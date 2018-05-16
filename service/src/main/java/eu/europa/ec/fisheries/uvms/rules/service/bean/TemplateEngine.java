@@ -50,7 +50,7 @@ public class TemplateEngine {
     @EJB
     private MDRCacheRuleService cacheService;
 
-    @PostConstruct
+//    @PostConstruct
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void initialize() {
         try {

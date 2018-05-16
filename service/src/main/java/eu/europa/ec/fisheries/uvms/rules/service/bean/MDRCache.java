@@ -53,7 +53,7 @@ public class MDRCache {
     @EJB
     private RulesMessageProducer producer;
 
-    @PostConstruct
+//    @PostConstruct
     public void init(){
         cache = CacheBuilder.newBuilder()
                 .refreshAfterWrite(24, TimeUnit.HOURS)
