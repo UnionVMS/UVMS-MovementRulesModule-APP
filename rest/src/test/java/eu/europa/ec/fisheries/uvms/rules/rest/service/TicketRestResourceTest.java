@@ -2,9 +2,16 @@ package eu.europa.ec.fisheries.uvms.rules.rest.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
+import javax.validation.constraints.AssertTrue;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+
+import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -65,15 +72,46 @@ public class TicketRestResourceTest extends BuildAssetServiceDeployment {
         assertThat(ticketList, is(0L));
     }
     
+    @Test
+    @RunAsClient
+    public void updateTicketStatusTest() throws Exception{ //there are no tickets to update so this one will result in an internal server error
+        TicketType ticketType = new TicketType();
+        ticketType.setGuid("TestGuid");
+
+        try {
+            String response = getWebTarget()
+                    .path("tickets/status")
+                    .request(MediaType.APPLICATION_JSON)
+                    .put(Entity.json(ticketType), String.class);
+        }catch (InternalServerErrorException ex){
+            assertTrue(true);
+        }
+
+    }
     
-//    @PUT
-//    @Consumes(value = { MediaType.APPLICATION_JSON })
-//    @Produces(value = { MediaType.APPLICATION_JSON })
-//    @Path("/status")
-//    @RequiresFeature(UnionVMSFeature.manageAlarmsOpenTickets)
-//    public ResponseDto updateTicketStatus(final TicketType ticketType) {
-    
-    
+    @Test
+    @RunAsClient
+    public void updateTicketStatusByQueryTest() throws Exception {
+        TicketQuery ticketQuery = new TicketQuery();
+        TicketListCriteria tlc = new TicketListCriteria();
+        tlc.setKey(TicketSearchKey.TICKET_GUID);
+        tlc.setValue("Test Guid");
+        ticketQuery.getTicketSearchCriteria().add(tlc);
+        ListPagination lp = new ListPagination();
+        lp.setPage(1);
+        lp.setListSize(10);
+        ticketQuery.setPagination(lp);
+
+
+        String response = getWebTarget()
+                    .path("tickets/status/vms_admin_com/" + TicketStatusType.OPEN)
+                    .request(MediaType.APPLICATION_JSON)
+                    .post(Entity.json(ticketQuery), String.class);
+
+        //ObjectMapper objectMapper = new ObjectMapper();
+        Object[] returnArray = deserializeResponseDto(response, Object[].class);
+        assertThat(returnArray.length, is(0));
+    }
 //    @POST
 //    @Consumes(value = { MediaType.APPLICATION_JSON })
 //    @Produces(value = { MediaType.APPLICATION_JSON })
