@@ -10,6 +10,7 @@
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
         </properties>
     </persistence-unit>
+    <!--
     <persistence-unit name="rulesOraclePU" transaction-type="JTA">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>jdbc/uvms_rules</jta-data-source>
@@ -18,4 +19,5 @@
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
         </properties>
     </persistence-unit>
+    -->
 </persistence>

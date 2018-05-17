@@ -47,17 +47,17 @@ public class Dao {
     @PersistenceContext(unitName = "rulesPostgresPU")
     private EntityManager postgres;
 
-    @PersistenceContext(unitName = "rulesOraclePU")
-    private EntityManager oracle;
+    /*@PersistenceContext(unitName = "rulesOraclePU")
+    private EntityManager oracle;*/
 
     @PostConstruct
     public void initEntityManager() {
         String dbDialect = System.getProperty("db.dialect");
-        if ("oracle".equalsIgnoreCase(dbDialect)) {
-            em = oracle;
-        } else {
+        //if ("oracle".equalsIgnoreCase(dbDialect)) {
+        //    em = oracle;
+        //} else {
             em = postgres;
-        }
+        //}
         factTemplateDao = new TemplateDao(em);
         failedRuleDao = new FailedRuleDao(em);
         rawMessageDao = new RawMessageDao(em);
