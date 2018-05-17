@@ -39,7 +39,7 @@ public class UserModuleMock implements MessageListener {
     public void onMessage(Message message) {
         try {
         
-        UserContext userContext = getAssetUserContext();
+        UserContext userContext = getRulesUserContext();
         String responseString;
             responseString = UserModuleResponseMapper.mapToGetUserContextResponse(userContext);
 
@@ -50,17 +50,23 @@ public class UserModuleMock implements MessageListener {
         }
     }
     
-    private UserContext getAssetUserContext() {
+    private UserContext getRulesUserContext() {
         UserContext userContext = new UserContext();
         userContext.setContextSet(new ContextSet());
         Context context = new Context();
         context.setRole(new Role());
-        Feature manageVesselsFeature = new Feature();
-        manageVesselsFeature.setName(UnionVMSFeature.viewAlarmRules.name());
-        context.getRole().getFeature().add(manageVesselsFeature);
-        Feature viewVesselsFeature = new Feature();
-        viewVesselsFeature.setName(UnionVMSFeature.viewVesselsAndMobileTerminals.name());
-        context.getRole().getFeature().add(viewVesselsFeature);
+        Feature viewAlarmsFeature = new Feature();
+        viewAlarmsFeature.setName(UnionVMSFeature.viewAlarmRules.name());
+        context.getRole().getFeature().add(viewAlarmsFeature);
+        Feature manageAlarmsFeature = new Feature();
+        manageAlarmsFeature.setName(UnionVMSFeature.manageAlarmRules.name());
+        context.getRole().getFeature().add(manageAlarmsFeature);
+        Feature viewAlarmsHoldingTableFeature = new Feature();
+        viewAlarmsHoldingTableFeature.setName(UnionVMSFeature.viewAlarmsHoldingTable.name());
+        context.getRole().getFeature().add(viewAlarmsHoldingTableFeature);
+        Feature manageAlarmsHoldingTableFeature = new Feature();
+        manageAlarmsHoldingTableFeature.setName(UnionVMSFeature.manageAlarmsHoldingTable.name());
+        context.getRole().getFeature().add(manageAlarmsHoldingTableFeature);
         userContext.getContextSet().getContexts().add(context);
         return userContext;
     }
