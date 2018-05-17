@@ -29,8 +29,6 @@ public class SanityRulesRestResourceTest extends TransactionalTests {
         String response = getWebTarget().path("/sanityrules/listAll").request(MediaType.APPLICATION_JSON).get(String.class);
 
 
-        final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
         final ObjectNode data = OBJECT_MAPPER.readValue(response, ObjectNode.class);
 
 

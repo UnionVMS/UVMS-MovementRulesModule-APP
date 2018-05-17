@@ -1,5 +1,6 @@
 package eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 
@@ -15,6 +16,8 @@ public class TransactionalTests extends BuildAssetServiceDeployment {
 
     @PersistenceContext
     protected EntityManager em;
+
+    final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Before
     public void before() throws SystemException, NotSupportedException {
