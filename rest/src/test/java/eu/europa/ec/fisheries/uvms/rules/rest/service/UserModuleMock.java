@@ -57,7 +57,8 @@ public class UserModuleMock implements MessageListener {
                 case GET_CONTACT_DETAILS:
                     ContactDetails contactDetails = new ContactDetails();
                     contactDetails.setOrganisationName("Test Organisation");
-                    UserModuleResponseMapper.mapToGetContactDetailsResponse(contactDetails);
+                    String response = UserModuleResponseMapper.mapToGetContactDetailsResponse(contactDetails);
+                    messageProducer.sendModuleResponseMessage((TextMessage) message, response);
                 default:
                     break;
 
