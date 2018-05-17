@@ -10,19 +10,25 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.rest.service;
 
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleResponseMapper;
-import eu.europa.ec.fisheries.wsdl.user.types.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleResponseMapper;
+import eu.europa.ec.fisheries.wsdl.user.module.UserBaseRequest;
+import eu.europa.ec.fisheries.wsdl.user.types.ContactDetails;
+import eu.europa.ec.fisheries.wsdl.user.types.Context;
+import eu.europa.ec.fisheries.wsdl.user.types.ContextSet;
+import eu.europa.ec.fisheries.wsdl.user.types.Feature;
+import eu.europa.ec.fisheries.wsdl.user.types.Role;
+import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
 
 @MessageDriven(mappedName = "jms/queue/UVMSUserEvent", activationConfig = {
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"),
@@ -37,13 +43,25 @@ public class UserModuleMock implements MessageListener {
     
     @Override
     public void onMessage(Message message) {
+        TextMessage textMessage = (TextMessage) message;
         try {
-        
-        UserContext userContext = getRulesUserContext();
-        String responseString;
-            responseString = UserModuleResponseMapper.mapToGetUserContextResponse(userContext);
+            UserBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, UserBaseRequest.class);
+            switch (request.getMethod()) {
+                case GET_USER_CONTEXT:
+                    UserContext userContext = getRulesUserContext();
+                    String responseString;
+                    responseString = UserModuleResponseMapper.mapToGetUserContextResponse(userContext);
+                    
+                    messageProducer.sendModuleResponseMessage((TextMessage) message, responseString);
+                    break;
+                case GET_CONTACT_DETAILS:
+                    ContactDetails contactDetails = new ContactDetails();
+                    contactDetails.setOrganisationName("Test Organisation");
+                    UserModuleResponseMapper.mapToGetContactDetailsResponse(contactDetails);
+                default:
+                    break;
 
-        messageProducer.sendModuleResponseMessage((TextMessage) message, responseString);
+            }
 
         } catch (Exception e) {
             LOG.error("UserModuleMock Error", e);
