@@ -3,8 +3,15 @@ package eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.*;
+import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleListCriteria;
+import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
+import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleSearchKey;
+import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
+import eu.europa.ec.fisheries.schema.rules.source.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
+import org.drools.core.command.assertion.AssertEquals;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
@@ -13,12 +20,13 @@ import org.junit.runner.RunWith;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 
+@RunAsClient
 @RunWith(Arquillian.class)
 public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
-    @RunAsClient
     public void CreateAndDeleteCustomRuleTest() throws Exception{
         CustomRuleType customRule = getCompleteNewCustomRule();
 
@@ -32,8 +40,110 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
         Assert.assertEquals(200, getReturnCode(deleteResponse));
 
+    }
+
+    @Test
+    public void CreateUpdateAndDeleteCustomRule() throws Exception{
+        CustomRuleType customRule = getCompleteNewCustomRule();
+
+        String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+        CustomRuleType returnCrt = deserializeResponseDto(response, CustomRuleType.class);
+
+        customRule.setName("New name");
+        customRule.setGuid(returnCrt.getGuid());
+
+        response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).put(Entity.json(customRule), String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+        returnCrt = deserializeResponseDto(response, CustomRuleType.class);
+        Assert.assertEquals(customRule.getName(), returnCrt.getName());
+
+        String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid()).request(MediaType.APPLICATION_JSON).delete(String.class);
+        Assert.assertEquals(200, getReturnCode(deleteResponse));
+    }
+
+    @Test
+    public void CreateFindByGuidAndDeleteCustomRule() throws Exception{
+        CustomRuleType customRule = getCompleteNewCustomRule();
+
+        String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+        CustomRuleType returnCrt = deserializeResponseDto(response, CustomRuleType.class);
+
+        customRule.setGuid(returnCrt.getGuid());
+
+        response = getWebTarget().path("/customrules/" + returnCrt.getGuid()).request(MediaType.APPLICATION_JSON).get(String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+        returnCrt = deserializeResponseDto(response, CustomRuleType.class);
+
+        Assert.assertEquals(customRule.getGuid(), returnCrt.getGuid());
+        Assert.assertEquals(customRule.getName(), returnCrt.getName());
+
+        String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid()).request(MediaType.APPLICATION_JSON).delete(String.class);
+        Assert.assertEquals(200, getReturnCode(deleteResponse));
+    }
+
+    @Test
+    public void CreateFindByUserNameAndDelete() throws Exception{
+        CustomRuleType customRule = getCompleteNewCustomRule();
+        customRule.setDescription("Test description");
+
+        String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+
+
+        response = getWebTarget().path("/customrules/listAll/" + customRule.getUpdatedBy()).request(MediaType.APPLICATION_JSON).get(String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+
+        final ObjectNode data = OBJECT_MAPPER.readValue(response, ObjectNode.class);
+        String valueAsString = OBJECT_MAPPER.writeValueAsString(data.get("data"));
+        CollectionType ct = OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, CustomRuleType.class);
+        List<CustomRuleType> dataValue = OBJECT_MAPPER.readValue(valueAsString, ct);
+
+        CustomRuleType returnCrt = dataValue.get(0);
+        Assert.assertEquals(customRule.getName(), returnCrt.getName());
+        Assert.assertEquals(customRule.getDescription(), returnCrt.getDescription());
+
+        String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid()).request(MediaType.APPLICATION_JSON).delete(String.class);
+        Assert.assertEquals(200, getReturnCode(deleteResponse));
+    }
+
+    @Test
+    public void CreateFindByQueryAndDelete() throws Exception {
+        CustomRuleType customRule = getCompleteNewCustomRule();
+
+        String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+
+        CustomRuleQuery customRuleQuery = new CustomRuleQuery();
+        ListPagination lp = new ListPagination();
+        lp.setListSize(10);
+        lp.setPage(1); //this value can not be 0 or lower...... ;(
+        customRuleQuery.setPagination(lp);
+        CustomRuleListCriteria crlc = new CustomRuleListCriteria();
+        crlc.setKey(CustomRuleSearchKey.NAME);
+        crlc.setValue(customRule.getName());
+        customRuleQuery.getCustomRuleSearchCriteria().add(crlc);
+        customRuleQuery.setDynamic(true);
+
+        response = getWebTarget().path("/customrules/listByQuery").request(MediaType.APPLICATION_JSON).post(Entity.json(customRuleQuery), String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+
+        /*final ObjectNode data = OBJECT_MAPPER.readValue(response, ObjectNode.class);
+        String valueAsString = OBJECT_MAPPER.writeValueAsString(data.get("data"));
+        CollectionType ct = OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, CustomRuleType.class);
+        List<CustomRuleType> dataValue = OBJECT_MAPPER.readValue(valueAsString, ct);*/
+        GetCustomRuleListByQueryResponse returnResult = deserializeResponseDto(response, GetCustomRuleListByQueryResponse.class);
+
+        CustomRuleType returnCrt = returnResult.getCustomRules().get(0);
+        Assert.assertEquals(customRule.getName(), returnCrt.getName());
+        Assert.assertEquals(customRule.getActions().get(0).getValue(), returnCrt.getActions().get(0).getValue());
+
+        String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid()).request(MediaType.APPLICATION_JSON).delete(String.class);
+        Assert.assertEquals(200, getReturnCode(deleteResponse));
 
     }
+
 
     private static <T> T deserializeResponseDto(String responseDto, Class<T> clazz) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
