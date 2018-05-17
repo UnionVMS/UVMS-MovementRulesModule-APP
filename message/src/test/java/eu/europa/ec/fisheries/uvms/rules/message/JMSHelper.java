@@ -52,7 +52,7 @@ public class JMSHelper {
         return assetModuleResponse.getAsset();
     }
     */
-    public String sendAssetMessage(String text) throws Exception {
+    public String sendMessageToRules(String text) throws Exception {
         Connection connection = connectionFactory.createConnection();
         try {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -72,11 +72,15 @@ public class JMSHelper {
     }
 
     public Message listenForResponse(String correlationId) throws Exception {
+        return listenForResponseOnQueue(correlationId, RESPONSE_QUEUE);
+    }
+    
+    public Message listenForResponseOnQueue(String correlationId, String queue) throws Exception {
         Connection connection = connectionFactory.createConnection();
         try {
             connection.start();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Queue responseQueue = session.createQueue(RESPONSE_QUEUE);
+            Queue responseQueue = session.createQueue(queue);
 
             return session.createConsumer(responseQueue).receive(TIMEOUT);
         } finally {
