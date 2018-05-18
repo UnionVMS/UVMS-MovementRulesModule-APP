@@ -151,7 +151,7 @@ public class RulesServiceBean implements RulesService {
     @EJB
     private RulesResponseConsumer consumer;
 
-    @EJB
+    @Inject
     private RulesMessageProducer producer;
 
     @EJB

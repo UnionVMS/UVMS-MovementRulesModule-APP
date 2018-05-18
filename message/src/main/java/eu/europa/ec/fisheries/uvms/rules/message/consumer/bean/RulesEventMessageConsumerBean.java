@@ -11,20 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.message.consumer.bean;
 
-import eu.europa.ec.fisheries.schema.rules.module.v1.RulesBaseRequest;
-import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
-import eu.europa.ec.fisheries.uvms.rules.message.event.*;
-import eu.europa.ec.fisheries.uvms.rules.message.event.carrier.EventMessage;
-import eu.europa.ec.fisheries.uvms.rules.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.ModuleResponseMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
+import java.util.UUID;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.enterprise.event.Event;
@@ -32,21 +19,34 @@ import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
-import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import eu.europa.ec.fisheries.schema.rules.module.v1.RulesBaseRequest;
+import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
+import eu.europa.ec.fisheries.uvms.rules.message.event.CountTicketsByMovementsEvent;
+import eu.europa.ec.fisheries.uvms.rules.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.rules.message.event.GetCustomRuleReceivedEvent;
+import eu.europa.ec.fisheries.uvms.rules.message.event.GetTicketsAndRulesByMovementsEvent;
+import eu.europa.ec.fisheries.uvms.rules.message.event.GetTicketsByMovementsEvent;
+import eu.europa.ec.fisheries.uvms.rules.message.event.PingReceivedEvent;
+import eu.europa.ec.fisheries.uvms.rules.message.event.SetMovementReportReceivedEvent;
+import eu.europa.ec.fisheries.uvms.rules.message.event.carrier.EventMessage;
+import eu.europa.ec.fisheries.uvms.rules.model.constant.FaultCode;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.rules.model.mapper.ModuleResponseMapper;
 
-/**
- * Message driven bean that receives all messages that
- * have no message selector.
- */
 @MessageDriven(mappedName = MessageConstants.QUEUE_MODULE_RULES, activationConfig = {
         @ActivationConfigProperty(propertyName = MessageConstants.MESSAGING_TYPE_STR, propertyValue = MessageConstants.CONNECTION_TYPE),
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_QUEUE),
-        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME),
-        @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = "messageSelector IS NULL")
+        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME)
 })
 public class RulesEventMessageConsumerBean implements MessageListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RulesEventMessageConsumerBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RulesEventMessageConsumerBean.class);
 
     @Inject
     @SetMovementReportReceivedEvent
@@ -69,64 +69,8 @@ public class RulesEventMessageConsumerBean implements MessageListener {
     private Event<EventMessage> getTicketsAndRulesByMovementsEvent;
 
     @Inject
-    @ValidateMovementReportReceivedEvent
-    private Event<EventMessage> validateMovementReportReceivedEvent;
-
-    @Inject
     @PingReceivedEvent
     private Event<EventMessage> pingReceivedEvent;
-
-    @Inject
-    @SetFLUXFAReportMessageReceivedEvent
-    private Event<EventMessage> setFLUXFAReportMessageReceivedEvent;
-
-    @Inject
-    @SendFaReportEvent
-    private Event<EventMessage> sendFLUXFAReportMessageReceivedEvent;
-
-    @Inject
-    @SetFluxFaQueryMessageReceivedEvent
-    private Event<EventMessage> setFaQueryReceivedEvent;
-
-    @Inject
-    @SendFaQueryEvent
-    private Event<EventMessage> sendFaQueryReceivedEvent;
-
-    @Inject
-    @RcvFluxResponseEvent
-    private Event<EventMessage> rcvFluxResponse;
-
-    @Inject
-    @SetFLUXMDRSyncMessageReceivedEvent
-    private Event<EventMessage> setFLUXMDRSyncMessageReceivedEvent;
-
-    @Inject
-    @GetFLUXMDRSyncMessageResponseEvent
-    private Event<EventMessage> getFluxMdrSynchMessageResponse;
-
-    @Inject
-    @ReceiveSalesQueryEvent
-    private Event<EventMessage> receiveSalesQueryEvent;
-
-    @Inject
-    @ReceiveSalesReportEvent
-    private Event<EventMessage> receiveSalesReportEvent;
-
-    @Inject
-    @ReceiveSalesResponseEvent
-    private Event<EventMessage> receiveSalesResponseEvent;
-
-    @Inject
-    @SendSalesReportEvent
-    private Event<EventMessage> sendSalesReportEvent;
-
-    @Inject
-    @SendSalesResponseEvent
-    private Event<EventMessage> sendSalesResponseEvent;
-
-    @Inject
-    @GetValidationResultsByRawGuid
-    private Event<EventMessage> getValidationResultsByRawMsgGuid;
 
     @Inject
     @ErrorEvent
@@ -163,55 +107,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                 case GET_TICKETS_AND_RULES_BY_MOVEMENTS:
                     getTicketsAndRulesByMovementsEvent.fire(new EventMessage(textMessage));
                     break;
-                case SET_FLUX_FA_REPORT :
-                    setFLUXFAReportMessageReceivedEvent.fire(new EventMessage(textMessage));
-                    break;
-                case SEND_FLUX_FA_REPORT :
-                    sendFLUXFAReportMessageReceivedEvent.fire(new EventMessage(textMessage));
-                    break;
-                case SET_FLUX_FA_QUERY :
-                    setFaQueryReceivedEvent.fire(new EventMessage(textMessage));
-                    break;
-                case SEND_FLUX_FA_QUERY :
-                    sendFaQueryReceivedEvent.fire(new EventMessage(textMessage));
-                    break;
-                case RCV_FLUX_RESPONSE:
-                    rcvFluxResponse.fire(new EventMessage(textMessage));
-                    break;
-                case SET_FLUX_MDR_SYNC_REQUEST :
-                    setFLUXMDRSyncMessageReceivedEvent.fire(new EventMessage(textMessage));
-                    break;
-                case GET_FLUX_MDR_SYNC_RESPONSE :
-                    getFluxMdrSynchMessageResponse.fire(new EventMessage(textMessage));
-                    break;
-                case RECEIVE_SALES_QUERY:
-                    receiveSalesQueryEvent.fire(new EventMessage(textMessage));
-                    break;
-
-                /** @deprecated
-                 * This code has moved to RulesDefaultSelectorEventConsumer.
-                 *  If you use the latest version of Exchange and Sales, this code will not be called anymore.
-                 *  For the parties that still use an older version of Exchange and Sales, this code is kept.
-                 *  Please upgrade as soon as possible. We'll remove this code in a next release.
-                 */
-                case RECEIVE_SALES_RESPONSE:
-                    receiveSalesResponseEvent.fire(new EventMessage(textMessage));
-                    break;
-                case RECEIVE_SALES_REPORT:
-                    receiveSalesReportEvent.fire(new EventMessage(textMessage));
-                    break;
-                case SEND_SALES_REPORT:
-                    sendSalesReportEvent.fire(new EventMessage(textMessage));
-                    break;
-                case SEND_SALES_RESPONSE:
-                    sendSalesResponseEvent.fire(new EventMessage(textMessage));
-                    break;
-                /** end deprecation **/
-
-                case GET_VALIDATION_RESULT_BY_RAW_GUID_REQUEST:
-                    getValidationResultsByRawMsgGuid.fire(new EventMessage(textMessage));
-                    break;
-                default:
+                 default:
                     LOG.error("[ Request method '{}' is not implemented ]", method.name());
                     errorEvent.fire(new EventMessage(textMessage, ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Method not implemented:" + method.name())));
                     break;

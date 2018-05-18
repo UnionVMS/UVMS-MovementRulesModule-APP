@@ -11,13 +11,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.message.producer;
 
+import javax.ejb.Local;
+import javax.enterprise.event.Observes;
+import javax.jms.TextMessage;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.rules.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.rules.message.event.carrier.EventMessage;
-import javax.ejb.Local;
-import javax.enterprise.event.Observes;
-import javax.jms.TextMessage;
 
 @Local
 public interface RulesMessageProducer {

@@ -10,16 +10,16 @@ details. You should have received a copy of the GNU General Public License along
 */
 package eu.europa.ec.fisheries.uvms.rules.message.producer.bean;
 
+import javax.ejb.Stateless;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 
 @Stateless
-@LocalBean
 public class RulesProducerBean extends AbstractProducer {
+    
     @Override
     public String getDestinationName() {
         return MessageConstants.QUEUE_MODULE_RULES;
     }
+    
 }

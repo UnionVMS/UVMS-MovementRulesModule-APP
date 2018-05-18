@@ -11,6 +11,15 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.message.producer.bean;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.enterprise.event.Observes;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
@@ -23,22 +32,11 @@ import eu.europa.ec.fisheries.uvms.rules.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
-import javax.annotation.PostConstruct;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Observes;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Stateless
-@LocalBean
 public class RulesMessageProducerBean extends AbstractProducer implements RulesMessageProducer, ConfigMessageProducer {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RulesMessageProducerBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RulesMessageProducerBean.class);
 
     private Queue rulesResponseQueue;
     private Queue movementQueue;
@@ -48,9 +46,6 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
     private Queue exchangeQueue;
     private Queue userQueue;
     private Queue auditQueue;
-    private Queue activityQueue;
-    private Queue mdrEventQueue;
-    private Queue salesQueue;
 
     @PostConstruct
     public void init() {
@@ -62,9 +57,6 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
         exchangeQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_EXCHANGE_EVENT);
         userQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_USM);
         auditQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_AUDIT_EVENT);
-        activityQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MODULE_ACTIVITY);
-        mdrEventQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MDR_EVENT);
-        salesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_SALES_EVENT);
     }
 
     @Override
@@ -128,15 +120,6 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
                 break;
             case AUDIT:
                 destination = auditQueue;
-                break;
-            case ACTIVITY:
-                destination = activityQueue;
-                break;
-            case MDR_EVENT:
-                destination = mdrEventQueue;
-                break;
-            case SALES:
-                destination = salesQueue;
                 break;
             default:
                 break;

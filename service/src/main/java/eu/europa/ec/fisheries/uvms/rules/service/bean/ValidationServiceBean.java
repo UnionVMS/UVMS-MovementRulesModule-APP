@@ -85,7 +85,7 @@ public class ValidationServiceBean implements ValidationService {
     @EJB
     RulesResponseConsumer consumer;
 
-    @EJB
+    @Inject
     RulesMessageProducer producer;
 
     @Inject

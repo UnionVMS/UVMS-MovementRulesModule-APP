@@ -67,7 +67,7 @@ public class RulesEventServiceBean implements EventService {
     @ErrorEvent
     private Event<EventMessage> errorEvent;
 
-    @EJB
+    @Inject
     private RulesMessageProducer rulesProducer;
 
     @EJB
