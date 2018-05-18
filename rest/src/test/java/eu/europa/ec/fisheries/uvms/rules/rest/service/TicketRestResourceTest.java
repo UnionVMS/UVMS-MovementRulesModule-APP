@@ -27,11 +27,11 @@ import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByMovementsRes
 import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian.BuildAssetServiceDeployment;
 
+@RunAsClient
 @RunWith(Arquillian.class)
 public class TicketRestResourceTest extends BuildAssetServiceDeployment {
 
     @Test
-    @RunAsClient
     public void getTicketListTest() throws Exception {
         TicketQuery query = getBasicTicketQuery();
         TicketListCriteria criteria = new TicketListCriteria();
@@ -49,7 +49,6 @@ public class TicketRestResourceTest extends BuildAssetServiceDeployment {
     }
     
     @Test
-    @RunAsClient
     public void getTicketsByMovementsTest() throws Exception {
         String response = getWebTarget()
                 .path("tickets/listByMovements")
@@ -61,7 +60,6 @@ public class TicketRestResourceTest extends BuildAssetServiceDeployment {
     }
 
     @Test
-    @RunAsClient
     public void countTicketsByMovementsTest() throws Exception {
         String response = getWebTarget()
                 .path("tickets/countByMovements")
@@ -73,7 +71,6 @@ public class TicketRestResourceTest extends BuildAssetServiceDeployment {
     }
     
     @Test
-    @RunAsClient
     public void updateTicketStatusTest() throws Exception{ //there are no tickets to update so this one will result in an internal server error
         TicketType ticketType = new TicketType();
         ticketType.setGuid("TestGuid");
@@ -90,7 +87,6 @@ public class TicketRestResourceTest extends BuildAssetServiceDeployment {
     }
     
     @Test
-    @RunAsClient
     public void updateTicketStatusByQueryTest() throws Exception {
         TicketQuery ticketQuery = new TicketQuery();
         TicketListCriteria tlc = new TicketListCriteria();
@@ -112,33 +108,42 @@ public class TicketRestResourceTest extends BuildAssetServiceDeployment {
         Object[] returnArray = deserializeResponseDto(response, Object[].class);
         assertThat(returnArray.length, is(0));
     }
-//    @POST
-//    @Consumes(value = { MediaType.APPLICATION_JSON })
-//    @Produces(value = { MediaType.APPLICATION_JSON })
-//    @Path("/status/{loggedInUser}/{status}")
-//    @RequiresFeature(UnionVMSFeature.manageAlarmsOpenTickets)
-//    public ResponseDto updateTicketStatusByQuery(@PathParam("loggedInUser") String loggedInUser, TicketQuery query, @PathParam("status") TicketStatusType status) {
-    
-    
-//    @GET
-//    @Produces(value = { MediaType.APPLICATION_JSON })
-//    @Path("/{guid}")
-//    @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-//    public ResponseDto getTicketByGuid(@PathParam("guid") String guid) {
-    
-    
-//    @GET
-//    @Produces(value = { MediaType.APPLICATION_JSON })
-//    @Path("/countopen/{loggedInUser}")
-//    @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-//    public ResponseDto getNumberOfOpenTicketReports(@PathParam(value = "loggedInUser") final String loggedInUser) {
-    
-    
-//    @GET
-//    @Produces(value = { MediaType.APPLICATION_JSON })
-//    @Path("/countAssetsNotSending")
-//    @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-//    public ResponseDto getNumberOfAssetsNotSending() {
+
+    @Test
+    public void getTicketByGuid() throws Exception {
+        try {
+            String response = getWebTarget()
+                    .path("tickets/" + "TestGuid")    //no tickets in the db
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(String.class);
+        }catch (InternalServerErrorException e){
+            assertTrue(true);
+        }
+
+    }
+
+    @Test
+    public void getNumberOfOpenTicketReportsTest() throws Exception{
+        String response = getWebTarget()
+                .path("/tickets/countopen/" + "vms_admin_com")    //no tickets in the db
+                .request(MediaType.APPLICATION_JSON)
+                .get(String.class);
+
+        Long ticketList = deserializeResponseDto(response, Long.class);
+        assertThat(ticketList, is(0L));
+    }
+
+    @Test
+    public void getNumberOfAssetsNotSendingTest() throws Exception{
+        String response = getWebTarget()
+                .path("/tickets/countAssetsNotSending")    //no tickets in the db
+                .request(MediaType.APPLICATION_JSON)
+                .get(String.class);
+
+        Long ticketList = deserializeResponseDto(response, Long.class);
+        assertThat(ticketList, is(0L));
+    }
+
     
     
     private static TicketQuery getBasicTicketQuery() {
