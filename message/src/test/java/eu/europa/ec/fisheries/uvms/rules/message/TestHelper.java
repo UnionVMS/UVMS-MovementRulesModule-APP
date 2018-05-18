@@ -16,6 +16,7 @@ import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetType;
+import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementComChannelType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementPoint;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementTypeType;
@@ -46,6 +47,7 @@ public class TestHelper {
         movement.setReportedCourse(50d);
         movement.setReportedSpeed(5d);
         movement.setSource(MovementSourceType.INMARSAT_C);
+        movement.setComChannelType(MovementComChannelType.NAF);
         return movement;
     }
 }

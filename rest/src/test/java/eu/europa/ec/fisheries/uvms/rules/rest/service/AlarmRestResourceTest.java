@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.rules.rest.service;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import javax.ws.rs.client.Entity;
@@ -90,7 +91,7 @@ public class AlarmRestResourceTest extends BuildAssetServiceDeployment {
                 .get(String.class);
         
         Integer openAlarmReports = deserializeResponseDto(response, Integer.class);
-        assertThat(openAlarmReports, is(0));
+        assertThat(openAlarmReports, is(notNullValue()));
     }
     
     private static AlarmQuery getBasicAlarmQuery() {
