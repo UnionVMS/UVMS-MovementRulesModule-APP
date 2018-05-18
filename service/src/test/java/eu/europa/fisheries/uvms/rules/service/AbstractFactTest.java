@@ -892,40 +892,6 @@ public class AbstractFactTest {
         assertFalse(fact.listIdDoesNotContainAll(codeTypeList, "bla", "alb"));
     }
 
-
-    @Test
-    public void testAnyValueDoesNotContainAllWhenValueDoesNotContainAnyValue() {
-        CodeType codeType1 = getCodeTypeWithValue("BUYER");
-        CodeType codeType2 = getCodeTypeWithValue("SELLER");
-
-        SalesPartyFact salesPartyType1 = new SalesPartyFact();
-        salesPartyType1.setRoleCodes(Arrays.asList(codeType1));
-
-        SalesPartyFact salesPartyType2 = new SalesPartyFact();
-        salesPartyType2.setRoleCodes(Arrays.asList(codeType2));
-
-
-        assertTrue(fact.salesPartiesValueDoesNotContainAny(Arrays.asList(salesPartyType1, salesPartyType2), "SENDER"));
-    }
-
-    @Test
-    public void testAnyValueDoesNotContainAllWhenValueContainsAnyValue() {
-        CodeType codeType1 = getCodeTypeWithValue("BUYER");
-        CodeType codeType2 = getCodeTypeWithValue("SELLER");
-        CodeType codeType3 = getCodeTypeWithValue("SENDER");
-
-        SalesPartyFact salesPartyType1 = new SalesPartyFact();
-        salesPartyType1.setRoleCodes(Arrays.asList(codeType1));
-
-        SalesPartyFact salesPartyType2 = new SalesPartyFact();
-        salesPartyType2.setRoleCodes(Arrays.asList(codeType2));
-
-        SalesPartyFact salesPartyType3 = new SalesPartyFact();
-        salesPartyType3.setRoleCodes(Arrays.asList(codeType3));
-
-        assertFalse(fact.salesPartiesValueDoesNotContainAny(Arrays.asList(salesPartyType1, salesPartyType2, salesPartyType3), "SENDER"));
-    }
-
     @Test
     public void testValueIdTypeContainsAnyWhenValueIsPresent() {
         IdType idType1 = new IdType();

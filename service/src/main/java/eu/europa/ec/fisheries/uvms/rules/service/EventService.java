@@ -73,15 +73,5 @@ public interface EventService {
 
     void getFLUXMDRSyncResponseMessageReceivedEvent(@Observes @GetFLUXMDRSyncMessageResponseEvent EventMessage message);
 
-    void receiveSalesQueryEvent(@Observes @ReceiveSalesQueryEvent EventMessage message);
-
-    void receiveSalesReportEvent(@Observes @ReceiveSalesReportEvent EventMessage message);
-
-    void receiveSalesResponseEvent(@Observes @ReceiveSalesResponseEvent EventMessage message);
-
-    void sendSalesReportEvent(@Observes @SendSalesReportEvent EventMessage message);
-
-    void sendSalesResponseEvent(@Observes @SendSalesResponseEvent EventMessage message);
-
     void getValidationResultsByRawGuid(@Observes @GetValidationResultsByRawGuid EventMessage message);
 }

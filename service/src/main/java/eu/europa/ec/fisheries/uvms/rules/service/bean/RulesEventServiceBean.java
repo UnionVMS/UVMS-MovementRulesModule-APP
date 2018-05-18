@@ -100,7 +100,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Stateless
-@Slf4j
 public class RulesEventServiceBean implements EventService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RulesEventServiceBean.class);
@@ -331,61 +330,6 @@ public class RulesEventServiceBean implements EventService {
     }
 
     @Override
-    public void receiveSalesQueryEvent(@Observes @ReceiveSalesQueryEvent EventMessage message) {
-        LOG.info("[INFO] Received ReceiveSalesQueryEvent..");
-        try {
-            ReceiveSalesQueryRequest receiveSalesQueryRequest = eu.europa.ec.fisheries.uvms.sales.model.mapper.JAXBMarshaller.unmarshallString(message.getJmsMessage().getText(), ReceiveSalesQueryRequest.class);
-            messageService.receiveSalesQueryRequest(receiveSalesQueryRequest);
-        } catch (JMSException | SalesMarshallException e) {
-            throw new RulesServiceTechnicalException("[ERROR] Couldn't read ReceiveSalesQueryRequest.", e);
-        }
-    }
-
-    @Override
-    public void receiveSalesReportEvent(@Observes @ReceiveSalesReportEvent EventMessage message) {
-        LOG.info("[INFO] Received ReceiveSalesReportEvent..");
-        try {
-            ReceiveSalesReportRequest receiveSalesReportRequest = eu.europa.ec.fisheries.uvms.sales.model.mapper.JAXBMarshaller.unmarshallString(message.getJmsMessage().getText(), ReceiveSalesReportRequest.class);
-            messageService.receiveSalesReportRequest(receiveSalesReportRequest);
-        } catch (JMSException | SalesMarshallException e) {
-            throw new RulesServiceTechnicalException("[ERROR] Couldn't read ReceiveSalesReportRequest.", e);
-        }
-    }
-
-    @Override
-    public void receiveSalesResponseEvent(@Observes @ReceiveSalesResponseEvent EventMessage message) {
-        LOG.info("[INFO] Received ReceiveSalesResponseEvent..");
-        try {
-            ReceiveSalesResponseRequest rulesRequest = eu.europa.ec.fisheries.uvms.sales.model.mapper.JAXBMarshaller.unmarshallString(message.getJmsMessage().getText(), ReceiveSalesResponseRequest.class);
-            messageService.receiveSalesResponseRequest(rulesRequest);
-        } catch (JMSException | SalesMarshallException e) {
-            throw new RulesServiceTechnicalException("[ERROR] Couldn't read ReceiveSalesResponseRequest.", e);
-        }
-    }
-
-    @Override
-    public void sendSalesReportEvent(@Observes @SendSalesReportEvent EventMessage message) {
-        LOG.info("[INFO] Received SendSalesReportEvent..");
-        try {
-            SendSalesReportRequest rulesRequest = eu.europa.ec.fisheries.uvms.sales.model.mapper.JAXBMarshaller.unmarshallString(message.getJmsMessage().getText(), SendSalesReportRequest.class);
-            messageService.sendSalesReportRequest(rulesRequest);
-        } catch (JMSException | SalesMarshallException e) {
-            throw new RulesServiceTechnicalException("[ERROR] Couldn't read SendSalesReportRequest.", e);
-        }
-    }
-
-    @Override
-    public void sendSalesResponseEvent(@Observes @SendSalesResponseEvent EventMessage message) {
-        LOG.info("[INFO] Received SendSalesResponseEvent..");
-        try {
-            SendSalesResponseRequest rulesRequest = eu.europa.ec.fisheries.uvms.sales.model.mapper.JAXBMarshaller.unmarshallString(message.getJmsMessage().getText(), SendSalesResponseRequest.class);
-            messageService.sendSalesResponseRequest(rulesRequest);
-        } catch (JMSException | SalesMarshallException e) {
-            throw new RulesServiceTechnicalException("[ERROR] Couldn't read SendSalesResponseRequest.", e);
-        }
-    }
-
-    @Override
     public void getValidationResultsByRawGuid(@Observes @GetValidationResultsByRawGuid EventMessage message) {
         try {
             TextMessage jmsRequestMessage = message.getJmsMessage();
@@ -393,7 +337,7 @@ public class RulesEventServiceBean implements EventService {
             String validationsForRawMessageGuid = messageService.getValidationsForRawMessageGuid(rulesRequest.getGuid(), rulesRequest.getType());
             rulesProducer.sendModuleResponseMessage(jmsRequestMessage, validationsForRawMessageGuid);
         } catch (RulesModelMarshallException | MessageException e) {
-            log.error("[ERROR] Error while trying to send Response to a GetValidationResultsByRawGuid to the Requestor Module..", e);
+            LOG.error("[ERROR] Error while trying to send Response to a GetValidationResultsByRawGuid to the Requestor Module..", e);
         }
     }
 

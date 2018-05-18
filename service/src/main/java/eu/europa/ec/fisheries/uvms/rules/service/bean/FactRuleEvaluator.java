@@ -13,11 +13,6 @@
 
 package eu.europa.ec.fisheries.uvms.rules.service.bean;
 
-import javax.ejb.DependsOn;
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,16 +20,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import eu.europa.ec.fisheries.schema.rules.rule.v1.ExternalRuleType;
-import eu.europa.ec.fisheries.schema.rules.rule.v1.RuleType;
-import eu.europa.ec.fisheries.uvms.rules.model.dto.TemplateRuleMapDto;
-import eu.europa.ec.fisheries.uvms.rules.service.SalesRulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.business.AbstractFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.RulesValidator;
-import eu.europa.ec.fisheries.uvms.rules.service.business.TemplateFactory;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceTechnicalException;
-import lombok.extern.slf4j.Slf4j;
+import javax.ejb.DependsOn;
+import javax.ejb.EJB;
+import javax.ejb.Singleton;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.drools.template.parser.DefaultTemplateContainer;
@@ -46,15 +36,24 @@ import org.kie.api.builder.KieFileSystem;
 import org.kie.api.builder.Results;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.schema.rules.rule.v1.ExternalRuleType;
+import eu.europa.ec.fisheries.schema.rules.rule.v1.RuleType;
+import eu.europa.ec.fisheries.uvms.rules.model.dto.TemplateRuleMapDto;
+import eu.europa.ec.fisheries.uvms.rules.service.business.AbstractFact;
+import eu.europa.ec.fisheries.uvms.rules.service.business.RulesValidator;
+import eu.europa.ec.fisheries.uvms.rules.service.business.TemplateFactory;
+import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceTechnicalException;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Singleton
 @DependsOn({"MDRCacheServiceBean"})
 public class FactRuleEvaluator {
 
-    @EJB
-    private SalesRulesService salesRulesService;
-
+    private static final Logger LOG = LoggerFactory.getLogger(FactRuleEvaluator.class);
+    
     @EJB
     private MDRCacheRuleService mdrCacheRuleService;
 
@@ -102,7 +101,7 @@ public class FactRuleEvaluator {
         }
         listener.finishSheet();
         String drl = listener.renderDRL();
-        log.debug(drl);
+        LOG.debug(drl);
         drlsAndBrId.put(drl, templateName);
         return drlsAndBrId;
     }
@@ -115,7 +114,7 @@ public class FactRuleEvaluator {
         Map<String, String> drlsAndBrId = new HashMap<>();
         for (ExternalRuleType extRuleType : externalRules) {
             String drl = extRuleType.getDrl();
-            log.debug("DRL for BR Id {} : {} ", extRuleType.getBrId(), drl);
+            LOG.debug("DRL for BR Id {} : {} ", extRuleType.getBrId(), drl);
             drlsAndBrId.put(drl, extRuleType.getBrId());
         }
         return drlsAndBrId;
@@ -152,7 +151,6 @@ public class FactRuleEvaluator {
         try {
             KieContainer container = KieServices.Factory.get().newKieContainer(KieServices.Factory.get().getRepository().getDefaultReleaseId());
             ksession = container.newKieSession();
-            ksession.setGlobal("salesService", salesRulesService);
             ksession.setGlobal("mdrService", mdrCacheRuleService);
             ksession.setGlobal("exchangeService", exchangeRuleService);
             for (AbstractFact fact : facts) { // Insert All the facts
@@ -163,11 +161,11 @@ public class FactRuleEvaluator {
 
         } catch (RuntimeException e) {
             String errorMessage = "Unable to validate facts. Reason: " + e.getMessage();
-            log.error(errorMessage);
+            LOG.error(errorMessage);
             throw new RulesServiceTechnicalException(errorMessage, e);
 
         } catch (Exception e) {
-            log.trace("EXCEPTION IN EVALUATION OF RULE");
+            LOG.trace("EXCEPTION IN EVALUATION OF RULE");
             Collection<?> objects = null;
             if (ksession != null) {
                 objects = ksession.getObjects();

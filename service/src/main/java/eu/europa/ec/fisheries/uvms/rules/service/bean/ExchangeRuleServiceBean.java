@@ -13,7 +13,15 @@ package eu.europa.ec.fisheries.uvms.rules.service.bean;
 import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.marshallJaxBObjectToString;
 import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 import static eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue.EXCHANGE;
-
+import java.util.Collections;
+import javax.ejb.EJB;
+import javax.ejb.Singleton;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import javax.xml.bind.JAXBException;
+import org.apache.commons.lang3.EnumUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsResponse;
@@ -23,19 +31,12 @@ import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
-import java.util.Collections;
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.xml.bind.JAXBException;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.EnumUtils;
 
 @Singleton
-@Slf4j
 public class ExchangeRuleServiceBean implements ExchangeRuleService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeRuleServiceBean.class);
+    
     @EJB
     private RulesResponseConsumer consumer;
 
@@ -61,7 +62,7 @@ public class ExchangeRuleServiceBean implements ExchangeRuleService {
             faQueryIdentificationExists = response.getRefGuid() != null;
 
         } catch (JAXBException | MessageException | JMSException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         return faQueryIdentificationExists;
     }
@@ -82,7 +83,7 @@ public class ExchangeRuleServiceBean implements ExchangeRuleService {
             messageGuidIdentificationExists = response.getMessageGuid() != null;
 
         } catch (JAXBException | MessageException | JMSException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         return messageGuidIdentificationExists;
     }

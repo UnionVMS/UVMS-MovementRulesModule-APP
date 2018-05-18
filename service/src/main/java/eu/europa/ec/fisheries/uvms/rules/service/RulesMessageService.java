@@ -13,21 +13,17 @@
 
 package eu.europa.ec.fisheries.uvms.rules.service;
 
+import javax.ejb.Local;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType;
-import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesQueryRequest;
-import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesReportRequest;
-import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesBaseRequest;
-import eu.europa.ec.fisheries.schema.rules.module.v1.SendSalesReportRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SendSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFaQueryMessageRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFluxFaResponseMessageRequest;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.ValidationResultDto;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
-import javax.ejb.Local;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
 import un.unece.uncefact.data.standard.fluxfaquerymessage._3.FLUXFAQueryMessage;
 import un.unece.uncefact.data.standard.fluxfareportmessage._3.FLUXFAReportMessage;
 import un.unece.uncefact.data.standard.fluxresponsemessage._6.FLUXResponseMessage;
@@ -58,16 +54,6 @@ public interface RulesMessageService {
     void mapAndSendFLUXMdrRequestToExchange(String request);
 
     void mapAndSendFLUXMdrResponseToMdrModule(String request);
-
-    void receiveSalesQueryRequest(ReceiveSalesQueryRequest receiveSalesQueryRequest);
-
-    void receiveSalesReportRequest(ReceiveSalesReportRequest receiveSalesReportRequest);
-
-    void sendSalesReportRequest(SendSalesReportRequest rulesRequest);
-
-    void receiveSalesResponseRequest(ReceiveSalesResponseRequest rulesRequest);
-
-    void sendSalesResponseRequest(SendSalesResponseRequest rulesRequest);
 
     String getValidationsForRawMessageGuid(String guid, String type);
 

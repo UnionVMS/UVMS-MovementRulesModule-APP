@@ -10,8 +10,6 @@ details. You should have received a copy of the GNU General Public License along
 */
 package eu.europa.ec.fisheries.uvms.rules.service.bean;
 
-import eu.europa.ec.fisheries.uvms.rules.service.RulesSchedulerService;
-import eu.europa.ec.fisheries.uvms.rules.service.config.RulesConfigurationCache;
 import java.util.Collection;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -22,7 +20,10 @@ import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 import javax.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.rules.service.RulesSchedulerService;
+import eu.europa.ec.fisheries.uvms.rules.service.config.RulesConfigurationCache;
 
 /**
  * @author Created by kovian, gregrinaldi on 30/05/2017
@@ -30,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
  *         EJB that provides the MDR Synchronization Functionality.
  *         Methods for handeling the automatic job scheduler configuration.
  */
-@Slf4j
 @Stateless
 @Transactional
 public class RulesSchedulerServiceBean implements RulesSchedulerService {
@@ -39,6 +39,8 @@ public class RulesSchedulerServiceBean implements RulesSchedulerService {
     private static final TimerConfig TIMER_CONFIG = new TimerConfig(RULES_SYNCHRONIZATION_TIMER, false);
     private static final String RULES_SCHEDULER_CONFIG_KEY = "RULES_SCHEDULER_CONFIG";
 
+    private static final Logger LOG = LoggerFactory.getLogger(RulesSchedulerServiceBean.class);
+    
     @EJB
     private RulesConfigurationCache rulesConfigCache;
 
@@ -54,7 +56,7 @@ public class RulesSchedulerServiceBean implements RulesSchedulerService {
      */
     @Timeout
     public void timeOut() {
-        log.info("\n\n\t---> Reinitializing Rules DROOLS engine as scheduled... ("+timerServ.getAllTimers().iterator().next().getSchedule().toString()+")\n");
+        LOG.info("\n\n\t---> Reinitializing Rules DROOLS engine as scheduled... ("+timerServ.getAllTimers().iterator().next().getSchedule().toString()+")\n");
         templateEngine.reInitialize();
     }
 
@@ -85,10 +87,10 @@ public class RulesSchedulerServiceBean implements RulesSchedulerService {
             cancelPreviousTimer();
             timerServ.createCalendarTimer(expression, TIMER_CONFIG);
         } catch (IllegalArgumentException ex) {
-            log.warn("Error creating new scheduled synchronization timer!", ex);
+            LOG.warn("Error creating new scheduled synchronization timer!", ex);
             throw ex;
         }
-        log.info("New timer scheduler created successfully : " + schedulerExpressionStr);
+        LOG.info("New timer scheduler created successfully : " + schedulerExpressionStr);
     }
 
     /**
@@ -99,7 +101,7 @@ public class RulesSchedulerServiceBean implements RulesSchedulerService {
         for (Timer currentTimer : allTimers) {
             if (TIMER_CONFIG.getInfo().equals(currentTimer.getInfo())) {
                 currentTimer.cancel();
-                log.info("Current Rules scheduler timer cancelled.");
+                LOG.info("Current Rules scheduler timer cancelled.");
                 break;
             }
         }

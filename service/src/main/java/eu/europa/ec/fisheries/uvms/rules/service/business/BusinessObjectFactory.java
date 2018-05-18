@@ -17,9 +17,6 @@ import eu.europa.ec.fisheries.uvms.rules.service.business.generator.AbstractGene
 import eu.europa.ec.fisheries.uvms.rules.service.business.generator.ActivityQueryFactGenerator;
 import eu.europa.ec.fisheries.uvms.rules.service.business.generator.ActivityRequestFactGenerator;
 import eu.europa.ec.fisheries.uvms.rules.service.business.generator.ActivityResponseFactGenerator;
-import eu.europa.ec.fisheries.uvms.rules.service.business.generator.SalesQueryFactGenerator;
-import eu.europa.ec.fisheries.uvms.rules.service.business.generator.SalesReportFactGenerator;
-import eu.europa.ec.fisheries.uvms.rules.service.business.generator.SalesResponseFactGenerator;
 import eu.europa.ec.fisheries.uvms.rules.service.config.BusinessObjectType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -42,12 +39,6 @@ public class BusinessObjectFactory {
                 case RECEIVING_FA_QUERY_MSG:
                 case SENDING_FA_QUERY_MSG:
                     return new ActivityQueryFactGenerator();
-                case FLUX_SALES_QUERY_MSG:
-                    return new SalesQueryFactGenerator();
-                case FLUX_SALES_REPORT_MSG:
-                    return new SalesReportFactGenerator();
-                case FLUX_SALES_RESPONSE_MSG:
-                    return new SalesResponseFactGenerator();
             }
         }
         return null;

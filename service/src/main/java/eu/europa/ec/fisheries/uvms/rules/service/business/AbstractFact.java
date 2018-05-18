@@ -13,15 +13,20 @@
 
 package eu.europa.ec.fisheries.uvms.rules.service.business;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import eu.europa.ec.fisheries.schema.rules.rule.v1.ErrorType;
-import eu.europa.ec.fisheries.schema.rules.template.v1.FactType;
-import eu.europa.ec.fisheries.uvms.rules.service.business.fact.*;
-import eu.europa.ec.fisheries.uvms.rules.service.mapper.xpath.util.XPathRepository;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.PatternSyntaxException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.PredicateUtils;
@@ -29,23 +34,33 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import eu.europa.ec.fisheries.schema.rules.rule.v1.ErrorType;
+import eu.europa.ec.fisheries.schema.rules.template.v1.FactType;
+import eu.europa.ec.fisheries.uvms.rules.service.business.fact.CodeType;
+import eu.europa.ec.fisheries.uvms.rules.service.business.fact.IdType;
+import eu.europa.ec.fisheries.uvms.rules.service.business.fact.IdTypeWithFlagState;
+import eu.europa.ec.fisheries.uvms.rules.service.business.fact.MeasureType;
+import eu.europa.ec.fisheries.uvms.rules.service.business.fact.NumericType;
+import eu.europa.ec.fisheries.uvms.rules.service.mapper.xpath.util.XPathRepository;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import un.unece.uncefact.data.standard.reusableaggregatebusinessinformationentity._20.ContactPerson;
 import un.unece.uncefact.data.standard.reusableaggregatebusinessinformationentity._20.DelimitedPeriod;
 import un.unece.uncefact.data.standard.reusableaggregatebusinessinformationentity._20.FACatch;
 import un.unece.uncefact.data.standard.reusableaggregatebusinessinformationentity._20.FLUXLocation;
 import un.unece.uncefact.data.standard.unqualifieddatatype._20.TextType;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.regex.PatternSyntaxException;
-
 @Slf4j
 @ToString
 public abstract class AbstractFact {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractFact.class);
+    
     private static volatile int counter = 0;
 
     protected FactType factType;
@@ -349,7 +364,7 @@ public abstract class AbstractFact {
                 return true;
             }
         } catch (IllegalArgumentException ex) {
-            log.debug("The SchemeId : '" + id.getSchemeId() + "' is not mapped in the AbstractFact.validateFormat(List<IdType> ids) method.", ex.getMessage());
+            LOG.debug("The SchemeId : '" + id.getSchemeId() + "' is not mapped in the AbstractFact.validateFormat(List<IdType> ids) method.", ex.getMessage());
             return true;
         }
         return false;
@@ -370,7 +385,7 @@ public abstract class AbstractFact {
                 return true;
             }
         } catch (IllegalArgumentException ex) {
-            log.debug("The codeType : '" + codeType.getListId() + "' is not mapped in the AbstractFact.validateFormat(List<CodeType> codeTypes) method.", ex.getMessage());
+            LOG.debug("The codeType : '" + codeType.getListId() + "' is not mapped in the AbstractFact.validateFormat(List<CodeType> codeTypes) method.", ex.getMessage());
             return true;
         }
         return false;
@@ -457,7 +472,7 @@ public abstract class AbstractFact {
         try {
             return validateFormat(idType.getValue(), FORMATS.valueOf(requiredSchemeId).getFormatStr());
         } catch (IllegalArgumentException ex) {
-            log.error("The SchemeId : '" + requiredSchemeId + "' is not mapped in the AbstractFact.FORMATS enum.", ex.getMessage());
+            LOG.error("The SchemeId : '" + requiredSchemeId + "' is not mapped in the AbstractFact.FORMATS enum.", ex.getMessage());
             return false;
         }
     }
@@ -469,7 +484,7 @@ public abstract class AbstractFact {
         try {
             return validateFormat(codeType.getValue(), FORMATS.valueOf(requiredListId).getFormatStr());
         } catch (IllegalArgumentException ex) {
-            log.error("The ListId : '" + requiredListId + "' is not mapped in the AbstractFact.FORMATS enum.", ex.getMessage());
+            LOG.error("The ListId : '" + requiredListId + "' is not mapped in the AbstractFact.FORMATS enum.", ex.getMessage());
             return false;
         }
     }
@@ -517,26 +532,6 @@ public abstract class AbstractFact {
      */
     public boolean listIdDoesNotContainAll(CodeType codeType, String... valuesToMatch) {
         return listIdDoesNotContainAll(Collections.singletonList(codeType), valuesToMatch);
-    }
-
-
-    public boolean salesPartiesValueDoesNotContainAny(List<SalesPartyFact> salesPartyTypes, String... valuesToMatch) {
-        List<CodeType> codeTypes = new ArrayList<>();
-        HashSet<String> valuesToBeFound = new HashSet<>(Arrays.asList(valuesToMatch));
-        for (SalesPartyFact salesPartyFact : salesPartyTypes) {
-            codeTypes.addAll(salesPartyFact.getRoleCodes());
-        }
-        if (valuesToMatch == null || valuesToMatch.length == 0 || CollectionUtils.isEmpty(codeTypes)) {
-            return true;
-        }
-        for (CodeType codeType : codeTypes) {
-            String value = codeType.getValue();
-
-            if (valuesToBeFound.contains(value)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public boolean listIdDoesNotContainAll(List<CodeType> codeTypes, String... valuesToMatch) {
@@ -651,8 +646,8 @@ public abstract class AbstractFact {
         if (creationDate != null && acceptanceDate != null) {
             DateTime creationDateTime = new DateTime(creationDate).toDateTime(DateTimeZone.UTC).plusMinutes(minutes);
             DateTime acceptanceDateTime = new DateTime(acceptanceDate).toDateTime(DateTimeZone.UTC);
-            log.debug("creationDate is {}", creationDateTime.toString());
-            log.debug("acceptanceDateTime is {}", acceptanceDateTime.toString());
+            LOG.debug("creationDate is {}", creationDateTime.toString());
+            LOG.debug("acceptanceDateTime is {}", acceptanceDateTime.toString());
             acceptanceDateNotAfterCreationDate = acceptanceDateTime.toDate().before(creationDateTime.toDate());
 
         }
@@ -670,10 +665,10 @@ public abstract class AbstractFact {
         boolean notInPast = true;
         if (creationDate != null) {
             DateTime now = eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC();
-            log.debug("now is {}", now.toString());
+            LOG.debug("now is {}", now.toString());
             now = now.plusMinutes(minutes);
             DateTime creationDateUTC = new DateTime(creationDate).toDateTime(DateTimeZone.UTC);
-            log.debug("creationDate is {}", creationDateUTC.toString());
+            LOG.debug("creationDate is {}", creationDateUTC.toString());
             notInPast = !creationDateUTC.toDate().before(now.toDate());
         }
         return notInPast;
@@ -999,7 +994,7 @@ public abstract class AbstractFact {
                     field.setAccessible(true);
                     fieldsObj = field.get(obj);
                 } catch (IllegalAccessException e) {
-                    log.warn("[WARN] Couldn't access field (even forcing accessible to true) {}", field);
+                    LOG.warn("[WARN] Couldn't access field (even forcing accessible to true) {}", field);
                     return false;
                 }
                 if (fieldsObj instanceof List) {
@@ -1266,7 +1261,7 @@ public abstract class AbstractFact {
             try {
                 idValueArray = idType.getValue().split(separator);
             } catch (NullPointerException | PatternSyntaxException ex) {
-                log.error("Error splitting IdType's value to array!", ex);
+                LOG.error("Error splitting IdType's value to array!", ex);
                 return null;
             }
         }

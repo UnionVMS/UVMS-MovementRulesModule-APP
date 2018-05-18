@@ -1,27 +1,24 @@
 package eu.europa.ec.fisheries.uvms.rules.service.bean;
 
 import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import eu.europa.ec.fisheries.schema.rules.rule.v1.ErrorType;
-import eu.europa.ec.fisheries.schema.rules.rule.v1.ExternalRuleType;
-import eu.europa.ec.fisheries.schema.rules.rule.v1.RuleType;
-import eu.europa.ec.fisheries.schema.rules.template.v1.FactType;
-import eu.europa.ec.fisheries.schema.rules.template.v1.TemplateType;
-import eu.europa.ec.fisheries.uvms.rules.model.dto.TemplateRuleMapDto;
-import eu.europa.ec.fisheries.uvms.rules.service.bean.sales.SalesRulesServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.business.AbstractFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.RulesValidator;
-import eu.europa.ec.fisheries.uvms.rules.service.business.fact.FaLandingFact;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import eu.europa.ec.fisheries.schema.rules.rule.v1.ErrorType;
+import eu.europa.ec.fisheries.schema.rules.rule.v1.ExternalRuleType;
+import eu.europa.ec.fisheries.schema.rules.rule.v1.RuleType;
+import eu.europa.ec.fisheries.schema.rules.template.v1.FactType;
+import eu.europa.ec.fisheries.schema.rules.template.v1.TemplateType;
+import eu.europa.ec.fisheries.uvms.rules.model.dto.TemplateRuleMapDto;
+import eu.europa.ec.fisheries.uvms.rules.service.business.AbstractFact;
+import eu.europa.ec.fisheries.uvms.rules.service.business.RulesValidator;
+import eu.europa.ec.fisheries.uvms.rules.service.business.fact.FaLandingFact;
 import un.unece.uncefact.data.standard.reusableaggregatebusinessinformationentity._20.FLUXLocation;
 
 /**
@@ -39,9 +36,6 @@ public class FaLandingEntityRuleTest {
 
     @InjectMocks
     private RulesValidator rulesValidator;
-
-    @InjectMocks
-    private SalesRulesServiceBean salesRulesService;
 
     @InjectMocks
     private MDRCacheServiceBean mdrCacheRuleService;

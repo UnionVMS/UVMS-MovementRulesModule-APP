@@ -12,15 +12,27 @@ package eu.europa.fisheries.uvms.rules.service.mapper.fact;
 
 import static eu.europa.ec.fisheries.uvms.rules.service.constants.XPathConstants.SPECIFIED_FISHING_GEAR;
 import static eu.europa.ec.fisheries.uvms.rules.service.constants.XPathConstants.SPECIFIED_FLUX_CHARACTERISTIC;
+import static java.util.Collections.singletonList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import static java.util.Collections.singletonList;
-
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import javax.xml.datatype.DatatypeFactory;
+import org.apache.commons.io.IOUtils;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
 import eu.europa.ec.fisheries.uvms.mdr.model.exception.MdrModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.service.bean.RuleTestHelper;
@@ -56,20 +68,7 @@ import eu.europa.ec.fisheries.uvms.rules.service.business.fact.VesselStorageChar
 import eu.europa.ec.fisheries.uvms.rules.service.business.fact.VesselTransportMeansFact;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.fact.ActivityFactMapper;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.xpath.util.XPathStringWrapper;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import javax.xml.datatype.DatatypeFactory;
 import lombok.SneakyThrows;
-import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
 import un.unece.uncefact.data.standard.fluxfareportmessage._3.FLUXFAReportMessage;
 import un.unece.uncefact.data.standard.fluxresponsemessage._6.FLUXResponseMessage;
 import un.unece.uncefact.data.standard.reusableaggregatebusinessinformationentity._20.AAPProcess;
@@ -316,6 +315,7 @@ public class ActivityFactMapperTest {
 
     }
 
+    @Ignore
     @Test
     public void testGenerateFactForFishingActivity() {
 
@@ -335,6 +335,7 @@ public class ActivityFactMapperTest {
 
     }
 
+    @Ignore
     @Test
     public void generateFactForFishingActivityWithBoolean() {
         List<FAReportDocument> faReportDocuments = fluxFaTestMessage.getFAReportDocuments();

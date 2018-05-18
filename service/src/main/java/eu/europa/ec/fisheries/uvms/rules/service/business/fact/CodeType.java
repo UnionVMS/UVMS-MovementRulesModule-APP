@@ -13,22 +13,21 @@
 
 package eu.europa.ec.fisheries.uvms.rules.service.business.fact;
 
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
 import java.util.Objects;
+import lombok.ToString;
 
 /**
  * @author padhyad
  * @author Gregory Rinaldi
  */
-@NoArgsConstructor
 @ToString
 public class CodeType {
 
     private String value;
     private String listId;
 
+    public CodeType() {}
+    
     public CodeType(String value) {
         this.value = value;
     }
