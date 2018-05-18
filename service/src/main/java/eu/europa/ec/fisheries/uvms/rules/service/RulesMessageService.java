@@ -18,7 +18,6 @@ import javax.ejb.Lock;
 import javax.ejb.LockType;
 import eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesBaseRequest;
-import eu.europa.ec.fisheries.schema.rules.module.v1.SendSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFaQueryMessageRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFluxFaResponseMessageRequest;

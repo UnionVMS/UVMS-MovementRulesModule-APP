@@ -19,10 +19,9 @@ import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.rules.module.v1.CountTicketsByMovementsRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.GetCustomRuleRequest;
@@ -31,12 +30,8 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketsAndRulesByMovemen
 import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketsByMovementsRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.GetValidationsByRawMsgGuidRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesQueryRequest;
-import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesReportRequest;
-import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesBaseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
-import eu.europa.ec.fisheries.schema.rules.module.v1.SendSalesReportRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SendSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesRequest;
@@ -58,13 +53,8 @@ import eu.europa.ec.fisheries.uvms.rules.message.event.GetTicketsByMovementsEven
 import eu.europa.ec.fisheries.uvms.rules.message.event.GetValidationResultsByRawGuid;
 import eu.europa.ec.fisheries.uvms.rules.message.event.PingReceivedEvent;
 import eu.europa.ec.fisheries.uvms.rules.message.event.RcvFluxResponseEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.ReceiveSalesQueryEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.ReceiveSalesReportEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.ReceiveSalesResponseEvent;
 import eu.europa.ec.fisheries.uvms.rules.message.event.SendFaQueryEvent;
 import eu.europa.ec.fisheries.uvms.rules.message.event.SendFaReportEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.SendSalesReportEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.SendSalesResponseEvent;
 import eu.europa.ec.fisheries.uvms.rules.message.event.SetFLUXFAReportMessageReceivedEvent;
 import eu.europa.ec.fisheries.uvms.rules.message.event.SetFLUXMDRSyncMessageReceivedEvent;
 import eu.europa.ec.fisheries.uvms.rules.message.event.SetFluxFaQueryMessageReceivedEvent;
@@ -84,20 +74,6 @@ import eu.europa.ec.fisheries.uvms.rules.service.EventService;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesMessageService;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceTechnicalException;
-import eu.europa.ec.fisheries.uvms.sales.model.exception.SalesMarshallException;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Stateless
 public class RulesEventServiceBean implements EventService {

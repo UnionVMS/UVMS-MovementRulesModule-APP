@@ -19,9 +19,6 @@ import static eu.europa.ec.fisheries.uvms.rules.service.config.BusinessObjectTyp
 import static eu.europa.ec.fisheries.uvms.rules.service.config.BusinessObjectType.SENDING_FA_QUERY_MSG;
 import static eu.europa.ec.fisheries.uvms.rules.service.config.BusinessObjectType.SENDING_FA_REPORT_MSG;
 import static eu.europa.ec.fisheries.uvms.rules.service.config.BusinessObjectType.SENDING_FA_RESPONSE_MSG;
-import static eu.europa.ec.fisheries.uvms.rules.service.config.ExtraValueType.CREATION_DATE_OF_MESSAGE;
-import static eu.europa.ec.fisheries.uvms.rules.service.config.ExtraValueType.ORIGINATING_PLUGIN;
-import static eu.europa.ec.fisheries.uvms.rules.service.config.ExtraValueType.SENDER_RECEIVER;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import java.net.URL;
@@ -59,30 +56,21 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
-import com.google.common.base.Optional;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType;
-import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesBaseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
-import eu.europa.ec.fisheries.schema.rules.module.v1.SendSalesReportRequest;
-import eu.europa.ec.fisheries.schema.rules.module.v1.SendSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFaQueryMessageRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFluxFaResponseMessageRequest;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.RawMsgType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
-import eu.europa.ec.fisheries.schema.sales.FLUXSalesQueryMessage;
-import eu.europa.ec.fisheries.schema.sales.FLUXSalesReportMessage;
-import eu.europa.ec.fisheries.schema.sales.FLUXSalesResponseMessage;
-import eu.europa.ec.fisheries.schema.sales.Report;
 import eu.europa.ec.fisheries.uvms.activity.model.exception.ActivityModelMarshallException;
 import eu.europa.ec.fisheries.uvms.activity.model.mapper.ActivityModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.activity.model.schemas.MessageType;
 import eu.europa.ec.fisheries.uvms.activity.model.schemas.SyncAsyncRequestType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
@@ -107,7 +95,6 @@ import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesValidationException;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.CodeTypeMapper;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.xpath.util.XPathRepository;
-import eu.europa.ec.fisheries.uvms.sales.model.exception.SalesMarshallException;
 import un.unece.uncefact.data.standard.fluxfaquerymessage._3.FLUXFAQueryMessage;
 import un.unece.uncefact.data.standard.fluxfareportmessage._3.FLUXFAReportMessage;
 import un.unece.uncefact.data.standard.fluxresponsemessage._6.FLUXResponseMessage;
@@ -177,45 +164,6 @@ public class RulesMessageServiceBean implements RulesMessageService {
             }
         }
         return false;
-    }
-
-    private Optional<DateTime> getCreationDate(FLUXSalesQueryMessage salesQueryMessage) {
-        if (salesQueryMessage != null && salesQueryMessage.getSalesQuery() != null
-                && salesQueryMessage.getSalesQuery().getSubmittedDateTime() != null
-                && salesQueryMessage.getSalesQuery().getSubmittedDateTime().getDateTime() != null) {
-            return Optional.of(salesQueryMessage.getSalesQuery().getSubmittedDateTime().getDateTime());
-        } else {
-            return Optional.absent();
-        }
-    }
-
-    private Optional<DateTime> getCreationDate(Report salesReportMessage) {
-        if (salesReportMessage != null) {
-            return getCreationDate(salesReportMessage.getFLUXSalesReportMessage());
-        } else {
-            return Optional.absent();
-        }
-    }
-
-    private Optional<DateTime> getCreationDate(FLUXSalesReportMessage salesReportMessage) {
-        if (salesReportMessage != null
-                && salesReportMessage.getFLUXReportDocument() != null
-                && salesReportMessage.getFLUXReportDocument().getCreationDateTime() != null
-                && salesReportMessage.getFLUXReportDocument().getCreationDateTime().getDateTime() != null) {
-            return Optional.of(salesReportMessage.getFLUXReportDocument().getCreationDateTime().getDateTime());
-        } else {
-            return Optional.absent();
-        }
-    }
-
-    private Optional<DateTime> getCreationDate(FLUXSalesResponseMessage salesResponseMessage) {
-        if (salesResponseMessage != null && salesResponseMessage.getFLUXResponseDocument() != null
-                && salesResponseMessage.getFLUXResponseDocument().getCreationDateTime() != null
-                && salesResponseMessage.getFLUXResponseDocument().getCreationDateTime().getDateTime() != null) {
-            return Optional.of(salesResponseMessage.getFLUXResponseDocument().getCreationDateTime().getDateTime());
-        } else {
-            return Optional.absent();
-        }
     }
 
     @Override
@@ -805,14 +753,6 @@ public class RulesMessageServiceBean implements RulesMessageService {
         fluxResponseDocument.setRelatedValidationResultDocuments(getValidationResultDocument(faReportValidationResult)); // Set validation result
     }
 
-    private void setFluxResponseDocumentRejectionReason(ValidationResultDto faReportValidationResult, FLUXResponseDocument fluxResponseDocument) {
-        if (faReportValidationResult.isError()) {
-            TextType rejectionReason = new TextType();
-            rejectionReason.setValue("VALIDATION");
-            fluxResponseDocument.setRejectionReason(rejectionReason); // Set rejection reason
-        }
-    }
-
     private void setFluxResponseDocumentResponseCode(ValidationResultDto faReportValidationResult, FLUXResponseDocument fluxResponseDocument) {
         CodeType responseCode = new CodeType();
         if (faReportValidationResult.isError()) {
@@ -864,11 +804,7 @@ public class RulesMessageServiceBean implements RulesMessageService {
             throw new RulesServiceException(e.getMessage(), e);
         }
     }
-
-    private void sendToSales(String message) throws MessageException {
-        producer.sendDataSourceMessage(message, DataSourceQueue.SALES);
-    }
-
+    
     private void sendToExchange(String message) throws MessageException {
         producer.sendDataSourceMessage(message, DataSourceQueue.EXCHANGE);
     }
