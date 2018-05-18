@@ -63,11 +63,7 @@
             <artifactId>uvms-commons-dao</artifactId>
             <version>${uvms.common.version}</version>
         </dependency>                
-        <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms</groupId>
-            <artifactId>uvms-test</artifactId>
-        </dependency>
-
+        
 
         <dependency>
             <groupId>org.mapstruct</groupId>
