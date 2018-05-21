@@ -22,12 +22,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
-import lombok.Data;
 
 @Entity
 @Table(name = "ticket")
@@ -40,7 +40,6 @@ import lombok.Data;
         @NamedQuery(name = Ticket.COUNT_TICKETS_BY_MOVEMENTS, query = "SELECT count(t) FROM Ticket t where t.movementGuid IN :movements"),
         @NamedQuery(name = Ticket.COUNT_ASSETS_NOT_SENDING, query = "SELECT count(t) FROM Ticket t where t.ruleGuid = :ruleGuid")
 })
-@Data
 public class Ticket implements Serializable {
 
     public static final String FIND_TICKET_BY_GUID = "Ticket.findByGuid";
@@ -98,8 +97,121 @@ public class Ticket implements Serializable {
     @NotNull
     private String updatedBy;
 
-    public Ticket() {
+    @PrePersist
+    public void prePersist() {
         this.guid = UUID.randomUUID().toString();
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getAssetGuid() {
+        return assetGuid;
+    }
+
+    public void setAssetGuid(String assetGuid) {
+        this.assetGuid = assetGuid;
+    }
+
+    public String getMobileTerminalGuid() {
+        return mobileTerminalGuid;
+    }
+
+    public void setMobileTerminalGuid(String mobileTerminalGuid) {
+        this.mobileTerminalGuid = mobileTerminalGuid;
+    }
+
+    public String getChannelGuid() {
+        return channelGuid;
+    }
+
+    public void setChannelGuid(String channelGuid) {
+        this.channelGuid = channelGuid;
+    }
+
+    public String getRuleGuid() {
+        return ruleGuid;
+    }
+
+    public void setRuleGuid(String ruleGuid) {
+        this.ruleGuid = ruleGuid;
+    }
+
+    public String getRuleName() {
+        return ruleName;
+    }
+
+    public void setRuleName(String ruleName) {
+        this.ruleName = ruleName;
+    }
+
+    public String getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(String recipient) {
+        this.recipient = recipient;
+    }
+
+    public String getMovementGuid() {
+        return movementGuid;
+    }
+
+    public void setMovementGuid(String movementGuid) {
+        this.movementGuid = movementGuid;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getTicketCount() {
+        return ticketCount;
+    }
+
+    public void setTicketCount(Long ticketCount) {
+        this.ticketCount = ticketCount;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+    
 }

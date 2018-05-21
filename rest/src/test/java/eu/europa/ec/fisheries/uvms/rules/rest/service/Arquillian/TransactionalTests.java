@@ -9,7 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.*;
 
-public class TransactionalTests extends BuildAssetServiceDeployment {
+public class TransactionalTests extends BuildRulesRestDeployment {
 
     @Inject
     protected UserTransaction userTransaction;

@@ -18,6 +18,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>rules-service</artifactId>
             <version>${project.parent.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms</groupId>
@@ -53,7 +54,6 @@
             	</exclusion>
             </exclusions>            
         </dependency>		
-
         <dependency>
 			<groupId>fish.focus.uvms.maven</groupId>
 			<artifactId>uvms-pom-monitoring-deps</artifactId>

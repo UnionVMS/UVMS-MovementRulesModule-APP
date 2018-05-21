@@ -23,18 +23,13 @@ import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.rules.rule.v1.RuleStatusType;
 import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
-import eu.europa.ec.fisheries.uvms.rules.entity.RawMessage;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleStatus;
 import eu.europa.ec.fisheries.uvms.rules.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.Template;
 import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.rules.entity.ValidationMessage;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchValue;
@@ -544,41 +539,5 @@ public class RulesDaoBean implements RulesDao {
             LOG.error("[ Error when getting counting tickets by movement. ] {}", e.getMessage());
             throw new DaoException("[ Error when counting tickets by movement. ] ", e);
         }
-    }
-
-    @Override
-    public List<Template> getAllFactTemplates() throws DaoException {
-        return null;
-    }
-
-    @Override
-    public void updatedFailedRules(List<String> brIds) throws DaoException {
-    }
-
-    @Override
-    public void saveValidationMessages(List<RawMessage> rawMessages) throws DaoException {
-    }
-
-    @Override
-    public List<ValidationMessage> getValidationMessagesById(List<String> ids) throws DaoException {
-        return null;
-    }
-
-    @Override
-    public List<ValidationMessage> getValidationMessagesByRawMsgGuid(String rawMsgGuid, String type) throws DaoException {
-        return null;
-    }
-
-    @Override
-    public RuleStatusType checkRuleStatus() throws DaoException {
-        return null;
-    }
-
-    @Override
-    public void createRuleStatus(RuleStatus ruleStatus) throws DaoException {
-    }
-
-    @Override
-    public void deleteRuleStatus() throws DaoException {
     }
 }

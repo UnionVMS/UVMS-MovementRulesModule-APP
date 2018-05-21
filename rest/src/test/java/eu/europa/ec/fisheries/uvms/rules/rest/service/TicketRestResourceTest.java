@@ -25,11 +25,11 @@ import eu.europa.ec.fisheries.schema.rules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByMovementsResponse;
 import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByQueryResponse;
-import eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian.BuildAssetServiceDeployment;
+import eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian.BuildRulesRestDeployment;
 
 @RunAsClient
 @RunWith(Arquillian.class)
-public class TicketRestResourceTest extends BuildAssetServiceDeployment {
+public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     public void getTicketListTest() throws Exception {

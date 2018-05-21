@@ -18,10 +18,10 @@ import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmSearchKey;
 import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.schema.rules.source.v1.GetAlarmListByQueryResponse;
-import eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian.BuildAssetServiceDeployment;
+import eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian.BuildRulesRestDeployment;
 
 @RunWith(Arquillian.class)
-public class AlarmRestResourceTest extends BuildAssetServiceDeployment {
+public class AlarmRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @RunAsClient
