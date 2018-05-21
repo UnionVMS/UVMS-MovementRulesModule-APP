@@ -11,30 +11,43 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.dao.bean;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.ejb.Stateless;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.persistence.TransactionRequiredException;
+import javax.persistence.TypedQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.RuleStatusType;
-import eu.europa.ec.fisheries.uvms.commons.service.exception.ServiceException;
-import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
-import eu.europa.ec.fisheries.uvms.rules.dao.Dao;
 import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.rules.entity.*;
+import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
+import eu.europa.ec.fisheries.uvms.rules.entity.RawMessage;
+import eu.europa.ec.fisheries.uvms.rules.entity.RuleStatus;
+import eu.europa.ec.fisheries.uvms.rules.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.Template;
+import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.rules.entity.ValidationMessage;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ejb.Stateless;
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Stateless
-public class RulesDaoBean extends Dao implements RulesDao {
+public class RulesDaoBean implements RulesDao {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RulesDaoBean.class);
-    private static final String MOVEMENT_GUID_PARAMETER = "movementGuid";
+    private static final Logger LOG = LoggerFactory.getLogger(RulesDaoBean.class);
+    
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public CustomRule createCustomRule(CustomRule entity) throws DaoException {
@@ -313,7 +326,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
         AlarmReport errorReport;
         try {
             TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID, AlarmReport.class);
-            query.setParameter(MOVEMENT_GUID_PARAMETER, guid);
+            query.setParameter("movementGuid", guid);
             errorReport = query.getSingleResult();
         } catch (NoResultException e) {
             LOG.debug("Fist position report");
@@ -535,105 +548,37 @@ public class RulesDaoBean extends Dao implements RulesDao {
 
     @Override
     public List<Template> getAllFactTemplates() throws DaoException {
-        try {
-            return factTemplateDao.listAllEnabled();
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
+        return null;
     }
 
     @Override
     public void updatedFailedRules(List<String> brIds) throws DaoException {
-        try {
-            failedRuleDao.updateFailedRules(brIds);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
     }
 
     @Override
     public void saveValidationMessages(List<RawMessage> rawMessages) throws DaoException {
-        try {
-            rawMessageDao.saveRawMessages(rawMessages);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
     }
 
     @Override
     public List<ValidationMessage> getValidationMessagesById(List<String> ids) throws DaoException {
-        try {
-            return validationMessageDao.getValidationMessagesById(ids);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
+        return null;
     }
 
     @Override
     public List<ValidationMessage> getValidationMessagesByRawMsgGuid(String rawMsgGuid, String type) throws DaoException {
-        try {
-            return validationMessageDao.getValidationMessagesByRawMessageGuid(rawMsgGuid, type);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
+        return null;
     }
 
     @Override
     public RuleStatusType checkRuleStatus() throws DaoException {
-        try {
-            return ruleStatusDao.findRuleStatus();
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
+        return null;
     }
 
     @Override
     public void createRuleStatus(RuleStatus ruleStatus) throws DaoException {
-        try {
-            ruleStatusDao.createRuleStatus(ruleStatus);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
     }
 
     @Override
     public void deleteRuleStatus() throws DaoException {
-        try {
-            ruleStatusDao.deleteRuleStatus();
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
-    }
-
-    public List<String> getFishingGearCharacteristicCodes(String fishingGearTypeCode) throws DaoException {
-        try {
-            return fishingGearTypeCharacteristicDao.getFishingGearCharacteristicCodes(fishingGearTypeCode);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
-    }
-
-    public List<String> getFishingGearCharacteristicCodes(String fishingGearTypeCode, boolean onlyMandatory) throws DaoException {
-        try {
-            return fishingGearTypeCharacteristicDao.getFishingGearCharacteristicCodes(fishingGearTypeCode, onlyMandatory);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
-    }
-
-    public List<String> getAllFishingGearTypeCodes() throws DaoException {
-        try {
-            return fishingGearTypeCharacteristicDao.getAllFishingGearTypeCodes();
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
-    }
-
-    public List<FishingGearTypeCharacteristic> getAllFishingGearTypeCharacteristics() throws DaoException {
-        try {
-            return fishingGearTypeCharacteristicDao.findAllEntity(FishingGearTypeCharacteristic.class);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
     }
 }

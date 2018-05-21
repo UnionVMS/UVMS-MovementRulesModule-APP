@@ -22,7 +22,7 @@ import javax.persistence.PersistenceContext;
 @Stateless
 public class RulesConfigHelper implements ConfigHelper {
 
-    @PersistenceContext(unitName = "rules")
+    @PersistenceContext
     protected EntityManager em;
 
     @Override
