@@ -37,43 +37,43 @@ import java.util.List;
 @Local
 public interface RulesDomainModel {
 
-    List<TemplateRuleMapDto> getAllFactTemplatesAndRules() throws RulesModelException;
+    //List<TemplateRuleMapDto> getAllFactTemplatesAndRules() throws RulesModelException;
 
-    CustomRuleType createCustomRule(CustomRuleType customRule) throws RulesModelException;
+    //CustomRuleType createCustomRule(CustomRuleType customRule) throws RulesModelException;
 
-    CustomRuleType updateCustomRule(CustomRuleType model) throws RulesModelException;
+    //CustomRuleType updateCustomRule(CustomRuleType model) throws RulesModelException;
 
-    AlarmReportType setAlarmStatus(AlarmReportType alarm) throws RulesModelException;
+    //AlarmReportType setAlarmStatus(AlarmReportType alarm) throws RulesModelException;
 
-    List<CustomRuleType> getRunnableCustomRuleList() throws RulesModelException;
+    //List<CustomRuleType> getRunnableCustomRuleList() throws RulesModelException;
 
-    List<SanityRuleType> getSanityRuleList() throws RulesModelException;
+    //List<SanityRuleType> getSanityRuleList() throws RulesModelException;
 
-    List<CustomRuleType> getCustomRulesByUser(String updatedBy) throws RulesModelException;
+    //List<CustomRuleType> getCustomRulesByUser(String updatedBy) throws RulesModelException;
 
-    CustomRuleListResponseDto getCustomRuleListByQuery(CustomRuleQuery query) throws RulesModelException;
+    //CustomRuleListResponseDto getCustomRuleListByQuery(CustomRuleQuery query) throws RulesModelException;
 
-    AlarmReportType createAlarmReport(AlarmReportType alarm) throws RulesModelException;
+    //AlarmReportType createAlarmReport(AlarmReportType alarm) throws RulesModelException;
 
     AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException;
 
     TicketListResponseDto getTicketListByQuery(String loggedInUser, TicketQuery query) throws RulesModelException;
 
-    TicketType createTicket(TicketType ticket) throws RulesModelException;
+    //TicketType createTicket(TicketType ticket) throws RulesModelException;
 
-    CustomRuleType updateCustomRuleSubscription(UpdateSubscriptionType updateSubscriptionType) throws RulesModelException;
+    //CustomRuleType updateCustomRuleSubscription(UpdateSubscriptionType updateSubscriptionType) throws RulesModelException;
 
-    CustomRuleType deleteCustomRule(String guid) throws RulesModelException;
+    //CustomRuleType deleteCustomRule(String guid) throws RulesModelException;
 
-    CustomRuleType updateLastTriggeredCustomRule(String ruleGuid) throws RulesModelException;
+    //CustomRuleType updateLastTriggeredCustomRule(String ruleGuid) throws RulesModelException;
 
-    TicketType setTicketStatus(TicketType ticket) throws RulesModelException;
+    //TicketType setTicketStatus(TicketType ticket) throws RulesModelException;
 
-    TicketType updateTicketCount(TicketType ticket) throws RulesModelException;
+    //TicketType updateTicketCount(TicketType ticket) throws RulesModelException;
 
     List<TicketType> updateTicketStatusByQuery(String userName, TicketQuery query, TicketStatusType status) throws RulesModelException;
 
-    CustomRuleType getByGuid(String guid) throws RulesModelException;
+    //CustomRuleType getByGuid(String guid) throws RulesModelException;
 
     TicketListResponseDto getTicketListByMovements(List<String> movements) throws RulesModelException;
 
@@ -109,15 +109,15 @@ public interface RulesDomainModel {
 
     List<TicketAndRuleType> getTicketsAndRulesByMovements(List<String> movementGuids) throws RulesModelException;
 
-    void updateFailedRules(List<String> failedRules) throws RulesModelException;
+    //void updateFailedRules(List<String> failedRules) throws RulesModelException;
 
-    void saveValidationMessages(RawMessageType rawMessageType) throws RulesModelException;
+    //void saveValidationMessages(RawMessageType rawMessageType) throws RulesModelException;
 
-    List<ValidationMessageType> getValidationMessagesById(List<String> ids) throws RulesModelException;
+    //List<ValidationMessageType> getValidationMessagesById(List<String> ids) throws RulesModelException;
 
-    List<ValidationMessageType> getValidationMessagesByRawMsgGuid(String rawMsgGuid, String type) throws RulesModelException;
+    //List<ValidationMessageType> getValidationMessagesByRawMsgGuid(String rawMsgGuid, String type) throws RulesModelException;
 
-    RuleStatusType checkRuleStatus() throws RulesModelException;
+    //RuleStatusType checkRuleStatus() throws RulesModelException;
 
-    void updateRuleStatus(RuleStatusType ruleStatusType) throws RulesModelException;
+    //void updateRuleStatus(RuleStatusType ruleStatusType) throws RulesModelException;
 }

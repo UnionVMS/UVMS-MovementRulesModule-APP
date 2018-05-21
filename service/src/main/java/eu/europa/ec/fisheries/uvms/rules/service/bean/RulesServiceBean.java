@@ -53,10 +53,7 @@ import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.AvailabilityType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscritionOperationType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.UpdateSubscriptionType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.*;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementSourceType;
@@ -79,6 +76,7 @@ import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
 import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.config.model.mapper.ModuleRequestMapper;
@@ -92,6 +90,16 @@ import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementDuplicateExc
 import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementFaultException;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.mapper.AlarmMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
@@ -160,6 +168,9 @@ public class RulesServiceBean implements RulesService {
     @EJB
     private RulesDomainModel rulesDomainModel;
 
+    @EJB
+    private RulesDao rulesDao;
+
     @Inject
     @AlarmReportEvent
     private Event<NotificationMessage> alarmReportEvent;
@@ -217,7 +228,27 @@ public class RulesServiceBean implements RulesService {
                     throw new AccessDeniedException("Forbidden access");
                 }
             }
-            CustomRuleType createdRule = rulesDomainModel.createCustomRule(customRule);
+            CustomRuleType createdRule = null;
+            //CustomRuleType createdRule = rulesDomainModel.createCustomRule(customRule);
+            //Copy-paste from RulesDomainModelBean to remove that class
+            LOG.debug("Create in Rules");
+            try {
+                CustomRule entity = CustomRuleMapper.toCustomRuleEntity(customRule);
+
+                List<RuleSubscription> subscriptionEntities = new ArrayList<>();
+                RuleSubscription creatorSubscription = new RuleSubscription();
+                creatorSubscription.setCustomRule(entity);
+                creatorSubscription.setOwner(customRule.getUpdatedBy());
+                creatorSubscription.setType(SubscriptionTypeType.TICKET.value());
+                subscriptionEntities.add(creatorSubscription);
+                entity.getRuleSubscriptionList().addAll(subscriptionEntities);
+
+                rulesDao.createCustomRule(entity);
+                createdRule = CustomRuleMapper.toCustomRuleType(entity);
+            } catch (DaoException | DaoMappingException e) {
+                LOG.error("[ERROR] Error when creating CustomRule ] {}", e.getMessage());
+                throw new RulesModelException("Error when creating CustomRule", e);
+            }
             // TODO: Rewrite so rules are loaded when changed
             rulesValidator.updateCustomRules();
             sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, createdRule.getGuid(), null, customRule.getUpdatedBy());
@@ -239,10 +270,11 @@ public class RulesServiceBean implements RulesService {
     public CustomRuleType getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException {
         LOG.info("[INFO] Get Custom Rule by guid invoked in service layer");
         try {
-            CustomRuleType customRule = rulesDomainModel.getByGuid(guid);
-            return customRule;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+            CustomRule entity = rulesDao.getCustomRuleByGuid(guid);
+            return CustomRuleMapper.toCustomRuleType(entity);
+        } catch (DaoException | DaoMappingException e) {
+            LOG.error("[ERROR] Error when getting CustomRule by GUID ] {}", e.getMessage());
+            throw new RulesServiceException(e.getMessage(), e);
         }
     }
 
@@ -271,7 +303,7 @@ public class RulesServiceBean implements RulesService {
                 }
             }
 
-            CustomRuleType customRule = rulesDomainModel.updateCustomRule(oldCustomRule);
+            CustomRuleType customRule = updateCustomRuleFromRDMB(oldCustomRule);
             rulesValidator.updateCustomRules();
             sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, customRule.getGuid(), null, oldCustomRule.getUpdatedBy());
             return customRule;
@@ -279,7 +311,51 @@ public class RulesServiceBean implements RulesService {
             throw new RulesServiceException(e.getMessage());
         }
     }
+    //Copy from RulesDomainModelBean to remove that class
+    //TODO: RENAME FOR GODS SAKE
+    private CustomRuleType updateCustomRuleFromRDMB(CustomRuleType customRule)  throws RulesModelException {
+        LOG.debug("Update custom rule in Rules");
 
+        if (customRule == null) {
+            LOG.error("[ERROR] Custom Rule is null, returning Exception ]");
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Custom Rule is null", null);
+        }
+
+        if (customRule.getGuid() == null) {
+            LOG.error("[ERROR] GUID of Custom Rule is null, returning Exception. ]");
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("GUID of Custom Rule is null", null);
+        }
+
+        try {
+
+            CustomRule newEntity = CustomRuleMapper.toCustomRuleEntity(customRule);
+
+            CustomRule oldEntity = rulesDao.getCustomRuleByGuid(customRule.getGuid());
+
+            // Copy last triggered if entities are equal
+            if (oldEntity.equals(newEntity)) {
+                newEntity.setTriggered(oldEntity.getTriggered());
+            }
+
+            // Close old version
+            oldEntity.setArchived(true);
+            oldEntity.setActive(false);
+            oldEntity.setEndDate(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            // Copy subscription list (ignore if provided)
+            List<RuleSubscription> subscriptions = oldEntity.getRuleSubscriptionList();
+            for (RuleSubscription subscription : subscriptions) {
+                rulesDao.detachSubscription(subscription);
+                newEntity.getRuleSubscriptionList().add(subscription);
+                subscription.setCustomRule(newEntity);
+            }
+
+            newEntity = rulesDao.createCustomRule(newEntity);
+            return CustomRuleMapper.toCustomRuleType(newEntity);
+        } catch (DaoException | DaoMappingException e) {
+            LOG.error("[ERROR] Error when updating custom rule {}", e.getMessage());
+            throw new RulesModelException("[ERROR] Error when updating custom rule. ]", e);
+        }
+    }
     /**
      * {@inheritDoc}
      *
@@ -290,7 +366,7 @@ public class RulesServiceBean implements RulesService {
     public CustomRuleType updateCustomRule(CustomRuleType oldCustomRule) throws RulesServiceException, RulesFaultException {
         LOG.info("[INFO] Update custom rule invoked in service layer by timer");
         try {
-            CustomRuleType updatedCustomRule = rulesDomainModel.updateCustomRule(oldCustomRule);
+            CustomRuleType updatedCustomRule = updateCustomRuleFromRDMB(oldCustomRule);
             sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid(), null, oldCustomRule.getUpdatedBy());
             return updatedCustomRule;
         } catch (RulesModelException e) {
@@ -312,7 +388,48 @@ public class RulesServiceBean implements RulesService {
                 throw new RulesServiceException("Not a valid subscription!");
             }
 
-            CustomRuleType updateCustomRule = rulesDomainModel.updateCustomRuleSubscription(updateSubscriptionType);
+            LOG.debug("Update custom rule subscription in Rules");
+
+            if (updateSubscriptionType == null) {
+                LOG.error("[ERROR] Subscription is null, returning Exception ]");
+                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Subscription is null", null);
+            }
+
+            if (updateSubscriptionType.getRuleGuid() == null) {
+                LOG.error("[ERROR] Custom Rule GUID for Subscription is null, returning Exception. ]");
+                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Custom Rule GUID for Subscription is null", null);
+            }
+
+            CustomRuleType updateCustomRule = null;
+            try {
+                CustomRule customRuleEntity = rulesDao.getCustomRuleByGuid(updateSubscriptionType.getRuleGuid());
+
+                if (SubscritionOperationType.ADD.equals(updateSubscriptionType.getOperation())) {
+                    RuleSubscription ruleSubscription = new RuleSubscription();
+                    ruleSubscription.setOwner(updateSubscriptionType.getSubscription().getOwner());
+                    if (updateSubscriptionType.getSubscription().getType() != null) {
+                        ruleSubscription.setType(updateSubscriptionType.getSubscription().getType().name());
+                    }
+                    customRuleEntity.getRuleSubscriptionList().add(ruleSubscription);
+                    ruleSubscription.setCustomRule(customRuleEntity);
+                } else if (SubscritionOperationType.REMOVE.equals(updateSubscriptionType.getOperation())) {
+                    List<RuleSubscription> subscriptions = customRuleEntity.getRuleSubscriptionList();
+                    for (RuleSubscription subscription : subscriptions) {
+                        if (subscription.getOwner().equals(updateSubscriptionType.getSubscription().getOwner()) && subscription.getType().equals(updateSubscriptionType.getSubscription().getType().name())) {
+                            customRuleEntity.getRuleSubscriptionList().remove(subscription);
+                            rulesDao.removeSubscription(subscription);
+                            break;
+                        }
+                    }
+                }
+
+                updateCustomRule = CustomRuleMapper.toCustomRuleType(customRuleEntity);
+            } catch (DaoException | DaoMappingException e) {
+                LOG.error("[ERROR] Error when updating custom rule {}", e.getMessage());
+                throw new RulesModelException("[ERROR] Error when updating custom rule. ]", e);
+            }
+
+            //CustomRuleType updateCustomRule = rulesDomainModel.updateCustomRuleSubscription(updateSubscriptionType);
 
             if (SubscritionOperationType.ADD.equals(updateSubscriptionType.getOperation())) {
                 // TODO: Don't log rule guid, log subscription guid?
@@ -349,11 +466,18 @@ public class RulesServiceBean implements RulesService {
                 }
             }
 
-            CustomRuleType deletedRule = rulesDomainModel.deleteCustomRule(guid);
+            CustomRule entity = rulesDao.getCustomRuleByGuid(guid);
+            entity.setArchived(true);
+            entity.setActive(false);
+            entity.setEndDate(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            CustomRuleType deletedRule = CustomRuleMapper.toCustomRuleType(entity);
+
+            //CustomRuleType deletedRule = rulesDomainModel.deleteCustomRule(guid);
             rulesValidator.updateCustomRules();
             sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, deletedRule.getGuid(), null, username);
             return deletedRule;
-        } catch (RulesModelMapperException | RulesModelException e) {
+        } catch (RulesModelMapperException | RulesModelException | DaoException | DaoMappingException e) {
+            LOG.error(e.getMessage());
             throw new RulesServiceException(e.getMessage());
         }
     }
@@ -435,7 +559,22 @@ public class RulesServiceBean implements RulesService {
     public TicketType updateTicketStatus(TicketType ticket) throws RulesServiceException, RulesFaultException {
         LOG.info("[INFO] Update ticket status invoked in service layer");
         try {
-            TicketType updatedTicket = rulesDomainModel.setTicketStatus(ticket);
+            LOG.info("[INFO] Update ticket status in Rules");
+
+            if (ticket == null || ticket.getGuid() == null) {
+                LOG.error("[ERROR] Ticket is null, can not update status ]");
+                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Ticket is null", null);
+            }
+            Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
+
+            entity.setStatus(ticket.getStatus().name());
+            entity.setUpdated(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            entity.setUpdatedBy(ticket.getUpdatedBy());
+
+            rulesDao.updateTicket(entity);
+
+            TicketType updatedTicket = TicketMapper.toTicketType(entity);
+
             // Notify long-polling clients of the update
             ticketUpdateEvent.fire(new NotificationMessage("guid", updatedTicket.getGuid()));
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
@@ -444,8 +583,9 @@ public class RulesServiceBean implements RulesService {
             return updatedTicket;
 
 
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+        } catch (RulesModelException | DaoException | DaoMappingException e) {
+            LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
+            throw new RulesServiceException("[ERROR] Error when updating ticket status. ]", e);
         }
     }
 
@@ -481,15 +621,34 @@ public class RulesServiceBean implements RulesService {
     public AlarmReportType updateAlarmStatus(AlarmReportType alarm) throws RulesServiceException, RulesFaultException {
         LOG.info("[INFO] Update alarm status invoked in service layer");
         try {
-            AlarmReportType updatedAlarm = rulesDomainModel.setAlarmStatus(alarm);
+            LOG.info("[INFO] Update alarm status in Rules");
+
+            AlarmReport entity = rulesDao.getAlarmReportByGuid(alarm.getGuid());
+            if (entity == null) {
+                LOG.error("[ERROR] Alarm is null, can not update status ]");
+                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Alarm is null", null);
+            }
+
+            entity.setStatus(alarm.getStatus().name());
+            entity.setUpdatedBy(alarm.getUpdatedBy());
+            entity.setUpdated(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            if (entity.getRawMovement() != null) {
+                entity.getRawMovement().setActive(!alarm.isInactivatePosition());
+            }
+
+            rulesDao.updateAlarm(entity);
+
+            AlarmReportType updatedAlarm = AlarmMapper.toAlarmReportType(entity);
+
             // Notify long-polling clients of the change
             alarmReportEvent.fire(new NotificationMessage("guid", updatedAlarm.getGuid()));
             // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
             alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
             sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, updatedAlarm.getGuid(), null, alarm.getUpdatedBy());
             return updatedAlarm;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+        } catch (RulesModelException | DaoException | DaoMappingException e) {
+            LOG.error("[ERROR] Error when updating {}", e.getMessage());
+            throw new RulesServiceException("[ERROR] Error when updating. ]", e);
         }
     }
 
@@ -526,18 +685,30 @@ public class RulesServiceBean implements RulesService {
     }
 
     private void createAssetNotSendingTicket(String ruleName, PreviousReportFact fact) throws RulesModelException {
-        TicketType ticket = new TicketType();
+        TicketType ticketType = new TicketType();
 
-        ticket.setAssetGuid(fact.getAssetGuid());
-        ticket.setOpenDate(RulesUtil.dateToString(new Date()));
-        ticket.setRuleName(ruleName);
-        ticket.setRuleGuid(ruleName);
-        ticket.setUpdatedBy("UVMS");
-        ticket.setStatus(TicketStatusType.OPEN);
-        ticket.setMovementGuid(fact.getMovementGuid());
-        ticket.setGuid(UUID.randomUUID().toString());
-        TicketType createdTicket = rulesDomainModel.createTicket(ticket);
-        sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, ticket.getUpdatedBy());
+        ticketType.setAssetGuid(fact.getAssetGuid());
+        ticketType.setOpenDate(RulesUtil.dateToString(new Date()));
+        ticketType.setRuleName(ruleName);
+        ticketType.setRuleGuid(ruleName);
+        ticketType.setUpdatedBy("UVMS");
+        ticketType.setStatus(TicketStatusType.OPEN);
+        ticketType.setMovementGuid(fact.getMovementGuid());
+        ticketType.setGuid(UUID.randomUUID().toString());
+
+        LOG.info("[INFO] Rule Engine creating Ticket");
+        TicketType createdTicket = null;
+        try {
+            Ticket ticket = TicketMapper.toTicketEntity(ticketType);
+            ticket.setTicketCount(1L);
+            Ticket tempTicket = rulesDao.createTicket(ticket);
+            createdTicket = TicketMapper.toTicketType(tempTicket);
+        } catch (DaoException | DaoMappingException e) {
+            LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());
+            throw new RulesModelException("[ERROR] Error when creating ticket. ]", e);
+        }
+
+        sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, ticketType.getUpdatedBy());
         // Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
     }
@@ -546,15 +717,32 @@ public class RulesServiceBean implements RulesService {
     public TicketType updateTicketCount(TicketType ticket) throws RulesServiceException {
         LOG.info("[INFO] Update ticket count invoked in service layer");
         try {
-            TicketType updatedTicket = rulesDomainModel.updateTicketCount(ticket);
+            LOG.info("[INFO] Update ticket count in Rules");
+
+            if (ticket == null || ticket.getGuid() == null) {
+                LOG.error("[ERROR] Ticket is null, can not update status ]");
+                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Ticket is null", null);
+            }
+            Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
+
+            entity.setTicketCount(ticket.getTicketCount());
+            entity.setUpdated(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            entity.setUpdatedBy(ticket.getUpdatedBy());
+
+            rulesDao.updateTicket(entity);
+
+            TicketType updatedTicket = TicketMapper.toTicketType(entity);
+
+            //TicketType updatedTicket = rulesDomainModel.updateTicketCount(ticket);
             // Notify long-polling clients of the update
             ticketUpdateEvent.fire(new NotificationMessage("guid", updatedTicket.getGuid()));
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
             sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), null, ticket.getUpdatedBy());
             return updatedTicket;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+        } catch (RulesModelException | DaoException | DaoMappingException e ) {
+            LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
+            throw new RulesServiceException("[ERROR] Error when updating ticket status. ]", e);
         }
     }
 
@@ -607,6 +795,8 @@ public class RulesServiceBean implements RulesService {
             throw new RulesServiceException(e.getMessage());
         }
     }
+
+    //private
 
     private AlarmQuery mapToOpenAlarmQuery(List<String> alarmGuids) {
         AlarmQuery query = new AlarmQuery();

@@ -87,7 +87,7 @@ public class RulesDomainModelBean implements RulesDomainModel {
     @EJB
     private RulesDao rulesDao;
 
-    @Override
+    /*@Override
     public List<TemplateRuleMapDto> getAllFactTemplatesAndRules() throws RulesModelException {
         List<TemplateRuleMapDto> templateRuleList = new ArrayList<>();
         try {
@@ -104,9 +104,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             throw new RulesModelException(e.getMessage(), e);
         }
         return templateRuleList;
-    }
+    }*/
 
-    @Override
+    /*@Override
     @Transactional(Transactional.TxType.REQUIRED)
     public void updateFailedRules(List<String> failedBrId) throws RulesModelException {
         try {
@@ -114,9 +114,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
         } catch (DaoException e) {
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     @Transactional(Transactional.TxType.REQUIRED)
     public void saveValidationMessages(RawMessageType rawMessageType) throws RulesModelException {
         try {
@@ -135,9 +135,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
         } catch (DaoException e) {
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<ValidationMessageType> getValidationMessagesById(List<String> ids) throws RulesModelException {
         try {
             List<ValidationMessage> validationMessages = rulesDao.getValidationMessagesById(ids);
@@ -145,9 +145,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
         } catch (DaoException e) {
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<ValidationMessageType>  getValidationMessagesByRawMsgGuid(String rawMsgGuid, String type) throws RulesModelException {
         try {
             List<ValidationMessage> validationMessages = rulesDao.getValidationMessagesByRawMsgGuid(rawMsgGuid, type);
@@ -155,18 +155,18 @@ public class RulesDomainModelBean implements RulesDomainModel {
         } catch (DaoException e) {
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public RuleStatusType checkRuleStatus() throws RulesModelException {
         try {
             return rulesDao.checkRuleStatus();
         } catch (DaoException e) {
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     @Transactional(Transactional.TxType.REQUIRED)
     public void updateRuleStatus(RuleStatusType ruleStatusType) throws RulesModelException {
         try {
@@ -177,9 +177,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
         } catch (DaoException e) {
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public CustomRuleType createCustomRule(CustomRuleType customRule) throws RulesModelException {
         LOG.debug("Create in Rules");
         try {
@@ -199,9 +199,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when creating CustomRule ] {}", e.getMessage());
             throw new RulesModelException("Error when creating CustomRule", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public CustomRuleType getByGuid(String guid) throws RulesModelException {
         try {
             CustomRule entity = rulesDao.getCustomRuleByGuid(guid);
@@ -210,9 +210,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting CustomRule by GUID ] {}", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public CustomRuleType updateCustomRule(CustomRuleType customRule) throws RulesModelException {
         LOG.debug("Update custom rule in Rules");
 
@@ -255,9 +255,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when updating custom rule {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when updating custom rule. ]", e);
         }
-    }
+    }*/
 
-    @Override
+   /* @Override
     public CustomRuleType updateCustomRuleSubscription(UpdateSubscriptionType updateSubscriptionType) throws RulesModelException {
         LOG.debug("Update custom rule subscription in Rules");
 
@@ -298,9 +298,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when updating custom rule {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when updating custom rule. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public CustomRuleType deleteCustomRule(String guid) throws RulesModelException {
         try {
             CustomRule entity = rulesDao.getCustomRuleByGuid(guid);
@@ -312,9 +312,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting CustomRule by GUID ] {}", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public CustomRuleType updateLastTriggeredCustomRule(String ruleGuid) throws RulesModelException {
         LOG.info("[INFO] Update custom rule in Rules");
 
@@ -333,10 +333,10 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when updating last triggered on rule {} {}", ruleGuid, e.getMessage());
             throw new RulesModelException("[ERROR] Error when updating last triggered on rule " + ruleGuid + ". ]", e);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public TicketType setTicketStatus(TicketType ticket) throws RulesModelException {
         LOG.info("[INFO] Update ticket status in Rules");
 
@@ -358,9 +358,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when updating ticket status. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public TicketType updateTicketCount(TicketType ticket) throws RulesModelException {
         LOG.info("[INFO] Update ticket count in Rules");
 
@@ -382,9 +382,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when updating ticket status. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public AlarmReportType setAlarmStatus(AlarmReportType alarmReportType) throws RulesModelException {
         LOG.info("[INFO] Update alarm status in Rules");
 
@@ -409,9 +409,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when updating {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when updating. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<CustomRuleType> getRunnableCustomRuleList() throws RulesModelException {
         LOG.debug("Getting list of Custom Rules that are active and not archived (rule engine)");
         try {
@@ -427,9 +427,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting runnable custom rules {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when getting runnable custom rules. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<SanityRuleType> getSanityRuleList() throws RulesModelException {
         LOG.debug("Getting list of Sanity Rules (rule engine)");
         try {
@@ -445,9 +445,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting sanity rules {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when getting sanity rules. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<CustomRuleType> getCustomRulesByUser(String updatedBy) throws RulesModelException {
         LOG.info("[INFO] Getting list of Custom Rules by user");
         try {
@@ -463,9 +463,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting custom rules by user {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when getting custom rules by user. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public CustomRuleListResponseDto getCustomRuleListByQuery(CustomRuleQuery query) throws RulesModelException {
         LOG.info("[INFO] Get list of custom rule from query.");
 
@@ -512,10 +512,10 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting custom rule list by query ] {} ", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
     // Triggered by rule engine
-    @Override
+    /*@Override
     public AlarmReportType createAlarmReport(AlarmReportType alarmReportType) throws RulesModelException {
         LOG.info("[INFO] Rule Engine creating Alarm Report");
         try {
@@ -550,10 +550,10 @@ public class RulesDomainModelBean implements RulesDomainModel {
             throw new RulesModelException("[ERROR] Error when creating alarm report. ]", e);
         }
 
-    }
+    }*/
 
     // Triggered by rule engine
-    @Override
+    /*@Override
     public TicketType createTicket(TicketType ticketType) throws RulesModelException {
         LOG.info("[INFO] Rule Engine creating Ticket");
         try {
@@ -565,7 +565,7 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when creating ticket. ]", e);
         }
-    }
+    }*/
 
     @Override
     public AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException {

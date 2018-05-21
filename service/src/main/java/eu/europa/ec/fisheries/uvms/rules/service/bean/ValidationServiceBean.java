@@ -42,11 +42,23 @@ import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
 import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
+import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.rules.entity.*;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
+import eu.europa.ec.fisheries.uvms.rules.mapper.AlarmMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.SanityRuleMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchFieldMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
@@ -88,6 +100,9 @@ public class ValidationServiceBean implements ValidationService {
     @Inject
     RulesMessageProducer producer;
 
+    @EJB
+    private RulesDao rulesDao;
+
     @Inject
     @TicketEvent
     private Event<NotificationMessage> ticketEvent;
@@ -117,10 +132,18 @@ public class ValidationServiceBean implements ValidationService {
     public List<CustomRuleType> getCustomRulesByUser(String userName) throws RulesServiceException, RulesFaultException {
         LOG.info("Get all custom rules invoked in service layer");
         try {
-            List<CustomRuleType> customRulesByUser = rulesDomainModel.getCustomRulesByUser(userName);
-            return customRulesByUser;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+            LOG.info("[INFO] Getting list of Custom Rules by user");
+            List<CustomRuleType> list = new ArrayList<>();
+            List<CustomRule> entityList = rulesDao.getCustomRulesByUser(userName);
+
+            for (CustomRule entity : entityList) {
+                list.add(CustomRuleMapper.toCustomRuleType(entity));
+            }
+            return list;
+
+        } catch (DaoException | DaoMappingException e) {
+            LOG.error("[ERROR] Error when getting custom rules by user {}", e.getMessage());
+            throw new RulesServiceException("[ERROR] Error when getting custom rules by user. ]", e);
         }
     }
 
@@ -134,10 +157,19 @@ public class ValidationServiceBean implements ValidationService {
     public List<CustomRuleType> getRunnableCustomRules() throws RulesServiceException, RulesFaultException {
         LOG.debug("Get all valid custom rules invoked in service layer");
         try {
-            List<CustomRuleType> runnableCustomRuleList = rulesDomainModel.getRunnableCustomRuleList();
-            return runnableCustomRuleList;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+            LOG.debug("Getting list of Custom Rules that are active and not archived (rule engine)");
+
+            List<CustomRuleType> list = new ArrayList<>();
+            List<CustomRule> entityList = rulesDao.getRunnableCustomRuleList();
+
+            for (CustomRule entity : entityList) {
+                list.add(CustomRuleMapper.toCustomRuleType(entity));
+            }
+
+            return list;
+        } catch (DaoException | DaoMappingException e) {
+            LOG.error("[ERROR] Error when getting runnable custom rules {}", e.getMessage());
+            throw new RulesServiceException("[ERROR] Error when getting runnable custom rules. ]", e);
         }
     }
 
@@ -151,10 +183,19 @@ public class ValidationServiceBean implements ValidationService {
     public List<SanityRuleType> getSanityRules() throws RulesServiceException, RulesFaultException {
         LOG.debug("Get all sanity rules invoked in service layer");
         try {
-            List<SanityRuleType> sanityRuleList = rulesDomainModel.getSanityRuleList();
-            return sanityRuleList;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+            LOG.debug("Getting list of Sanity Rules (rule engine)");
+
+            List<SanityRuleType> list = new ArrayList<>();
+            List<SanityRule> entityList = rulesDao.getSanityRules();
+
+            for (SanityRule entity : entityList) {
+                list.add(SanityRuleMapper.toSanityRuleType(entity));
+            }
+
+            return list;
+        } catch (DaoException | DaoMappingException e) {
+            LOG.error("[ERROR] Error when getting sanity rules {}", e.getMessage());
+            throw new RulesServiceException("[ERROR] Error when getting sanity rules. ]", e);
         }
     }
 
@@ -162,14 +203,54 @@ public class ValidationServiceBean implements ValidationService {
     public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException {
         LOG.info("Get custom rules by query invoked in service layer");
         try {
-            CustomRuleListResponseDto customRuleListByQuery = rulesDomainModel.getCustomRuleListByQuery(query);
+            LOG.info("[INFO] Get list of custom rule from query.");
+
+            if (query == null) {
+                throw new InputArgumentException("Custom rule list query is null");
+            }
+            if (query.getPagination() == null) {
+                throw new InputArgumentException("Pagination in custom rule list query is null");
+            }
+            if (query.getCustomRuleSearchCriteria() == null) {
+                throw new InputArgumentException("No search criteria in custom rule list query");
+            }
+
+            CustomRuleListResponseDto customRuleListByQuery = new CustomRuleListResponseDto();
+            List<CustomRuleType> customRuleList = new ArrayList<>();
+
+            Integer page = query.getPagination().getPage();
+            Integer listSize = query.getPagination().getListSize();
+
+            List<CustomRuleSearchValue> searchKeyValues = CustomRuleSearchFieldMapper.mapSearchField(query.getCustomRuleSearchCriteria());
+
+            String sql = CustomRuleSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
+            String countSql = CustomRuleSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
+
+            Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql, searchKeyValues);
+            List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql, searchKeyValues);
+
+            for (CustomRule entity : customRuleEntityList) {
+                customRuleList.add(CustomRuleMapper.toCustomRuleType(entity));
+            }
+
+            int numberOfPages = (int) (numberMatches / listSize);
+            if (numberMatches % listSize != 0) {
+                numberOfPages += 1;
+            }
+
+            customRuleListByQuery.setTotalNumberOfPages(numberOfPages);
+            customRuleListByQuery.setCurrentPage(query.getPagination().getPage());
+            customRuleListByQuery.setCustomRuleList(customRuleList);
+
+
             GetCustomRuleListByQueryResponse response = new GetCustomRuleListByQueryResponse();
             response.setTotalNumberOfPages(customRuleListByQuery.getTotalNumberOfPages());
             response.setCurrentPage(customRuleListByQuery.getCurrentPage());
             response.getCustomRules().addAll(customRuleListByQuery.getCustomRuleList());
             return response;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+        } catch (RulesModelException | DaoMappingException | DaoException e) {
+            LOG.error("[ERROR] Error when getting custom rule list by query ] {} ", e.getMessage());
+            throw new RulesServiceException(e.getMessage(), e);
         }
     }
 
@@ -243,10 +324,10 @@ public class ValidationServiceBean implements ValidationService {
     private void sendMailToSubscribers(String ruleGuid, String ruleName, MovementFact fact) {
         CustomRuleType customRuleType = null;
         try {
-            // Get email subscribers
-            customRuleType = rulesDomainModel.getByGuid(ruleGuid);
-        } catch (RulesModelException e) {
-            LOG.error("[ Failed to fetch rule when sending email to subscribers! ] {}", e.getMessage());
+            CustomRule entity = rulesDao.getCustomRuleByGuid(ruleGuid);
+            customRuleType = CustomRuleMapper.toCustomRuleType(entity);
+        } catch (DaoException | DaoMappingException e) {
+            LOG.error("[ Failed to fetch rule when sending email to subscribers due to erro when getting CustomRule by GUID! ] {}", e.getMessage());
         }
 
         List<SubscriptionType> subscriptions = customRuleType.getSubscriptions();
@@ -272,8 +353,19 @@ public class ValidationServiceBean implements ValidationService {
 
     private void updateLastTriggered(String ruleGuid) {
         try {
-            rulesDomainModel.updateLastTriggeredCustomRule(ruleGuid);
-        } catch (RulesModelException e) {
+            LOG.info("[INFO] Update custom rule in Rules");
+
+            if (ruleGuid == null) {
+                LOG.error("[ERROR] GUID of Custom Rule is null, returning Exception. ]");
+                throw new InputArgumentException("GUID of Custom Rule is null", null);
+            }
+
+            CustomRule entity = rulesDao.getCustomRuleByGuid(ruleGuid);
+            entity.setTriggered(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            rulesDao.updateCustomRule(entity);
+
+        } catch (RulesModelException | DaoException e) {
+            LOG.error("[ERROR] Error when updating last triggered on rule {} {}", ruleGuid, e.getMessage());
             LOG.warn("[ Failed to update last triggered date for rule {} ]", ruleGuid);
         }
     }
@@ -477,27 +569,34 @@ public class ValidationServiceBean implements ValidationService {
     private void createTicket(String ruleName, String ruleGuid, MovementFact fact) {
         LOG.info("Create ticket invoked in service layer");
         try {
-            TicketType ticket = new TicketType();
+            TicketType ticketType = new TicketType();
 
-            ticket.setAssetGuid(fact.getAssetGuid());
-            ticket.setMobileTerminalGuid(fact.getMobileTerminalGuid());
-            ticket.setChannelGuid(fact.getChannelGuid());
-            ticket.setOpenDate(RulesUtil.dateToString(new Date()));
-            ticket.setRuleName(ruleName);
-            ticket.setRuleGuid(ruleGuid);
-            ticket.setStatus(TicketStatusType.OPEN);
-            ticket.setUpdatedBy("UVMS");
-            ticket.setMovementGuid(fact.getMovementGuid());
-            ticket.setGuid(UUID.randomUUID().toString());
+            ticketType.setAssetGuid(fact.getAssetGuid());
+            ticketType.setMobileTerminalGuid(fact.getMobileTerminalGuid());
+            ticketType.setChannelGuid(fact.getChannelGuid());
+            ticketType.setOpenDate(RulesUtil.dateToString(new Date()));
+            ticketType.setRuleName(ruleName);
+            ticketType.setRuleGuid(ruleGuid);
+            ticketType.setStatus(TicketStatusType.OPEN);
+            ticketType.setUpdatedBy("UVMS");
+            ticketType.setMovementGuid(fact.getMovementGuid());
+            ticketType.setGuid(UUID.randomUUID().toString());
 
             for (int i = 0; i < fact.getAreaTypes().size(); i++) {
                 if ("EEZ".equals(fact.getAreaTypes().get(i))) {
-                    ticket.setRecipient(fact.getAreaCodes().get(i));
+                    ticketType.setRecipient(fact.getAreaCodes().get(i));
                 }
             }
 
-            TicketType createdTicket = rulesDomainModel.createTicket(ticket);
-            String request = RulesDataSourceRequestMapper.mapCreateTicket(ticket);
+            LOG.info("[INFO] Rule Engine creating Ticket");
+
+            Ticket ticket = TicketMapper.toTicketEntity(ticketType);
+            ticket.setTicketCount(1L);
+            Ticket tempTicket = rulesDao.createTicket(ticket);
+            TicketType createdTicket = TicketMapper.toTicketType(tempTicket);
+
+            //TicketType createdTicket = rulesDomainModel.createTicket(ticket);
+            String request = RulesDataSourceRequestMapper.mapCreateTicket(ticketType);
 
             ticketEvent.fire(new NotificationMessage("guid", createdTicket.getGuid()));
 
@@ -505,8 +604,9 @@ public class ValidationServiceBean implements ValidationService {
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
             sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, ticket.getUpdatedBy());
-        } catch (RulesModelMapperException | RulesModelException e) {
+        } catch (RulesModelMapperException | DaoException | DaoMappingException e) {
             LOG.error("[ Failed to create ticket! ] {}", e.getMessage());
+            LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());
         }
     }
 
@@ -533,14 +633,43 @@ public class ValidationServiceBean implements ValidationService {
 
             // Alarm item
             List<AlarmItemType> alarmItems = new ArrayList<>();
-            AlarmItemType alarmItem = new AlarmItemType();
-            alarmItem.setGuid(UUID.randomUUID().toString());
-            alarmItem.setRuleName(ruleName);
-            alarmItem.setRuleGuid(ruleName);
-            alarmItems.add(alarmItem);
+            AlarmItemType alarmItemType = new AlarmItemType();
+            alarmItemType.setGuid(UUID.randomUUID().toString());
+            alarmItemType.setRuleName(ruleName);
+            alarmItemType.setRuleGuid(ruleName);
+            alarmItems.add(alarmItemType);
             alarmReport.getAlarmItem().addAll(alarmItems);
 
-            AlarmReportType createdAlarmReport = rulesDomainModel.createAlarmReport(alarmReport);
+            LOG.info("[INFO] Rule Engine creating Alarm Report");
+
+            String movementGuid = null;
+            if (alarmReport.getRawMovement() != null) {
+                movementGuid = alarmReport.getRawMovement().getGuid();
+            }
+            AlarmReport alarmReportEntity = rulesDao.getOpenAlarmReportByMovementGuid(movementGuid);
+
+            if (alarmReportEntity == null) {
+                alarmReportEntity = new AlarmReport();
+
+                RawMovement rawMovement = AlarmMapper.toRawMovementEntity(alarmReport.getRawMovement());
+                if (rawMovement != null) {
+                    alarmReportEntity.setRawMovement(rawMovement);
+                    rawMovement.setAlarmReport(alarmReportEntity);
+                }
+            }
+
+            AlarmItem alarmItem = AlarmMapper.toAlarmItemEntity(alarmReport.getAlarmItem().get(0));
+            alarmItem.setAlarmReport(alarmReportEntity);
+            alarmReportEntity.getAlarmItemList().add(alarmItem);
+
+            AlarmReport entity = AlarmMapper.toAlarmReportEntity(alarmReportEntity, alarmReport);
+            if (entity.getRawMovement() != null) {
+                entity.getRawMovement().setActive(!alarmReport.isInactivatePosition());
+            }
+
+            AlarmReport createdReport = rulesDao.createAlarmReport(entity);
+
+            AlarmReportType createdAlarmReport = AlarmMapper.toAlarmReportType(createdReport);
 
 
             // Notify long-polling clients of the new alarm report
@@ -550,7 +679,8 @@ public class ValidationServiceBean implements ValidationService {
             alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
 
             sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.CREATE, createdAlarmReport.getGuid(), null, alarmReport.getUpdatedBy());
-        } catch (RulesModelException e) {
+        } catch (DaoException | DaoMappingException e) {
+            LOG.error("[ERROR] Error when creating alarm report {}", e.getMessage());
             LOG.error("[ Failed to create alarm! ] {}", e.getMessage());
         }
     }
