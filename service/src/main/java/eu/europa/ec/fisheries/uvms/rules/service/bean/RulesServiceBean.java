@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.rules.service.bean;
 
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +38,11 @@ import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.*;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.AvailabilityType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionTypeType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscritionOperationType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementSourceType;
@@ -60,13 +65,6 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalModelMapperException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalUnmarshallException;
-import eu.europa.ec.fisheries.uvms.mobileterminal.model.mapper.MobileTerminalModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.mobileterminal.model.mapper.MobileTerminalModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movement.model.exception.ModelMapperException;
-import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementDuplicateException;
-import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementFaultException;
-import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
@@ -77,9 +75,6 @@ import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
-import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.AlarmListResponseDto;
@@ -675,7 +670,7 @@ public class RulesServiceBean implements RulesService {
             throw new RulesModelException("[ERROR] Error when creating ticket. ]", e);
         }
 
-		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, ticket.getUpdatedBy());	        // Notify long-polling clients of the change
+		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, createdTicket.getUpdatedBy());	        // Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
     }
 
