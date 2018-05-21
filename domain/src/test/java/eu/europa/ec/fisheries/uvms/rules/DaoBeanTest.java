@@ -62,12 +62,12 @@ public class DaoBeanTest {
         entity.setGuid(guid);
 
         TypedQuery<CustomRule> query = mock(TypedQuery.class);
-        when(em.createNamedQuery(UvmsConstants.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class)).thenReturn(query);
+        when(em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class)).thenReturn(query);
         CustomRule dummyResult = new CustomRule();
         when(query.getSingleResult()).thenReturn(dummyResult);
 
         CustomRule result = dao.getCustomRuleByGuid(guid);
-        verify(em).createNamedQuery(UvmsConstants.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
+        verify(em).createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
         verify(query).getSingleResult();
         assertSame(dummyResult, result);
     }
@@ -97,14 +97,14 @@ public class DaoBeanTest {
     @Test
     public void testGetCustomRuleList() throws DaoException {
         TypedQuery<CustomRule> query = mock(TypedQuery.class);
-        when(em.createNamedQuery(UvmsConstants.LIST_CUSTOM_RULES_BY_USER, CustomRule.class)).thenReturn(query);
+        when(em.createNamedQuery(CustomRule.LIST_CUSTOM_RULES_BY_USER, CustomRule.class)).thenReturn(query);
 
         List<CustomRule> dummyResult = new ArrayList<CustomRule>();
         when(query.getResultList()).thenReturn(dummyResult);
 
         List<CustomRule> result = dao.getCustomRulesByUser("dummyUser");
 
-        verify(em).createNamedQuery(UvmsConstants.LIST_CUSTOM_RULES_BY_USER, CustomRule.class);
+        verify(em).createNamedQuery(CustomRule.LIST_CUSTOM_RULES_BY_USER, CustomRule.class);
         verify(query).getResultList();
         assertSame(dummyResult, result);
     }

@@ -57,7 +57,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     public CustomRule getCustomRuleByGuid(String guid) throws DaoException {
 
         try {
-            TypedQuery<CustomRule> query = em.createNamedQuery(UvmsConstants.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
+            TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -73,7 +73,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public Ticket getTicketByGuid(String guid) throws DaoException {
         try {
-            TypedQuery<Ticket> query = em.createNamedQuery(UvmsConstants.FIND_TICKET_BY_GUID, Ticket.class);
+            TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_GUID, Ticket.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -88,7 +88,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<Ticket> getTicketsByMovements(List<String> movements) throws DaoException {
         try {
-            TypedQuery<Ticket> query = em.createNamedQuery(UvmsConstants.FIND_TICKETS_BY_MOVEMENTS, Ticket.class);
+            TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKETS_BY_MOVEMENTS, Ticket.class);
             query.setParameter("movements", movements);
             return query.getResultList();
         } catch (NoResultException e) {
@@ -104,7 +104,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public long countTicketListByMovements(List<String> movements) throws DaoException {
         try {
-            TypedQuery<Long> query = em.createNamedQuery(UvmsConstants.COUNT_TICKETS_BY_MOVEMENTS, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_TICKETS_BY_MOVEMENTS, Long.class);
             query.setParameter("movements", movements);
             return query.getSingleResult();
         } catch (Exception e) {
@@ -117,7 +117,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<String> getCustomRulesForTicketsByUser(String owner) throws DaoException {
         try {
-            TypedQuery<String> query = em.createNamedQuery(UvmsConstants.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, String.class);
+            TypedQuery<String> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, String.class);
             query.setParameter("owner", owner);
             return query.getResultList();
         } catch (NoResultException e) {
@@ -131,7 +131,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public long getNumberOfOpenAlarms() throws DaoException {
         try {
-            TypedQuery<Long> query = em.createNamedQuery(UvmsConstants.COUNT_OPEN_ALARMS, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(AlarmReport.COUNT_OPEN_ALARMS, Long.class);
             return query.getSingleResult();
         } catch (Exception e) {
             LOG.error("[ Error when getting counting open alarms. ] {}", e.getMessage());
@@ -142,7 +142,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public long getNumberOfOpenTickets(List<String> validRuleGuids) throws DaoException {
         try {
-            TypedQuery<Long> query = em.createNamedQuery(UvmsConstants.COUNT_OPEN_TICKETS, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_OPEN_TICKETS, Long.class);
             query.setParameter("validRuleGuids", validRuleGuids);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -156,7 +156,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public AlarmReport getAlarmReportByGuid(String guid) throws DaoException {
         try {
-            TypedQuery<AlarmReport> query = em.createNamedQuery(UvmsConstants.FIND_ALARM_BY_GUID, AlarmReport.class);
+            TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_ALARM_BY_GUID, AlarmReport.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -244,7 +244,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<CustomRule> getRunnableCustomRuleList() throws DaoException {
         try {
-            TypedQuery<CustomRule> query = em.createNamedQuery(UvmsConstants.GET_RUNNABLE_CUSTOM_RULES, CustomRule.class);
+            TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.GET_RUNNABLE_CUSTOM_RULES, CustomRule.class);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
             LOG.error("[ Error when getting runnable custom rules ] {}", e.getMessage());
@@ -258,7 +258,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<SanityRule> getSanityRules() throws DaoException {
         try {
-            TypedQuery<SanityRule> query = em.createNamedQuery(UvmsConstants.FIND_ALL_SANITY_RULES, SanityRule.class);
+            TypedQuery<SanityRule> query = em.createNamedQuery(SanityRule.FIND_ALL_SANITY_RULES, SanityRule.class);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
             LOG.error("[ Error when getting sanity rules ] {}", e.getMessage());
@@ -272,7 +272,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<CustomRule> getCustomRulesByUser(String updatedBy) throws DaoException {
         try {
-            TypedQuery<CustomRule> query = em.createNamedQuery(UvmsConstants.LIST_CUSTOM_RULES_BY_USER, CustomRule.class);
+            TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.LIST_CUSTOM_RULES_BY_USER, CustomRule.class);
             query.setParameter("updatedBy", updatedBy);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -312,7 +312,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     public AlarmReport getOpenAlarmReportByMovementGuid(String guid) throws DaoException {
         AlarmReport errorReport;
         try {
-            TypedQuery<AlarmReport> query = em.createNamedQuery(UvmsConstants.FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID, AlarmReport.class);
+            TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID, AlarmReport.class);
             query.setParameter(MOVEMENT_GUID_PARAMETER, guid);
             errorReport = query.getSingleResult();
         } catch (NoResultException e) {
@@ -443,7 +443,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<PreviousReport> getPreviousReportList() throws DaoException {
         try {
-            TypedQuery<PreviousReport> query = em.createNamedQuery(UvmsConstants.GET_ALL_PREVIOUS_REPORTS, PreviousReport.class);
+            TypedQuery<PreviousReport> query = em.createNamedQuery(PreviousReport.GET_ALL_PREVIOUS_REPORTS, PreviousReport.class);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
             LOG.error("[ Error when getting list of previous reports ] {}", e.getMessage());
@@ -459,7 +459,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public Ticket getTicketByAssetAndRule(String assetGuid, String ruleGuid) throws DaoException {
         try {
-            TypedQuery<Ticket> query = em.createNamedQuery(UvmsConstants.FIND_TICKET_BY_ASSET_AND_RULE, Ticket.class);
+            TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_ASSET_AND_RULE, Ticket.class);
             query.setParameter("assetGuid", assetGuid);
             query.setParameter("ruleGuid", ruleGuid);
             return query.getSingleResult();
@@ -479,7 +479,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public AlarmReport getAlarmReportByAssetAndRule(String assetGuid, String ruleGuid) throws DaoException {
         try {
-            TypedQuery<AlarmReport> query = em.createNamedQuery(UvmsConstants.FIND_ALARM_REPORT_BY_ASSET_GUID_AND_RULE_GUID, AlarmReport.class);
+            TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_ALARM_REPORT_BY_ASSET_GUID_AND_RULE_GUID, AlarmReport.class);
             query.setParameter("assetGuid", assetGuid);
             query.setParameter("ruleGuid", ruleGuid);
             return query.getSingleResult();
@@ -497,7 +497,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public PreviousReport getPreviousReportByAssetGuid(String assetGuid) {
         try {
-            TypedQuery<PreviousReport> query = em.createNamedQuery(UvmsConstants.FIND_PREVIOUS_REPORT_BY_ASSET_GUID, PreviousReport.class);
+            TypedQuery<PreviousReport> query = em.createNamedQuery(PreviousReport.FIND_PREVIOUS_REPORT_BY_ASSET_GUID, PreviousReport.class);
             query.setParameter("assetGuid", assetGuid);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -524,7 +524,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public long getNumberOfTicketsByRuleGuid(String ruleGuid) throws DaoException {
         try {
-            TypedQuery<Long> query = em.createNamedQuery(UvmsConstants.COUNT_ASSETS_NOT_SENDING, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_ASSETS_NOT_SENDING, Long.class);
             query.setParameter("ruleGuid", ruleGuid);
             return query.getSingleResult();
         } catch (Exception e) {

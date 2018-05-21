@@ -11,6 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.entity;
 
+import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,22 +25,21 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
-import java.util.Date;
-
-import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
 
 //@formatter:off
 @Entity
 @Table(name = "previousreport")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = UvmsConstants.GET_ALL_PREVIOUS_REPORTS, query = "SELECT pr FROM PreviousReport pr"),
-        @NamedQuery(name = UvmsConstants.FIND_PREVIOUS_REPORT_BY_ASSET_GUID, query = "SELECT pr FROM PreviousReport pr WHERE assetGuid = :assetGuid")
+        @NamedQuery(name = PreviousReport.GET_ALL_PREVIOUS_REPORTS, query = "SELECT pr FROM PreviousReport pr"),
+        @NamedQuery(name = PreviousReport.FIND_PREVIOUS_REPORT_BY_ASSET_GUID, query = "SELECT pr FROM PreviousReport pr WHERE pr.assetGuid = :assetGuid")
 })
 //@formatter:on
 public class PreviousReport implements Serializable {
 
+    public static final String GET_ALL_PREVIOUS_REPORTS = "PreviousReport.findAll";
+    public static final String FIND_PREVIOUS_REPORT_BY_ASSET_GUID = "PreviousReport.findByAssetGuid";
+    
     private static final long serialVersionUID = 1L;
 
     @Id

@@ -11,6 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.entity;
 
+import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,21 +25,19 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
-import java.util.Date;
-
-import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
 
 //@formatter:off
 @Entity
 @Table(name = "sanityrule")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = UvmsConstants.FIND_ALL_SANITY_RULES, query = "SELECT r FROM SanityRule r") // for rule engine
+        @NamedQuery(name = SanityRule.FIND_ALL_SANITY_RULES, query = "SELECT r FROM SanityRule r") // for rule engine
 })
 //@formatter:on
 public class SanityRule implements Serializable {
 
+    public static final String FIND_ALL_SANITY_RULES = "SanityRule.findAll";
+    
     private static final long serialVersionUID = 1L;
 
     @Id
