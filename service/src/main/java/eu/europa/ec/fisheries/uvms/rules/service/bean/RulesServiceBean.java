@@ -36,7 +36,6 @@ import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.remote.RulesDomainModel;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelAttribute;
@@ -123,9 +122,6 @@ public class RulesServiceBean implements RulesService {
     @EJB
     private RulesValidator rulesValidator;
 
-    @EJB
-    private RulesDomainModel rulesDomainModel;
-    
     @Inject
     private UserServiceBean userService;
     
@@ -269,7 +265,7 @@ public class RulesServiceBean implements RulesService {
                 }
             }
 
-            CustomRuleType customRule = updateCustomRuleFromRDMB(oldCustomRule);
+            CustomRuleType customRule = internalUpdateCustomRule(oldCustomRule);
             rulesValidator.updateCustomRules();
             auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, customRule.getGuid(), null, oldCustomRule.getUpdatedBy());
             return customRule;
@@ -278,8 +274,7 @@ public class RulesServiceBean implements RulesService {
         }
     }
     //Copy from RulesDomainModelBean to remove that class
-    //TODO: RENAME FOR GODS SAKE
-    private CustomRuleType updateCustomRuleFromRDMB(CustomRuleType customRule)  throws RulesModelException {
+    private CustomRuleType internalUpdateCustomRule(CustomRuleType customRule)  throws RulesModelException {
         LOG.debug("Update custom rule in Rules");
 
         if (customRule == null) {
@@ -332,7 +327,7 @@ public class RulesServiceBean implements RulesService {
     public CustomRuleType updateCustomRule(CustomRuleType oldCustomRule) throws RulesServiceException, RulesFaultException {
         LOG.info("[INFO] Update custom rule invoked in service layer by timer");
         try {
-            CustomRuleType updatedCustomRule = updateCustomRuleFromRDMB(oldCustomRule);
+            CustomRuleType updatedCustomRule = internalUpdateCustomRule(oldCustomRule);
             auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid(), null, oldCustomRule.getUpdatedBy());
             return updatedCustomRule;
         } catch (RulesModelException e) {

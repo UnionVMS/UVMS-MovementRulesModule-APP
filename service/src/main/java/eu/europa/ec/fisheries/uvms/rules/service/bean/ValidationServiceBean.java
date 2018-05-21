@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import eu.europa.ec.fisheries.remote.RulesDomainModel;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
@@ -119,8 +118,6 @@ public class ValidationServiceBean implements ValidationService {
     @TicketCountEvent
     private Event<NotificationMessage> ticketCountEvent;
 
-    @EJB
-    private RulesDomainModel rulesDomainModel;
 
     /**
      * {@inheritDoc}

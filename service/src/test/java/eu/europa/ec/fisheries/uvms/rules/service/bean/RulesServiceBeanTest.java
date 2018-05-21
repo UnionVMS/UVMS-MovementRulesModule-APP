@@ -37,7 +37,6 @@ import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByQueryRespons
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.remote.RulesDomainModel;
 import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
@@ -86,8 +85,6 @@ public class RulesServiceBeanTest {
     RulesServiceBean rulesServiceBean;
     @Mock
     TextMessage response;
-    @Mock
-    private RulesDomainModel rulesDomainModel;
 
     @Before
     public void initMocks() {
