@@ -11,30 +11,43 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.dao.bean;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.ejb.Stateless;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.persistence.TransactionRequiredException;
+import javax.persistence.TypedQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.RuleStatusType;
-import eu.europa.ec.fisheries.uvms.commons.service.exception.ServiceException;
-import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
-import eu.europa.ec.fisheries.uvms.rules.dao.Dao;
 import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.rules.entity.*;
+import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
+import eu.europa.ec.fisheries.uvms.rules.entity.RawMessage;
+import eu.europa.ec.fisheries.uvms.rules.entity.RuleStatus;
+import eu.europa.ec.fisheries.uvms.rules.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.Template;
+import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.rules.entity.ValidationMessage;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ejb.Stateless;
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Stateless
-public class RulesDaoBean extends Dao implements RulesDao {
+public class RulesDaoBean implements RulesDao {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RulesDaoBean.class);
-    private static final String MOVEMENT_GUID_PARAMETER = "movementGuid";
+    private static final Logger LOG = LoggerFactory.getLogger(RulesDaoBean.class);
+    
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public CustomRule createCustomRule(CustomRule entity) throws DaoException {
@@ -57,7 +70,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     public CustomRule getCustomRuleByGuid(String guid) throws DaoException {
 
         try {
-            TypedQuery<CustomRule> query = em.createNamedQuery(UvmsConstants.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
+            TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -73,7 +86,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public Ticket getTicketByGuid(String guid) throws DaoException {
         try {
-            TypedQuery<Ticket> query = em.createNamedQuery(UvmsConstants.FIND_TICKET_BY_GUID, Ticket.class);
+            TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_GUID, Ticket.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -88,7 +101,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<Ticket> getTicketsByMovements(List<String> movements) throws DaoException {
         try {
-            TypedQuery<Ticket> query = em.createNamedQuery(UvmsConstants.FIND_TICKETS_BY_MOVEMENTS, Ticket.class);
+            TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKETS_BY_MOVEMENTS, Ticket.class);
             query.setParameter("movements", movements);
             return query.getResultList();
         } catch (NoResultException e) {
@@ -104,7 +117,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public long countTicketListByMovements(List<String> movements) throws DaoException {
         try {
-            TypedQuery<Long> query = em.createNamedQuery(UvmsConstants.COUNT_TICKETS_BY_MOVEMENTS, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_TICKETS_BY_MOVEMENTS, Long.class);
             query.setParameter("movements", movements);
             return query.getSingleResult();
         } catch (Exception e) {
@@ -117,7 +130,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<String> getCustomRulesForTicketsByUser(String owner) throws DaoException {
         try {
-            TypedQuery<String> query = em.createNamedQuery(UvmsConstants.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, String.class);
+            TypedQuery<String> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, String.class);
             query.setParameter("owner", owner);
             return query.getResultList();
         } catch (NoResultException e) {
@@ -131,7 +144,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public long getNumberOfOpenAlarms() throws DaoException {
         try {
-            TypedQuery<Long> query = em.createNamedQuery(UvmsConstants.COUNT_OPEN_ALARMS, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(AlarmReport.COUNT_OPEN_ALARMS, Long.class);
             return query.getSingleResult();
         } catch (Exception e) {
             LOG.error("[ Error when getting counting open alarms. ] {}", e.getMessage());
@@ -142,7 +155,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public long getNumberOfOpenTickets(List<String> validRuleGuids) throws DaoException {
         try {
-            TypedQuery<Long> query = em.createNamedQuery(UvmsConstants.COUNT_OPEN_TICKETS, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_OPEN_TICKETS, Long.class);
             query.setParameter("validRuleGuids", validRuleGuids);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -156,7 +169,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public AlarmReport getAlarmReportByGuid(String guid) throws DaoException {
         try {
-            TypedQuery<AlarmReport> query = em.createNamedQuery(UvmsConstants.FIND_ALARM_BY_GUID, AlarmReport.class);
+            TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_ALARM_BY_GUID, AlarmReport.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -244,7 +257,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<CustomRule> getRunnableCustomRuleList() throws DaoException {
         try {
-            TypedQuery<CustomRule> query = em.createNamedQuery(UvmsConstants.GET_RUNNABLE_CUSTOM_RULES, CustomRule.class);
+            TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.GET_RUNNABLE_CUSTOM_RULES, CustomRule.class);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
             LOG.error("[ Error when getting runnable custom rules ] {}", e.getMessage());
@@ -258,7 +271,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<SanityRule> getSanityRules() throws DaoException {
         try {
-            TypedQuery<SanityRule> query = em.createNamedQuery(UvmsConstants.FIND_ALL_SANITY_RULES, SanityRule.class);
+            TypedQuery<SanityRule> query = em.createNamedQuery(SanityRule.FIND_ALL_SANITY_RULES, SanityRule.class);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
             LOG.error("[ Error when getting sanity rules ] {}", e.getMessage());
@@ -272,7 +285,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<CustomRule> getCustomRulesByUser(String updatedBy) throws DaoException {
         try {
-            TypedQuery<CustomRule> query = em.createNamedQuery(UvmsConstants.LIST_CUSTOM_RULES_BY_USER, CustomRule.class);
+            TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.LIST_CUSTOM_RULES_BY_USER, CustomRule.class);
             query.setParameter("updatedBy", updatedBy);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -312,8 +325,8 @@ public class RulesDaoBean extends Dao implements RulesDao {
     public AlarmReport getOpenAlarmReportByMovementGuid(String guid) throws DaoException {
         AlarmReport errorReport;
         try {
-            TypedQuery<AlarmReport> query = em.createNamedQuery(UvmsConstants.FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID, AlarmReport.class);
-            query.setParameter(MOVEMENT_GUID_PARAMETER, guid);
+            TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID, AlarmReport.class);
+            query.setParameter("movementGuid", guid);
             errorReport = query.getSingleResult();
         } catch (NoResultException e) {
             LOG.debug("Fist position report");
@@ -443,7 +456,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public List<PreviousReport> getPreviousReportList() throws DaoException {
         try {
-            TypedQuery<PreviousReport> query = em.createNamedQuery(UvmsConstants.GET_ALL_PREVIOUS_REPORTS, PreviousReport.class);
+            TypedQuery<PreviousReport> query = em.createNamedQuery(PreviousReport.GET_ALL_PREVIOUS_REPORTS, PreviousReport.class);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
             LOG.error("[ Error when getting list of previous reports ] {}", e.getMessage());
@@ -459,7 +472,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public Ticket getTicketByAssetAndRule(String assetGuid, String ruleGuid) throws DaoException {
         try {
-            TypedQuery<Ticket> query = em.createNamedQuery(UvmsConstants.FIND_TICKET_BY_ASSET_AND_RULE, Ticket.class);
+            TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_ASSET_AND_RULE, Ticket.class);
             query.setParameter("assetGuid", assetGuid);
             query.setParameter("ruleGuid", ruleGuid);
             return query.getSingleResult();
@@ -479,7 +492,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public AlarmReport getAlarmReportByAssetAndRule(String assetGuid, String ruleGuid) throws DaoException {
         try {
-            TypedQuery<AlarmReport> query = em.createNamedQuery(UvmsConstants.FIND_ALARM_REPORT_BY_ASSET_GUID_AND_RULE_GUID, AlarmReport.class);
+            TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_ALARM_REPORT_BY_ASSET_GUID_AND_RULE_GUID, AlarmReport.class);
             query.setParameter("assetGuid", assetGuid);
             query.setParameter("ruleGuid", ruleGuid);
             return query.getSingleResult();
@@ -497,7 +510,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public PreviousReport getPreviousReportByAssetGuid(String assetGuid) {
         try {
-            TypedQuery<PreviousReport> query = em.createNamedQuery(UvmsConstants.FIND_PREVIOUS_REPORT_BY_ASSET_GUID, PreviousReport.class);
+            TypedQuery<PreviousReport> query = em.createNamedQuery(PreviousReport.FIND_PREVIOUS_REPORT_BY_ASSET_GUID, PreviousReport.class);
             query.setParameter("assetGuid", assetGuid);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -524,7 +537,7 @@ public class RulesDaoBean extends Dao implements RulesDao {
     @Override
     public long getNumberOfTicketsByRuleGuid(String ruleGuid) throws DaoException {
         try {
-            TypedQuery<Long> query = em.createNamedQuery(UvmsConstants.COUNT_ASSETS_NOT_SENDING, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_ASSETS_NOT_SENDING, Long.class);
             query.setParameter("ruleGuid", ruleGuid);
             return query.getSingleResult();
         } catch (Exception e) {
@@ -535,105 +548,37 @@ public class RulesDaoBean extends Dao implements RulesDao {
 
     @Override
     public List<Template> getAllFactTemplates() throws DaoException {
-        try {
-            return factTemplateDao.listAllEnabled();
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
+        return null;
     }
 
     @Override
     public void updatedFailedRules(List<String> brIds) throws DaoException {
-        try {
-            failedRuleDao.updateFailedRules(brIds);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
     }
 
     @Override
     public void saveValidationMessages(List<RawMessage> rawMessages) throws DaoException {
-        try {
-            rawMessageDao.saveRawMessages(rawMessages);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
     }
 
     @Override
     public List<ValidationMessage> getValidationMessagesById(List<String> ids) throws DaoException {
-        try {
-            return validationMessageDao.getValidationMessagesById(ids);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
+        return null;
     }
 
     @Override
     public List<ValidationMessage> getValidationMessagesByRawMsgGuid(String rawMsgGuid, String type) throws DaoException {
-        try {
-            return validationMessageDao.getValidationMessagesByRawMessageGuid(rawMsgGuid, type);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
+        return null;
     }
 
     @Override
     public RuleStatusType checkRuleStatus() throws DaoException {
-        try {
-            return ruleStatusDao.findRuleStatus();
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
+        return null;
     }
 
     @Override
     public void createRuleStatus(RuleStatus ruleStatus) throws DaoException {
-        try {
-            ruleStatusDao.createRuleStatus(ruleStatus);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
     }
 
     @Override
     public void deleteRuleStatus() throws DaoException {
-        try {
-            ruleStatusDao.deleteRuleStatus();
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
-    }
-
-    public List<String> getFishingGearCharacteristicCodes(String fishingGearTypeCode) throws DaoException {
-        try {
-            return fishingGearTypeCharacteristicDao.getFishingGearCharacteristicCodes(fishingGearTypeCode);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
-    }
-
-    public List<String> getFishingGearCharacteristicCodes(String fishingGearTypeCode, boolean onlyMandatory) throws DaoException {
-        try {
-            return fishingGearTypeCharacteristicDao.getFishingGearCharacteristicCodes(fishingGearTypeCode, onlyMandatory);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
-    }
-
-    public List<String> getAllFishingGearTypeCodes() throws DaoException {
-        try {
-            return fishingGearTypeCharacteristicDao.getAllFishingGearTypeCodes();
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
-    }
-
-    public List<FishingGearTypeCharacteristic> getAllFishingGearTypeCharacteristics() throws DaoException {
-        try {
-            return fishingGearTypeCharacteristicDao.findAllEntity(FishingGearTypeCharacteristic.class);
-        } catch (ServiceException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
     }
 }

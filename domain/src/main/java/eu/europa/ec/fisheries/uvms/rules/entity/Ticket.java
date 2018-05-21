@@ -12,6 +12,9 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 
 package eu.europa.ec.fisheries.uvms.rules.entity;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,27 +27,29 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.UUID;
-
-import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
 import lombok.Data;
 
 @Entity
 @Table(name = "ticket")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = UvmsConstants.FIND_TICKET_BY_GUID, query = "SELECT t FROM Ticket t WHERE t.guid = :guid"),
-        @NamedQuery(name = UvmsConstants.FIND_TICKET_BY_ASSET_AND_RULE, query = "SELECT t FROM Ticket t WHERE t.assetGuid = :assetGuid and status <> 'CLOSED' and ruleGuid = :ruleGuid"),
-        @NamedQuery(name = UvmsConstants.COUNT_OPEN_TICKETS, query = "SELECT count(t) FROM Ticket t where t.status = 'OPEN' AND t.ruleGuid IN :validRuleGuids"),
-        @NamedQuery(name = UvmsConstants.FIND_TICKETS_BY_MOVEMENTS, query = "SELECT t FROM Ticket t where t.movementGuid IN :movements"),
-        @NamedQuery(name = UvmsConstants.COUNT_TICKETS_BY_MOVEMENTS, query = "SELECT count(t) FROM Ticket t where t.movementGuid IN :movements"),
-        @NamedQuery(name = UvmsConstants.COUNT_ASSETS_NOT_SENDING, query = "SELECT count(t) FROM Ticket t where t.ruleGuid = :ruleGuid")
+        @NamedQuery(name = Ticket.FIND_TICKET_BY_GUID, query = "SELECT t FROM Ticket t WHERE t.guid = :guid"),
+        @NamedQuery(name = Ticket.FIND_TICKET_BY_ASSET_AND_RULE, query = "SELECT t FROM Ticket t WHERE t.assetGuid = :assetGuid and t.status <> 'CLOSED' and t.ruleGuid = :ruleGuid"),
+        @NamedQuery(name = Ticket.FIND_TICKETS_BY_MOVEMENTS, query = "SELECT t FROM Ticket t where t.movementGuid IN :movements"),
+        @NamedQuery(name = Ticket.COUNT_OPEN_TICKETS, query = "SELECT count(t) FROM Ticket t where t.status = 'OPEN' AND t.ruleGuid IN :validRuleGuids"),
+        @NamedQuery(name = Ticket.COUNT_TICKETS_BY_MOVEMENTS, query = "SELECT count(t) FROM Ticket t where t.movementGuid IN :movements"),
+        @NamedQuery(name = Ticket.COUNT_ASSETS_NOT_SENDING, query = "SELECT count(t) FROM Ticket t where t.ruleGuid = :ruleGuid")
 })
 @Data
 public class Ticket implements Serializable {
 
+    public static final String FIND_TICKET_BY_GUID = "Ticket.findByGuid";
+    public static final String FIND_TICKET_BY_ASSET_AND_RULE = "Ticket.findByAssetGuid";
+    public static final String FIND_TICKETS_BY_MOVEMENTS = "Ticket.findByMovementGuids";
+    public static final String COUNT_OPEN_TICKETS = "Ticket.countOpenTickets";
+    public static final String COUNT_TICKETS_BY_MOVEMENTS = "Ticket.countByMovementGuids";
+    public static final String COUNT_ASSETS_NOT_SENDING = "Ticket.countAssetsNotSending";
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ticket_id")

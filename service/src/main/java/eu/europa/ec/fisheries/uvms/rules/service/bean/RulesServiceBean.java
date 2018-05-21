@@ -11,14 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.service.bean;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
 import java.nio.file.AccessDeniedException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -27,32 +20,23 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.remote.RulesDomainModel;
-import eu.europa.ec.fisheries.schema.config.module.v1.SettingsListResponse;
-import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelAttribute;
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelType;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListCriteria;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalListQuery;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalSearchCriteria;
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalType;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.SearchKey;
-import eu.europa.ec.fisheries.schema.movement.module.v1.CreateMovementResponse;
-import eu.europa.ec.fisheries.schema.movement.search.v1.MovementMapResponseType;
-import eu.europa.ec.fisheries.schema.movement.search.v1.MovementQuery;
-import eu.europa.ec.fisheries.schema.movement.search.v1.RangeCriteria;
-import eu.europa.ec.fisheries.schema.movement.search.v1.RangeKeyType;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.*;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketsAndRulesByMovementsResponse;
@@ -71,16 +55,9 @@ import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.rules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
-import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelValidationException;
-import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
-import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.config.model.mapper.ModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalModelMapperException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalUnmarshallException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.mapper.MobileTerminalModuleRequestMapper;
@@ -110,9 +87,14 @@ import eu.europa.ec.fisheries.uvms.rules.model.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.AssetServiceBean;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.AuditServiceBean;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.ConfigServiceBean;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.ExchangeServiceBean;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.MobileTerminalServiceBean;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.MovementServiceBean;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.PreviousReportFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
@@ -126,51 +108,49 @@ import eu.europa.ec.fisheries.uvms.rules.service.event.TicketUpdateEvent;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.AssetAssetIdMapper;
-import eu.europa.ec.fisheries.uvms.rules.service.mapper.ExchangeMovementMapper;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.MobileTerminalMapper;
-import eu.europa.ec.fisheries.uvms.rules.service.mapper.MovementBaseTypeMapper;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.MovementFactMapper;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.RawMovementFactMapper;
-import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleRequestMapper;
 import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
-import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
-import eu.europa.ec.fisheries.wsdl.asset.types.AssetListCriteria;
-import eu.europa.ec.fisheries.wsdl.asset.types.AssetListCriteriaPair;
-import eu.europa.ec.fisheries.wsdl.asset.types.AssetListPagination;
-import eu.europa.ec.fisheries.wsdl.asset.types.AssetListQuery;
-import eu.europa.ec.fisheries.wsdl.asset.types.ConfigSearchField;
-import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
-import eu.europa.ec.fisheries.wsdl.user.module.GetUserContextResponse;
 import eu.europa.ec.fisheries.wsdl.user.types.Feature;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
-import eu.europa.ec.fisheries.wsdl.user.types.UserContextId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 @Stateless
 public class RulesServiceBean implements RulesService {
 
-    static final double VICINITY_RADIUS = 0.05;
-    static final long TWENTYFOUR_HOURS_IN_MILLISEC = 86400000;
-    private final static Logger LOG = LoggerFactory.getLogger(RulesServiceBean.class);
-
-    @EJB
-    private RulesResponseConsumer consumer;
-
-    @Inject
-    private RulesMessageProducer producer;
+    private static final Logger LOG = LoggerFactory.getLogger(RulesServiceBean.class);
 
     @EJB
     private RulesValidator rulesValidator;
 
     @EJB
     private RulesDomainModel rulesDomainModel;
+    
+    @Inject
+    private UserServiceBean userService;
+    
+    @Inject
+    private AssetServiceBean assetService;
+    
+    @Inject
+    private MobileTerminalServiceBean mobileTerminalService;
 
     @EJB
     private RulesDao rulesDao;
 
+    @Inject
+    private MovementServiceBean movementService;
+    
+    @Inject
+    private ExchangeServiceBean exchangeService;
+    
+    @Inject
+    private AuditServiceBean auditService;
+    
+    @Inject
+    private ConfigServiceBean configService;
+    
     @Inject
     @AlarmReportEvent
     private Event<NotificationMessage> alarmReportEvent;
@@ -191,19 +171,6 @@ public class RulesServiceBean implements RulesService {
     @TicketCountEvent
     private Event<NotificationMessage> ticketCountEvent;
 
-    private String getOrganisationName(String userName) throws eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException, MessageException, RulesModelMarshallException {
-        String userRequest = UserModuleRequestMapper.mapToGetContactDetailsRequest(userName);
-        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER);
-        TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
-        GetContactDetailResponse userResponse = JAXBMarshaller.unmarshallTextMessage(userMessage, GetContactDetailResponse.class);
-
-        if (userResponse != null && userResponse.getContactDetails() != null) {
-            return userResponse.getContactDetails().getOrganisationName();
-        } else {
-            return null;
-        }
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -216,14 +183,14 @@ public class RulesServiceBean implements RulesService {
         LOG.info("[INFO] Create invoked in service layer");
         try {
             // Get organisation of user
-            String organisationName = getOrganisationName(customRule.getUpdatedBy());
+            String organisationName = userService.getOrganisationName(customRule.getUpdatedBy());
             if (organisationName != null) {
                 customRule.setOrganisation(organisationName);
             } else {
                 LOG.warn("User {} is not connected to any organisation!", customRule.getUpdatedBy());
             }
             if (customRule.getAvailability().equals(AvailabilityType.GLOBAL)) {
-                UserContext userContext = getFullUserContext(customRule.getUpdatedBy(), applicationName);
+                UserContext userContext = userService.getFullUserContext(customRule.getUpdatedBy(), applicationName);
                 if (!hasFeature(userContext, featureName)) {
                     throw new AccessDeniedException("Forbidden access");
                 }
@@ -251,7 +218,7 @@ public class RulesServiceBean implements RulesService {
             }
             // TODO: Rewrite so rules are loaded when changed
             rulesValidator.updateCustomRules();
-            sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, createdRule.getGuid(), null, customRule.getUpdatedBy());
+            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, createdRule.getGuid(), null, customRule.getUpdatedBy());
             return createdRule;
 
         } catch (RulesModelMapperException | MessageException | RulesModelException | eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException e) {
@@ -289,7 +256,7 @@ public class RulesServiceBean implements RulesService {
         LOG.info("[INFO] Update custom rule invoked in service layer");
         try {
             // Get organisation of user
-            String organisationName = getOrganisationName(oldCustomRule.getUpdatedBy());
+            String organisationName = userService.getOrganisationName(oldCustomRule.getUpdatedBy());
             if (organisationName != null) {
                 oldCustomRule.setOrganisation(organisationName);
             } else {
@@ -297,7 +264,7 @@ public class RulesServiceBean implements RulesService {
             }
 
             if (oldCustomRule.getAvailability().equals(AvailabilityType.GLOBAL)) {
-                UserContext userContext = getFullUserContext(oldCustomRule.getUpdatedBy(), applicationName);
+                UserContext userContext = userService.getFullUserContext(oldCustomRule.getUpdatedBy(), applicationName);
                 if (!hasFeature(userContext, featureName)) {
                     throw new AccessDeniedException("Forbidden access");
                 }
@@ -305,7 +272,7 @@ public class RulesServiceBean implements RulesService {
 
             CustomRuleType customRule = updateCustomRuleFromRDMB(oldCustomRule);
             rulesValidator.updateCustomRules();
-            sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, customRule.getGuid(), null, oldCustomRule.getUpdatedBy());
+            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, customRule.getGuid(), null, oldCustomRule.getUpdatedBy());
             return customRule;
         } catch (RulesModelMapperException | MessageException | eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException | RulesModelException e) {
             throw new RulesServiceException(e.getMessage());
@@ -367,7 +334,7 @@ public class RulesServiceBean implements RulesService {
         LOG.info("[INFO] Update custom rule invoked in service layer by timer");
         try {
             CustomRuleType updatedCustomRule = updateCustomRuleFromRDMB(oldCustomRule);
-            sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid(), null, oldCustomRule.getUpdatedBy());
+            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid(), null, oldCustomRule.getUpdatedBy());
             return updatedCustomRule;
         } catch (RulesModelException e) {
             throw new RulesServiceException(e.getMessage());
@@ -433,10 +400,10 @@ public class RulesServiceBean implements RulesService {
 
             if (SubscritionOperationType.ADD.equals(updateSubscriptionType.getOperation())) {
                 // TODO: Don't log rule guid, log subscription guid?
-                sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.CREATE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
+                auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.CREATE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
             } else if (SubscritionOperationType.REMOVE.equals(updateSubscriptionType.getOperation())) {
                 // TODO: Don't log rule guid, log subscription guid?
-                sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.DELETE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
+                auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.DELETE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
             }
             return updateCustomRule;
         } catch (RulesModelException e) {
@@ -460,7 +427,7 @@ public class RulesServiceBean implements RulesService {
         try {
             CustomRuleType customRuleFromDb = getCustomRuleByGuid(guid);
             if (customRuleFromDb.getAvailability().equals(AvailabilityType.GLOBAL)) {
-                UserContext userContext = getFullUserContext(username, applicationName);
+                UserContext userContext = userService.getFullUserContext(username, applicationName);
                 if (!hasFeature(userContext, featureName)) {
                     throw new AccessDeniedException("Forbidden access");
                 }
@@ -474,7 +441,7 @@ public class RulesServiceBean implements RulesService {
 
             //CustomRuleType deletedRule = rulesDomainModel.deleteCustomRule(guid);
             rulesValidator.updateCustomRules();
-            sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, deletedRule.getGuid(), null, username);
+            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, deletedRule.getGuid(), null, username);
             return deletedRule;
         } catch (RulesModelMapperException | RulesModelException | DaoException | DaoMappingException e) {
             LOG.error(e.getMessage());
@@ -579,7 +546,7 @@ public class RulesServiceBean implements RulesService {
             ticketUpdateEvent.fire(new NotificationMessage("guid", updatedTicket.getGuid()));
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-            sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), ticket.getComment(), ticket.getUpdatedBy());
+            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), ticket.getComment(), ticket.getUpdatedBy());
             return updatedTicket;
 
 
@@ -597,7 +564,7 @@ public class RulesServiceBean implements RulesService {
             // Notify long-polling clients of the update
             for (TicketType updatedTicket : updatedTickets) {
                 ticketUpdateEvent.fire(new NotificationMessage("guid", updatedTicket.getGuid()));
-                sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), null, loggedInUser);
+                auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), null, loggedInUser);
             }
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
@@ -644,7 +611,7 @@ public class RulesServiceBean implements RulesService {
             alarmReportEvent.fire(new NotificationMessage("guid", updatedAlarm.getGuid()));
             // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
             alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
-            sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, updatedAlarm.getGuid(), null, alarm.getUpdatedBy());
+            auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, updatedAlarm.getGuid(), null, alarm.getUpdatedBy());
             return updatedAlarm;
         } catch (RulesModelException | DaoException | DaoMappingException e) {
             LOG.error("[ERROR] Error when updating {}", e.getMessage());
@@ -708,8 +675,7 @@ public class RulesServiceBean implements RulesService {
             throw new RulesModelException("[ERROR] Error when creating ticket. ]", e);
         }
 
-        sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, ticketType.getUpdatedBy());
-        // Notify long-polling clients of the change
+		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, ticket.getUpdatedBy());	        // Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
     }
 
@@ -738,7 +704,7 @@ public class RulesServiceBean implements RulesService {
             ticketUpdateEvent.fire(new NotificationMessage("guid", updatedTicket.getGuid()));
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-            sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), null, ticket.getUpdatedBy());
+            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), null, ticket.getUpdatedBy());
             return updatedTicket;
         } catch (RulesModelException | DaoException | DaoMappingException e ) {
             LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
@@ -782,7 +748,7 @@ public class RulesServiceBean implements RulesService {
                 // Mark the alarm as REPROCESSED before reprocessing. That will create a new alarm (if still wrong) with the items remaining.
                 alarm.setStatus(AlarmStatusType.REPROCESSED);
                 alarm = updateAlarmStatus(alarm);
-                sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, alarm.getGuid(), null, username);
+                auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, alarm.getGuid(), null, username);
                 RawMovementType rawMovementType = alarm.getRawMovement();
                 // TODO: Use better type (some variation of PluginType...)
                 String pluginType = alarm.getPluginType();
@@ -830,19 +796,19 @@ public class RulesServiceBean implements RulesService {
             Asset asset = null;
 
             // Get Mobile Terminal if it exists
-            MobileTerminalType mobileTerminal = getMobileTerminalByRawMovement(rawMovement);
+            MobileTerminalType mobileTerminal = mobileTerminalService.getMobileTerminalByRawMovement(rawMovement);
             auditTimestamp = auditLog("Time to fetch from Mobile Terminal Module:", auditTimestamp);
 
             // Get Asset
             if (mobileTerminal != null) {
                 String connectId = mobileTerminal.getConnectId();
                 if (connectId != null) {
-                    asset = getAssetByConnectId(connectId);
+                    asset = assetService.getAssetByConnectId(connectId);
                 }
             } else {
-                asset = getAssetByCfrIrcs(rawMovement.getAssetId());
+                asset = assetService.getAssetByCfrIrcs(rawMovement.getAssetId());
                 if (isPluginTypeWithoutMobileTerminal(rawMovement.getPluginType()) && asset != null) {
-                    mobileTerminal = findMobileTerminalByAsset(asset.getAssetId().getGuid());
+                    mobileTerminal = mobileTerminalService.findMobileTerminalByAsset(asset.getAssetId().getGuid());
                     rawMovement.setMobileTerminal(MobileTerminalMapper.mapMobileTerminal(mobileTerminal));
                 }
             }
@@ -864,10 +830,10 @@ public class RulesServiceBean implements RulesService {
                 rulesValidator.evaluate(movementFact);
                 auditLog("Rules total time:", auditTotalTimestamp);
                 // Tell Exchange that a movement was persisted in Movement
-                sendBackToExchange(movementFact.getMovementGuid(), rawMovement, MovementRefTypeType.MOVEMENT, username);
+                exchangeService.sendBackToExchange(movementFact.getMovementGuid(), rawMovement, MovementRefTypeType.MOVEMENT, username);
             } else {
                 // Tell Exchange that the report caused an alarm
-                sendBackToExchange(null, rawMovement, MovementRefTypeType.ALARM, username);
+                exchangeService.sendBackToExchange(null, rawMovement, MovementRefTypeType.ALARM, username);
             }
         } catch (MessageException | MobileTerminalModelMapperException | MobileTerminalUnmarshallException | JMSException | AssetModelMapperException | RulesModelMapperException | InterruptedException | ExecutionException e) {
             throw new RulesServiceException(e.getMessage());
@@ -924,7 +890,7 @@ public class RulesServiceBean implements RulesService {
         FutureTask<Integer> numberOfReportsLast24HoursTask = new FutureTask<>(new Callable<Integer>() {
             @Override
             public Integer call() {
-                return numberOfReportsLast24Hours(assetHistGuid, positionTime);
+                return movementService.numberOfReportsLast24Hours(assetHistGuid, positionTime);
             }
         });
         executor.execute(numberOfReportsLast24HoursTask);
@@ -932,7 +898,7 @@ public class RulesServiceBean implements RulesService {
         FutureTask<MovementType> sendToMovementTask = new FutureTask<>(new Callable<MovementType>() {
             @Override
             public MovementType call() {
-                return sendToMovement(assetHistGuid, rawMovement, username);
+                return movementService.sendToMovement(assetHistGuid, rawMovement, username);
             }
         });
         executor.execute(sendToMovementTask);
@@ -940,7 +906,7 @@ public class RulesServiceBean implements RulesService {
         FutureTask<List<AssetGroup>> assetGroupTask = new FutureTask<>(new Callable<List<AssetGroup>>() {
             @Override
             public List<AssetGroup> call() {
-                return getAssetGroup(assetGuid);
+                return assetService.getAssetGroup(assetGuid);
             }
         });
         executor.execute(assetGroupTask);
@@ -948,7 +914,7 @@ public class RulesServiceBean implements RulesService {
         FutureTask<List<String>> vicinityOfTask = new FutureTask<>(new Callable<List<String>>() {
             @Override
             public List<String> call() {
-                return getVicinityOf(rawMovement);
+                return movementService.getVicinityOf(rawMovement);
             }
         });
         executor.execute(vicinityOfTask);
@@ -996,33 +962,12 @@ public class RulesServiceBean implements RulesService {
         auditTimestamp = auditLog("Time to fetch time difference to previous report:", auditTimestamp);
 
         // We only persist our own last communications that were not from AIS.
-        if (isLocalFlagstate(assetFlagState) && !movementSource.equals(MovementSourceType.AIS)) {
+        if (configService.isLocalFlagstate(assetFlagState) && !movementSource.equals(MovementSourceType.AIS)) {
             persistLastCommunication(assetGuid, positionTime);
         }
         auditLog("Time to persist the position time:", auditTimestamp);
 
         return timeDiffInSeconds;
-    }
-
-    private boolean isLocalFlagstate(String assetFlagState) {
-        if (assetFlagState == null) {
-            return false;
-        }
-        TextMessage response;
-        try {
-            String settingsRequest = ModuleRequestMapper.toListSettingsRequest("asset");
-            String messageId = producer.sendDataSourceMessage(settingsRequest, DataSourceQueue.CONFIG);
-            response = consumer.getMessage(messageId, TextMessage.class);
-            SettingsListResponse settings = eu.europa.ec.fisheries.uvms.config.model.mapper.JAXBMarshaller.unmarshallTextMessage(response, SettingsListResponse.class);
-            for (SettingType setting : settings.getSettings()) {
-                if (setting.getKey().equals("asset.default.flagstate")) {
-                    return assetFlagState.equalsIgnoreCase(setting.getValue());
-                }
-            }
-        } catch (eu.europa.ec.fisheries.uvms.config.model.exception.ModelMapperException | MessageException e) {
-            return false;
-        }
-        return false;
     }
 
     private Long timeDiffFromLastCommunication(String assetGuid, Date thisTime) {
@@ -1043,357 +988,11 @@ public class RulesServiceBean implements RulesService {
         PreviousReportType thisReport = new PreviousReportType();
         thisReport.setPositionTime(positionTime);
         thisReport.setAssetGuid(assetGuid);
-        String upsertPreviousReportequest = null;
         try {
             rulesDomainModel.upsertPreviousReport(thisReport);
         } catch (RulesModelException e) {
             LOG.error("[ERROR] Error persisting report. ] {}", e.getMessage());
         }
-    }
-
-    private Integer numberOfReportsLast24Hours(String connectId, Date thisTime) {
-        LOG.info("[INFO] Fetching number of reports last 24 hours");
-        Date auditTimestamp = new Date();
-        Integer numberOfMovements = null;
-        MovementQuery query = new MovementQuery();
-
-        // Range
-        RangeCriteria dateRangeCriteria = new RangeCriteria();
-        dateRangeCriteria.setKey(RangeKeyType.DATE);
-        Date twentyFourHoursAgo = new Date(thisTime.getTime() - TWENTYFOUR_HOURS_IN_MILLISEC);
-        dateRangeCriteria.setFrom(twentyFourHoursAgo.toString());
-        //String to = RulesUtil.xmlGregorianToString(thisTime);
-        dateRangeCriteria.setTo(thisTime.toString());
-        query.getMovementRangeSearchCriteria().add(dateRangeCriteria);
-
-        // Id
-        eu.europa.ec.fisheries.schema.movement.search.v1.ListCriteria idCriteria = new eu.europa.ec.fisheries.schema.movement.search.v1.ListCriteria();
-        idCriteria.setKey(eu.europa.ec.fisheries.schema.movement.search.v1.SearchKey.CONNECT_ID);
-        idCriteria.setValue(connectId);
-        query.getMovementSearchCriteria().add(idCriteria);
-
-        try {
-            String request = MovementModuleRequestMapper.mapToGetMovementMapByQueryRequest(query);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOVEMENT);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-
-            List<MovementMapResponseType> result = MovementModuleResponseMapper.mapToMovementMapResponse(response);
-
-            List<MovementType> movements;
-
-            if (result == null || result.isEmpty()) {
-                LOG.warn("[WARN] Error when fetching sum of previous movement reports : No result found");
-                return null;
-            } else if (result.size() != 1) {
-                LOG.warn("[WARN] Error when fetching sum of previous movement reports: Duplicate assets found ({})", result.size());
-                return null;
-            } else if (!connectId.equals(result.get(0).getKey())) {
-                LOG.warn("[WARN] Error when fetching sum of previous movement reports: Wrong asset found ({})", result.get(0).getKey());
-                return null;
-            } else {
-                movements = result.get(0).getMovements();
-            }
-
-            numberOfMovements = movements != null ? movements.size() : 0;
-        } catch (Exception e) {
-            // If something goes wrong, continue with the other validation
-            LOG.warn("[ERROR] Error when fetching sum of previous movement reports:{} ]", e.getMessage());
-        }
-
-        auditLog("Time to fetch number of reports last 24 hours:", auditTimestamp);
-
-        return numberOfMovements;
-    }
-
-    private MovementType sendToMovement(String connectId, RawMovementType rawMovement, String username) {
-        LOG.info("[INFO] Send the validated raw position to Movement..");
-        Date auditTimestamp = new Date();
-        MovementType createdMovement = null;
-        try {
-            MovementBaseType movementBaseType = MovementBaseTypeMapper.mapRawMovementFact(rawMovement);
-            movementBaseType.setConnectId(connectId);
-            String createMovementRequest = MovementModuleRequestMapper.mapToCreateMovementRequest(movementBaseType, username);
-            String messageId = producer.sendDataSourceMessage(createMovementRequest, DataSourceQueue.MOVEMENT);
-            TextMessage movementResponse = consumer.getMessage(messageId, TextMessage.class, 10000L);
-            CreateMovementResponse createMovementResponse = MovementModuleResponseMapper.mapToCreateMovementResponseFromMovementResponse(movementResponse);
-            createdMovement = createMovementResponse.getMovement();
-        } catch (JMSException | MovementFaultException | ModelMapperException | MessageException e) {
-            LOG.error("[ERROR] Error when getting movementResponse from Movement , movementResponse from JMS Queue is null..");
-        } catch (MovementDuplicateException e) {
-            LOG.error("[ERROR] Error when getting movementResponse from Movement, tried to create duplicate movement..");
-        }
-
-        auditLog("Time to get movement from Movement Module:", auditTimestamp);
-
-        return createdMovement;
-    }
-
-    private List<String> getVicinityOf(RawMovementType rawMovement) {
-        long start = System.currentTimeMillis();
-        List<String> vicinityOf = new ArrayList<>();
-        /*
-        try {
-            MovementQuery query = new MovementQuery();
-            query.setExcludeFirstAndLastSegment(true);
-
-            RangeCriteria time = new RangeCriteria();
-            //GregorianCalendar from = rawMovement.getPositionTime().toGregorianCalendar();
-            //from.add(Calendar.HOUR_OF_DAY, -1);
-            Date fromDate = new Date(rawMovement.getPositionTime().getTime() - TWENTYFOUR_HOURS_IN_MILLISEC);
-            time.setKey(RangeKeyType.DATE);
-            time.setFrom(fromDate.toString());
-            time.setTo(rawMovement.getPositionTime().toString());
-            query.getMovementRangeSearchCriteria().add(time);
-
-            eu.europa.ec.fisheries.schema.movement.search.v1.ListPagination pagination = new eu.europa.ec.fisheries.schema.movement.search.v1.ListPagination();
-            pagination.setListSize(BigInteger.valueOf(1000L));
-            pagination.setPage(BigInteger.ONE);
-            query.setPagination(pagination);
-
-            String request = MovementModuleRequestMapper.mapToGetMovementListByQueryRequest(query);
-            String messageId = rulesProducer.sendDataSourceMessage(request, DataSourceQueue.MOVEMENT);
-            TextMessage movementResponse = consumer.getMessage(messageId, TextMessage.class);
-            List<MovementType> movements = MovementModuleResponseMapper.mapToMovementListResponse(movementResponse);
-            double centerX = rawMovement.getPosition().getLongitude();
-            double centerY = rawMovement.getPosition().getLatitude();
-            List<String> guidList = new ArrayList<>();
-            for (MovementType movement : movements) {
-                if (guidList.contains(movement.getConnectId())) {
-                    continue;
-                }
-                double x = movement.getPosition().getLongitude();
-                double y = movement.getPosition().getLatitude();
-                double distance = Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2);
-                if (distance < VICINITY_RADIUS) {
-                    guidList.add(movement.getConnectId());
-                    Asset asset = getAssetByConnectId(movement.getConnectId());
-                    vicinityOf.add(asset.getIrcs());
-                }
-                //(x - center_x)^2 + (y - center_y)^2 < radius^2
-            }
-        } catch (AssetModelMapperException | JMSException | MessageException | ModelMapperException | MovementFaultException | MovementDuplicateException e) {
-            LOG.warn("Could not fetch movements for vicinity of.");
-        }
-
-        LOG.debug("[ Get nearby vessels: {} ms ]", (System.currentTimeMillis() - start));
-        */
-        return vicinityOf;
-    }
-
-    private List<AssetGroup> getAssetGroup(String assetGuid) {
-        LOG.info("[INFO] Fetch asset groups from Asset");
-
-        Date auditTimestamp = new Date();
-
-        TextMessage getAssetResponse = null;
-        String getAssetMessageId = null;
-        List<AssetGroup> assetGroups = null;
-        try {
-            String getAssetRequest = AssetModuleRequestMapper.createAssetGroupListByAssetGuidRequest(assetGuid);
-            getAssetMessageId = producer.sendDataSourceMessage(getAssetRequest, DataSourceQueue.ASSET);
-            getAssetResponse = consumer.getMessage(getAssetMessageId, TextMessage.class);
-
-            assetGroups = AssetModuleResponseMapper.mapToAssetGroupListFromResponse(getAssetResponse, getAssetMessageId);
-        } catch (AssetModelMapperException | MessageException e) {
-            LOG.warn("[ Failed while fetching asset groups ]", e.getMessage());
-        }
-
-        auditLog("Time to get asset groups:", auditTimestamp);
-
-        return assetGroups;
-    }
-
-    private void sendBackToExchange(String guid, RawMovementType rawMovement, MovementRefTypeType status, String username) throws RulesModelMarshallException, MessageException {
-        LOG.info("[INFO] Sending back processed movement to exchange");
-
-        // Map response
-        MovementRefType movementRef = new MovementRefType();
-        movementRef.setMovementRefGuid(guid);
-        movementRef.setType(status);
-        movementRef.setAckResponseMessageID(rawMovement.getAckResponseMessageID());
-
-        // Map movement
-        SetReportMovementType setReportMovementType = ExchangeMovementMapper.mapExchangeMovement(rawMovement);
-
-        try {
-            String exchangeResponseText = ExchangeMovementMapper.mapToProcessedMovementResponse(setReportMovementType, movementRef, username);
-//            String exchangeResponseText = eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller.marshallJaxBObjectToString(ExchangeModuleRequestMapper.mapToProcessedMovementResopnse(setReportMovementType, movementRef));
-            producer.sendDataSourceMessage(exchangeResponseText, DataSourceQueue.EXCHANGE);
-        } catch (ExchangeModelMapperException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Asset getAssetByConnectId(String connectId) throws AssetModelMapperException, MessageException {
-        LOG.info("[INFO] Fetch asset by connectId '{}'", connectId);
-
-        AssetListQuery query = new AssetListQuery();
-        AssetListCriteria criteria = new AssetListCriteria();
-        AssetListCriteriaPair criteriaPair = new AssetListCriteriaPair();
-        criteriaPair.setKey(ConfigSearchField.GUID);
-        criteriaPair.setValue(connectId);
-        criteria.getCriterias().add(criteriaPair);
-        criteria.setIsDynamic(true);
-
-        query.setAssetSearchCriteria(criteria);
-
-        AssetListPagination pagination = new AssetListPagination();
-        // To leave room to find erroneous results - it must be only one in the list
-        pagination.setListSize(2);
-        pagination.setPage(1);
-        query.setPagination(pagination);
-
-        String getAssetRequest = AssetModuleRequestMapper.createAssetListModuleRequest(query);
-        String getAssetMessageId = producer.sendDataSourceMessage(getAssetRequest, DataSourceQueue.ASSET);
-        TextMessage getAssetResponse = consumer.getMessage(getAssetMessageId, TextMessage.class);
-
-        List<Asset> resultList = AssetModuleResponseMapper.mapToAssetListFromResponse(getAssetResponse, getAssetMessageId);
-
-        return resultList.size() != 1 ? null : resultList.get(0);
-    }
-
-    private Asset getAssetByCfrIrcs(AssetId assetId) {
-        LOG.info("[INFO] Fetch asset by assetId");
-
-        Asset asset = null;
-        try {
-            // If no asset information exists, don't look for one
-            if (assetId == null || assetId.getAssetIdList() == null) {
-                LOG.warn("No asset information exists!");
-                return null;
-            }
-
-            List<AssetIdList> ids = assetId.getAssetIdList();
-
-            String cfr = null;
-            String ircs = null;
-            String mmsi = null;
-
-            // Get possible search parameters
-            for (AssetIdList id : ids) {
-                if (eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType.CFR.equals(id.getIdType())) {
-                    cfr = id.getValue();
-                }
-                if (eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType.IRCS.equals(id.getIdType())) {
-                    ircs = id.getValue();
-                }
-                if (eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType.MMSI.equals(id.getIdType())) {
-                    mmsi = id.getValue();
-                }
-
-            }
-
-            if (ircs != null && cfr != null && mmsi != null) {
-                try {
-                    asset = getAsset(AssetIdType.CFR, cfr);
-                    // If the asset matches on ircs as well we have a winner
-                    if (asset != null && asset.getIrcs().equals(ircs)) {
-                        return asset;
-                    }
-                    // If asset is null, try fetching by IRCS (cfr will fail for SE national db)
-                    if (asset == null) {
-                        asset = getAsset(AssetIdType.IRCS, ircs);
-                        // If asset is still null, try mmsi (this should be the case for movement coming from AIS)
-                        if (asset == null) {
-                            return getAsset(AssetIdType.MMSI, mmsi);
-                        }
-                    }
-                } catch (AssetModelValidationException e) {
-                    return getAsset(AssetIdType.IRCS, ircs);
-                }
-            } else if (cfr != null) {
-                return getAsset(AssetIdType.CFR, cfr);
-            } else if (ircs != null) {
-                return getAsset(AssetIdType.IRCS, ircs);
-            } else if (mmsi != null) {
-                return getAsset(AssetIdType.MMSI, mmsi);
-            }
-
-        } catch (Exception e) {
-            // Log and continue validation
-            LOG.warn("Could not find asset!");
-        }
-        return null;
-    }
-
-    private Asset getAsset(AssetIdType type, String value) throws AssetModelMapperException, MessageException {
-        String getAssetListRequest = AssetModuleRequestMapper.createGetAssetModuleRequest(value, type);
-        String getAssetMessageId = producer.sendDataSourceMessage(getAssetListRequest, DataSourceQueue.ASSET);
-        TextMessage getAssetResponse = consumer.getMessage(getAssetMessageId, TextMessage.class);
-
-        return AssetModuleResponseMapper.mapToAssetFromResponse(getAssetResponse, getAssetMessageId);
-    }
-
-    private MobileTerminalType getMobileTerminalByRawMovement(RawMovementType rawMovement) throws MessageException, MobileTerminalModelMapperException, MobileTerminalUnmarshallException, JMSException {
-        LOG.info("[INFO] Fetch mobile terminal");
-        MobileTerminalListQuery query = new MobileTerminalListQuery();
-
-        // If no mobile terminal information exists, don't look for one
-        if (rawMovement.getMobileTerminal() == null || rawMovement.getMobileTerminal().getMobileTerminalIdList() == null) {
-            return null;
-        }
-
-        List<IdList> ids = rawMovement.getMobileTerminal().getMobileTerminalIdList();
-
-        MobileTerminalSearchCriteria criteria = new MobileTerminalSearchCriteria();
-        for (IdList id : ids) {
-            eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListCriteria crit = new eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListCriteria();
-            switch (id.getType()) {
-                case DNID:
-                    if (id.getValue() != null) {
-                        crit.setKey(eu.europa.ec.fisheries.schema.mobileterminal.types.v1.SearchKey.DNID);
-                        crit.setValue(id.getValue());
-                        criteria.getCriterias().add(crit);
-                    }
-                    break;
-                case MEMBER_NUMBER:
-                    if (id.getValue() != null) {
-                        crit.setKey(eu.europa.ec.fisheries.schema.mobileterminal.types.v1.SearchKey.MEMBER_NUMBER);
-                        crit.setValue(id.getValue());
-                        criteria.getCriterias().add(crit);
-                    }
-                    break;
-                case SERIAL_NUMBER:
-                    if (id.getValue() != null) {
-                        crit.setKey(eu.europa.ec.fisheries.schema.mobileterminal.types.v1.SearchKey.SERIAL_NUMBER);
-                        crit.setValue(id.getValue());
-                        criteria.getCriterias().add(crit);
-                    }
-                    break;
-                case LES:
-                default:
-                    LOG.error("[ERROR] Unhandled Mobile Terminal id: {} ]", id.getType());
-                    break;
-            }
-        }
-
-        // If no valid criterias, don't look for a mobile terminal
-        if (criteria.getCriterias().isEmpty()) {
-            return null;
-        }
-
-        // If we know the transponder type from the source, use it in the search criteria
-        eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListCriteria transponderTypeCrit = new eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListCriteria();
-        transponderTypeCrit.setKey(eu.europa.ec.fisheries.schema.mobileterminal.types.v1.SearchKey.TRANSPONDER_TYPE);
-        transponderTypeCrit.setValue(rawMovement.getSource().name());
-        criteria.getCriterias().add(transponderTypeCrit);
-
-        query.setMobileTerminalSearchCriteria(criteria);
-        eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListPagination pagination = new eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListPagination();
-        // To leave room to find erroneous results - it must be only one in the list
-        pagination.setListSize(2);
-        pagination.setPage(1);
-        query.setPagination(pagination);
-
-        String getMobileTerminalListRequest = MobileTerminalModuleRequestMapper.createMobileTerminalListRequest(query);
-        String getMobileTerminalMessageId = producer.sendDataSourceMessage(getMobileTerminalListRequest, DataSourceQueue.MOBILE_TERMINAL);
-        TextMessage getMobileTerminalResponse = consumer.getMessage(getMobileTerminalMessageId, TextMessage.class);
-
-        List<MobileTerminalType> resultList = MobileTerminalModuleResponseMapper.mapToMobileTerminalListResponse(getMobileTerminalResponse);
-
-        MobileTerminalType mobileTerminal = resultList.size() != 1 ? null : resultList.get(0);
-
-        return mobileTerminal;
     }
 
     // TODO: Implement for IRIDIUM as well (if needed)
@@ -1453,82 +1052,11 @@ public class RulesServiceBean implements RulesService {
         return channelGuid;
     }
 
-    private MobileTerminalType findMobileTerminalByAsset(String assetGuid) throws MessageException, MobileTerminalModelMapperException, MobileTerminalUnmarshallException, JMSException {
-        MobileTerminalListQuery query = new MobileTerminalListQuery();
-        eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListPagination pagination = new eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListPagination();
-        pagination.setListSize(2);
-        pagination.setPage(1);
-        MobileTerminalSearchCriteria criteria = new MobileTerminalSearchCriteria();
-        ListCriteria guidCriteria = new ListCriteria();
-        guidCriteria.setKey(SearchKey.CONNECT_ID);
-        guidCriteria.setValue(assetGuid);
-        criteria.getCriterias().add(guidCriteria);
-        query.setMobileTerminalSearchCriteria(criteria);
-        query.setPagination(pagination);
-
-        String request = MobileTerminalModuleRequestMapper.createMobileTerminalListRequest(query);
-        String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOBILE_TERMINAL);
-
-        TextMessage getMobileTerminalResponse = consumer.getMessage(messageId, TextMessage.class);
-
-        List<MobileTerminalType> resultList = MobileTerminalModuleResponseMapper.mapToMobileTerminalListResponse(getMobileTerminalResponse);
-
-        MobileTerminalType mobileTerminal = null;
-
-        for (MobileTerminalType mobileTerminalType : resultList) {
-            if (mobileTerminalType.getConnectId() != null) {
-                mobileTerminal = mobileTerminalType;
-                break;
-            }
-        }
-
-        return mobileTerminal;
-    }
-
     private Date auditLog(String msg, Date lastTimestamp) {
         Date newTimestamp = new Date();
         long duration = newTimestamp.getTime() - lastTimestamp.getTime();
         LOG.debug("[INFO] --> AUDIT - {} {} ms", msg, duration);
         return newTimestamp;
-    }
-
-    private void sendAuditMessage(AuditObjectTypeEnum type, AuditOperationEnum operation, String affectedObject, String comment, String username) {
-        try {
-            String message = AuditLogMapper.mapToAuditLog(type.getValue(), operation.getValue(), affectedObject, comment, username);
-            producer.sendDataSourceMessage(message, DataSourceQueue.AUDIT);
-        } catch (AuditModelMarshallException | MessageException e) {
-            LOG.error("[ERROR] Error when sending message to Audit. ] {}", e.getMessage());
-        }
-    }
-
-    private UserContext getFullUserContext(String remoteUser, String applicationName) throws RulesServiceException, RulesModelMarshallException {
-        LOG.debug("Request getFullUserContext({}, {})", remoteUser, applicationName);
-        UserContext userContext = null;
-        UserContextId contextId = new UserContextId();
-        contextId.setApplicationName(applicationName);
-        contextId.setUserName(remoteUser);
-        String userRequest;
-        try {
-            userRequest = UserModuleRequestMapper.mapToGetUserContextRequest(contextId);
-            String messageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER);
-            LOG.debug("JMS message with ID: {} is sent to USM.", messageId);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-
-            if (response != null) {
-                GetUserContextResponse userContextResponse = JAXBMarshaller.unmarshallTextMessage(response, GetUserContextResponse.class);
-                LOG.debug("Response concerning message with ID: {} is received.", messageId);
-                userContext = userContextResponse.getContext();
-            } else {
-                LOG.error("Error occurred while receiving JMS response for message ID: {}", messageId);
-                throw new RulesServiceException("Unable to receive a response from USM.");
-            }
-        } catch (eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException e) {
-            throw new RulesModelMarshallException("Unexpected exception while trying to get user context.", e);
-        } catch (MessageException e) {
-            LOG.error("Unable to receive a response from USM.");
-            throw new RulesServiceException("Unable to receive a response from USM.");
-        }
-        return userContext;
     }
 
     private boolean hasFeature(UserContext userContext, String featureName) {

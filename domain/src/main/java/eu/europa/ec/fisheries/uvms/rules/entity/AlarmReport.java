@@ -11,6 +11,11 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.entity;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,27 +32,26 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
 
 //@formatter:off
 @Entity
 @Table(name = "alarmreport")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = UvmsConstants.FIND_ALARM_REPORT_BY_ID, query = "SELECT ar FROM AlarmReport ar WHERE ar.id = :id"),
-    @NamedQuery(name = UvmsConstants.FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID, query = "SELECT ar FROM AlarmReport ar WHERE ar.rawMovement.guid = :movementGuid and status = 'OPEN'"),
-    @NamedQuery(name = UvmsConstants.FIND_ALARM_BY_GUID, query = "SELECT ar FROM AlarmReport ar WHERE ar.guid = :guid"),
-    @NamedQuery(name = UvmsConstants.FIND_ALARM_REPORT_BY_ASSET_GUID_AND_RULE_GUID, query = "SELECT ar FROM AlarmReport ar left join ar.alarmItemList ai WHERE ar.assetGuid = :assetGuid and ar.status = 'OPEN' and ai.ruleGuid = :ruleGuid"),
-    @NamedQuery(name = UvmsConstants.COUNT_OPEN_ALARMS, query = "SELECT count(ar) FROM AlarmReport ar where ar.status = 'OPEN'")
+    @NamedQuery(name = AlarmReport.FIND_ALARM_REPORT_BY_ID, query = "SELECT ar FROM AlarmReport ar WHERE ar.id = :id"),
+    @NamedQuery(name = AlarmReport.FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID, query = "SELECT ar FROM AlarmReport ar WHERE ar.rawMovement.guid = :movementGuid and ar.status = 'OPEN'"),
+    @NamedQuery(name = AlarmReport.FIND_ALARM_BY_GUID, query = "SELECT ar FROM AlarmReport ar WHERE ar.guid = :guid"),
+    @NamedQuery(name = AlarmReport.FIND_ALARM_REPORT_BY_ASSET_GUID_AND_RULE_GUID, query = "SELECT ar FROM AlarmReport ar left join ar.alarmItemList ai WHERE ar.assetGuid = :assetGuid and ar.status = 'OPEN' and ai.ruleGuid = :ruleGuid"),
+    @NamedQuery(name = AlarmReport.COUNT_OPEN_ALARMS, query = "SELECT count(ar) FROM AlarmReport ar where ar.status = 'OPEN'")
 })
 //@formatter:on
 public class AlarmReport implements Serializable {
+    
+    public static final String FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID = "AlarmReport.findByMovementGuid";
+    public static final String FIND_ALARM_REPORT_BY_ID = "AlarmReport.findById";
+    public static final String FIND_ALARM_BY_GUID = "AlarmReport.findByGuid";
+    public static final String COUNT_OPEN_ALARMS = "AlarmReport.countOpenAlarms";
+    public static final String FIND_ALARM_REPORT_BY_ASSET_GUID_AND_RULE_GUID = "AlarmReport.findByAssetGuidRuleGuid";
 
     private static final long serialVersionUID = 1L;
 
