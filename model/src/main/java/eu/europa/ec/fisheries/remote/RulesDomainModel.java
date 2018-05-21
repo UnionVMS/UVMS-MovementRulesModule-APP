@@ -55,9 +55,9 @@ public interface RulesDomainModel {
 
     //AlarmReportType createAlarmReport(AlarmReportType alarm) throws RulesModelException;
 
-    AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException;
+    //AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException;
 
-    TicketListResponseDto getTicketListByQuery(String loggedInUser, TicketQuery query) throws RulesModelException;
+    //TicketListResponseDto getTicketListByQuery(String loggedInUser, TicketQuery query) throws RulesModelException;
 
     //TicketType createTicket(TicketType ticket) throws RulesModelException;
 
@@ -71,43 +71,43 @@ public interface RulesDomainModel {
 
     //TicketType updateTicketCount(TicketType ticket) throws RulesModelException;
 
-    List<TicketType> updateTicketStatusByQuery(String userName, TicketQuery query, TicketStatusType status) throws RulesModelException;
+    //List<TicketType> updateTicketStatusByQuery(String userName, TicketQuery query, TicketStatusType status) throws RulesModelException;
 
     //CustomRuleType getByGuid(String guid) throws RulesModelException;
 
-    TicketListResponseDto getTicketListByMovements(List<String> movements) throws RulesModelException;
+    //TicketListResponseDto getTicketListByMovements(List<String> movements) throws RulesModelException;
 
-    long countTicketListByMovements(List<String> movements) throws RulesModelException;
+    //long countTicketListByMovements(List<String> movements) throws RulesModelException;
 
-    List<PreviousReportType> getPreviousReports() throws RulesModelException;
+    //List<PreviousReportType> getPreviousReports() throws RulesModelException;
 
-    PreviousReportType getPreviousReportByAssetGuid(String assetGuid) throws RulesModelException;
+    //PreviousReportType getPreviousReportByAssetGuid(String assetGuid) throws RulesModelException;
 
-    TicketType getTicketByAssetGuid(String assetGuid, String ruleGuid) throws RulesModelException;
+    //TicketType getTicketByAssetGuid(String assetGuid, String ruleGuid) throws RulesModelException;
 
-    TicketType getTicketByGuid(String guid) throws RulesModelException;
+    //TicketType getTicketByGuid(String guid) throws RulesModelException;
 
-    AlarmReportType getAlarmReportByAssetAndRule(String assetGuid, String ruleGuid) throws RulesModelException;
+    //AlarmReportType getAlarmReportByAssetAndRule(String assetGuid, String ruleGuid) throws RulesModelException;
 
-    void upsertPreviousReport(PreviousReportType previousReport) throws RulesModelException;
+    //void upsertPreviousReport(PreviousReportType previousReport) throws RulesModelException;
 
-    AlarmReportType getAlarmReportByGuid(String guid) throws RulesModelException;
+    //AlarmReportType getAlarmReportByGuid(String guid) throws RulesModelException;
 
     /**
      * @return number of open alarms
      * @throws RulesModelException
      */
-    long getNumberOfOpenAlarms() throws RulesModelException;
+    //long getNumberOfOpenAlarms() throws RulesModelException;
 
     /**
      * @return number of open tickets
      * @throws RulesModelException
      */
-    long getNumberOfOpenTickets(String userName) throws RulesModelException;
+    //long getNumberOfOpenTickets(String userName) throws RulesModelException;
 
-    long getNumberOfAssetsNotSending() throws RulesModelException;
+    //long getNumberOfAssetsNotSending() throws RulesModelException;
 
-    List<TicketAndRuleType> getTicketsAndRulesByMovements(List<String> movementGuids) throws RulesModelException;
+    //List<TicketAndRuleType> getTicketsAndRulesByMovements(List<String> movementGuids) throws RulesModelException;
 
     //void updateFailedRules(List<String> failedRules) throws RulesModelException;
 

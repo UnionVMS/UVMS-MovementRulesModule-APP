@@ -567,7 +567,7 @@ public class RulesDomainModelBean implements RulesDomainModel {
         }
     }*/
 
-    @Override
+    /*@Override
     public AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException {
         LOG.info("[INFO] Get list of alarms from query.");
 
@@ -614,9 +614,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting alarm list by query ] {} ", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<TicketType> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesModelException {
         LOG.info("[INFO] Update ticket status by query");
         try {
@@ -656,9 +656,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when updating ticket status. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public TicketListResponseDto getTicketListByQuery(String loggedInUser, TicketQuery query) throws RulesModelException {
         LOG.info("[INFO] Get list of tickets from query.");
 
@@ -705,9 +705,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting ticket list by query ] {} ", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public TicketListResponseDto getTicketListByMovements(List<String> movements) throws RulesModelException {
         LOG.info("[INFO] Get tickets by movements.");
         if (movements == null) {
@@ -729,9 +729,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting tickets by movements ] {} ", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public long countTicketListByMovements(List<String> movements) throws RulesModelException {
         LOG.info("[INFO] Count tickets by movements.");
         if (movements == null) {
@@ -746,9 +746,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when counting tickets by movements ] {} ", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<PreviousReportType> getPreviousReports() throws RulesModelException {
         LOG.info("[INFO] Getting list of previous reports");
         try {
@@ -762,9 +762,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting list {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when getting list. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public PreviousReportType getPreviousReportByAssetGuid(String assetGuid) throws RulesModelException {
         LOG.info("[INFO] Getting previous report by asset GUID..");
         try {
@@ -774,9 +774,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting previous report by asset guid {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when getting previous report by asset guid", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public TicketType getTicketByAssetGuid(String assetGuid, String ruleGuid) throws RulesModelException {
         LOG.info("[INFO] Getting ticket by asset guid : {}", assetGuid);
         try {
@@ -786,9 +786,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting list {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when getting list", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public AlarmReportType getAlarmReportByAssetAndRule(String assetGuid, String ruleGuid) throws RulesModelException {
         LOG.info("[INFO] Getting alarm report by asset guid:{}", assetGuid);
         try {
@@ -798,9 +798,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting list {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when getting list. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void upsertPreviousReport(PreviousReportType previousReport) throws RulesModelException {
         LOG.info("[INFO] Upserting previous report");
         try {
@@ -814,9 +814,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
         } catch (DaoException | DaoMappingException e) {
             throw new RulesModelException("[ERROR] Error when upserting previous report. ]", e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public AlarmReportType getAlarmReportByGuid(String guid) throws RulesModelException {
         LOG.info("[INFO] Getting alarm report by guid");
         try {
@@ -825,9 +825,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting alarm report by GUID {}", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public TicketType getTicketByGuid(String guid) throws RulesModelException {
         LOG.info("[INFO] Getting ticket by guid");
         try {
@@ -837,9 +837,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting ticket by GUID {}", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public long getNumberOfOpenAlarms() throws RulesModelException {
         LOG.info("[INFO] Counting open alarms");
         try {
@@ -848,9 +848,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when counting open alarms {}", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public long getNumberOfOpenTickets(String userName) throws RulesModelException {
         LOG.info("[INFO] Counting open tickets");
         try {
@@ -863,9 +863,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when counting open tickets {}", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public long getNumberOfAssetsNotSending() throws RulesModelException {
         LOG.info("[INFO] Counting assets not sending");
         try {
@@ -874,9 +874,9 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when counting open alarms {}", e.getMessage());
             throw new RulesModelException(e.getMessage(), e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<TicketAndRuleType> getTicketsAndRulesByMovements(List<String> movementGuids) throws RulesModelException {
         LOG.info("[INFO] Get Tickets and Rules by movements");
         List<TicketAndRuleType> ticketsAndRules = new ArrayList<>();
@@ -897,5 +897,5 @@ public class RulesDomainModelBean implements RulesDomainModel {
             LOG.error("[ERROR] Error when getting list {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when getting list.", e);
         }
-    }
+    }*/
 }

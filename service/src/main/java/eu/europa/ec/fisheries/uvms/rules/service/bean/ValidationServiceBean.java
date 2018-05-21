@@ -688,9 +688,10 @@ public class ValidationServiceBean implements ValidationService {
     @Override
     public long getNumberOfOpenAlarmReports() throws RulesServiceException, RulesFaultException {
         try {
-            long numberOfOpenAlarms = rulesDomainModel.getNumberOfOpenAlarms();
-            return numberOfOpenAlarms;
-        } catch (RulesModelException e) {
+            LOG.info("[INFO] Counting open alarms");
+            return rulesDao.getNumberOfOpenAlarms();
+        } catch (DaoException e) {
+            LOG.error("[ERROR] Error when counting open alarms {}", e.getMessage());
             LOG.error("[ Error when getting number of open alarms ] {}", e.getMessage());
             throw new RulesServiceException("[ Error when getting number of open alarms. ]");
         }
@@ -699,9 +700,14 @@ public class ValidationServiceBean implements ValidationService {
     @Override
     public long getNumberOfOpenTickets(String userName) throws RulesServiceException, RulesFaultException {
         try {
-            long numberOfOpenTickets = rulesDomainModel.getNumberOfOpenTickets(userName);
-            return numberOfOpenTickets;
-        } catch (RulesModelException e) {
+            LOG.info("[INFO] Counting open tickets");
+            List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);
+            if (!validRuleGuids.isEmpty()) {
+                return rulesDao.getNumberOfOpenTickets(validRuleGuids);
+            }
+            return 0;
+        } catch (DaoException e) {
+            LOG.error("[ERROR] Error when counting open tickets {}", e.getMessage());
             LOG.error("[ Error when getting number of open tickets ] {}", e.getMessage());
             throw new RulesServiceException("[ Error when getting number of open alarms. ]");
         }
