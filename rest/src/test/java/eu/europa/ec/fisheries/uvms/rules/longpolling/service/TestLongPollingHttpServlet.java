@@ -11,7 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.longpolling.service;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,37 +27,37 @@ public class TestLongPollingHttpServlet {
     @Test
     public void testNoAction() {
         String jsonMessage = longPolling.createJsonMessage("abc123");
-        Assert.assertEquals("{\"ids\":[\"abc123\"]}", jsonMessage);
+        assertEquals("{\"ids\":[\"abc123\"]}", jsonMessage);
     }
 
     @Test
     public void testNoGuid() {
         String jsonMessage = longPolling.createJsonMessage(null);
-        Assert.assertEquals("{\"ids\":[]}", jsonMessage);
+        assertEquals("{\"ids\":[]}", jsonMessage);
     }
 
     @Test
     public void testUpdated() {
         String jsonMessage = longPolling.createJsonMessage("abc123", "updated");
-        Assert.assertEquals("{\"updated\":{\"ids\":[\"abc123\"]}}", jsonMessage);
+        assertEquals("{\"updated\":{\"ids\":[\"abc123\"]}}", jsonMessage);
     }
 
     @Test
     public void testUpdatedNoGuid() {
         String jsonMessage = longPolling.createJsonMessage(null, "updated");
-        Assert.assertEquals("{\"updated\":{\"ids\":[]}}", jsonMessage);
+        assertEquals("{\"updated\":{\"ids\":[]}}", jsonMessage);
     }
     
     @Test
     public void testCountTrue() {
         String jsonMessage = longPolling.createJsonMessageCount(true);
-        Assert.assertEquals("{\"updated\":true}", jsonMessage);
+        assertEquals("{\"updated\":true}", jsonMessage);
     }
 
     @Test
     public void testCountFalse() {
         String jsonMessage = longPolling.createJsonMessageCount(false);
-        Assert.assertEquals("{\"updated\":false}", jsonMessage);
+        assertEquals("{\"updated\":false}", jsonMessage);
     }
 
 }

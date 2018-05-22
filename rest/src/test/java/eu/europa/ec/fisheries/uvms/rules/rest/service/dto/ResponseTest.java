@@ -11,14 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.rest.service.dto;
 
-import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
-import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
+import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
 
 public class ResponseTest {
 
@@ -46,12 +46,12 @@ public class ResponseTest {
 
         String VALUE = "HELLO_DTO";
         ResponseDto dto = new ResponseDto(VALUE, ResponseCode.OK);
-        Assert.assertEquals(dto.getCode().intValue(), ResponseCode.OK.getCode());
-        Assert.assertEquals(VALUE, dto.getData());
+        assertEquals(dto.getCode().intValue(), ResponseCode.OK.getCode());
+        assertEquals(VALUE, dto.getData());
 
         dto = new ResponseDto(VALUE, ResponseCode.UNDEFINED_ERROR);
-        Assert.assertEquals(dto.getCode().intValue(), ResponseCode.UNDEFINED_ERROR.getCode());
-        Assert.assertEquals(VALUE, dto.getData());
+        assertEquals(dto.getCode().intValue(), ResponseCode.UNDEFINED_ERROR.getCode());
+        assertEquals(VALUE, dto.getData());
 
     }
 }

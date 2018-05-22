@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 @Stateless
 public class TicketRestResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TicketRestResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TicketRestResource.class);
 
     @EJB
     RulesService rulesService;
@@ -69,7 +69,7 @@ public class TicketRestResource {
         try {
             return new ResponseDto(rulesService.getTicketList(loggedInUser, query), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException  | NullPointerException ex) {
-            LOG.error("[ Error when getting list. ] {} ", ex.getStackTrace());
+            LOG.error("[ Error when getting list. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
     }
@@ -92,7 +92,7 @@ public class TicketRestResource {
         try {
             return new ResponseDto(rulesService.getTicketsByMovements(movements), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException  | NullPointerException ex) {
-            LOG.error("[ Error when getting list by movements. ] {} ", ex.getStackTrace());
+            LOG.error("[ Error when getting list by movements. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
     }
@@ -114,7 +114,7 @@ public class TicketRestResource {
         try {
             return new ResponseDto(rulesService.countTicketsByMovements(movements), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException e) {
-            LOG.error("[ Error when getting number of open tickets. ] {} ", e.getMessage());
+            LOG.error("[ Error when getting number of open tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -137,7 +137,7 @@ public class TicketRestResource {
         try {
             return new ResponseDto(rulesService.updateTicketStatus(ticketType), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when updating. ] {} ", e.getStackTrace());
+            LOG.error("[ Error when updating. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -160,7 +160,7 @@ public class TicketRestResource {
         try {
             return new ResponseDto(rulesService.updateTicketStatusByQuery(loggedInUser, query, status), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when updating. ] {} ", e.getStackTrace());
+            LOG.error("[ Error when updating. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -181,7 +181,7 @@ public class TicketRestResource {
         try {
             return new ResponseDto(rulesService.getTicketByGuid(guid), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException e) {
-            LOG.error("[ Error when getting ticket by GUID. ] {} ", e.getMessage());
+            LOG.error("[ Error when getting ticket by GUID. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -203,7 +203,7 @@ public class TicketRestResource {
         try {
             return new ResponseDto(validationService.getNumberOfOpenTickets(loggedInUser), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException e) {
-            LOG.error("[ Error when getting number of open tickets. ] {} ", e.getMessage());
+            LOG.error("[ Error when getting number of open tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -224,7 +224,7 @@ public class TicketRestResource {
         try {
             return new ResponseDto(rulesService.getNumberOfAssetsNotSending(), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException e) {
-            LOG.error("[ Error when getting number of assets not sending. ] {} ", e.getMessage());
+            LOG.error("[ Error when getting number of assets not sending. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }

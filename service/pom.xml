@@ -90,11 +90,10 @@
             <artifactId>audit-model</artifactId>
             <version>${audit.model.version}</version>
         </dependency>
-
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.config</groupId>
             <artifactId>config-model</artifactId>
-            <version>4.0.0</version>
+            <version>${uvms.config.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
@@ -105,12 +104,6 @@
             <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
             <artifactId>uvms-commons-notification</artifactId>
             <version>${uvms.common.version}</version>
-        </dependency>
-		<dependency>
-            <groupId>fish.focus.uvms.maven</groupId>
-            <artifactId>uvms-pom-arquillian-deps</artifactId>
-            <type>pom</type>
-            <scope>test</scope>
         </dependency>
 
         <!-- drools dependencies -->
@@ -134,6 +127,14 @@
         <dependency>
             <groupId>org.drools</groupId>
             <artifactId>drools-templates</artifactId>
+        </dependency>
+        
+        <!-- TEST DEPENDENCIES -->
+		<dependency>
+            <groupId>fish.focus.uvms.maven</groupId>
+            <artifactId>uvms-pom-arquillian-deps</artifactId>
+            <type>pom</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

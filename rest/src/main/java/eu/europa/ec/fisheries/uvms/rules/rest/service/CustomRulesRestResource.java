@@ -82,10 +82,10 @@ public class CustomRulesRestResource {
             }
             return new ResponseDto(rulesService.createCustomRule(customRule, UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)), ResponseCode.OK);
         } catch (RulesServiceException | NullPointerException | RulesFaultException e) {
-            LOG.error("[ Error when creating. ] {} ", e.getStackTrace());
+            LOG.error("[ Error when creating. ] {} ", e);
             return ErrorHandler.getFault(e);
         } catch (AccessDeniedException e) {
-            LOG.error("[ User has no right to create global alarm rules ] {} ", e.getStackTrace());
+            LOG.error("[ User has no right to create global alarm rules ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -108,7 +108,7 @@ public class CustomRulesRestResource {
         try {
             return new ResponseDto(validationService.getCustomRulesByUser(userName), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException | NullPointerException ex) {
-            LOG.error("[ Error when getting all custom rules. ] {} ", ex.getStackTrace());
+            LOG.error("[ Error when getting all custom rules. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
     }
@@ -131,7 +131,7 @@ public class CustomRulesRestResource {
         try {
             return new ResponseDto(validationService.getCustomRulesByQuery(query), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException | NullPointerException ex) {
-            LOG.error("[ Error when getting custom rules by query. ] {} ", ex.getStackTrace());
+            LOG.error("[ Error when getting custom rules by query. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
     }
@@ -154,7 +154,7 @@ public class CustomRulesRestResource {
         try {
             return new ResponseDto(rulesService.getCustomRuleByGuid(guid), ResponseCode.OK);
         } catch (RulesFaultException | RulesModelMapperException | RulesServiceException | NullPointerException ex) {
-            LOG.error("[ Error when getting custom rule by guid. ] {} ", ex.getStackTrace());
+            LOG.error("[ Error when getting custom rule by guid. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
     }
@@ -176,7 +176,7 @@ public class CustomRulesRestResource {
         try {
             return new ResponseDto(rulesService.updateCustomRule(customRuleType, UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when updating. ] {} ", e.getStackTrace());
+            LOG.error("[ Error when updating. ] {} ", e);
             return ErrorHandler.getFault(e);
         } catch (AccessDeniedException e) {
             LOG.error("Forbidden access", e.getMessage());
@@ -202,7 +202,7 @@ public class CustomRulesRestResource {
         try {
             return new ResponseDto(rulesService.updateSubscription(updateSubscriptionType, request.getRemoteUser()), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when updating subscription. ] {} ", e.getStackTrace());
+            LOG.error("[ Error when updating subscription. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -224,7 +224,7 @@ public class CustomRulesRestResource {
         try {
             return new ResponseDto(rulesService.deleteCustomRule(guid, request.getRemoteUser(),UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when deleting custom rule. ] {} ", e.getStackTrace());
+            LOG.error("[ Error when deleting custom rule. ] {} ", e);
             return ErrorHandler.getFault(e);
         } catch (AccessDeniedException e) {
             LOG.error("Forbidden access", e.getMessage());

@@ -10,7 +10,6 @@
 
     <name>${project.parent.artifactId}-domain</name>
     <artifactId>rules-dbaccess-domain</artifactId>
-    <version>3.0.31-SNAPSHOT</version>
     <packaging>ejb</packaging>
 
     <!-- PROPERTIES USED FOR LOGBACK -->
@@ -32,11 +31,6 @@
             <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
             <artifactId>rules-model</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
-            <artifactId>uvms-commons-message</artifactId>
-            <version>${uvms.common.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>

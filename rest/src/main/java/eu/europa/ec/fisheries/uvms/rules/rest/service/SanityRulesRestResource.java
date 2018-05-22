@@ -57,7 +57,7 @@ public class SanityRulesRestResource {
         try {
             return new ResponseDto(validationService.getSanityRules(), ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException | NullPointerException ex) {
-            LOG.error("[ Error when getting all sanity rules. ] {} ", ex.getStackTrace());
+            LOG.error("[ Error when getting all sanity rules. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
     }
