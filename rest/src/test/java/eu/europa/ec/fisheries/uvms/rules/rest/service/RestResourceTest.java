@@ -28,7 +28,6 @@ import eu.europa.ec.fisheries.uvms.rules.rest.service.CustomRulesRestResource;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.rules.service.mockdata.MockData;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
