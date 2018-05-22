@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 
 //TODO: RENAME
 @RunWith(Arquillian.class)
-public class SanityRulesRestResourceTest extends TransactionalTests {
+public class RulesServiceTest extends TransactionalTests {
 
     @Test
     public void worldsBestTestTest(){
