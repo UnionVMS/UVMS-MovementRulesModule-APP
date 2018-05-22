@@ -1,23 +1,19 @@
 package eu.europa.Arquillian;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.inject.Inject;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 import org.junit.After;
 import org.junit.Before;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.*;
 
 public class TransactionalTests extends BuildRulesServiceDeployment {
 
     @Inject
     protected UserTransaction userTransaction;
-
-    @PersistenceContext
-    protected EntityManager em;
-
-    final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Before
     public void before() throws SystemException, NotSupportedException {

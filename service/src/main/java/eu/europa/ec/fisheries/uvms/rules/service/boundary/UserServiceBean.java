@@ -25,6 +25,7 @@ import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleRequestMapper;
+import eu.europa.ec.fisheries.wsdl.user.module.FindOrganisationsResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetUserContextResponse;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
@@ -71,17 +72,27 @@ public class UserServiceBean {
         return userContext;
     }
     
-    public String getOrganisationName(String userName) throws ModelMarshallException, MessageException, RulesModelMarshallException {
-        String userRequest = UserModuleRequestMapper.mapToGetContactDetailsRequest(userName);
-        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER);
-        TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
-        GetContactDetailResponse userResponse = JAXBMarshaller.unmarshallTextMessage(userMessage, GetContactDetailResponse.class);
-
+    public String getOrganisationName(String username) throws ModelMarshallException, MessageException, RulesModelMarshallException {
+        GetContactDetailResponse userResponse = getContactDetails(username);
         if (userResponse != null && userResponse.getContactDetails() != null) {
             return userResponse.getContactDetails().getOrganisationName();
         } else {
             return null;
         }
+    }
+    
+    public GetContactDetailResponse getContactDetails(String username) throws ModelMarshallException, MessageException, RulesModelMarshallException {
+        String userRequest = UserModuleRequestMapper.mapToGetContactDetailsRequest(username);
+        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER);
+        TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
+        return JAXBMarshaller.unmarshallTextMessage(userMessage, GetContactDetailResponse.class);
+    }
+    
+    public FindOrganisationsResponse findOrganisation(String nationIsoName) throws ModelMarshallException, MessageException, RulesModelMarshallException {
+        String userRequest = UserModuleRequestMapper.mapToFindOrganisationsRequest(nationIsoName);
+        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER);
+        TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
+        return JAXBMarshaller.unmarshallTextMessage(userMessage, FindOrganisationsResponse.class);
     }
     
 }

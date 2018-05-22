@@ -1,6 +1,5 @@
 package eu.europa.Arquillian;
 
-
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -22,16 +21,11 @@ public abstract class BuildRulesServiceDeployment {
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
-        //testWar.addAsResource(new File("src\\main\\resources\\templates\\SanityRulesTemplate.drt"),"src/main/resources/rules/CustomRules.drl");
-        testWar.addAsResource(new File("src\\main\\resources\\templates\\CustomRulesTemplate.drt"),"/templates/CustomRulesTemplate.drt");
-        testWar.addAsResource(new File("src\\main\\resources\\rules\\SanityRules.drl"),"src/main/resources/rules/SanityRules.drl");
-        testWar.addAsResource(new File("src\\main\\resources\\templates\\SanityRulesTemplate.drt"),"/templates/SanityRulesTemplate.drt");
-        //System.out.println(testWar.); templates/SanityRulesTemplate.drt src\main\resources\templates\SanityRulesTemplate.drt C:\Work\UVMS-RulesModule-APP\service\src\main\resources\rules\SanityRules.drl C:\Work\UVMS-RulesModule-APP\service\src\main\resources\templates\CustomRulesTemplate.drt
+        testWar.addAsResource(new File("src/main/resources/templates/CustomRulesTemplate.drt"),"/templates/CustomRulesTemplate.drt");
+        testWar.addAsResource(new File("src/main/resources/templates/SanityRulesTemplate.drt"),"/templates/SanityRulesTemplate.drt");
 
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.rules.service");
         testWar.addPackages(true, "eu.europa.Arquillian");
-
-
 
         return testWar;
     }
