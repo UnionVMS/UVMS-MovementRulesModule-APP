@@ -11,16 +11,16 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.service.bean;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.TextMessage;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
@@ -39,16 +39,17 @@ import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.rules.source.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
-import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.rules.entity.*;
+import eu.europa.ec.fisheries.uvms.rules.entity.AlarmItem;
+import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.RawMovement;
+import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
@@ -58,19 +59,16 @@ import eu.europa.ec.fisheries.uvms.rules.mapper.SanityRuleMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchValue;
-import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.AuditServiceBean;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.ExchangeServiceBean;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RulesUtil;
@@ -80,27 +78,27 @@ import eu.europa.ec.fisheries.uvms.rules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.rules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
-import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleRequestMapper;
 import eu.europa.ec.fisheries.wsdl.user.module.FindOrganisationsResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
 import eu.europa.ec.fisheries.wsdl.user.types.EndPoint;
 import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Stateless
 public class ValidationServiceBean implements ValidationService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ValidationServiceBean.class);
-
-    @EJB
-    RulesResponseConsumer consumer;
-
-    @Inject
-    RulesMessageProducer producer;
+    private static final Logger LOG = LoggerFactory.getLogger(ValidationServiceBean.class);
 
     @EJB
     private RulesDao rulesDao;
+    
+    @Inject
+    private UserServiceBean userService;
+    
+    @Inject
+    private ExchangeServiceBean exchangeService;
+    
+    @Inject
+    private AuditServiceBean auditService;
 
     @Inject
     @TicketEvent
@@ -333,10 +331,7 @@ public class ValidationServiceBean implements ValidationService {
                 if (SubscriptionTypeType.EMAIL.equals(subscription.getType())) {
                     try {
                         // Find current email address
-                        String userRequest = UserModuleRequestMapper.mapToGetContactDetailsRequest(subscription.getOwner());
-                        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER);
-                        TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
-                        GetContactDetailResponse userResponse = JAXBMarshaller.unmarshallTextMessage(userMessage, GetContactDetailResponse.class);
+                        GetContactDetailResponse userResponse = userService.getContactDetails(subscription.getOwner());
                         String emailAddress = userResponse.getContactDetails().getEMail();
                         sendToEmail(emailAddress, ruleName, fact);
                     } catch (Exception e) {
@@ -373,12 +368,7 @@ public class ValidationServiceBean implements ValidationService {
         try {
             MovementType exchangeMovement = fact.getExchangeMovement();
 
-            //XMLGregorianCalendar date = RulesUtil.dateToXmlGregorian(new Date());
-
-            String userRequest = UserModuleRequestMapper.mapToFindOrganisationsRequest(endpoint);
-            String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER);
-            TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
-            FindOrganisationsResponse userResponse = JAXBMarshaller.unmarshallTextMessage(userMessage, FindOrganisationsResponse.class);
+            FindOrganisationsResponse userResponse = userService.findOrganisation(endpoint);
 
             List<RecipientInfoType> recipientInfoList = new ArrayList<>();
 
@@ -393,18 +383,16 @@ public class ValidationServiceBean implements ValidationService {
                 }
             }
             
-            List<ServiceResponseType> pluginList = getPluginList(pluginType);
+            List<ServiceResponseType> pluginList = exchangeService.getPluginList(pluginType);
             if (pluginList != null && !pluginList.isEmpty()) {
                 for (ServiceResponseType service : pluginList) {
                     if (StatusType.STOPPED.equals(service.getStatus())) {
                         LOG.info("Service {} was Stopped, trying the next one, if possible.", service.getName());
                         continue;
                     }
-                    String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin(service.getServiceClassName(), pluginType, new Date(), ruleName, endpoint, exchangeMovement, recipientInfoList, fact.getAssetName(), fact.getIrcs(), fact.getMmsiNo(), fact.getExternalMarking(), fact.getFlagState());
-                    String messageId = producer.sendDataSourceMessage(exchangeRequest, DataSourceQueue.EXCHANGE);
-                    TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+                    exchangeService.sendReportToPlugin(service, pluginType, ruleName, endpoint, exchangeMovement, recipientInfoList, fact);
 
-                    sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, endpoint, "UVMS");
+                    auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, endpoint, "UVMS");
                     // TODO: Do something with the response??? Or don't send response from Exchange
                     return;
                 }
@@ -415,15 +403,6 @@ public class ValidationServiceBean implements ValidationService {
             LOG.error("[ Failed to send to endpoint! ] {}", e.getMessage());
         }
         
-    }
-
-    private List<ServiceResponseType> getPluginList(PluginType pluginType) throws ExchangeModelMapperException, MessageException {
-        ArrayList<PluginType> types = new ArrayList<>();
-        types.add(pluginType);
-        String serviceListRequest = ExchangeModuleRequestMapper.createGetServiceListRequest(types);
-        String serviceListRequestId = producer.sendDataSourceMessage(serviceListRequest, DataSourceQueue.EXCHANGE);
-        TextMessage serviceListResponse = consumer.getMessage(serviceListRequestId, TextMessage.class);
-        return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromModuleResponse(serviceListResponse, serviceListRequestId);
     }
 
     private void sendToEndpointFlux(String ruleName, MovementFact fact, String endpoint) {
@@ -444,17 +423,16 @@ public class ValidationServiceBean implements ValidationService {
         email.setTo(emailAddress);
 
         try {
-            List<ServiceResponseType> pluginList = getPluginList(PluginType.EMAIL);
+            List<ServiceResponseType> pluginList = exchangeService.getPluginList(PluginType.EMAIL);
             if (pluginList != null && !pluginList.isEmpty()) {
                 for (ServiceResponseType service : pluginList) {
                     if (StatusType.STOPPED.equals(service.getStatus())) {
                         LOG.info("Service {} was Stopped, trying the next one, if possible.", service.getName());
                         continue;
                     }
-                    String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(service.getServiceClassName(), email, ruleName);
-                    producer.sendDataSourceMessage(request, DataSourceQueue.EXCHANGE);
+                    exchangeService.sendEmail(service, email, ruleName);
 
-                    sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_EMAIL, null, emailAddress, "UVMS");
+                    auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_EMAIL, null, emailAddress, "UVMS");
                     return;
                 }
             }
@@ -592,16 +570,13 @@ public class ValidationServiceBean implements ValidationService {
             Ticket tempTicket = rulesDao.createTicket(ticket);
             TicketType createdTicket = TicketMapper.toTicketType(tempTicket);
 
-            //TicketType createdTicket = rulesDomainModel.createTicket(ticket);
-            String request = RulesDataSourceRequestMapper.mapCreateTicket(ticketType);
-
             ticketEvent.fire(new NotificationMessage("guid", createdTicket.getGuid()));
 
             // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
-            sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, ticket.getUpdatedBy());
-        } catch (RulesModelMapperException | DaoException | DaoMappingException e) {
+            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, ticket.getUpdatedBy());
+        } catch (DaoException | DaoMappingException e) {
             LOG.error("[ Failed to create ticket! ] {}", e.getMessage());
             LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());
         }
@@ -675,7 +650,7 @@ public class ValidationServiceBean implements ValidationService {
             // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
             alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
 
-            sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.CREATE, createdAlarmReport.getGuid(), null, alarmReport.getUpdatedBy());
+            auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.CREATE, createdAlarmReport.getGuid(), null, alarmReport.getUpdatedBy());
         } catch (DaoException | DaoMappingException e) {
             LOG.error("[ERROR] Error when creating alarm report {}", e.getMessage());
             LOG.error("[ Failed to create alarm! ] {}", e.getMessage());
@@ -707,16 +682,6 @@ public class ValidationServiceBean implements ValidationService {
             LOG.error("[ERROR] Error when counting open tickets {}", e.getMessage());
             LOG.error("[ Error when getting number of open tickets ] {}", e.getMessage());
             throw new RulesServiceException("[ Error when getting number of open alarms. ]");
-        }
-    }
-
-    private void sendAuditMessage(AuditObjectTypeEnum type, AuditOperationEnum operation, String affectedObject, String comment, String username) {
-        try {
-            String message = AuditLogMapper.mapToAuditLog(type.getValue(), operation.getValue(), affectedObject, comment, username);
-            producer.sendDataSourceMessage(message, DataSourceQueue.AUDIT);
-        }
-        catch (AuditModelMarshallException | MessageException e) {
-            LOG.error("[ Error when sending message to Audit. ] {}", e.getMessage());
         }
     }
 
