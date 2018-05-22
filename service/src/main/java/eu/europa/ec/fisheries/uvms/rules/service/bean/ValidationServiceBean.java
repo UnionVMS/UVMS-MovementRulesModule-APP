@@ -575,7 +575,7 @@ public class ValidationServiceBean implements ValidationService {
             // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
-            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, ticket.getUpdatedBy());
+            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, createdTicket.getUpdatedBy());
         } catch (DaoException | DaoMappingException e) {
             LOG.error("[ Failed to create ticket! ] {}", e.getMessage());
             LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());

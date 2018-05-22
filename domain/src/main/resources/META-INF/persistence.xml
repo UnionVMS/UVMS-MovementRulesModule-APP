@@ -6,6 +6,7 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>jdbc/uvms_rules</jta-data-source>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <class>eu.europa.ec.fisheries.uvms.config.service.entity.Parameter</class>
         <properties>
             <property name="hibernate.dialect" value="${hibernate.dialect}"/>
         </properties>
