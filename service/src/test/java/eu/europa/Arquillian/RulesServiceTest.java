@@ -133,7 +133,7 @@ public class RulesServiceTest extends TransactionalTests {
     }
 
     @Test
-    public void updateSubscription() throws Exception{
+    public void updateSubscriptionNegativeTests() throws Exception{
         try{
             rulesService.updateSubscription(null, "testUser");
             Assert.assertTrue(false);
@@ -177,6 +177,31 @@ public class RulesServiceTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
 
+    }
+
+    @Test
+    public void updateSubscriptionTest() throws Exception{
+        UpdateSubscriptionType input = new UpdateSubscriptionType();
+        SubscriptionType subscriptionType = new SubscriptionType();
+        input.setSubscription(subscriptionType);
+        subscriptionType.setType(SubscriptionTypeType.TICKET);
+        subscriptionType.setOwner("tester");
+
+        //create a custom rule and do some actual updates.....
+        CustomRuleType newRule = getCompleteNewCustomRule();
+        newRule = rulesService.createCustomRule(newRule, "test", "test");
+        Assert.assertNotNull(newRule.getGuid());
+
+        input.setRuleGuid(newRule.getGuid());
+
+        input.setOperation(SubscritionOperationType.ADD);
+        CustomRuleType output = rulesService.updateSubscription(input, null);
+        Assert.assertEquals(2, output.getSubscriptions().size());
+
+        input.setOperation((SubscritionOperationType.REMOVE));
+        output = rulesService.updateSubscription(input, null);
+        Assert.assertEquals(1, output.getSubscriptions().size());
+        Assert.assertEquals("vms_admin_com", output.getSubscriptions().get(0).getOwner());
     }
 
 
