@@ -217,7 +217,7 @@ public class RulesServiceBean implements RulesService {
             return createdRule;
 
         } catch (RulesModelMapperException | MessageException | RulesModelException | eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException e) {
-            throw new RulesServiceException(e.getMessage());
+            throw new RulesServiceException(e.getMessage(), e);
         }
     }
 
@@ -344,6 +344,11 @@ public class RulesServiceBean implements RulesService {
     public CustomRuleType updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException {
         LOG.info("[INFO] Update subscription invoked in service layer");
         try {
+            if (updateSubscriptionType == null) {
+                LOG.error("[ERROR] Subscription is null, returning Exception ]");
+                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Subscription is null", null);
+            }
+
             boolean validRequest = updateSubscriptionType.getSubscription().getType() != null && updateSubscriptionType.getSubscription().getOwner() != null;
             if (!validRequest) {
                 throw new RulesServiceException("Not a valid subscription!");
@@ -351,10 +356,7 @@ public class RulesServiceBean implements RulesService {
 
             LOG.debug("Update custom rule subscription in Rules");
 
-            if (updateSubscriptionType == null) {
-                LOG.error("[ERROR] Subscription is null, returning Exception ]");
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Subscription is null", null);
-            }
+
 
             if (updateSubscriptionType.getRuleGuid() == null) {
                 LOG.error("[ERROR] Custom Rule GUID for Subscription is null, returning Exception. ]");

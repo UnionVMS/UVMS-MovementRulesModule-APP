@@ -27,7 +27,7 @@ import java.util.List;
 public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
-    public void CreateAndDeleteCustomRuleTest() throws Exception{
+    public void createAndDeleteCustomRuleTest() throws Exception{
         CustomRuleType customRule = getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
@@ -43,7 +43,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
-    public void CreateUpdateAndDeleteCustomRule() throws Exception{
+    public void createUpdateAndDeleteCustomRule() throws Exception{
         CustomRuleType customRule = getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
@@ -63,7 +63,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
-    public void CreateFindByGuidAndDeleteCustomRule() throws Exception{
+    public void createFindByGuidAndDeleteCustomRule() throws Exception{
         CustomRuleType customRule = getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
@@ -84,7 +84,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
-    public void CreateFindByUserNameAndDelete() throws Exception{
+    public void createFindByUserNameAndDelete() throws Exception{
         CustomRuleType customRule = getCompleteNewCustomRule();
         customRule.setDescription("Test description");
 
@@ -109,7 +109,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
-    public void CreateFindByQueryAndDelete() throws Exception {
+    public void createFindByQueryAndDelete() throws Exception {
         CustomRuleType customRule = getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
