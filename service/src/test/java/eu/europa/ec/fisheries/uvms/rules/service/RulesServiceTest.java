@@ -264,16 +264,6 @@ public class RulesServiceTest extends TransactionalTests {
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
-
-        ListPagination lp = new ListPagination();
-        input.setPagination(lp);
-
-        try {
-            rulesService.getTicketList(null, input);    //missing criteria
-            Assert.assertTrue(false);
-        }catch (EJBTransactionRolledbackException e){
-            Assert.assertTrue(true);
-        }
     }
 
     @Test
@@ -354,12 +344,6 @@ public class RulesServiceTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
         TicketQuery input = new TicketQuery();
-        try{
-            rulesService.updateTicketStatusByQuery("test user", input, TicketStatusType.OPEN);
-            Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
-            Assert.assertTrue(true);
-        }
         input.getTicketSearchCriteria().add(new TicketListCriteria());
         try{
             rulesService.updateTicketStatusByQuery("test user", input, TicketStatusType.OPEN);
