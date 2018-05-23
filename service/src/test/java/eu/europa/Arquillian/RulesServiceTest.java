@@ -2,10 +2,22 @@ package eu.europa.Arquillian;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelType;
+import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
+import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
+import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.*;
+import eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType;
+import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.MobileTerminalType;
+import eu.europa.ec.fisheries.schema.rules.movement.v1.*;
+import eu.europa.ec.fisheries.schema.rules.search.v1.*;
+import eu.europa.ec.fisheries.schema.rules.source.v1.GetAlarmListByQueryResponse;
+import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
+import javafx.scene.control.Pagination;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
@@ -16,6 +28,9 @@ import javax.ejb.EJB;
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.persistence.NoResultException;
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 @RunWith(Arquillian.class)
@@ -44,9 +59,24 @@ public class RulesServiceTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
 
+        try {
+            output = rulesService.createCustomRule(input, "test", null);
+            Assert.assertTrue(false);
+        }catch (AccessDeniedException e){
+            Assert.assertTrue(true);
+        }
+
+        try {
+            output = rulesService.createCustomRule(input, null, "test");
+            Assert.assertTrue(false);
+        }catch (AccessDeniedException e){
+            Assert.assertTrue(true);
+        }
+
         input.setAvailability((AvailabilityType.PRIVATE));
         output = rulesService.createCustomRule(input, "test", "test");
         Assert.assertNotNull(output.getGuid());
+
     }
 
     @Test
@@ -57,6 +87,7 @@ public class RulesServiceTest extends TransactionalTests {
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
+
     }
 
     @Test
@@ -204,6 +235,217 @@ public class RulesServiceTest extends TransactionalTests {
         Assert.assertEquals("vms_admin_com", output.getSubscriptions().get(0).getOwner());
     }
 
+    //test for getAlarmList among the rest tests
+
+    @Test
+    public void getTicketListNegativeTest() throws Exception {   //a test with proper input is among the rest tests
+        try {
+            rulesService.getTicketList(null, null);   //missing query
+            Assert.assertTrue(false);
+        }catch (EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+
+        TicketQuery input = new TicketQuery();
+
+        try {
+            rulesService.getTicketList(null, input);    //missing pagination
+            Assert.assertTrue(false);
+        }catch (EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+
+        ListPagination lp = new ListPagination();
+        input.setPagination(lp);
+
+        try {
+            rulesService.getTicketList(null, input);    //missing criteria
+            Assert.assertTrue(false);
+        }catch (EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void getTicketsByMovementsNegativeTest() throws Exception{ //a test with proper input is among the rest tests
+        try{
+            rulesService.getTicketsByMovements(null);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+        List<String> input = new ArrayList<String>();
+
+        try{
+            rulesService.getTicketsByMovements(input);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+
+    }
+    @Test
+    public void countTicketsByMovementNegativeTest() throws Exception { //a test with proper input is among the rest tests
+        try{
+            rulesService.getTicketsByMovements(null);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+
+        List<String> input = new ArrayList<String>();
+
+        try{
+            rulesService.getTicketsByMovements(input);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void updateTicketStatusNegativeTest() throws Exception {     //a test with proper input is among the rest tests
+        try{
+            rulesService.updateTicketStatus(null);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+
+        TicketType input = new TicketType();
+        try{
+            rulesService.updateTicketStatus(input);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void updateTicketStatusByQueryNegativeTest() throws Exception{   //a test with proper input is among the rest tests
+        try{
+            rulesService.updateTicketStatusByQuery(null, null, null);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+
+        try{
+            rulesService.updateTicketStatusByQuery("test user", null, null);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+
+        try{
+            rulesService.updateTicketStatusByQuery("test user", null, TicketStatusType.OPEN);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+        TicketQuery input = new TicketQuery();
+        try{
+            rulesService.updateTicketStatusByQuery("test user", input, TicketStatusType.OPEN);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+        input.getTicketSearchCriteria().add(new TicketListCriteria());
+        try{
+            rulesService.updateTicketStatusByQuery("test user", input, TicketStatusType.OPEN);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void updateAlarmStatusNegativeTest() throws Exception{ //a test with proper input is among the rest tests
+        AlarmReportType input = new AlarmReportType();
+        try{
+            rulesService.updateAlarmStatus(input);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void updateTicketCountNegativeTest() throws Exception {     //a test with proper input is among the rest tests
+        try{
+            rulesService.updateTicketCount(null);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+
+        TicketType input = new TicketType();
+        try{
+            rulesService.updateTicketCount(input);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+    }
+
+    //getAlarmReportByGuid and getTicketByGuid have tests among the rest tests
+
+
+    @Test
+    public void setMovementReportReceivedTest() throws Exception {
+        RawMovementType input = new RawMovementType();
+        AssetId assetId = new AssetId();
+        assetId.setAssetType(AssetType.AIR);
+        input.setAssetId(assetId);
+
+        input.setPositionTime(new Date());
+        MovementPoint movementPoint = new MovementPoint();
+        movementPoint.setLatitude(0.0D);
+        movementPoint.setLongitude(0.0D);
+        input.setPosition(movementPoint);
+
+        input.setAssetName("test boat");
+        input.setComChannelType(MovementComChannelType.FLUX);
+        input.setFlagState("SWE");
+
+        MobileTerminalType mobileTerminalType = new MobileTerminalType();
+        mobileTerminalType.setConnectId("test connect id");
+        mobileTerminalType.setGuid("test MTT guid");
+        input.setMobileTerminal(mobileTerminalType);
+
+        input.setMovementType(MovementTypeType.POS);
+        input.setReportedCourse(0.1D);
+        input.setReportedSpeed(0.2D);
+        input.setSource(MovementSourceType.NAF);
+
+        MovementActivityType movementActivityType = new MovementActivityType();
+        movementActivityType.setCallback("callback");
+        movementActivityType.setMessageId("test message ID");
+        movementActivityType.setMessageType(MovementActivityTypeType.CAT);
+        input.setActivity(movementActivityType);
+        input.setConnectId("rmt connectID");
+        input.setDateRecieved(new Date());
+        input.setExternalMarking("marking");
+        input.setPluginName("plugin name");
+        input.setPluginType(PluginType.FLUX.value());
+        input.setStatus("bored");
+        input.setAckResponseMessageID("ack message");
+        input.setInternalReferenceNumber("42");
+        input.setTripNumber(42D);
+
+
+
+        try{
+            rulesService.setMovementReportReceived(null, null, null);
+            Assert.assertTrue(false);
+        }catch(EJBTransactionRolledbackException e){
+            Assert.assertTrue(true);
+        }
+
+        rulesService.setMovementReportReceived(input, null, null);  //right now this only checks that there are no exceptions thrown
+
+
+    }
 
 
 

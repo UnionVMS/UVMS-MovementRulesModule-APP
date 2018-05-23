@@ -478,7 +478,7 @@ public class RulesServiceBean implements RulesService {
             if (query.getPagination() == null) {
                 throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Pagination in ticket list query is null");
             }
-            if (query.getTicketSearchCriteria() == null) {
+            if (query.getTicketSearchCriteria().isEmpty()) {
                 throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("No search criteria in ticket list query");
             }
 
@@ -646,7 +646,7 @@ public class RulesServiceBean implements RulesService {
                 LOG.error("[ERROR] Status is null, can not update status ]");
                 throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Status is null", null);
             }
-            if (query.getTicketSearchCriteria() == null) {
+            if (query.getTicketSearchCriteria().isEmpty()) {
                 LOG.error("[ERROR] No search criteria in query, can not update status ]");
                 throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("No search criteria in ticket list query");
             }
@@ -895,7 +895,7 @@ public class RulesServiceBean implements RulesService {
         if (query.getPagination() == null) {
             throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Pagination in alarm list query is null");
         }
-        if (query.getAlarmSearchCriteria() == null) {
+        if (query.getAlarmSearchCriteria().isEmpty()) {
             throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("No search criteria in alarm list query");
         }
 
