@@ -11,15 +11,16 @@ import javax.inject.Inject;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import eu.europa.Arquillian.RulesTestHelper;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.SanityRuleType;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleListCriteria;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleSearchKey;
 import eu.europa.ec.fisheries.schema.rules.source.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.rules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
@@ -38,38 +39,38 @@ public class ValidationServiceBeanTest {
         CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
         CustomRuleType createdCustomRule = rulesService.createCustomRule(customRuleType, "", "");
         
-        List<CustomRuleType> customRulesByUser = validationService.getCustomRulesByUser(createdCustomRule.getUpdatedBy());
+        List<CustomRule> customRulesByUser = validationService.getCustomRulesByUser(createdCustomRule.getUpdatedBy());
         assertTrue(customRulesByUser.size() > 0);
     }
     
     @Test
     public void getRunnableCustomRulesTest() throws Exception {
-        List<CustomRuleType> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
+        List<CustomRule> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
         CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
         rulesService.createCustomRule(customRuleType, "", "");
         
-        List<CustomRuleType> runnableCustomRulesAfter = validationService.getRunnableCustomRules();
+        List<CustomRule> runnableCustomRulesAfter = validationService.getRunnableCustomRules();
         assertThat(runnableCustomRulesAfter.size(), is(runnableCustomRulesBefore.size() + 1));
     }
     
     @Test
     public void getRunnableCustomRulesInactivateRuleTest() throws Exception {
-        List<CustomRuleType> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
+        List<CustomRule> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
         CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
         CustomRuleType createdCustomRule = rulesService.createCustomRule(customRuleType, "", "");
         
-        List<CustomRuleType> runnableCustomRulesAfter = validationService.getRunnableCustomRules();
+        List<CustomRule> runnableCustomRulesAfter = validationService.getRunnableCustomRules();
         assertThat(runnableCustomRulesAfter.size(), is(runnableCustomRulesBefore.size() + 1));
         
         rulesService.deleteCustomRule(createdCustomRule.getGuid(), "Test", "", "");
         
-        List<CustomRuleType> runnableCustomRulesAfterDelete = validationService.getRunnableCustomRules();
+        List<CustomRule> runnableCustomRulesAfterDelete = validationService.getRunnableCustomRules();
         assertThat(runnableCustomRulesAfterDelete.size(), is(runnableCustomRulesBefore.size()));
     }
     
     @Test
     public void getSanityRulesTest() throws Exception {
-        List<SanityRuleType> sanityRules = validationService.getSanityRules();
+        List<SanityRule> sanityRules = validationService.getSanityRules();
         assertTrue(sanityRules.size() > 0);
     }
     

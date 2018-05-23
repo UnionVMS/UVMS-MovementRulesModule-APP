@@ -20,33 +20,8 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
-
 import javax.enterprise.event.Event;
 import javax.jms.TextMessage;
-import java.util.ArrayList;
-import java.util.List;
-
-import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.rules.previous.v1.PreviousReportType;
-import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
-import eu.europa.ec.fisheries.schema.rules.search.v1.TicketQuery;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetAlarmListByQueryResponse;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketByAssetAndRuleResponse;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByQueryResponse;
-import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.rules.model.dto.AlarmListResponseDto;
-import eu.europa.ec.fisheries.uvms.rules.model.dto.TicketListResponseDto;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesDataSourceRequestMapper;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesDataSourceResponseMapper;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.AuditServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.business.PreviousReportFact;
-import eu.europa.ec.fisheries.uvms.rules.service.constants.ServiceConstants;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -58,6 +33,20 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
+import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketByAssetAndRuleResponse;
+import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
+import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesDataSourceRequestMapper;
+import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesDataSourceResponseMapper;
+import eu.europa.ec.fisheries.uvms.rules.service.boundary.AuditServiceBean;
+import eu.europa.ec.fisheries.uvms.rules.service.business.PreviousReportFact;
+import eu.europa.ec.fisheries.uvms.rules.service.constants.ServiceConstants;
 
 @PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)

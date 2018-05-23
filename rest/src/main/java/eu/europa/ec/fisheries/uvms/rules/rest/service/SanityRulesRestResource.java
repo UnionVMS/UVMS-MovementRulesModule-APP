@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.rest.service;
 
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
@@ -18,24 +19,26 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.mapper.SanityRuleMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Path("/sanityrules")
 @Stateless
 @RequiresFeature(UnionVMSFeature.viewAlarmRules)
 public class SanityRulesRestResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SanityRulesRestResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SanityRulesRestResource.class);
 
     @EJB
     ValidationService validationService;
@@ -53,10 +56,10 @@ public class SanityRulesRestResource {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @Path(value = "listAll")
     public ResponseDto getSanityRules() {
-        LOG.info("Get all sanity rules invoked in rest layer");
         try {
-            return new ResponseDto(validationService.getSanityRules(), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException ex) {
+            List<SanityRule> sanityRules = validationService.getSanityRules();
+            return new ResponseDto(SanityRuleMapper.toSanityRuleTypeList(sanityRules), ResponseCode.OK);
+        } catch (RulesServiceException | RulesFaultException | NullPointerException | DaoMappingException ex) {
             LOG.error("[ Error when getting all sanity rules. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }

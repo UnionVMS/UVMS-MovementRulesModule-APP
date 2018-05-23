@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
-import eu.europa.ec.fisheries.uvms.rules.dao.bean.RulesDaoBean;
+import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import org.junit.Before;
@@ -40,7 +40,7 @@ public class DaoBeanTest {
     EntityManager em;
 
     @InjectMocks
-    private RulesDaoBean dao;
+    private RulesDao dao;
 
     @Before
     public void setUp() {

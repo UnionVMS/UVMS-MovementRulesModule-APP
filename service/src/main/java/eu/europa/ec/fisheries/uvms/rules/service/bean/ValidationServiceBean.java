@@ -32,7 +32,6 @@ import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.SanityRuleType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
@@ -55,7 +54,6 @@ import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.SanityRuleMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchValue;
@@ -124,22 +122,8 @@ public class ValidationServiceBean implements ValidationService {
      * @throws RulesServiceException
      */
     @Override
-    public List<CustomRuleType> getCustomRulesByUser(String userName) throws RulesServiceException, RulesFaultException {
-        LOG.info("Get all custom rules invoked in service layer");
-        try {
-            LOG.info("[INFO] Getting list of Custom Rules by user");
-            List<CustomRuleType> list = new ArrayList<>();
-            List<CustomRule> entityList = rulesDao.getCustomRulesByUser(userName);
-
-            for (CustomRule entity : entityList) {
-                list.add(CustomRuleMapper.toCustomRuleType(entity));
-            }
-            return list;
-
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when getting custom rules by user {}", e.getMessage());
-            throw new RulesServiceException("[ERROR] Error when getting custom rules by user. ]", e);
-        }
+    public List<CustomRule> getCustomRulesByUser(String userName) {
+        return rulesDao.getCustomRulesByUser(userName);
     }
 
     /**
@@ -149,23 +133,8 @@ public class ValidationServiceBean implements ValidationService {
      * @throws RulesServiceException
      */
     @Override
-    public List<CustomRuleType> getRunnableCustomRules() throws RulesServiceException, RulesFaultException {
-        LOG.debug("Get all valid custom rules invoked in service layer");
-        try {
-            LOG.debug("Getting list of Custom Rules that are active and not archived (rule engine)");
-
-            List<CustomRuleType> list = new ArrayList<>();
-            List<CustomRule> entityList = rulesDao.getRunnableCustomRuleList();
-
-            for (CustomRule entity : entityList) {
-                list.add(CustomRuleMapper.toCustomRuleType(entity));
-            }
-
-            return list;
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when getting runnable custom rules {}", e.getMessage());
-            throw new RulesServiceException("[ERROR] Error when getting runnable custom rules. ]", e);
-        }
+    public List<CustomRule> getRunnableCustomRules() {
+        return rulesDao.getRunnableCustomRuleList();
     }
 
     /**
@@ -175,23 +144,8 @@ public class ValidationServiceBean implements ValidationService {
      * @throws RulesServiceException
      */
     @Override
-    public List<SanityRuleType> getSanityRules() throws RulesServiceException, RulesFaultException {
-        LOG.debug("Get all sanity rules invoked in service layer");
-        try {
-            LOG.debug("Getting list of Sanity Rules (rule engine)");
-
-            List<SanityRuleType> list = new ArrayList<>();
-            List<SanityRule> entityList = rulesDao.getSanityRules();
-
-            for (SanityRule entity : entityList) {
-                list.add(SanityRuleMapper.toSanityRuleType(entity));
-            }
-
-            return list;
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when getting sanity rules {}", e.getMessage());
-            throw new RulesServiceException("[ERROR] Error when getting sanity rules. ]", e);
-        }
+    public List<SanityRule> getSanityRules() {
+        return rulesDao.getSanityRules();
     }
 
     @Override
@@ -206,10 +160,7 @@ public class ValidationServiceBean implements ValidationService {
             if (query.getPagination() == null) {
                 throw new InputArgumentException("Pagination in custom rule list query is null");
             }
-            if (query.getCustomRuleSearchCriteria() == null) {
-                throw new InputArgumentException("No search criteria in custom rule list query");
-            }
-
+            
             CustomRuleListResponseDto customRuleListByQuery = new CustomRuleListResponseDto();
             List<CustomRuleType> customRuleList = new ArrayList<>();
 

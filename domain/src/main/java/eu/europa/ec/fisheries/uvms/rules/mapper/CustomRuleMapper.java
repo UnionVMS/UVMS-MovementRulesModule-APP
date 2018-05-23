@@ -14,8 +14,6 @@ package eu.europa.ec.fisheries.uvms.rules.mapper;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.ActionType;
@@ -27,6 +25,7 @@ import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleIntervalType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleSegmentType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.LogicOperatorType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.SanityRuleType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionTypeType;
@@ -36,13 +35,14 @@ import eu.europa.ec.fisheries.uvms.rules.entity.Interval;
 import eu.europa.ec.fisheries.uvms.rules.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.rules.entity.RuleSegment;
 import eu.europa.ec.fisheries.uvms.rules.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
 
-@LocalBean
-@Stateless
 public class CustomRuleMapper {
+    
+    private CustomRuleMapper() {};
 
-    private final static Logger LOG = LoggerFactory.getLogger(CustomRuleMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CustomRuleMapper.class);
 
     public static CustomRuleType toCustomRuleType(CustomRuleType customRuleType, CustomRule customRuleEntity) throws DaoMappingException {
         try {
@@ -216,5 +216,13 @@ public class CustomRuleMapper {
     public static CustomRuleType toCustomRuleType(CustomRule customRuleEntity) throws DaoMappingException {
         CustomRuleType customRuleType = new CustomRuleType();
         return toCustomRuleType(customRuleType, customRuleEntity);
+    }
+    
+    public static List<CustomRuleType> toCustomRuleTypeList(List<CustomRule> customRules) throws DaoMappingException {
+        List<CustomRuleType> customRuleTypes = new ArrayList<>();
+        for (CustomRule customRule : customRules) {
+            customRuleTypes.add(toCustomRuleType(customRule));
+        }
+        return customRuleTypes;
     }
 }

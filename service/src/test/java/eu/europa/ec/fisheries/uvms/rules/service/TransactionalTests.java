@@ -1,4 +1,4 @@
-package eu.europa.Arquillian;
+package eu.europa.ec.fisheries.uvms.rules.service;
 
 import javax.inject.Inject;
 import javax.transaction.HeuristicMixedException;

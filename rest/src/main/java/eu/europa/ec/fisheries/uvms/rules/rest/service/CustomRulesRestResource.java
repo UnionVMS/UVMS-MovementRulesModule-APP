@@ -26,7 +26,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.nio.file.AccessDeniedException;
-
+import java.util.List;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleIntervalType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleSegmentType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
@@ -36,6 +36,9 @@ import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
@@ -106,8 +109,9 @@ public class CustomRulesRestResource {
     public ResponseDto getCustomRulesByUser(@PathParam(value = "userName") final String userName) {
         LOG.info("Get all custom rules invoked in rest layer");
         try {
-            return new ResponseDto(validationService.getCustomRulesByUser(userName), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException ex) {
+            List<CustomRule> customRulesByUser = validationService.getCustomRulesByUser(userName);
+            return new ResponseDto(CustomRuleMapper.toCustomRuleTypeList(customRulesByUser), ResponseCode.OK);
+        } catch (RulesServiceException | RulesFaultException | NullPointerException | DaoMappingException ex) {
             LOG.error("[ Error when getting all custom rules. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }

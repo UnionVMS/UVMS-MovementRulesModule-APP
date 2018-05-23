@@ -13,20 +13,23 @@ package eu.europa.ec.fisheries.uvms.rules.service.business;
 
 import java.util.Date;
 import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleIntervalType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.Interval;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CheckRulesChangesTask implements Runnable {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CheckRulesChangesTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CheckRulesChangesTask.class);
 
     ValidationService validationService;
     RulesValidator rulesValidator;
@@ -48,15 +51,15 @@ public class CheckRulesChangesTask implements Runnable {
     private void clearCustomRules() {
         LOG.debug("Looking outdated custom rules");
         try {
-            List<CustomRuleType> customRules = validationService.getRunnableCustomRules();
+            List<CustomRule> customRules = validationService.getRunnableCustomRules();
             boolean updateNeeded = false;
-            for (CustomRuleType rule : customRules) {
+            for (CustomRule rule : customRules) {
                 // If there are no time intervals, we do not need to check if the rule should be inactivated.
-                boolean inactivate = rule.getTimeIntervals().size() > 0;
-                for (CustomRuleIntervalType interval : rule.getTimeIntervals()) {
+                boolean inactivate = rule.getIntervals().size() > 0;
+                for (Interval interval : rule.getIntervals()) {
                     if (interval.getEnd() != null && interval.getStart() != null) {
-                        Date end = DateUtils.parseToUTCDateTime(interval.getEnd());
-                        Date start = DateUtils.parseToUTCDateTime(interval.getStart());
+                        Date end = interval.getEnd();
+                        Date start = interval.getStart();
                         Date now = new Date();
                         if (start.before(now) && end.after(now)) {
                             inactivate = false;
@@ -68,7 +71,7 @@ public class CheckRulesChangesTask implements Runnable {
                     LOG.debug("Inactivating {}", rule.getName());
                     rule.setActive(false);
                     rule.setUpdatedBy("UVMS");
-                    rulesService.updateCustomRule(rule);
+                    rulesService.updateCustomRule(CustomRuleMapper.toCustomRuleType(rule));
                     updateNeeded = true;
                 }
             }
@@ -76,7 +79,7 @@ public class CheckRulesChangesTask implements Runnable {
                 LOG.debug("Clear outdated custom rules");
                 rulesValidator.updateCustomRules();
             }
-        } catch (RulesServiceException | RulesFaultException e) {
+        } catch (RulesServiceException | RulesFaultException | DaoMappingException e) {
             LOG.error("[ Error when getting sanity rules ]");
             // TODO: Throw exception???
         }

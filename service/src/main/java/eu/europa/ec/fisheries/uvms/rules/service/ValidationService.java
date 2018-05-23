@@ -11,13 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.service;
 
-import javax.ejb.Local;
 import java.util.List;
-
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.SanityRuleType;
+import javax.ejb.Local;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.rules.source.v1.GetCustomRuleListByQueryResponse;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
@@ -25,11 +24,11 @@ import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException
 
 @Local
 public interface ValidationService {
-    List<CustomRuleType> getCustomRulesByUser(String userName) throws RulesServiceException, RulesFaultException;
+    List<CustomRule> getCustomRulesByUser(String userName) throws RulesServiceException, RulesFaultException;
 
-    List<CustomRuleType> getRunnableCustomRules() throws RulesServiceException, RulesFaultException;
+    List<CustomRule> getRunnableCustomRules() throws RulesServiceException, RulesFaultException;
 
-    List<SanityRuleType> getSanityRules() throws RulesServiceException, RulesFaultException;
+    List<SanityRule> getSanityRules() throws RulesServiceException, RulesFaultException;
 
     GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException;
 

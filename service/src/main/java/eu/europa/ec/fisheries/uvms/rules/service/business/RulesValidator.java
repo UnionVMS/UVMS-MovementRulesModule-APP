@@ -30,8 +30,8 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.SanityRuleType;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
@@ -54,7 +54,7 @@ public class RulesValidator {
 
     private KieFileSystem sanityKfs;
     private KieContainer sanityKcontainer;
-    private List<SanityRuleType> currentSanityRules;
+    private List<SanityRule> currentSanityRules;
 
     private KieFileSystem customKfs;
     private KieContainer customKcontainer;
@@ -70,7 +70,7 @@ public class RulesValidator {
         LOG.debug("Updating sanity rules");
         try {
             // Fetch sanity rules from DB
-            List<SanityRuleType> sanityRules = validationService.getSanityRules();
+            List<SanityRule> sanityRules = validationService.getSanityRules();
             if (sanityRules != null && !sanityRules.isEmpty()) {
               //  if (checkForChanges(sanityRules)) {
                     currentSanityRules = sanityRules;
@@ -92,7 +92,7 @@ public class RulesValidator {
         LOG.info("Updating sanity rules");
         try {
             // Fetch sanity rules from DB
-            List<SanityRuleType> sanityRules = validationService.getSanityRules();
+            List<SanityRule> sanityRules = validationService.getSanityRules();
             if (sanityRules != null && !sanityRules.isEmpty()) {
                 if (checkForChanges(sanityRules)) {
                     currentSanityRules = sanityRules;
@@ -122,7 +122,7 @@ public class RulesValidator {
         LOG.info("Updating custom rules");
         try {
             // Fetch custom rules from DB
-            List<CustomRuleType> customRules = validationService.getRunnableCustomRules();
+            List<CustomRule> customRules = validationService.getRunnableCustomRules();
             if (customRules != null && !customRules.isEmpty()) {
                 // Add custom rules
                 List<CustomRuleDto> rules = CustomRuleParser.parseRules(customRules);
@@ -201,13 +201,13 @@ public class RulesValidator {
         return drl;
     }
 
-    private String generateSanityRuleDrl(String template, List<SanityRuleType> sanityRules) {
+    private String generateSanityRuleDrl(String template, List<SanityRule> sanityRules) {
         InputStream templateStream = this.getClass().getResourceAsStream(template);
         TemplateContainer tc = new DefaultTemplateContainer(templateStream);
         TemplateDataListener listener = new TemplateDataListener(tc);
 
         int rowNum = 0;
-        for (SanityRuleType sanityRule : sanityRules) {
+        for (SanityRule sanityRule : sanityRules) {
             listener.newRow(rowNum, 0);
             listener.newCell(rowNum, 0, sanityRule.getName(), 0);
             listener.newCell(rowNum, 1, sanityRule.getExpression(), 0);
@@ -221,13 +221,13 @@ public class RulesValidator {
         return drl;
     }
 
-    private boolean checkForChanges(List<SanityRuleType> sanityRules) {
+    private boolean checkForChanges(List<SanityRule> sanityRules) {
         if (currentSanityRules == null || sanityRules.size() != currentSanityRules.size()) {
             return true;
         } else {
             for (int i = 0; i < sanityRules.size(); i++) {
-                SanityRuleType a = sanityRules.get(i);
-                SanityRuleType b = currentSanityRules.get(i);
+                SanityRule a = sanityRules.get(i);
+                SanityRule b = currentSanityRules.get(i);
 
                 if (a.getDescription() != null && !a.getDescription().equalsIgnoreCase(b.getDescription())) {
                     return true;
@@ -247,7 +247,7 @@ public class RulesValidator {
                 if (a.getName() == null && b.getName() != null) {
                     return true;
                 }
-                if (a.getUpdated() != null && !a.getUpdated().equalsIgnoreCase(b.getUpdated())) {
+                if (a.getUpdated() != null && !a.getUpdated().equals(b.getUpdated())) {
                     return true;
                 }
                 if (a.getUpdated() == null && b.getUpdated() != null) {

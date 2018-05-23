@@ -11,22 +11,21 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.mapper;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SanityRuleType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@LocalBean
-@Stateless
 public class SanityRuleMapper {
+    
+    private SanityRuleMapper() {}
 
-    private final static Logger LOG = LoggerFactory.getLogger(SanityRuleMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SanityRuleMapper.class);
 
     public static SanityRuleType toSanityRuleType(SanityRuleType sanityRuleType, SanityRule sanityRuleEntity) throws DaoMappingException {
         try {
@@ -71,5 +70,13 @@ public class SanityRuleMapper {
     public static SanityRuleType toSanityRuleType(SanityRule sanityRuleEntity) throws DaoMappingException {
         SanityRuleType sanityRuleType = new SanityRuleType();
         return toSanityRuleType(sanityRuleType, sanityRuleEntity);
+    }
+    
+    public static List<SanityRuleType> toSanityRuleTypeList(List<SanityRule> sanityRules) throws DaoMappingException {
+        List<SanityRuleType> sanityRuleTypes = new ArrayList<>();
+        for (SanityRule sanityRule : sanityRules) {
+            sanityRuleTypes.add(toSanityRuleType(sanityRule));
+        }
+        return sanityRuleTypes;
     }
 }
