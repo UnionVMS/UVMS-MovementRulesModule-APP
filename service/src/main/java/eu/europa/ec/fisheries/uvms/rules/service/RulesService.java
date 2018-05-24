@@ -24,10 +24,16 @@ import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByMovementsRes
 import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.service.business.PreviousReportFact;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
+import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 
 import javax.ejb.Local;
 import java.nio.file.AccessDeniedException;
@@ -43,7 +49,7 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    CustomRuleType createCustomRule(CustomRuleType customRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException;
+    CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMarshallException, ModelMarshallException, MessageException;
 
     CustomRuleType updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException;
 
@@ -99,15 +105,15 @@ public interface RulesService {
      * @param customRuleType
      * @throws RulesServiceException
      */
-    CustomRuleType updateCustomRule(CustomRuleType customRuleType, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException;
+    CustomRule updateCustomRule(CustomRule customRuleType, String featureName, String applicationName) throws AccessDeniedException, RulesModelMarshallException, ModelMarshallException, RulesModelException, MessageException, DaoException;
 
     /**
      * Update an object
      *
-     * @param customRuleType
+     * @param oldCustomRule
      * @throws RulesServiceException
      */
-    CustomRuleType updateCustomRule(CustomRuleType oldCustomRule) throws RulesServiceException, RulesFaultException;
+    CustomRule updateCustomRule(CustomRule oldCustomRule) throws RulesModelException, DaoException;
 
     /**
      * Creates an error report

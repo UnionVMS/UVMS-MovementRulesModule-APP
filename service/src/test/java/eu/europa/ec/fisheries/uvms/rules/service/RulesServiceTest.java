@@ -6,6 +6,13 @@ import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.EJBTransactionRolledbackException;
+
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.RuleAction;
+import eu.europa.ec.fisheries.uvms.rules.entity.RuleSegment;
+import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
+import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
+import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,10 +65,10 @@ public class RulesServiceTest extends TransactionalTests {
 
     @Test
     public void createCustomRuleTest() throws Exception{
-        CustomRuleType input = getCompleteNewCustomRule();
-        input.setAvailability(AvailabilityType.GLOBAL);
+        CustomRule input = getCompleteNewCustomRule();
+        input.setAvailability(AvailabilityType.GLOBAL.value());
 
-        CustomRuleType output = null;
+        CustomRule output = null;
         try {
             output = rulesService.createCustomRule(input, "test", "test");
             Assert.assertTrue(false);
@@ -83,7 +90,7 @@ public class RulesServiceTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
 
-        input.setAvailability((AvailabilityType.PRIVATE));
+        input.setAvailability((AvailabilityType.PRIVATE.value()));
         output = rulesService.createCustomRule(input, "test", "test");
         Assert.assertNotNull(output.getGuid());
 
@@ -102,8 +109,9 @@ public class RulesServiceTest extends TransactionalTests {
 
     @Test
     public void updateDummyCustomRuleTest() throws Exception{      //an update with proper input/execution exists among the rest tests
-        CustomRuleType input = getCompleteNewCustomRule();
-        input.setAvailability(AvailabilityType.GLOBAL);
+        CustomRule input = getCompleteNewCustomRule();
+        input.setAvailability(AvailabilityType.GLOBAL.value());
+        input.setGuid(null);
 
         //not enough rights
         try {
@@ -112,13 +120,13 @@ public class RulesServiceTest extends TransactionalTests {
         }catch (AccessDeniedException e){
             Assert.assertTrue(true);
         }
-        input.setAvailability(AvailabilityType.PRIVATE);
+        input.setAvailability(AvailabilityType.PRIVATE.value());
 
         //no guid
         try{
             rulesService.updateCustomRule(input, "test", "test");
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
 
@@ -126,7 +134,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateCustomRule(null);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
 
@@ -139,18 +147,22 @@ public class RulesServiceTest extends TransactionalTests {
 
         input.setGuid("dummyGuid");
 
+        userTransaction.rollback();
+        userTransaction.begin();
+
         //no such rule to update
         try{
+
             rulesService.updateCustomRule(input, "test", "test");
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(NoEntityFoundException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateCustomRule(input);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(NoEntityFoundException e){
             Assert.assertTrue(true);
         }
 
@@ -229,7 +241,7 @@ public class RulesServiceTest extends TransactionalTests {
         subscriptionType.setOwner("tester");
 
         //create a custom rule and do some actual updates.....
-        CustomRuleType newRule = getCompleteNewCustomRule();
+        CustomRule newRule = getCompleteNewCustomRule();
         newRule = rulesService.createCustomRule(newRule, "test", "test");
         Assert.assertNotNull(newRule.getGuid());
 
@@ -444,26 +456,29 @@ public class RulesServiceTest extends TransactionalTests {
 
 
 
-    private CustomRuleType getCompleteNewCustomRule(){
-        CustomRuleType customRule = new CustomRuleType();
+    private CustomRule getCompleteNewCustomRule(){
+        CustomRule customRule = new CustomRule();
 
         customRule.setName("Flag SWE && area DNK => Send to DNK" + " (" + System.currentTimeMillis() + ")");
-        customRule.setAvailability(AvailabilityType.PRIVATE);
+        customRule.setAvailability(AvailabilityType.PRIVATE.value());
         customRule.setUpdatedBy("vms_admin_com");
         customRule.setActive(true);
         customRule.setArchived(false);
 
         // If flagstate = SWE
-        CustomRuleSegmentType flagStateRule = new CustomRuleSegmentType();
-        flagStateRule.setStartOperator("(");
-        flagStateRule.setCriteria(CriteriaType.ASSET);
-        flagStateRule.setSubCriteria(SubCriteriaType.FLAG_STATE);
-        flagStateRule.setCondition(ConditionType.EQ);
-        flagStateRule.setValue("SWE");
-        flagStateRule.setEndOperator(")");
-        flagStateRule.setLogicBoolOperator(LogicOperatorType.AND);
-        flagStateRule.setOrder("0");
-        customRule.getDefinitions().add(flagStateRule);
+
+        RuleSegment ruleSegment = new RuleSegment();
+        ruleSegment.setStartOperator("(");
+        ruleSegment.setCriteria(CriteriaType.ASSET.value());
+        ruleSegment.setSubCriteria(SubCriteriaType.FLAG_STATE.value());
+        ruleSegment.setCondition(ConditionType.EQ.value());
+        ruleSegment.setValue("SWE");
+        ruleSegment.setEndOperator(")");
+        ruleSegment.setLogicOperator(LogicOperatorType.AND.value());
+        ruleSegment.setOrder(0);
+        ruleSegment.setCustomRule(customRule);
+
+        customRule.getRuleSegmentList().add(ruleSegment);
 
         // and area = DNK
         CustomRuleSegmentType areaRule = new CustomRuleSegmentType();
@@ -475,7 +490,22 @@ public class RulesServiceTest extends TransactionalTests {
         areaRule.setEndOperator(")");
         areaRule.setLogicBoolOperator(LogicOperatorType.NONE);
         areaRule.setOrder("1");
-        customRule.getDefinitions().add(areaRule);
+
+        ruleSegment = new RuleSegment();
+
+        ruleSegment.setStartOperator("(");
+        ruleSegment.setCriteria(CriteriaType.AREA.value());
+        ruleSegment.setSubCriteria(SubCriteriaType.AREA_CODE.value());
+        ruleSegment.setCondition(ConditionType.EQ.value());
+        ruleSegment.setValue("DNK");
+        ruleSegment.setEndOperator(")");
+        ruleSegment.setLogicOperator(LogicOperatorType.NONE.value());
+        ruleSegment.setOrder(1);
+        ruleSegment.setCustomRule(customRule);
+
+        customRule.getRuleSegmentList().add(ruleSegment);
+
+
 
         // then send to FLUX DNK
         CustomRuleActionType action = new CustomRuleActionType();
@@ -483,7 +513,14 @@ public class RulesServiceTest extends TransactionalTests {
         action.setValue("FLUX DNK");
         action.setOrder("0");
 
-        customRule.getActions().add(action);
+
+        RuleAction ruleAction = new RuleAction();
+        ruleAction.setAction(ActionType.SEND_TO_FLUX.value());
+        ruleAction.setValue("FLUX DNK");
+        ruleAction.setOrder(0);
+        ruleAction.setCustomRule(customRule);
+
+        customRule.getRuleActionList().add(ruleAction);
 
         return customRule;
     }

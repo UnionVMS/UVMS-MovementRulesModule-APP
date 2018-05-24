@@ -43,20 +43,10 @@ public class RulesDao {
     @PersistenceContext
     private EntityManager em;
 
-    public CustomRule createCustomRule(CustomRule entity) throws DaoException {
-        try {
-            em.persist(entity);
-            return entity;
-        } catch (EntityExistsException | IllegalArgumentException | TransactionRequiredException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new DaoException("[ Error when creating. ]", e);
-        } catch (PersistenceException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new DaoException("[ Error when creating. ]", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new DaoException("[ Error when creating. ]", e);
-        }
+    public CustomRule createCustomRule(CustomRule entity){
+
+        em.persist(entity);
+        return entity;
     }
 
     public CustomRule getCustomRuleByGuid(String guid) throws DaoException {

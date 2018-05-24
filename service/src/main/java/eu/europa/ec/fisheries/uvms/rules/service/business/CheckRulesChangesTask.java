@@ -13,6 +13,9 @@ package eu.europa.ec.fisheries.uvms.rules.service.business;
 
 import java.util.Date;
 import java.util.List;
+
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleIntervalType;
@@ -71,7 +74,7 @@ public class CheckRulesChangesTask implements Runnable {
                     LOG.debug("Inactivating {}", rule.getName());
                     rule.setActive(false);
                     rule.setUpdatedBy("UVMS");
-                    rulesService.updateCustomRule(CustomRuleMapper.toCustomRuleType(rule));
+                    rulesService.updateCustomRule(rule);
                     updateNeeded = true;
                 }
             }
@@ -79,7 +82,7 @@ public class CheckRulesChangesTask implements Runnable {
                 LOG.debug("Clear outdated custom rules");
                 rulesValidator.updateCustomRules();
             }
-        } catch (RulesServiceException | RulesFaultException | DaoMappingException e) {
+        } catch (RulesServiceException | DaoException | RulesModelException e) {
             LOG.error("[ Error when getting sanity rules ]");
             // TODO: Throw exception???
         }

@@ -53,6 +53,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         customRule.setName("New name");
         customRule.setGuid(returnCrt.getGuid());
 
+
         response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).put(Entity.json(customRule), String.class);
         Assert.assertEquals(200, getReturnCode(response));
         returnCrt = deserializeResponseDto(response, CustomRuleType.class);
@@ -72,6 +73,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
         customRule.setGuid(returnCrt.getGuid());
 
+
         response = getWebTarget().path("/customrules/" + returnCrt.getGuid()).request(MediaType.APPLICATION_JSON).get(String.class);
         Assert.assertEquals(200, getReturnCode(response));
         returnCrt = deserializeResponseDto(response, CustomRuleType.class);
@@ -87,6 +89,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     public void createFindByUserNameAndDelete() throws Exception{
         CustomRuleType customRule = getCompleteNewCustomRule();
         customRule.setDescription("Test description");
+        customRule.setUpdatedBy("vms_admin_com_createFindByUserNameAndDelete");
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(200, getReturnCode(response));

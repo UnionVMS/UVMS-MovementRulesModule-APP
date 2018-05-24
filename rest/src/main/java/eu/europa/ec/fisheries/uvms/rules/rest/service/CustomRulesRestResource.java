@@ -27,6 +27,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.UUID;
+
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleIntervalType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleSegmentType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
@@ -83,12 +85,14 @@ public class CustomRulesRestResource {
             if(!validate(customRule)){
                 return new ResponseDto<String>("Custom rule data is not correct", ResponseCode.INPUT_ERROR);
             }
-            return new ResponseDto(rulesService.createCustomRule(customRule, UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)), ResponseCode.OK);
-        } catch (RulesServiceException | NullPointerException | RulesFaultException e) {
-            LOG.error("[ Error when creating. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            CustomRule entity = CustomRuleMapper.toCustomRuleEntity(customRule);
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.createCustomRule(entity, UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)));
+            return new ResponseDto(response, ResponseCode.OK);
         } catch (AccessDeniedException e) {
             LOG.error("[ User has no right to create global alarm rules ] {} ", e);
+            return ErrorHandler.getFault(e);
+        } catch (Exception e ) {
+            LOG.error("[ Error when creating. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -178,12 +182,14 @@ public class CustomRulesRestResource {
     public ResponseDto update(final CustomRuleType customRuleType) {
         LOG.info("Update custom rule invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.updateCustomRule(customRuleType, UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when updating. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(customRuleType);
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.updateCustomRule(customRule, UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)));
+            return new ResponseDto(response, ResponseCode.OK);
         } catch (AccessDeniedException e) {
             LOG.error("Forbidden access", e.getMessage());
+            return ErrorHandler.getFault(e);
+        } catch (Exception e) {
+            LOG.error("[ Error when updating. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }

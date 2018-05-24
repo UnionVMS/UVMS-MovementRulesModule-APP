@@ -80,38 +80,6 @@ public class RulesServiceBeanTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Ignore
-    @Test
-    public void testCreateCustomRule() throws Exception {
-        // Setup
-        mockStatic(RulesDataSourceRequestMapper.class);
-        CustomRuleType customRule = new CustomRuleType();
-        String request = "request";
-        when(RulesDataSourceRequestMapper.mapCreateCustomRule(customRule)).thenReturn(request);
-
-        String messageId = "messageId";
-        when(mockProducer.sendDataSourceMessage(anyString(), eq(DataSourceQueue.INTERNAL))).thenReturn(messageId);
-
-        TextMessage response = mock(TextMessage.class);
-        when(mockConsumer.getMessage(messageId, TextMessage.class)).thenReturn(response);
-
-        mockStatic(RulesDataSourceResponseMapper.class);
-        CustomRuleType result = new CustomRuleType();
-        when(RulesDataSourceResponseMapper.mapToCreateCustomRuleFromResponse(response, messageId)).thenReturn(result);
-
-        // Act
-        rulesServiceBean.createCustomRule(customRule, "manageGlobalAlarmsRules", "Union-VMS");
-
-        // Verify
-        verifyStatic();
-        RulesDataSourceRequestMapper.mapCreateCustomRule(customRule);
-
-        verifyStatic();
-        RulesDataSourceResponseMapper.mapToCreateCustomRuleFromResponse(response, messageId);
-
-        verify(mockProducer).sendDataSourceMessage(anyString(), eq(DataSourceQueue.INTERNAL));
-        verify(mockConsumer).getMessage(messageId, TextMessage.class);
-    }
 
     //TODO: rewrite to not use rulesDomainModelBean
     /*@Test
@@ -138,39 +106,6 @@ public class RulesServiceBeanTest {
         rulesServiceBean.getCustomRuleByGuid(guid);
 
     }*/
-
-    @Ignore
-    @Test
-    public void testUpdateCustomRule() throws Exception {
-        // Setup
-        mockStatic(RulesDataSourceRequestMapper.class);
-        CustomRuleType customRule = new CustomRuleType();
-        String request = "request";
-        when(RulesDataSourceRequestMapper.mapUpdateCustomRule(customRule)).thenReturn(request);
-
-        String messageId = "messageId";
-        when(mockProducer.sendDataSourceMessage(anyString(), eq(DataSourceQueue.INTERNAL))).thenReturn(messageId);
-
-        TextMessage response = mock(TextMessage.class);
-        when(mockConsumer.getMessage(messageId, TextMessage.class)).thenReturn(response);
-
-        mockStatic(RulesDataSourceResponseMapper.class);
-        CustomRuleType result = new CustomRuleType();
-        when(RulesDataSourceResponseMapper.mapToUpdateCustomRuleFromResponse(response, messageId)).thenReturn(result);
-
-        // Act
-        rulesServiceBean.updateCustomRule(customRule, "manageGlobalAlarmsRules", "Union-VMS");
-
-        // Verify
-        verifyStatic();
-        RulesDataSourceRequestMapper.mapUpdateCustomRule(customRule);
-
-        verifyStatic();
-        RulesDataSourceResponseMapper.mapToUpdateCustomRuleFromResponse(response, messageId);
-
-        verify(mockProducer).sendDataSourceMessage(anyString(), eq(DataSourceQueue.INTERNAL));
-        verify(mockConsumer).getMessage(messageId, TextMessage.class);
-    }
 
     //TODO: Remake to not use RulesDomainModelBean
     /*@Test

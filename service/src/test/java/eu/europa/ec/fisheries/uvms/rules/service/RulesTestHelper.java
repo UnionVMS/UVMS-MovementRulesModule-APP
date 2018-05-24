@@ -21,15 +21,16 @@ import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
 
 public class RulesTestHelper {
 
-    public static CustomRuleType createBasicCustomRuleType() {
-        CustomRuleType customRule = new CustomRuleType();
+    public static CustomRule createBasicCustomRuleType() {
+        CustomRule customRule = new CustomRule();
         customRule.setName("Test Rule " + System.currentTimeMillis());
-        customRule.setAvailability(AvailabilityType.PRIVATE);
+        customRule.setAvailability(AvailabilityType.PRIVATE.value());
         customRule.setUpdatedBy("Test User");
         customRule.setActive(true);
         customRule.setArchived(false);

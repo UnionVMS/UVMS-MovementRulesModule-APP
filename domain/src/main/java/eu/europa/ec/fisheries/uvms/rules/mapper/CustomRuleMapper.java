@@ -127,10 +127,12 @@ public class CustomRuleMapper {
 
     public static CustomRule toCustomRuleEntity(CustomRule customRuleEntity, CustomRuleType customRuleType) throws DaoMappingException {
         try {
-            Date now = DateUtils.nowUTC().toGregorianCalendar().getTime();
+            //Date now = DateUtils.nowUTC().toGregorianCalendar().getTime();   //just writing new Date() is apperently way to simple.......
 
+            Date now = new Date();
             // Base
             customRuleEntity.setName(customRuleType.getName());
+            customRuleEntity.setGuid(customRuleType.getGuid());     //why was this not here from the beginning ?!?!?!?
             customRuleEntity.setAvailability(customRuleType.getAvailability().value());
             customRuleEntity.setDescription(customRuleType.getDescription());
             customRuleEntity.setActive(customRuleType.isActive());

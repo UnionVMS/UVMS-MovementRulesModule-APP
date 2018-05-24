@@ -26,6 +26,7 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.JMSException;
+import javax.jms.Message;
 
 import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
 import eu.europa.ec.fisheries.uvms.rules.entity.*;
@@ -34,6 +35,8 @@ import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchValue;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
@@ -174,51 +177,49 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesFaultException
      */
     @Override
-    public CustomRuleType createCustomRule(CustomRuleType customRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException {
+    public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMarshallException, ModelMarshallException, MessageException {
         LOG.info("[INFO] Create invoked in service layer");
-        try {
-            // Get organisation of user
-            String organisationName = userService.getOrganisationName(customRule.getUpdatedBy());
-            if (organisationName != null) {
-                customRule.setOrganisation(organisationName);
-            } else {
-                LOG.warn("User {} is not connected to any organisation!", customRule.getUpdatedBy());
-            }
-            if (customRule.getAvailability().equals(AvailabilityType.GLOBAL)) {
-                UserContext userContext = userService.getFullUserContext(customRule.getUpdatedBy(), applicationName);
-                if (!hasFeature(userContext, featureName)) {
-                    throw new AccessDeniedException("Forbidden access");
-                }
-            }
-            CustomRuleType createdRule = null;
-            //CustomRuleType createdRule = rulesDomainModel.createCustomRule(customRule);
-            //Copy-paste from RulesDomainModelBean to remove that class
-            LOG.debug("Create in Rules");
-            try {
-                CustomRule entity = CustomRuleMapper.toCustomRuleEntity(customRule);
 
-                List<RuleSubscription> subscriptionEntities = new ArrayList<>();
-                RuleSubscription creatorSubscription = new RuleSubscription();
-                creatorSubscription.setCustomRule(entity);
-                creatorSubscription.setOwner(customRule.getUpdatedBy());
-                creatorSubscription.setType(SubscriptionTypeType.TICKET.value());
-                subscriptionEntities.add(creatorSubscription);
-                entity.getRuleSubscriptionList().addAll(subscriptionEntities);
-
-                rulesDao.createCustomRule(entity);
-                createdRule = CustomRuleMapper.toCustomRuleType(entity);
-            } catch (DaoException | DaoMappingException e) {
-                LOG.error("[ERROR] Error when creating CustomRule ] {}", e.getMessage());
-                throw new RulesModelException("Error when creating CustomRule", e);
-            }
-            // TODO: Rewrite so rules are loaded when changed
-            rulesValidator.updateCustomRules();
-            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, createdRule.getGuid(), null, customRule.getUpdatedBy());
-            return createdRule;
-
-        } catch (RulesModelMapperException | MessageException | RulesModelException | eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException e) {
-            throw new RulesServiceException(e.getMessage(), e);
+        // Get organisation of user
+        String organisationName = userService.getOrganisationName(customRule.getUpdatedBy());
+        if (organisationName != null) {
+            customRule.setOrganisation(organisationName);
+        } else {
+            LOG.warn("User {} is not connected to any organisation!", customRule.getUpdatedBy());
         }
+        if (customRule.getAvailability().equals(AvailabilityType.GLOBAL.value())) {
+            UserContext userContext = userService.getFullUserContext(customRule.getUpdatedBy(), applicationName);
+            if (!hasFeature(userContext, featureName)) {
+                throw new AccessDeniedException("Forbidden access");
+            }
+        }
+        CustomRule createdRule = null;
+        //Copy-paste from RulesDomainModelBean to remove that class
+        LOG.debug("Create in Rules");
+        //CustomRule entity = CustomRuleMapper.toCustomRuleEntity(customRule);
+
+        List<RuleSubscription> subscriptionEntities = new ArrayList<>();
+        RuleSubscription creatorSubscription = new RuleSubscription();
+        creatorSubscription.setCustomRule(customRule);
+        creatorSubscription.setOwner(customRule.getUpdatedBy());
+        creatorSubscription.setType(SubscriptionTypeType.TICKET.value());
+        subscriptionEntities.add(creatorSubscription);
+        customRule.getRuleSubscriptionList().addAll(subscriptionEntities);
+
+
+        customRule.setUpdated(new Date());
+        customRule.setStartDate(new Date());
+        customRule.setGuid(UUID.randomUUID().toString());
+
+        rulesDao.createCustomRule(customRule);
+        createdRule = customRule;
+
+        // TODO: Rewrite so rules are loaded when changed
+        rulesValidator.updateCustomRules();
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, createdRule.getGuid(), null, customRule.getUpdatedBy());
+        return createdRule;
+
+
     }
 
     /**
@@ -247,75 +248,69 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public CustomRuleType updateCustomRule(CustomRuleType oldCustomRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException {
+    public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, RulesModelMarshallException, ModelMarshallException, RulesModelException, MessageException, DaoException {
         LOG.info("[INFO] Update custom rule invoked in service layer");
-        try {
-            // Get organisation of user
-            String organisationName = userService.getOrganisationName(oldCustomRule.getUpdatedBy());
-            if (organisationName != null) {
-                oldCustomRule.setOrganisation(organisationName);
-            } else {
-                LOG.warn("User {} is not connected to any organisation!", oldCustomRule.getUpdatedBy());
-            }
-
-            if (oldCustomRule.getAvailability().equals(AvailabilityType.GLOBAL)) {
-                UserContext userContext = userService.getFullUserContext(oldCustomRule.getUpdatedBy(), applicationName);
-                if (!hasFeature(userContext, featureName)) {
-                    throw new AccessDeniedException("Forbidden access");
-                }
-            }
-
-            CustomRuleType customRule = internalUpdateCustomRule(oldCustomRule);
-            rulesValidator.updateCustomRules();
-            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, customRule.getGuid(), null, oldCustomRule.getUpdatedBy());
-            return customRule;
-        } catch (RulesModelMapperException | MessageException | eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException | RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+        // Get organisation of user
+        String organisationName = userService.getOrganisationName(oldCustomRule.getUpdatedBy());
+        if (organisationName != null) {
+            oldCustomRule.setOrganisation(organisationName);
+        } else {
+            LOG.warn("User {} is not connected to any organisation!", oldCustomRule.getUpdatedBy());
         }
+
+        if (oldCustomRule.getAvailability().equals(AvailabilityType.GLOBAL.value())) {
+            UserContext userContext = userService.getFullUserContext(oldCustomRule.getUpdatedBy(), applicationName);
+            if (!hasFeature(userContext, featureName)) {
+                throw new AccessDeniedException("Forbidden access");
+            }
+        }
+
+        CustomRule customRule = internalUpdateCustomRule(oldCustomRule);
+        rulesValidator.updateCustomRules();
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, customRule.getGuid(), null, oldCustomRule.getUpdatedBy());
+        return customRule;
+
     }
     //Copy from RulesDomainModelBean to remove that class
-    private CustomRuleType internalUpdateCustomRule(CustomRuleType customRule)  throws RulesModelException {
+    private CustomRule internalUpdateCustomRule(CustomRule newEntity)  throws RulesModelException, DaoException {
         LOG.debug("Update custom rule in Rules");
 
-        if (customRule == null) {
+        if (newEntity == null) {
             LOG.error("[ERROR] Custom Rule is null, returning Exception ]");
             throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Custom Rule is null", null);
         }
 
-        if (customRule.getGuid() == null) {
+        if (newEntity.getGuid() == null) {
             LOG.error("[ERROR] GUID of Custom Rule is null, returning Exception. ]");
             throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("GUID of Custom Rule is null", null);
         }
 
-        try {
 
-            CustomRule newEntity = CustomRuleMapper.toCustomRuleEntity(customRule);
+        CustomRule oldEntity = rulesDao.getCustomRuleByGuid(newEntity.getGuid());
+        newEntity.setGuid(UUID.randomUUID().toString());
 
-            CustomRule oldEntity = rulesDao.getCustomRuleByGuid(customRule.getGuid());
-
-            // Copy last triggered if entities are equal
-            if (oldEntity.equals(newEntity)) {
-                newEntity.setTriggered(oldEntity.getTriggered());
-            }
-
-            // Close old version
-            oldEntity.setArchived(true);
-            oldEntity.setActive(false);
-            oldEntity.setEndDate(DateUtils.nowUTC().toGregorianCalendar().getTime());
-            // Copy subscription list (ignore if provided)
-            List<RuleSubscription> subscriptions = oldEntity.getRuleSubscriptionList();
-            for (RuleSubscription subscription : subscriptions) {
-                rulesDao.detachSubscription(subscription);
-                newEntity.getRuleSubscriptionList().add(subscription);
-                subscription.setCustomRule(newEntity);
-            }
-
-            newEntity = rulesDao.createCustomRule(newEntity);
-            return CustomRuleMapper.toCustomRuleType(newEntity);
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when updating custom rule {}", e.getMessage());
-            throw new RulesModelException("[ERROR] Error when updating custom rule. ]", e);
+        // Copy last triggered if entities are equal
+        if (oldEntity.equals(newEntity)) {
+            newEntity.setTriggered(oldEntity.getTriggered());
         }
+
+        // Close old version
+        oldEntity.setArchived(true);
+        oldEntity.setActive(false);
+        oldEntity.setEndDate(DateUtils.nowUTC().toGregorianCalendar().getTime());
+        // Copy subscription list (ignore if provided)
+        List<RuleSubscription> subscriptions = oldEntity.getRuleSubscriptionList();
+        for (RuleSubscription subscription : subscriptions) {
+            rulesDao.detachSubscription(subscription);
+            newEntity.getRuleSubscriptionList().add(subscription);
+            subscription.setCustomRule(newEntity);
+        }
+
+        newEntity.setUpdated(new Date());
+        newEntity.setStartDate(new Date());
+        newEntity = rulesDao.createCustomRule(newEntity);
+        return newEntity;
+
     }
     /**
      * {@inheritDoc}
@@ -324,15 +319,13 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public CustomRuleType updateCustomRule(CustomRuleType oldCustomRule) throws RulesServiceException, RulesFaultException {
+    public CustomRule updateCustomRule(CustomRule oldCustomRule) throws RulesServiceException, RulesModelException, DaoException {
         LOG.info("[INFO] Update custom rule invoked in service layer by timer");
-        try {
-            CustomRuleType updatedCustomRule = internalUpdateCustomRule(oldCustomRule);
-            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid(), null, oldCustomRule.getUpdatedBy());
-            return updatedCustomRule;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
-        }
+
+        CustomRule updatedCustomRule = internalUpdateCustomRule(oldCustomRule);
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid(), null, oldCustomRule.getUpdatedBy());
+        return updatedCustomRule;
+
     }
 
     /**

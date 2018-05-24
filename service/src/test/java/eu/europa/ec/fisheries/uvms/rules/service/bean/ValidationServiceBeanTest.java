@@ -36,8 +36,8 @@ public class ValidationServiceBeanTest {
     
     @Test
     public void getCustomRulesByUserTest() throws Exception {
-        CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
-        CustomRuleType createdCustomRule = rulesService.createCustomRule(customRuleType, "", "");
+        CustomRule customRule = RulesTestHelper.createBasicCustomRuleType();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         List<CustomRule> customRulesByUser = validationService.getCustomRulesByUser(createdCustomRule.getUpdatedBy());
         assertTrue(customRulesByUser.size() > 0);
@@ -46,8 +46,8 @@ public class ValidationServiceBeanTest {
     @Test
     public void getRunnableCustomRulesTest() throws Exception {
         List<CustomRule> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
-        CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
-        rulesService.createCustomRule(customRuleType, "", "");
+        CustomRule customRule = RulesTestHelper.createBasicCustomRuleType();
+        rulesService.createCustomRule(customRule, "", "");
         
         List<CustomRule> runnableCustomRulesAfter = validationService.getRunnableCustomRules();
         assertThat(runnableCustomRulesAfter.size(), is(runnableCustomRulesBefore.size() + 1));
@@ -56,8 +56,8 @@ public class ValidationServiceBeanTest {
     @Test
     public void getRunnableCustomRulesInactivateRuleTest() throws Exception {
         List<CustomRule> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
-        CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
-        CustomRuleType createdCustomRule = rulesService.createCustomRule(customRuleType, "", "");
+        CustomRule customRule = RulesTestHelper.createBasicCustomRuleType();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         List<CustomRule> runnableCustomRulesAfter = validationService.getRunnableCustomRules();
         assertThat(runnableCustomRulesAfter.size(), is(runnableCustomRulesBefore.size() + 1));
@@ -76,8 +76,8 @@ public class ValidationServiceBeanTest {
     
     @Test
     public void getCustomRuleListByQueryGuidTest() throws Exception {
-        CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
-        CustomRuleType createdCustomRule = rulesService.createCustomRule(customRuleType, "", "");
+        CustomRule customRule = RulesTestHelper.createBasicCustomRuleType();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         CustomRuleQuery query = RulesTestHelper.createBasicCustomRuleQuery();
         CustomRuleListCriteria criteria = new CustomRuleListCriteria();
@@ -98,8 +98,8 @@ public class ValidationServiceBeanTest {
     
     @Test
     public void getCustomRuleListByQueryUserTest() throws Exception {
-        CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
-        CustomRuleType createdCustomRule = rulesService.createCustomRule(customRuleType, "", "");
+        CustomRule customRule = RulesTestHelper.createBasicCustomRuleType();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         CustomRuleQuery query = RulesTestHelper.createBasicCustomRuleQuery();
         CustomRuleListCriteria criteria = new CustomRuleListCriteria();
@@ -122,8 +122,8 @@ public class ValidationServiceBeanTest {
         calendar.set(Calendar.MILLISECOND, 0);
         Date timestamp = calendar.getTime();
         
-        CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
-        CustomRuleType createdCustomRule = rulesService.createCustomRule(customRuleType, "", "");
+        CustomRule customRule = RulesTestHelper.createBasicCustomRuleType();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         MovementFact movementFact = RulesTestHelper.createBasicMovementFact();
         validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid(), movementFact, "EMAIL,test@test.com");
@@ -138,8 +138,8 @@ public class ValidationServiceBeanTest {
     
     @Test
     public void customRuleTriggeredNewTicketShouldBeCreatedTest() throws Exception {
-        CustomRuleType customRuleType = RulesTestHelper.createBasicCustomRuleType();
-        CustomRuleType createdCustomRule = rulesService.createCustomRule(customRuleType, "", "");
+        CustomRule customRule = RulesTestHelper.createBasicCustomRuleType();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
         
