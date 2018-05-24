@@ -214,9 +214,10 @@ public class CustomRulesRestResource {
     public ResponseDto updateSubscription(UpdateSubscriptionType updateSubscriptionType) {
         LOG.info("Update subscription invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.updateSubscription(updateSubscriptionType, request.getRemoteUser()), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when updating subscription. ] {} ", e);
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.updateSubscription(updateSubscriptionType, request.getRemoteUser()));
+            return new ResponseDto(response, ResponseCode.OK);
+        } catch (RulesServiceException | RulesFaultException | NullPointerException | DaoMappingException | InputArgumentException | DaoException e) {
+            LOG.error("[ Error when updating subscription and custom rule. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }

@@ -190,7 +190,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateSubscription(null, "testUser");
             Assert.assertTrue(false);
-        }catch (EJBTransactionRolledbackException e){
+        }catch (InputArgumentException e){
             Assert.assertTrue(true);
         }
 
@@ -218,15 +218,18 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateSubscription(input, "testUser"); //no rule Guid
             Assert.assertTrue(false);
-        }catch (EJBTransactionRolledbackException e){
+        }catch (InputArgumentException e){
             Assert.assertTrue(true);
         }
         input.setRuleGuid("dummyGuid");
 
+        userTransaction.rollback();
+        userTransaction.begin();
+
         try{
             rulesService.updateSubscription(input, "testUser"); //non-existant rule guid
             Assert.assertTrue(false);
-        }catch (EJBTransactionRolledbackException e){
+        }catch (NoEntityFoundException e){
             Assert.assertTrue(true);
         }
 
@@ -248,13 +251,13 @@ public class RulesServiceTest extends TransactionalTests {
         input.setRuleGuid(newRule.getGuid());
 
         input.setOperation(SubscritionOperationType.ADD);
-        CustomRuleType output = rulesService.updateSubscription(input, null);
-        Assert.assertEquals(2, output.getSubscriptions().size());
+        CustomRule output = rulesService.updateSubscription(input, null);
+        Assert.assertEquals(2, output.getRuleSubscriptionList().size());
 
         input.setOperation((SubscritionOperationType.REMOVE));
         output = rulesService.updateSubscription(input, null);
-        Assert.assertEquals(1, output.getSubscriptions().size());
-        Assert.assertEquals("vms_admin_com", output.getSubscriptions().get(0).getOwner());
+        Assert.assertEquals(1, output.getRuleSubscriptionList().size());
+        Assert.assertEquals("vms_admin_com", output.getRuleSubscriptionList().get(0).getOwner());
     }
 
     //test for getAlarmList among the rest tests

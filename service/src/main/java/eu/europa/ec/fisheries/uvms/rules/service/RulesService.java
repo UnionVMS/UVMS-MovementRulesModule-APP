@@ -27,6 +27,8 @@ import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
@@ -51,7 +53,7 @@ public interface RulesService {
      */
     CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMarshallException, ModelMarshallException, MessageException;
 
-    CustomRuleType updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException;
+    CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException, InputArgumentException, DaoException, DaoMappingException;
 
     /**
      * Lists (all) custom rules

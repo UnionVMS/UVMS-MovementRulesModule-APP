@@ -334,70 +334,57 @@ public class RulesServiceBean implements RulesService {
      * @param updateSubscriptionType
      */
     @Override
-    public CustomRuleType updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException {
+    public CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException, DaoMappingException {
         LOG.info("[INFO] Update subscription invoked in service layer");
-        try {
-            if (updateSubscriptionType == null) {
-                LOG.error("[ERROR] Subscription is null, returning Exception ]");
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Subscription is null", null);
-            }
-
-            boolean validRequest = updateSubscriptionType.getSubscription().getType() != null && updateSubscriptionType.getSubscription().getOwner() != null;
-            if (!validRequest) {
-                throw new RulesServiceException("Not a valid subscription!");
-            }
-
-            LOG.debug("Update custom rule subscription in Rules");
-
-
-
-            if (updateSubscriptionType.getRuleGuid() == null) {
-                LOG.error("[ERROR] Custom Rule GUID for Subscription is null, returning Exception. ]");
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Custom Rule GUID for Subscription is null", null);
-            }
-
-            CustomRuleType updateCustomRule = null;
-            try {
-                CustomRule customRuleEntity = rulesDao.getCustomRuleByGuid(updateSubscriptionType.getRuleGuid());
-
-                if (SubscritionOperationType.ADD.equals(updateSubscriptionType.getOperation())) {
-                    RuleSubscription ruleSubscription = new RuleSubscription();
-                    ruleSubscription.setOwner(updateSubscriptionType.getSubscription().getOwner());
-                    if (updateSubscriptionType.getSubscription().getType() != null) {
-                        ruleSubscription.setType(updateSubscriptionType.getSubscription().getType().name());
-                    }
-                    customRuleEntity.getRuleSubscriptionList().add(ruleSubscription);
-                    ruleSubscription.setCustomRule(customRuleEntity);
-                } else if (SubscritionOperationType.REMOVE.equals(updateSubscriptionType.getOperation())) {
-                    List<RuleSubscription> subscriptions = customRuleEntity.getRuleSubscriptionList();
-                    for (RuleSubscription subscription : subscriptions) {
-                        if (subscription.getOwner().equals(updateSubscriptionType.getSubscription().getOwner()) && subscription.getType().equals(updateSubscriptionType.getSubscription().getType().name())) {
-                            customRuleEntity.getRuleSubscriptionList().remove(subscription);
-                            rulesDao.removeSubscription(subscription);
-                            break;
-                        }
-                    }
-                }
-
-                updateCustomRule = CustomRuleMapper.toCustomRuleType(customRuleEntity);
-            } catch (DaoException | DaoMappingException e) {
-                LOG.error("[ERROR] Error when updating custom rule {}", e.getMessage());
-                throw new RulesModelException("[ERROR] Error when updating custom rule. ]", e);
-            }
-
-            //CustomRuleType updateCustomRule = rulesDomainModel.updateCustomRuleSubscription(updateSubscriptionType);
-
-            if (SubscritionOperationType.ADD.equals(updateSubscriptionType.getOperation())) {
-                // TODO: Don't log rule guid, log subscription guid?
-                auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.CREATE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
-            } else if (SubscritionOperationType.REMOVE.equals(updateSubscriptionType.getOperation())) {
-                // TODO: Don't log rule guid, log subscription guid?
-                auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.DELETE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
-            }
-            return updateCustomRule;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+        if (updateSubscriptionType == null) {
+            LOG.error("[ERROR] Subscription is null, returning Exception ]");
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Subscription is null", null);
         }
+
+        boolean validRequest = updateSubscriptionType.getSubscription().getType() != null && updateSubscriptionType.getSubscription().getOwner() != null;
+        if (!validRequest) {
+            throw new RulesServiceException("Not a valid subscription!");
+        }
+
+        LOG.debug("Update custom rule subscription in Rules");
+
+
+        if (updateSubscriptionType.getRuleGuid() == null) {
+            LOG.error("[ERROR] Custom Rule GUID for Subscription is null, returning Exception. ]");
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Custom Rule GUID for Subscription is null", null);
+        }
+
+        CustomRule customRuleEntity = rulesDao.getCustomRuleByGuid(updateSubscriptionType.getRuleGuid());
+
+        if (SubscritionOperationType.ADD.equals(updateSubscriptionType.getOperation())) {
+            RuleSubscription ruleSubscription = new RuleSubscription();
+            ruleSubscription.setOwner(updateSubscriptionType.getSubscription().getOwner());
+            if (updateSubscriptionType.getSubscription().getType() != null) {
+                ruleSubscription.setType(updateSubscriptionType.getSubscription().getType().name());
+            }
+            customRuleEntity.getRuleSubscriptionList().add(ruleSubscription);
+            ruleSubscription.setCustomRule(customRuleEntity);
+        } else if (SubscritionOperationType.REMOVE.equals(updateSubscriptionType.getOperation())) {
+            List<RuleSubscription> subscriptions = customRuleEntity.getRuleSubscriptionList();
+            for (RuleSubscription subscription : subscriptions) {
+                if (subscription.getOwner().equals(updateSubscriptionType.getSubscription().getOwner()) && subscription.getType().equals(updateSubscriptionType.getSubscription().getType().name())) {
+                    customRuleEntity.getRuleSubscriptionList().remove(subscription);
+                    rulesDao.removeSubscription(subscription);
+                    break;
+                }
+            }
+        }
+        //CustomRuleType updateCustomRule = CustomRuleMapper.toCustomRuleType(customRuleEntity);
+
+
+        if (SubscritionOperationType.ADD.equals(updateSubscriptionType.getOperation())) {
+            // TODO: Don't log rule guid, log subscription guid?
+            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.CREATE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
+        } else if (SubscritionOperationType.REMOVE.equals(updateSubscriptionType.getOperation())) {
+            // TODO: Don't log rule guid, log subscription guid?
+            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.DELETE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
+        }
+        return customRuleEntity;
     }
 
     /**
