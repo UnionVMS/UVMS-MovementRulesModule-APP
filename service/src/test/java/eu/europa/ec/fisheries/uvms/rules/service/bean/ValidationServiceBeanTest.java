@@ -128,8 +128,8 @@ public class ValidationServiceBeanTest {
         MovementFact movementFact = RulesTestHelper.createBasicMovementFact();
         validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid(), movementFact, "EMAIL,test@test.com");
         
-        CustomRuleType updatedCustomRule = rulesService.getCustomRuleByGuid(createdCustomRule.getGuid());
-        String lastTriggered = updatedCustomRule.getLastTriggered();
+        CustomRule updatedCustomRule = rulesService.getCustomRuleByGuid(createdCustomRule.getGuid());
+        String lastTriggered = DateUtils.dateToString(updatedCustomRule.getTriggered());
         assertThat(lastTriggered, is(notNullValue()));
         
         Date dateTriggered = DateUtils.stringToDate(lastTriggered);

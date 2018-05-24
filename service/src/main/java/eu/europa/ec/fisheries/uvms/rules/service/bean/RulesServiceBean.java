@@ -230,12 +230,12 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public CustomRuleType getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException {
+    public CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException {
         LOG.info("[INFO] Get Custom Rule by guid invoked in service layer");
         try {
-            CustomRule entity = rulesDao.getCustomRuleByGuid(guid);
-            return CustomRuleMapper.toCustomRuleType(entity);
-        } catch (DaoException | DaoMappingException e) {
+            return rulesDao.getCustomRuleByGuid(guid);
+
+        } catch (DaoException e) {
             LOG.error("[ERROR] Error when getting CustomRule by GUID ] {}", e.getMessage());
             throw new RulesServiceException(e.getMessage(), e);
         }
@@ -407,35 +407,30 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public CustomRuleType deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException {
+    public CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMapperException {
         LOG.info("[INFO] Deleting custom rule by guid: {}.", guid);
         if (guid == null) {
             throw new InputArgumentException("No custom rule to remove");
         }
 
-        try {
-            CustomRuleType customRuleFromDb = getCustomRuleByGuid(guid);
-            if (customRuleFromDb.getAvailability().equals(AvailabilityType.GLOBAL)) {
-                UserContext userContext = userService.getFullUserContext(username, applicationName);
-                if (!hasFeature(userContext, featureName)) {
-                    throw new AccessDeniedException("Forbidden access");
-                }
+        CustomRule customRuleFromDb = getCustomRuleByGuid(guid);
+        if (customRuleFromDb.getAvailability().equals(AvailabilityType.GLOBAL.value())) {
+            UserContext userContext = userService.getFullUserContext(username, applicationName);
+            if (!hasFeature(userContext, featureName)) {
+                throw new AccessDeniedException("Forbidden access");
             }
-
-            CustomRule entity = rulesDao.getCustomRuleByGuid(guid);
-            entity.setArchived(true);
-            entity.setActive(false);
-            entity.setEndDate(DateUtils.nowUTC().toGregorianCalendar().getTime());
-            CustomRuleType deletedRule = CustomRuleMapper.toCustomRuleType(entity);
-
-            //CustomRuleType deletedRule = rulesDomainModel.deleteCustomRule(guid);
-            rulesValidator.updateCustomRules();
-            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, deletedRule.getGuid(), null, username);
-            return deletedRule;
-        } catch (RulesModelMapperException | RulesModelException | DaoException | DaoMappingException e) {
-            LOG.error(e.getMessage());
-            throw new RulesServiceException(e.getMessage());
         }
+
+        CustomRule entity = rulesDao.getCustomRuleByGuid(guid);
+        entity.setArchived(true);
+        entity.setActive(false);
+        entity.setEndDate(new Date());
+        //CustomRuleType deletedRule = CustomRuleMapper.toCustomRuleType(entity);
+
+        rulesValidator.updateCustomRules();
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, entity.getGuid(), null, username);
+        return entity;
+
     }
 
     /**

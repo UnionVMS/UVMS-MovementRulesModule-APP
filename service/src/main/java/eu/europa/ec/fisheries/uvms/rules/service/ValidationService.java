@@ -17,6 +17,10 @@ import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.rules.source.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
+import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
@@ -30,7 +34,7 @@ public interface ValidationService {
 
     List<SanityRule> getSanityRules() throws RulesServiceException, RulesFaultException;
 
-    GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException;
+    GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException, DaoMappingException, SearchMapperException, DaoException, InputArgumentException;
 
     // Triggered by rule engine
     void customRuleTriggered(String ruleName, String ruleGuid, MovementFact fact, String actions);

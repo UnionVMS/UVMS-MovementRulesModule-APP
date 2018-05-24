@@ -19,6 +19,8 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+
+import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
@@ -149,55 +151,49 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     @Override
-    public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException {
+    public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException, InputArgumentException, DaoMappingException, SearchMapperException, DaoException {
         LOG.info("Get custom rules by query invoked in service layer");
-        try {
-            LOG.info("[INFO] Get list of custom rule from query.");
 
-            if (query == null) {
-                throw new InputArgumentException("Custom rule list query is null");
-            }
-            if (query.getPagination() == null) {
-                throw new InputArgumentException("Pagination in custom rule list query is null");
-            }
-            
-            CustomRuleListResponseDto customRuleListByQuery = new CustomRuleListResponseDto();
-            List<CustomRuleType> customRuleList = new ArrayList<>();
-
-            Integer page = query.getPagination().getPage();
-            Integer listSize = query.getPagination().getListSize();
-
-            List<CustomRuleSearchValue> searchKeyValues = CustomRuleSearchFieldMapper.mapSearchField(query.getCustomRuleSearchCriteria());
-
-            String sql = CustomRuleSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
-            String countSql = CustomRuleSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
-
-            Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql, searchKeyValues);
-            List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql, searchKeyValues);
-
-            for (CustomRule entity : customRuleEntityList) {
-                customRuleList.add(CustomRuleMapper.toCustomRuleType(entity));
-            }
-
-            int numberOfPages = (int) (numberMatches / listSize);
-            if (numberMatches % listSize != 0) {
-                numberOfPages += 1;
-            }
-
-            customRuleListByQuery.setTotalNumberOfPages(numberOfPages);
-            customRuleListByQuery.setCurrentPage(query.getPagination().getPage());
-            customRuleListByQuery.setCustomRuleList(customRuleList);
-
-
-            GetCustomRuleListByQueryResponse response = new GetCustomRuleListByQueryResponse();
-            response.setTotalNumberOfPages(customRuleListByQuery.getTotalNumberOfPages());
-            response.setCurrentPage(customRuleListByQuery.getCurrentPage());
-            response.getCustomRules().addAll(customRuleListByQuery.getCustomRuleList());
-            return response;
-        } catch (RulesModelException | DaoMappingException | DaoException e) {
-            LOG.error("[ERROR] Error when getting custom rule list by query ] {} ", e.getMessage());
-            throw new RulesServiceException(e.getMessage(), e);
+        if (query == null) {
+            throw new InputArgumentException("Custom rule list query is null");
         }
+        if (query.getPagination() == null) {
+            throw new InputArgumentException("Pagination in custom rule list query is null");
+        }
+
+        CustomRuleListResponseDto customRuleListByQuery = new CustomRuleListResponseDto();
+        List<CustomRuleType> customRuleList = new ArrayList<>();
+
+        Integer page = query.getPagination().getPage();
+        Integer listSize = query.getPagination().getListSize();
+
+        List<CustomRuleSearchValue> searchKeyValues = CustomRuleSearchFieldMapper.mapSearchField(query.getCustomRuleSearchCriteria());
+
+        String sql = CustomRuleSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
+        String countSql = CustomRuleSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
+
+        Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql, searchKeyValues);
+        List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql, searchKeyValues);
+
+        for (CustomRule entity : customRuleEntityList) {
+            customRuleList.add(CustomRuleMapper.toCustomRuleType(entity));
+        }
+
+        int numberOfPages = (int) (numberMatches / listSize);
+        if (numberMatches % listSize != 0) {
+            numberOfPages += 1;
+        }
+
+        customRuleListByQuery.setTotalNumberOfPages(numberOfPages);
+        customRuleListByQuery.setCurrentPage(query.getPagination().getPage());
+        customRuleListByQuery.setCustomRuleList(customRuleList);
+
+
+        GetCustomRuleListByQueryResponse response = new GetCustomRuleListByQueryResponse();
+        response.setTotalNumberOfPages(customRuleListByQuery.getTotalNumberOfPages());
+        response.setCurrentPage(customRuleListByQuery.getCurrentPage());
+        response.getCustomRules().addAll(customRuleListByQuery.getCustomRuleList());
+        return response;
     }
 
     // Triggered by rule engine

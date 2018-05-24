@@ -39,7 +39,10 @@ import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
+import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
@@ -138,7 +141,7 @@ public class CustomRulesRestResource {
         LOG.info("Get custom rules by query invoked in rest layer");
         try {
             return new ResponseDto(validationService.getCustomRulesByQuery(query), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException ex) {
+        } catch (RulesServiceException | RulesFaultException | NullPointerException | SearchMapperException | DaoException | DaoMappingException | InputArgumentException ex) {
             LOG.error("[ Error when getting custom rules by query. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
@@ -160,8 +163,9 @@ public class CustomRulesRestResource {
     public ResponseDto getCustomRuleByGuid(@PathParam(value = "guid") final String guid) {
         LOG.info("Get custom rule by guid invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.getCustomRuleByGuid(guid), ResponseCode.OK);
-        } catch (RulesFaultException | RulesModelMapperException | RulesServiceException | NullPointerException ex) {
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.getCustomRuleByGuid(guid));
+            return new ResponseDto(response, ResponseCode.OK);
+        } catch (RulesFaultException | RulesModelMapperException | RulesServiceException | NullPointerException | DaoMappingException ex) {
             LOG.error("[ Error when getting custom rule by guid. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
@@ -232,8 +236,9 @@ public class CustomRulesRestResource {
     public ResponseDto deleteCustomRule(@PathParam(value = "guid") final String guid) {
         LOG.info("Delete custom rule invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.deleteCustomRule(guid, request.getRemoteUser(),UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.deleteCustomRule(guid, request.getRemoteUser(),UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)));
+            return new ResponseDto(response, ResponseCode.OK);
+        } catch (RulesServiceException | RulesFaultException | NullPointerException | DaoMappingException | DaoException | RulesModelMapperException e) {
             LOG.error("[ Error when deleting custom rule. ] {} ", e);
             return ErrorHandler.getFault(e);
         } catch (AccessDeniedException e) {

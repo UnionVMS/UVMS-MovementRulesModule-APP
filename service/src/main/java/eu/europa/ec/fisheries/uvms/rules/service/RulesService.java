@@ -61,7 +61,7 @@ public interface RulesService {
      */
 //    List<CustomRuleType> getCustomRuleList() throws RulesServiceException;
 
-    CustomRuleType deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException;
+    CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMapperException;
 
     /**
      * Lists alarms by query
@@ -141,7 +141,7 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException, RulesModelMapperException, RulesFaultException
      */
-    CustomRuleType getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException;
+    CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException;
 
     AlarmReportType updateAlarmStatus(AlarmReportType ticket) throws RulesServiceException, RulesFaultException;
 

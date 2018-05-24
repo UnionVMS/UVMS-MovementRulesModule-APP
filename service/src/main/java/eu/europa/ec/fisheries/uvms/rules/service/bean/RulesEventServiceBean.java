@@ -19,6 +19,9 @@ import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
@@ -115,9 +118,9 @@ public class RulesEventServiceBean implements EventService {
                                 + baseRequest.getMethod().name())));
             }
             GetCustomRuleRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), GetCustomRuleRequest.class);
-            CustomRuleType response = rulesService.getCustomRuleByGuid(request.getGuid());
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.getCustomRuleByGuid(request.getGuid()));
             rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), RulesModuleResponseMapper.mapToGetCustomRuleResponse(response));
-        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException e) {
+        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoMappingException e) {
             LOG.error("[ERROR] Error when fetching rule by guid {}", e.getMessage());
             errorEvent.fire(message);
         }
