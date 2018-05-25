@@ -7,10 +7,7 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.EJBTransactionRolledbackException;
 
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleAction;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleSegment;
-import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.rules.entity.*;
 import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
@@ -371,11 +368,11 @@ public class RulesServiceTest extends TransactionalTests {
 
     @Test
     public void updateAlarmStatusNegativeTest() throws Exception{ //a test with proper input is among the rest tests
-        AlarmReportType input = new AlarmReportType();
+        AlarmReport input = new AlarmReport();
         try{
             rulesService.updateAlarmStatus(input);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(NoEntityFoundException e){
             Assert.assertTrue(true);
         }
     }

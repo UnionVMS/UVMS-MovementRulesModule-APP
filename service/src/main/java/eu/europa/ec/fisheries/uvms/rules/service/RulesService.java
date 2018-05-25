@@ -25,6 +25,7 @@ import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByQueryRespons
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
+import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
@@ -73,7 +74,7 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, RulesFaultException;
+    GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, RulesModelException, DaoMappingException, DaoException;
 
     /**
      * Lists tickets by query
@@ -147,13 +148,13 @@ public interface RulesService {
      */
     CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException;
 
-    AlarmReportType updateAlarmStatus(AlarmReportType ticket) throws RulesServiceException, RulesFaultException;
+    AlarmReport updateAlarmStatus(AlarmReport ticket) throws RulesServiceException, RulesFaultException, DaoException, InputArgumentException;
 
     List<PreviousReportType> getPreviousMovementReports() throws RulesServiceException, RulesFaultException;
 
     void timerRuleTriggered(String ruleName, PreviousReportFact fact) throws RulesServiceException, RulesFaultException;
 
-    String reprocessAlarm(List<String> alarms, String username) throws RulesServiceException, RulesFaultException;
+    String reprocessAlarm(List<String> alarms, String username) throws RulesServiceException, RulesModelException, DaoMappingException, DaoException;
 
     void setMovementReportReceived(RawMovementType rawMovementType, String pluginType, String username) throws RulesServiceException;
 
@@ -162,7 +163,7 @@ public interface RulesService {
      * @return an alarm
      * @throws RulesServiceException if unsuccessful
      */
-    AlarmReportType getAlarmReportByGuid(String guid) throws RulesServiceException, RulesFaultException;
+    AlarmReport getAlarmReportByGuid(String guid) throws RulesServiceException, RulesFaultException, DaoException;
 
     /**
      * @param guid the GUID of a ticket

@@ -428,18 +428,16 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, RulesFaultException {
+    public GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, RulesModelException, DaoMappingException, DaoException {
         LOG.info("[INFO] Get alarm list invoked in service layer");
-        try {
-            AlarmListResponseDto alarmList = getAlarmListByQuery(query);
-            GetAlarmListByQueryResponse response = new GetAlarmListByQueryResponse();
-            response.getAlarms().addAll(alarmList.getAlarmList());
-            response.setTotalNumberOfPages(alarmList.getTotalNumberOfPages());
-            response.setCurrentPage(alarmList.getCurrentPage());
-            return response;
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
-        }
+
+        AlarmListResponseDto alarmList = getAlarmListByQuery(query);
+        GetAlarmListByQueryResponse response = new GetAlarmListByQueryResponse();
+        response.getAlarms().addAll(alarmList.getAlarmList());
+        response.setTotalNumberOfPages(alarmList.getTotalNumberOfPages());
+        response.setCurrentPage(alarmList.getCurrentPage());
+        return response;
+
     }
 
     @Override
@@ -624,38 +622,33 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public AlarmReportType updateAlarmStatus(AlarmReportType alarm) throws RulesServiceException, RulesFaultException {
+    public AlarmReport updateAlarmStatus(AlarmReport alarm) throws RulesServiceException, DaoException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException {
         LOG.info("[INFO] Update alarm status invoked in service layer");
-        try {
-            LOG.info("[INFO] Update alarm status in Rules");
 
-            AlarmReport entity = rulesDao.getAlarmReportByGuid(alarm.getGuid());
-            if (entity == null) {
-                LOG.error("[ERROR] Alarm is null, can not update status ]");
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Alarm is null", null);
-            }
-
-            entity.setStatus(alarm.getStatus().name());
-            entity.setUpdatedBy(alarm.getUpdatedBy());
-            entity.setUpdated(DateUtils.nowUTC().toGregorianCalendar().getTime());
-            if (entity.getRawMovement() != null) {
-                entity.getRawMovement().setActive(!alarm.isInactivatePosition());
-            }
-
-            rulesDao.updateAlarm(entity);
-
-            AlarmReportType updatedAlarm = AlarmMapper.toAlarmReportType(entity);
-
-            // Notify long-polling clients of the change
-            alarmReportEvent.fire(new NotificationMessage("guid", updatedAlarm.getGuid()));
-            // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
-            alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
-            auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, updatedAlarm.getGuid(), null, alarm.getUpdatedBy());
-            return updatedAlarm;
-        } catch (RulesModelException | DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when updating {}", e.getMessage());
-            throw new RulesServiceException("[ERROR] Error when updating. ]", e);
+        AlarmReport entity = rulesDao.getAlarmReportByGuid(alarm.getGuid());
+        if (entity == null) {
+            LOG.error("[ERROR] Alarm is null, can not update status ]");
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Alarm is null", null);
         }
+
+        entity.setStatus(alarm.getStatus());
+        entity.setUpdatedBy(alarm.getUpdatedBy());
+        entity.setUpdated(new Date());
+        if (entity.getRawMovement() != null) {
+            entity.getRawMovement().setActive(!alarm.getRawMovement().getActive()); /*isInactivatePosition()*/
+        }
+
+        rulesDao.updateAlarm(entity);
+
+        //AlarmReportType updatedAlarm = AlarmMapper.toAlarmReportType(entity);
+
+        // Notify long-polling clients of the change
+        alarmReportEvent.fire(new NotificationMessage("guid", entity.getGuid()));
+        // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
+        alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
+        auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, entity.getGuid(), null, alarm.getUpdatedBy());
+        return entity;
+
     }
 
     // Triggered by RulesTimerBean
@@ -764,14 +757,9 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public AlarmReportType getAlarmReportByGuid(String guid) throws RulesServiceException, RulesFaultException {
-        try {
-            LOG.info("[INFO] Getting alarm report by guid");
-            return AlarmMapper.toAlarmReportType(rulesDao.getAlarmReportByGuid(guid));
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when getting alarm report by GUID {}", e.getMessage());
-            throw new RulesServiceException("[ Error when getting alarm by GUID. ]");
-        }
+    public AlarmReport getAlarmReportByGuid(String guid) throws RulesServiceException, DaoException {
+        LOG.info("[INFO] Getting alarm report by guid");
+        return rulesDao.getAlarmReportByGuid(guid);
     }
 
     @Override
@@ -782,36 +770,35 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public String reprocessAlarm(List<String> alarmGuids, String username) throws RulesServiceException {
+    public String reprocessAlarm(List<String> alarmGuids, String username) throws RulesServiceException, DaoMappingException, DaoException, RulesModelException {
         LOG.info("[INFO] Reprocess alarms invoked in service layer");
-        try {
-            AlarmQuery query = mapToOpenAlarmQuery(alarmGuids);
-            AlarmListResponseDto alarms = getAlarmListByQuery(query);
 
-            for (AlarmReportType alarm : alarms.getAlarmList()) {
-                // Cannot reprocess without a movement (i.e. "Asset not sending" alarm)
-                if (alarm.getRawMovement() == null) {
-                    continue;
-                }
+        AlarmQuery query = mapToOpenAlarmQuery(alarmGuids);
+        AlarmListResponseDto alarms = getAlarmListByQuery(query);
 
-                // Mark the alarm as REPROCESSED before reprocessing. That will create a new alarm (if still wrong) with the items remaining.
-                alarm.setStatus(AlarmStatusType.REPROCESSED);
-                alarm = updateAlarmStatus(alarm);
-                auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, alarm.getGuid(), null, username);
-                RawMovementType rawMovementType = alarm.getRawMovement();
-                // TODO: Use better type (some variation of PluginType...)
-                String pluginType = alarm.getPluginType();
-                setMovementReportReceived(rawMovementType, pluginType, username);
+        for (AlarmReportType alarm : alarms.getAlarmList()) {
+            // Cannot reprocess without a movement (i.e. "Asset not sending" alarm)
+            if (alarm.getRawMovement() == null) {
+                continue;
             }
-//            return RulesDataSourceResponseMapper.mapToAlarmListFromResponse(response, messageId);
-            // TODO: Better
-            return "OK";
-        } catch (RulesModelException e) {
-            throw new RulesServiceException(e.getMessage());
+
+            // Mark the alarm as REPROCESSED before reprocessing. That will create a new alarm (if still wrong) with the items remaining.
+            alarm.setStatus(AlarmStatusType.REPROCESSED);
+            //its this, not change updateAlarmStatus or change the DTO, I think that this is the best of a bad lot
+            alarm = AlarmMapper.toAlarmReportType(updateAlarmStatus(AlarmMapper.toAlarmReportEntity(alarm)));
+            auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, alarm.getGuid(), null, username);
+            RawMovementType rawMovementType = alarm.getRawMovement();
+            // TODO: Use better type (some variation of PluginType...)
+            String pluginType = alarm.getPluginType();
+            setMovementReportReceived(rawMovementType, pluginType, username);
         }
+        // return RulesDataSourceResponseMapper.mapToAlarmListFromResponse(response, messageId);
+        // TODO: Better
+        return "OK";
+
     }
 
-    private AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException {
+    private AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException, DaoMappingException, DaoException {
         LOG.info("[INFO] Get list of alarms from query.");
 
         if (query == null) {
@@ -821,39 +808,34 @@ public class RulesServiceBean implements RulesService {
             throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Pagination in alarm list query is null");
         }
 
-        try {
-            AlarmListResponseDto response = new AlarmListResponseDto();
-            List<AlarmReportType> alarmList = new ArrayList<>();
 
-            Integer page = query.getPagination().getPage();
-            Integer listSize = query.getPagination().getListSize();
+        Integer page = query.getPagination().getPage();
+        Integer listSize = query.getPagination().getListSize();
 
-            List<AlarmSearchValue> searchKeyValues = AlarmSearchFieldMapper.mapSearchField(query.getAlarmSearchCriteria());
+        List<AlarmSearchValue> searchKeyValues = AlarmSearchFieldMapper.mapSearchField(query.getAlarmSearchCriteria());
 
-            String sql = AlarmSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
-            String countSql = AlarmSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
+        String sql = AlarmSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
+        String countSql = AlarmSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
 
-            Long numberMatches = rulesDao.getAlarmListSearchCount(countSql, searchKeyValues);
-            List<AlarmReport> alarmEntityList = rulesDao.getAlarmListPaginated(page, listSize, sql, searchKeyValues);
+        Long numberMatches = rulesDao.getAlarmListSearchCount(countSql);
+        List<AlarmReport> alarmEntityList = rulesDao.getAlarmListPaginated(page, listSize, sql);
 
-            for (AlarmReport entity : alarmEntityList) {
-                alarmList.add(AlarmMapper.toAlarmReportType(entity));
-            }
-
-            int numberOfPages = (int) (numberMatches / listSize);
-            if (numberMatches % listSize != 0) {
-                numberOfPages += 1;
-            }
-
-            response.setTotalNumberOfPages(numberOfPages);
-            response.setCurrentPage(query.getPagination().getPage());
-            response.setAlarmList(alarmList);
-
-            return response;
-        } catch (DaoMappingException | DaoException e) {
-            LOG.error("[ERROR] Error when getting alarm list by query ] {} ", e.getMessage());
-            throw new RulesModelException(e.getMessage(), e);
+        List<AlarmReportType> alarmList = new ArrayList<>();
+        for (AlarmReport entity : alarmEntityList) {
+            alarmList.add(AlarmMapper.toAlarmReportType(entity));
         }
+
+        int numberOfPages = (int) (numberMatches / listSize);
+        if (numberMatches % listSize != 0) {
+            numberOfPages += 1;
+        }
+
+        AlarmListResponseDto response = new AlarmListResponseDto();
+        response.setTotalNumberOfPages(numberOfPages);
+        response.setCurrentPage(query.getPagination().getPage());
+        response.setAlarmList(alarmList);
+
+        return response;
     }
 
     private AlarmQuery mapToOpenAlarmQuery(List<String> alarmGuids) {

@@ -30,8 +30,13 @@ import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
+import eu.europa.ec.fisheries.uvms.rules.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.AlarmListResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.rest.error.ErrorHandler;
@@ -69,12 +74,12 @@ public class AlarmRestResource {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/list")
     @RequiresFeature(UnionVMSFeature.viewAlarmsHoldingTable)
-    public ResponseDto<AlarmListResponseDto> getCustomRuleList(AlarmQuery query) {
+    public ResponseDto<AlarmListResponseDto> getAlarmList(AlarmQuery query) {
         LOG.info("Get alarm list invoked in rest layer");
         try {
             return new ResponseDto(rulesService.getAlarmList(query), ResponseCode.OK);
-        } catch (RulesServiceException | NullPointerException | RulesFaultException  e) {
-            LOG.error("[ Error when getting list. ] {} ", e.getMessage());
+        } catch (RulesServiceException | NullPointerException | DaoException | DaoMappingException | RulesModelException  e) {
+            LOG.error("[ Error when getting alarm list by query. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -94,9 +99,10 @@ public class AlarmRestResource {
     public ResponseDto updateAlarmStatus(final AlarmReportType alarmReportType) {
         LOG.info("Update alarm status invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.updateAlarmStatus(alarmReportType), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when updating. ] {} ", e.getMessage());
+            AlarmReportType response = AlarmMapper.toAlarmReportType(rulesService.updateAlarmStatus(AlarmMapper.toAlarmReportEntity(alarmReportType)));
+            return new ResponseDto(response, ResponseCode.OK);
+        } catch (RulesServiceException | RulesFaultException | NullPointerException | InputArgumentException | DaoMappingException | DaoException e) {
+            LOG.error("[ Error when updating Alarm. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -115,8 +121,9 @@ public class AlarmRestResource {
     @RequiresFeature(UnionVMSFeature.viewAlarmsHoldingTable)
     public ResponseDto getAlarmReportByGuid(@PathParam("guid") String guid) {
         try {
-            return new ResponseDto(rulesService.getAlarmReportByGuid(guid), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException e) {
+            AlarmReportType response = AlarmMapper.toAlarmReportType(rulesService.getAlarmReportByGuid(guid));
+            return new ResponseDto(response, ResponseCode.OK);
+        } catch (RulesServiceException | RulesFaultException | DaoMappingException | DaoException e) {
             LOG.error("[ Error when getting alarm by GUID. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }
@@ -139,7 +146,7 @@ public class AlarmRestResource {
         LOG.info("Reprocess alarm invoked in rest layer");
         try {
             return new ResponseDto(rulesService.reprocessAlarm(alarmGuidList, request.getRemoteUser()), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
+        } catch (RulesServiceException | NullPointerException | DaoException | DaoMappingException | RulesModelException e) {
             LOG.error("[ Error when reprocessing. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }
@@ -158,7 +165,7 @@ public class AlarmRestResource {
     @Path("/countopen")
     @RequiresFeature(UnionVMSFeature.viewAlarmsHoldingTable)
     public ResponseDto getNumberOfOpenAlarmReports() {
-        Principal userPrincipal = request.getUserPrincipal();
+        //Principal userPrincipal = request.getUserPrincipal();    //what is a Principal?
 
         try {
             return new ResponseDto(validationService.getNumberOfOpenAlarmReports(), ResponseCode.OK);

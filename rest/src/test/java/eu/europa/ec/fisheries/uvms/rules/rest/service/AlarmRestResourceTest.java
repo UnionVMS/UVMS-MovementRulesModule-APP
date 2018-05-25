@@ -6,6 +6,8 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+
+import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -25,7 +27,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @RunAsClient
-    public void getCustomRuleListTest() throws Exception {
+    public void getAlarmListTest() throws Exception {
         AlarmQuery basicAlarmQuery = getBasicAlarmQuery();
         AlarmListCriteria criteria = new AlarmListCriteria();
         criteria.setKey(AlarmSearchKey.RULE_GUID);
@@ -41,7 +43,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         assertThat(alarmList.getAlarms().size(), is(0));
     }
 
-    /*
+/*
     @Test
     @RunAsClient
     public void updateAlarmStatusTest() throws Exception {
@@ -52,7 +54,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         
         assertThat(response, is(notNullValue()));
     }
-    */
+*/
     
     /*
     @Test

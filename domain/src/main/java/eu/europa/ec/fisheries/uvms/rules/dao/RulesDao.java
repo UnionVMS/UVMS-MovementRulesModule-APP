@@ -103,14 +103,9 @@ public class RulesDao {
         }
     }
 
-    public long getNumberOfOpenAlarms() throws DaoException {
-        try {
+    public long getNumberOfOpenAlarms(){
             TypedQuery<Long> query = em.createNamedQuery(AlarmReport.COUNT_OPEN_ALARMS, Long.class);
             return query.getSingleResult();
-        } catch (Exception e) {
-            LOG.error("[ Error when getting counting open alarms. ] {}", e.getMessage());
-            throw new DaoException("[ Error when counting open alarms. ] ", e);
-        }
     }
 
     public long getNumberOfOpenTickets(List<String> validRuleGuids){
@@ -131,9 +126,6 @@ public class RulesDao {
         } catch (NoResultException e) {
             LOG.error("[ Alarm with guid {} can't be found ]", guid);
             throw new NoEntityFoundException("[ Alarm with guid " + guid + " can't be found ]", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when getting Alarm by ID. ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting Alarm by ID. ] ", e);
         }
     }
 
@@ -145,9 +137,6 @@ public class RulesDao {
         } catch (IllegalArgumentException | TransactionRequiredException e) {
             LOG.error("[ Error when updating CustomRule ] {}", e.getMessage());
             throw new DaoException("[ Error when updating CustomRule ]", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when updating CustomRule ] {}", e.getMessage());
-            throw new DaoException("[ Error when updating CustomRule ]", e);
         }
     }
 
@@ -156,9 +145,6 @@ public class RulesDao {
             em.remove(entity);
             em.flush();
         } catch (IllegalArgumentException | TransactionRequiredException e) {
-            LOG.error("[ Error when removing subscription ] {}", e.getMessage());
-            throw new DaoException("[ Error when removing subscription ]", e);
-        } catch (Exception e) {
             LOG.error("[ Error when removing subscription ] {}", e.getMessage());
             throw new DaoException("[ Error when removing subscription ]", e);
         }
@@ -178,31 +164,15 @@ public class RulesDao {
     }
 
     public Ticket updateTicket(Ticket entity) throws DaoException {
-        try {
-            em.merge(entity);
-            em.flush();
-            return entity;
-        } catch (IllegalArgumentException | TransactionRequiredException e) {
-            LOG.error("[ Error when updating Ticket ] {}", e.getMessage());
-            throw new DaoException("[ Error when updating Ticket ]", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when updating Ticket ] {}", e.getMessage());
-            throw new DaoException("[ Error when updating Ticket ]", e);
-        }
+        em.merge(entity);
+        em.flush();
+        return entity;
     }
 
-    public AlarmReport updateAlarm(AlarmReport entity) throws DaoException {
-        try {
-            em.merge(entity);
-            em.flush();
-            return entity;
-        } catch (IllegalArgumentException | TransactionRequiredException e) {
-            LOG.error("[ Error when updating Alarm ] {}", e.getMessage());
-            throw new DaoException("[ Error when updating Alarm ]", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when updating Alarm ] {}", e.getMessage());
-            throw new DaoException("[ Error when updating CustomAlarm ]", e);
-        }
+    public AlarmReport updateAlarm(AlarmReport entity){
+        em.merge(entity);
+        em.flush();
+        return entity;
     }
 
     public List<CustomRule> getRunnableCustomRuleList() {
@@ -288,7 +258,7 @@ public class RulesDao {
         }
     }
 
-    public Long getAlarmListSearchCount(String countSql, List<AlarmSearchValue> searchKeyValues) throws DaoException {
+    public Long getAlarmListSearchCount(String countSql){  //, List<AlarmSearchValue> searchKeyValues was not used
         LOG.debug("ALARM SQL QUERY IN LIST COUNT: {}", countSql);
 
         TypedQuery<Long> query = em.createQuery(countSql, Long.class);
@@ -296,24 +266,16 @@ public class RulesDao {
         return query.getSingleResult();
     }
 
-    public List<AlarmReport> getAlarmListPaginated(Integer page, Integer listSize, String sql, List<AlarmSearchValue> searchKeyValues)
-            throws DaoException {
-        try {
-            LOG.debug("ALARM SQL QUERY IN LIST PAGINATED: {}", sql);
+    public List<AlarmReport> getAlarmListPaginated(Integer page, Integer listSize, String sql){ // List<AlarmSearchValue> searchKeyValues was  not used
 
-            TypedQuery<AlarmReport> query = em.createQuery(sql, AlarmReport.class);
+        LOG.debug("ALARM SQL QUERY IN LIST PAGINATED: {}", sql);
 
-            query.setFirstResult(listSize * (page - 1));
-            query.setMaxResults(listSize);
+        TypedQuery<AlarmReport> query = em.createQuery(sql, AlarmReport.class);
 
-            return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error getting alarm list paginated ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting alarm list ] ", e);
-        } catch (Exception e) {
-            LOG.error("[ Error getting alarm list paginated ]  {}", e.getMessage());
-            throw new DaoException("[ Error when getting alarm list ] ", e);
-        }
+        query.setFirstResult(listSize * (page - 1));
+        query.setMaxResults(listSize);
+
+        return query.getResultList();
     }
 
     public Long getTicketListSearchCount(String countSql, List<TicketSearchValue> searchKeyValues) throws DaoException {

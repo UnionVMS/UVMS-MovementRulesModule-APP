@@ -605,15 +605,9 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     @Override
-    public long getNumberOfOpenAlarmReports() throws RulesServiceException, RulesFaultException {
-        try {
-            LOG.info("[INFO] Counting open alarms");
-            return rulesDao.getNumberOfOpenAlarms();
-        } catch (DaoException e) {
-            LOG.error("[ERROR] Error when counting open alarms {}", e.getMessage());
-            LOG.error("[ Error when getting number of open alarms ] {}", e.getMessage());
-            throw new RulesServiceException("[ Error when getting number of open alarms. ]");
-        }
+    public long getNumberOfOpenAlarmReports() throws RulesServiceException {
+        LOG.info("[INFO] Counting open alarms");
+        return rulesDao.getNumberOfOpenAlarms();
     }
 
     @Override
