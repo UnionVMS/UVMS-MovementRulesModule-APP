@@ -26,9 +26,11 @@ import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
+import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
@@ -79,11 +81,11 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, RulesFaultException;
+    GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, RulesFaultException, SearchMapperException, DaoException, DaoMappingException, InputArgumentException;
 
-    GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException;
+    GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException, InputArgumentException, DaoException, DaoMappingException;
 
-    long countTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException;
+    long countTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException, InputArgumentException, DaoException;
 
     /**
      * Update a ticket status
@@ -91,7 +93,7 @@ public interface RulesService {
      * @param ticket
      * @throws RulesServiceException
      */
-    TicketType updateTicketStatus(TicketType ticket) throws RulesServiceException, RulesFaultException;
+    Ticket updateTicketStatus(Ticket ticket) throws RulesFaultException, InputArgumentException, DaoException, DaoMappingException;
 
     /**
      * Update a ticket count, for Asset not sending tickets
@@ -167,9 +169,9 @@ public interface RulesService {
      * @return a ticket
      * @throws RulesServiceException if unsuccessful
      */
-    TicketType getTicketByGuid(String guid) throws RulesServiceException, RulesFaultException;
+    Ticket getTicketByGuid(String guid) throws RulesServiceException;
 
-    List<TicketType> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, RulesFaultException;
+    List<TicketType> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, RulesFaultException, InputArgumentException, DaoMappingException, DaoException, SearchMapperException;
 
     long getNumberOfAssetsNotSending() throws RulesServiceException, RulesFaultException;
 

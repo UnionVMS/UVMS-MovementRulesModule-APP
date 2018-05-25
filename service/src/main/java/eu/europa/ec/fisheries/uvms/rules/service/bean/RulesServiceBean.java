@@ -30,6 +30,7 @@ import javax.jms.Message;
 
 import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
 import eu.europa.ec.fisheries.uvms.rules.entity.*;
+import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.PreviousReportMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchValue;
@@ -442,80 +443,63 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, RulesFaultException {
+    public GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, SearchMapperException, DaoException, DaoMappingException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException {
         LOG.info("[INFO] Get ticket list invoked in service layer");
-        try {
-            LOG.info("[INFO] Get list of tickets from query.");
 
-            if (query == null) {
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Ticket list query is null");
-            }
-            if (query.getPagination() == null) {
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Pagination in ticket list query is null");
-            }
-
-            TicketListResponseDto ticketListResponseDto = new TicketListResponseDto();
-            List<TicketType> ticketList = new ArrayList<>();
-            Integer listSize = query.getPagination().getListSize();
-            List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
-            List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
-
-
-            String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleGuids, true);
-            String countSql = TicketSearchFieldMapper.createCountSearchSql(searchKeyValues, validRuleGuids, true);
-            Long numberMatches = rulesDao.getTicketListSearchCount(countSql, searchKeyValues);
-            List<Ticket> ticketEntityList = rulesDao.getTicketListPaginated(query.getPagination().getPage(), listSize, sql, searchKeyValues);
-            for (Ticket entity : ticketEntityList) {
-                ticketList.add(TicketMapper.toTicketType(entity));
-            }
-            int numberOfPages = (int) (numberMatches / listSize);
-            if (numberMatches % listSize != 0) {
-                numberOfPages += 1;
-            }
-            ticketListResponseDto.setTotalNumberOfPages(numberOfPages);
-            ticketListResponseDto.setCurrentPage(query.getPagination().getPage());
-            ticketListResponseDto.setTicketList(ticketList);
-
-            //TicketListResponseDto ticketList = rulesDomainModel.getTicketListByQuery(loggedInUser, query);
-            GetTicketListByQueryResponse response = new GetTicketListByQueryResponse();
-            response.setCurrentPage(ticketListResponseDto.getCurrentPage());
-            response.setTotalNumberOfPages(ticketListResponseDto.getTotalNumberOfPages());
-            response.getTickets().addAll(ticketListResponseDto.getTicketList());
-            return response;
-        } catch (RulesModelException | DaoMappingException | DaoException e) {
-            LOG.error("[ERROR] Error when getting ticket list by query ] {} ", e.getMessage());
-            throw new RulesServiceException(e.getMessage() , e);
+        if (query == null) {
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Ticket list query is null");
         }
+        if (query.getPagination() == null) {
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Pagination in ticket list query is null");
+        }
+
+        Integer listSize = query.getPagination().getListSize();
+        List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
+        List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
+
+
+        String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleGuids, true);
+        String countSql = TicketSearchFieldMapper.createCountSearchSql(searchKeyValues, validRuleGuids, true);
+        Long numberMatches = rulesDao.getTicketListSearchCount(countSql, searchKeyValues);
+        List<Ticket> ticketEntityList = rulesDao.getTicketListPaginated(query.getPagination().getPage(), listSize, sql, searchKeyValues);
+
+        List<TicketType> ticketList = new ArrayList<>();
+        for (Ticket entity : ticketEntityList) {
+            ticketList.add(TicketMapper.toTicketType(entity));
+        }
+        int numberOfPages = (int) (numberMatches / listSize);
+        if (numberMatches % listSize != 0) {
+            numberOfPages += 1;
+        }
+
+        GetTicketListByQueryResponse response = new GetTicketListByQueryResponse();
+        response.setCurrentPage(query.getPagination().getPage());
+        response.setTotalNumberOfPages(numberOfPages);
+        response.getTickets().addAll(ticketList);
+        return response;
+
     }
 
     @Override
-    public GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException {
+    public GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException, DaoMappingException {
         LOG.info("[INFO] Get tickets by movements invoked in service layer");
-        try {
-            LOG.info("[INFO] Get tickets by movements.");
-            if (movements == null) {
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is null");
-            }
-            if (movements.isEmpty()) {
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is empty");
-            }
-
-            TicketListResponseDto ticketListByMovements = new TicketListResponseDto();
-            List<TicketType> ticketList = new ArrayList<>();
-            List<Ticket> ticketEntityList = rulesDao.getTicketsByMovements(movements);
-            for (Ticket entity : ticketEntityList) {
-                ticketList.add(TicketMapper.toTicketType(entity));
-            }
-            ticketListByMovements.setTicketList(ticketList);
-
-            //TicketListResponseDto ticketListByMovements = rulesDomainModel.getTicketListByMovements(movements);
-            GetTicketListByMovementsResponse response = new GetTicketListByMovementsResponse();
-            response.getTickets().addAll(ticketListByMovements.getTicketList());
-            return response;
-        } catch (RulesModelException | DaoMappingException | DaoException e) {
-            LOG.error("[ERROR] Error when getting tickets by movements ] {} ", e.getMessage());
-            throw new RulesServiceException(e.getMessage() , e);
+        if (movements == null) {
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is null");
         }
+        if (movements.isEmpty()) {
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is empty");
+        }
+
+        List<TicketType> ticketList = new ArrayList<>();
+        List<Ticket> ticketEntityList = rulesDao.getTicketsByMovements(movements);
+        for (Ticket entity : ticketEntityList) {
+            ticketList.add(TicketMapper.toTicketType(entity));
+        }
+
+        GetTicketListByMovementsResponse response = new GetTicketListByMovementsResponse();
+        response.getTickets().addAll(ticketList);
+        return response;
+
     }
 
     @Override
@@ -547,118 +531,96 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public long countTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException {
+    public long countTicketsByMovements(List<String> movements) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException {
         LOG.info("[INFO] Get number of tickets by movements invoked in service layer");
-        try {
-            LOG.info("[INFO] Count tickets by movements.");
 
-            if (movements == null) {
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is null");
-            }
-            if (movements.isEmpty()) {
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is empty");
-            }
 
-            return rulesDao.countTicketListByMovements(movements);
-        } catch (RulesModelException | DaoException e) {
-            LOG.error("[ERROR] Error when counting tickets by movements ] {} ", e.getMessage());
-            throw new RulesServiceException(e.getMessage() , e);
+        if (movements == null) {
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is null");
         }
+        if (movements.isEmpty()) {
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is empty");
+        }
+
+        return rulesDao.countTicketListByMovements(movements);
     }
 
     @Override
-    public TicketType updateTicketStatus(TicketType ticket) throws RulesServiceException, RulesFaultException {
+    public Ticket updateTicketStatus(Ticket ticket) throws RulesServiceException, RulesFaultException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException, DaoMappingException {
         LOG.info("[INFO] Update ticket status invoked in service layer");
-        try {
-            LOG.info("[INFO] Update ticket status in Rules");
 
-            if (ticket == null || ticket.getGuid() == null) {
-                LOG.error("[ERROR] Ticket is null, can not update status ]");
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Ticket is null", null);
-            }
-            Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
-
-            entity.setStatus(ticket.getStatus().name());
-            entity.setUpdated(DateUtils.nowUTC().toGregorianCalendar().getTime());
-            entity.setUpdatedBy(ticket.getUpdatedBy());
-
-            rulesDao.updateTicket(entity);
-
-            TicketType updatedTicket = TicketMapper.toTicketType(entity);
-
-            // Notify long-polling clients of the update
-            ticketUpdateEvent.fire(new NotificationMessage("guid", updatedTicket.getGuid()));
-            // Notify long-polling clients of the change (no value since FE will need to fetch it)
-            ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), ticket.getComment(), ticket.getUpdatedBy());
-            return updatedTicket;
-
-
-        } catch (RulesModelException | DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
-            throw new RulesServiceException("[ERROR] Error when updating ticket status. ]", e);
+        if (ticket == null || ticket.getGuid() == null) {
+            LOG.error("[ERROR] Ticket is null, can not update status ]");
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Ticket is null", null);
         }
+        Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
+
+        entity.setStatus(ticket.getStatus());
+        entity.setUpdated(new Date());
+        entity.setUpdatedBy(ticket.getUpdatedBy());
+
+        rulesDao.updateTicket(entity);
+
+        //TicketType updatedTicket = TicketMapper.toTicketType(entity);
+
+        // Notify long-polling clients of the update
+        ticketUpdateEvent.fire(new NotificationMessage("guid", entity.getGuid()));
+        // Notify long-polling clients of the change (no value since FE will need to fetch it)
+        ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
+        auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid(), /*ticket.getComment()*/"", ticket.getUpdatedBy());    //ticket.getComment was empty before the change
+        return entity;
+
     }
 
     @Override
-    public List<TicketType> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, RulesFaultException {
+    public List<TicketType> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoMappingException, DaoException, SearchMapperException {
         LOG.info("[INFO] Update all ticket status invoked in service layer");
-        try {
-            LOG.info("[INFO] Update ticket status by query");
 
-            if (loggedInUser == null) {
-                LOG.error("[ERROR] LoggedInUser is null, can not update status ]");
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("LoggedInUser is null", null);
-            }
-            if (status == null) {
-                LOG.error("[ERROR] Status is null, can not update status ]");
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Status is null", null);
-            }
-            if (query == null) {
-                LOG.error("[ERROR] Status is null, can not update status ]");
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Status is null", null);
-            }
-            List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
-            List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
-            String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleGuids, true);
-            List<Ticket> tickets = rulesDao.getTicketList(sql, searchKeyValues);
-            for (Ticket ticket : tickets) {
-                ticket.setStatus(status.name());
-                ticket.setUpdated(DateUtils.nowUTC().toGregorianCalendar().getTime());
-                ticket.setUpdatedBy(loggedInUser);
-
-                rulesDao.updateTicket(ticket);
-            }
-            List<TicketType> ticketList = new ArrayList<>();
-            for (Ticket ticket : tickets) {
-                ticketList.add(TicketMapper.toTicketType(ticket));
-            }
-
-
-            //List<TicketType> ticketList = rulesDomainModel.updateTicketStatusByQuery(loggedInUser, query, status);
-            // Notify long-polling clients of the update
-            for (TicketType updatedTicket : ticketList) {
-                ticketUpdateEvent.fire(new NotificationMessage("guid", updatedTicket.getGuid()));
-                auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), null, loggedInUser);
-            }
-            // Notify long-polling clients of the change (no value since FE will need to fetch it)
-            ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-            return ticketList;
-        } catch (RulesModelException | DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
-            throw new RulesServiceException("[ERROR] Error when updating ticket status. ]", e);
+        if (loggedInUser == null) {
+            LOG.error("[ERROR] LoggedInUser is null, can not update status ]");
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("LoggedInUser is null", null);
         }
+        if (status == null) {
+            LOG.error("[ERROR] Status is null, can not update status ]");
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Status is null", null);
+        }
+        if (query == null) {
+            LOG.error("[ERROR] Status is null, can not update status ]");
+            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Status is null", null);
+        }
+        List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
+        List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
+        String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleGuids, true);
+        List<Ticket> tickets = rulesDao.getTicketList(sql, searchKeyValues);
+        for (Ticket ticket : tickets) {
+            ticket.setStatus(status.name());
+            ticket.setUpdated(new Date());
+            ticket.setUpdatedBy(loggedInUser);
+
+            rulesDao.updateTicket(ticket);
+        }
+        List<TicketType> ticketList = new ArrayList<>();
+        for (Ticket ticket : tickets) {
+            ticketList.add(TicketMapper.toTicketType(ticket));
+
+            // Notify long-polling clients of the update
+            ticketUpdateEvent.fire(new NotificationMessage("guid", ticket.getGuid()));
+            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid(), null, loggedInUser);
+        }
+
+
+        // Notify long-polling clients of the change (no value since FE will need to fetch it)
+        ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
+        return ticketList;
+
     }
 
     @Override
-    public long getNumberOfAssetsNotSending() throws RulesServiceException, RulesFaultException {
-        try {
-            LOG.info("[INFO] Counting assets not sending");
-            return rulesDao.getNumberOfTicketsByRuleGuid(UvmsConstants.ASSET_NOT_SENDING_RULE);
-        } catch (DaoException e) {
-            LOG.error("[ERROR] Error when counting open alarms {}", e.getMessage());
-            throw new RulesServiceException("[ Error when getting number of open alarms. ]");
-        }
+    public long getNumberOfAssetsNotSending() throws RulesServiceException {
+
+        LOG.info("[INFO] Counting assets not sending");
+        return rulesDao.getNumberOfTicketsByRuleGuid(UvmsConstants.ASSET_NOT_SENDING_RULE);
+
     }
 
     @Override
@@ -813,15 +775,10 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public TicketType getTicketByGuid(String guid) throws RulesServiceException, RulesFaultException {
-        try {
-            LOG.info("[INFO] Getting ticket by guid");
-            Ticket ticketEntity = rulesDao.getTicketByGuid(guid);
-            return TicketMapper.toTicketType(ticketEntity);
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when getting ticket by GUID {}", e.getMessage());
-            throw new RulesServiceException("[ Error when getting ticket by GUID. ]" , e);
-        }
+    public Ticket getTicketByGuid(String guid) throws RulesServiceException{
+
+        LOG.info("[INFO] Getting ticket by guid");
+        return rulesDao.getTicketByGuid(guid);
     }
 
     @Override

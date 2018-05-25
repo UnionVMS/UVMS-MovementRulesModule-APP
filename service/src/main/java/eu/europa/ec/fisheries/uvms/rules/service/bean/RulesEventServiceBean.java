@@ -20,7 +20,9 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,7 +143,7 @@ public class RulesEventServiceBean implements EventService {
             GetTicketListByMovementsResponse response = rulesService.getTicketsByMovements(request.getMovementGuids());
             String responseString = RulesModuleResponseMapper.mapToGetTicketListByMovementsResponse(response.getTickets());
             rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), responseString);
-        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException e) {
+        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoMappingException | InputArgumentException | DaoException e) {
             LOG.error("[ERROR] Error when fetching tickets by movements {}", e.getMessage());
             errorEvent.fire(message);
         }
@@ -162,7 +164,7 @@ public class RulesEventServiceBean implements EventService {
             CountTicketsByMovementsRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), CountTicketsByMovementsRequest.class);
             long response = rulesService.countTicketsByMovements(request.getMovementGuids());
             rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), RulesModuleResponseMapper.mapToCountTicketListByMovementsResponse(response));
-        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException e) {
+        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoException | InputArgumentException e) {
             LOG.error("[ERROR] Error when fetching ticket count by movements {}", e.getMessage());
             errorEvent.fire(message);
         }

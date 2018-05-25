@@ -65,18 +65,11 @@ public class RulesDao {
 
     }
 
-    public Ticket getTicketByGuid(String guid) throws DaoException {
-        try {
-            TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_GUID, Ticket.class);
-            query.setParameter("guid", guid);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            LOG.error("[ Ticket with guid '{}' can't be found ]", guid);
-            throw new NoEntityFoundException("[ Ticket with guid '" + guid + "' can't be found ]", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when getting Ticket by ID. ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting Ticket by ID. ] ", e);
-        }
+    public Ticket getTicketByGuid(String guid){
+
+        TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_GUID, Ticket.class);
+        query.setParameter("guid", guid);
+        return query.getSingleResult();
     }
 
     public List<Ticket> getTicketsByMovements(List<String> movements) throws DaoException {
@@ -88,21 +81,13 @@ public class RulesDao {
             // TODO: Return empty list???
             LOG.error("[ No tickets found for movements ]");
             throw new NoEntityFoundException("[ No tickets found for movements ]", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when getting Ticket by movements. ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting Ticket by movements. ] ", e);
         }
     }
 
-    public long countTicketListByMovements(List<String> movements) throws DaoException {
-        try {
-            TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_TICKETS_BY_MOVEMENTS, Long.class);
-            query.setParameter("movements", movements);
-            return query.getSingleResult();
-        } catch (Exception e) {
-            LOG.error("[ Error when getting counting tickets by movement. ] {}", e.getMessage());
-            throw new DaoException("[ Error when counting tickets by movement. ] ", e);
-        }
+    public long countTicketListByMovements(List<String> movements){
+        TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_TICKETS_BY_MOVEMENTS, Long.class);
+        query.setParameter("movements", movements);
+        return query.getSingleResult();
     }
 
     public List<String> getCustomRulesForTicketsByUser(String owner) throws DaoException {
@@ -128,16 +113,13 @@ public class RulesDao {
         }
     }
 
-    public long getNumberOfOpenTickets(List<String> validRuleGuids) throws DaoException {
+    public long getNumberOfOpenTickets(List<String> validRuleGuids){
         try {
             TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_OPEN_TICKETS, Long.class);
             query.setParameter("validRuleGuids", validRuleGuids);
             return query.getSingleResult();
         } catch (NoResultException e) {
             return 0;
-        } catch (Exception e) {
-            LOG.error("[ Error when getting counting open tickets. ] {}", e.getMessage());
-            throw new DaoException("[ Error when counting open tickets. ] ", e);
         }
     }
 
@@ -362,21 +344,14 @@ public class RulesDao {
         }
     }
 
-    public List<Ticket> getTicketList(String sql, List<TicketSearchValue> searchKeyValues)
-            throws DaoException {
-        try {
-            LOG.debug("TICKET SQL QUERY IN LIST: {}", sql);
+    public List<Ticket> getTicketList(String sql, List<TicketSearchValue> searchKeyValues){
 
-            TypedQuery<Ticket> query = em.createQuery(sql, Ticket.class);
+        LOG.debug("TICKET SQL QUERY IN LIST: {}", sql);
 
-            return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error getting ticket list paginated ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting ticket list ] ", e);
-        } catch (Exception e) {
-            LOG.error("[ Error getting ticket list paginated ]  {}", e.getMessage());
-            throw new DaoException("[ Error when getting ticket list ] ", e);
-        }
+        TypedQuery<Ticket> query = em.createQuery(sql, Ticket.class);
+
+        return query.getResultList();
+
     }
 
     public List<PreviousReport> getPreviousReportList() throws DaoException {
@@ -455,14 +430,9 @@ public class RulesDao {
         }
     }
 
-    public long getNumberOfTicketsByRuleGuid(String ruleGuid) throws DaoException {
-        try {
-            TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_ASSETS_NOT_SENDING, Long.class);
-            query.setParameter("ruleGuid", ruleGuid);
-            return query.getSingleResult();
-        } catch (Exception e) {
-            LOG.error("[ Error when getting counting tickets by movement. ] {}", e.getMessage());
-            throw new DaoException("[ Error when counting tickets by movement. ] ", e);
-        }
+    public long getNumberOfTicketsByRuleGuid(String ruleGuid){
+        TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_ASSETS_NOT_SENDING, Long.class);
+        query.setParameter("ruleGuid", ruleGuid);
+        return query.getSingleResult();
     }
 }

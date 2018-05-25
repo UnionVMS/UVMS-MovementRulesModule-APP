@@ -28,6 +28,11 @@ import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
+import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
+import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
@@ -68,8 +73,8 @@ public class TicketRestResource {
         LOG.info("Get tickets list invoked in rest layer");
         try {
             return new ResponseDto(rulesService.getTicketList(loggedInUser, query), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException  | NullPointerException ex) {
-            LOG.error("[ Error when getting list. ] {} ", ex);
+        } catch (RulesServiceException | RulesFaultException  | NullPointerException | InputArgumentException | DaoMappingException | DaoException | SearchMapperException ex) {
+            LOG.error("[ERROR] Error when getting ticket list by query ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
     }
@@ -91,8 +96,8 @@ public class TicketRestResource {
         LOG.info("Get tickets by movements invoked in rest layer");
         try {
             return new ResponseDto(rulesService.getTicketsByMovements(movements), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException  | NullPointerException ex) {
-            LOG.error("[ Error when getting list by movements. ] {} ", ex);
+        } catch (RulesServiceException | RulesFaultException  | NullPointerException | DaoMappingException | InputArgumentException | DaoException ex) {
+            LOG.error("[ Error when getting ticket list by movements. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
     }
@@ -113,8 +118,8 @@ public class TicketRestResource {
     public ResponseDto countTicketsByMovements(List<String> movements) {
         try {
             return new ResponseDto(rulesService.countTicketsByMovements(movements), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException e) {
-            LOG.error("[ Error when getting number of open tickets. ] {} ", e);
+        } catch (RulesServiceException | RulesFaultException | DaoException | InputArgumentException e) {
+            LOG.error("[ Error when counting number of open tickets by movements. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -135,9 +140,11 @@ public class TicketRestResource {
     public ResponseDto updateTicketStatus(final TicketType ticketType) {
         LOG.info("Update ticket status invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.updateTicketStatus(ticketType), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when updating. ] {} ", e);
+
+            TicketType response = TicketMapper.toTicketType(rulesService.updateTicketStatus(TicketMapper.toTicketEntity(ticketType)));
+            return new ResponseDto(response, ResponseCode.OK);
+        } catch (RulesServiceException | RulesFaultException | NullPointerException | InputArgumentException | DaoMappingException | DaoException e) {
+            LOG.error("[ Error when updating ticket. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -159,8 +166,8 @@ public class TicketRestResource {
         LOG.info("Update ticket status invoked in rest layer");
         try {
             return new ResponseDto(rulesService.updateTicketStatusByQuery(loggedInUser, query, status), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException e) {
-            LOG.error("[ Error when updating. ] {} ", e);
+        } catch (RulesServiceException | RulesFaultException | NullPointerException | InputArgumentException | DaoMappingException | DaoException | SearchMapperException e) {
+            LOG.error("[ Error when updating tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -179,8 +186,9 @@ public class TicketRestResource {
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
     public ResponseDto getTicketByGuid(@PathParam("guid") String guid) {
         try {
-            return new ResponseDto(rulesService.getTicketByGuid(guid), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException e) {
+            TicketType response = TicketMapper.toTicketType(rulesService.getTicketByGuid(guid));
+            return new ResponseDto(response, ResponseCode.OK);
+        } catch (RulesServiceException | DaoMappingException e) {
             LOG.error("[ Error when getting ticket by GUID. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
@@ -202,7 +210,7 @@ public class TicketRestResource {
 
         try {
             return new ResponseDto(validationService.getNumberOfOpenTickets(loggedInUser), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException e) {
+        } catch (RulesServiceException | RulesFaultException | DaoException e) {
             LOG.error("[ Error when getting number of open tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
         }

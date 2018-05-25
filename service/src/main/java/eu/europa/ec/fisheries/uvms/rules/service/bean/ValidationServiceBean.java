@@ -617,19 +617,14 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     @Override
-    public long getNumberOfOpenTickets(String userName) throws RulesServiceException, RulesFaultException {
-        try {
-            LOG.info("[INFO] Counting open tickets");
-            List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);
-            if (!validRuleGuids.isEmpty()) {
-                return rulesDao.getNumberOfOpenTickets(validRuleGuids);
-            }
-            return 0;
-        } catch (DaoException e) {
-            LOG.error("[ERROR] Error when counting open tickets {}", e.getMessage());
-            LOG.error("[ Error when getting number of open tickets ] {}", e.getMessage());
-            throw new RulesServiceException("[ Error when getting number of open alarms. ]");
+    public long getNumberOfOpenTickets(String userName) throws RulesServiceException, DaoException {
+
+        LOG.info("[INFO] Counting open tickets");
+        List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);
+        if (!validRuleGuids.isEmpty()) {
+            return rulesDao.getNumberOfOpenTickets(validRuleGuids);
         }
+        return 0;
     }
 
     private Date auditLog(String msg, Date lastTimestamp) {

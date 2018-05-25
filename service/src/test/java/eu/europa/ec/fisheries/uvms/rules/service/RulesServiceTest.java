@@ -10,6 +10,7 @@ import javax.ejb.EJBTransactionRolledbackException;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.rules.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.rules.entity.RuleSegment;
+import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
@@ -267,7 +268,7 @@ public class RulesServiceTest extends TransactionalTests {
         try {
             rulesService.getTicketList(null, null);   //missing query
             Assert.assertTrue(false);
-        }catch (EJBTransactionRolledbackException e){
+        }catch (InputArgumentException e){
             Assert.assertTrue(true);
         }
 
@@ -276,7 +277,7 @@ public class RulesServiceTest extends TransactionalTests {
         try {
             rulesService.getTicketList(null, input);    //missing pagination
             Assert.assertTrue(false);
-        }catch (EJBTransactionRolledbackException e){
+        }catch (InputArgumentException e){
             Assert.assertTrue(true);
         }
     }
@@ -286,7 +287,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.getTicketsByMovements(null);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
         List<String> input = new ArrayList<String>();
@@ -294,7 +295,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.getTicketsByMovements(input);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
 
@@ -304,7 +305,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.getTicketsByMovements(null);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
 
@@ -313,7 +314,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.getTicketsByMovements(input);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
     }
@@ -323,15 +324,15 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateTicketStatus(null);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
 
-        TicketType input = new TicketType();
+        Ticket input = new Ticket();
         try{
             rulesService.updateTicketStatus(input);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
     }
@@ -341,21 +342,21 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateTicketStatusByQuery(null, null, null);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateTicketStatusByQuery("test user", null, null);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateTicketStatusByQuery("test user", null, TicketStatusType.OPEN);
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        }catch(InputArgumentException e){
             Assert.assertTrue(true);
         }
         TicketQuery input = new TicketQuery();
