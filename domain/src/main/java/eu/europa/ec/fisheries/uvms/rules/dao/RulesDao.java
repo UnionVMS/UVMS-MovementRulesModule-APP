@@ -31,7 +31,6 @@ import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchValue;
 
@@ -163,7 +162,7 @@ public class RulesDao {
         }
     }
 
-    public Ticket updateTicket(Ticket entity) throws DaoException {
+    public Ticket updateTicket(Ticket entity){
         em.merge(entity);
         em.flush();
         return entity;

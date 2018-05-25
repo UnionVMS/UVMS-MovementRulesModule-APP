@@ -26,7 +26,7 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.JMSException;
-import javax.jms.Message;
+
 
 import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
 import eu.europa.ec.fisheries.uvms.rules.entity.*;
@@ -365,26 +365,23 @@ public class RulesServiceBean implements RulesService {
             }
             customRuleEntity.getRuleSubscriptionList().add(ruleSubscription);
             ruleSubscription.setCustomRule(customRuleEntity);
+
+            // TODO: Don't log rule guid, log subscription guid?
+            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.CREATE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
         } else if (SubscritionOperationType.REMOVE.equals(updateSubscriptionType.getOperation())) {
             List<RuleSubscription> subscriptions = customRuleEntity.getRuleSubscriptionList();
             for (RuleSubscription subscription : subscriptions) {
                 if (subscription.getOwner().equals(updateSubscriptionType.getSubscription().getOwner()) && subscription.getType().equals(updateSubscriptionType.getSubscription().getType().name())) {
                     customRuleEntity.getRuleSubscriptionList().remove(subscription);
                     rulesDao.removeSubscription(subscription);
+
+                    // TODO: Don't log rule guid, log subscription guid?
+                    auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.DELETE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
                     break;
                 }
             }
         }
-        //CustomRuleType updateCustomRule = CustomRuleMapper.toCustomRuleType(customRuleEntity);
 
-
-        if (SubscritionOperationType.ADD.equals(updateSubscriptionType.getOperation())) {
-            // TODO: Don't log rule guid, log subscription guid?
-            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.CREATE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
-        } else if (SubscritionOperationType.REMOVE.equals(updateSubscriptionType.getOperation())) {
-            // TODO: Don't log rule guid, log subscription guid?
-            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_SUBSCRIPTION, AuditOperationEnum.DELETE, updateSubscriptionType.getRuleGuid(), updateSubscriptionType.getSubscription().getOwner() + "/" + updateSubscriptionType.getSubscription().getType(), username);
-        }
         return customRuleEntity;
     }
 
@@ -640,7 +637,6 @@ public class RulesServiceBean implements RulesService {
 
         rulesDao.updateAlarm(entity);
 
-        //AlarmReportType updatedAlarm = AlarmMapper.toAlarmReportType(entity);
 
         // Notify long-polling clients of the change
         alarmReportEvent.fire(new NotificationMessage("guid", entity.getGuid()));
@@ -750,7 +746,7 @@ public class RulesServiceBean implements RulesService {
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), null, ticket.getUpdatedBy());
             return updatedTicket;
-        } catch (RulesModelException | DaoException | DaoMappingException e ) {
+        } catch (RulesModelException | DaoMappingException e ) {
             LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
             throw new RulesServiceException("[ERROR] Error when updating ticket status. ]", e);
         }
