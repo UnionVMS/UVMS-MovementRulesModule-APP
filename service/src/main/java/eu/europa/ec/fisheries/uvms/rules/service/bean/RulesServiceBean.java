@@ -26,18 +26,6 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.JMSException;
-
-
-import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
-import eu.europa.ec.fisheries.uvms.rules.entity.*;
-import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.PreviousReportMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchValue;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchValue;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
-import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
@@ -55,18 +43,17 @@ import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscritionOperationType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdList;
+import eu.europa.ec.fisheries.schema.rules.module.v1.GetAlarmListByQueryResponse;
+import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketListByMovementsResponse;
+import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.schema.rules.previous.v1.PreviousReportType;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmSearchKey;
 import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketQuery;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetAlarmListByQueryResponse;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByMovementsResponse;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.rules.ticketrule.v1.TicketAndRuleType;
@@ -75,19 +62,30 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalModelMapperException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalUnmarshallException;
+import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
 import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
+import eu.europa.ec.fisheries.uvms.rules.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
 import eu.europa.ec.fisheries.uvms.rules.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchFieldMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchValue;
+import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchFieldMapper;
+import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.AlarmListResponseDto;
-
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.rules.service.boundary.AssetServiceBean;
 import eu.europa.ec.fisheries.uvms.rules.service.boundary.AuditServiceBean;
@@ -99,7 +97,6 @@ import eu.europa.ec.fisheries.uvms.rules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.PreviousReportFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
-
 import eu.europa.ec.fisheries.uvms.rules.service.business.RulesValidator;
 import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportCountEvent;
 import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportEvent;
@@ -112,6 +109,7 @@ import eu.europa.ec.fisheries.uvms.rules.service.mapper.AssetAssetIdMapper;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.MobileTerminalMapper;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.MovementFactMapper;
 import eu.europa.ec.fisheries.uvms.rules.service.mapper.RawMovementFactMapper;
+import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.user.types.Feature;
@@ -637,20 +635,8 @@ public class RulesServiceBean implements RulesService {
 
     // Triggered by RulesTimerBean
     @Override
-    public List<PreviousReportType> getPreviousMovementReports() throws RulesServiceException {
-        LOG.info("[INFO] Get previous movement reports invoked in service layer");
-        try {
-            LOG.info("[INFO] Getting list of previous reports");
-            List<PreviousReportType> previousReports = new ArrayList<>();
-            List<PreviousReport> entityList = rulesDao.getPreviousReportList();
-            for (PreviousReport entity : entityList) {
-                previousReports.add(PreviousReportMapper.toPreviousReportType(entity));
-            }
-            return previousReports;
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when getting list {}", e.getMessage());
-            throw new RulesServiceException("[ERROR] Error when getting list. ]", e);
-        }
+    public List<PreviousReport> getPreviousMovementReports() {
+        return rulesDao.getPreviousReportList();
     }
 
     // Triggered by timer rule
@@ -1026,11 +1012,9 @@ public class RulesServiceBean implements RulesService {
         LOG.info("[INFO] Fetching time difference to previous movement report");
         Long timeDiff = null;
         try {
-            LOG.info("[INFO] Getting previous report by asset GUID..");
             PreviousReport entity = rulesDao.getPreviousReportByAssetGuid(assetGuid);
-            PreviousReportType previousReport = PreviousReportMapper.toPreviousReportType(entity);
 
-            Date previousTime = previousReport.getPositionTime();
+            Date previousTime = entity.getPositionTime();
             timeDiff = thisTime.getTime() - previousTime.getTime();
         } catch (Exception e) { // there should be a DaoMappingException here but based on this exception and the below comment I am putting it in a comment instead.....
             // If something goes wrong, continue with the other validation
@@ -1041,23 +1025,15 @@ public class RulesServiceBean implements RulesService {
     }
 
     private void persistLastCommunication(String assetGuid, Date positionTime) {
-        PreviousReportType thisReport = new PreviousReportType();
-        thisReport.setPositionTime(positionTime);
-        thisReport.setAssetGuid(assetGuid);
-        try {
-            LOG.info("[INFO] Upserting previous report");
-
-            PreviousReport entity = rulesDao.getPreviousReportByAssetGuid(thisReport.getAssetGuid());
-            if (entity == null) {
-                entity = PreviousReportMapper.toPreviousReportEntity(thisReport);
-            } else {
-                entity = PreviousReportMapper.toPreviousReportEntity(entity, thisReport);
-            }
-            rulesDao.updatePreviousReport(entity);
-
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error persisting report. ] {}", e.getMessage());
+        PreviousReport entity = rulesDao.getPreviousReportByAssetGuid(assetGuid);
+        if (entity == null) {
+            entity = new PreviousReport();
         }
+        entity.setPositionTime(positionTime);
+        entity.setAssetGuid(assetGuid);
+        entity.setUpdated(new Date());
+        entity.setUpdatedBy("UVMS");
+        rulesDao.updatePreviousReport(entity);
     }
 
     // TODO: Implement for IRIDIUM as well (if needed)

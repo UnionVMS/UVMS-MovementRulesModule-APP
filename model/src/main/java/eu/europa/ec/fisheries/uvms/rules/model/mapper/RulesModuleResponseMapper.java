@@ -28,6 +28,8 @@ import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperExcepti
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 
 public class RulesModuleResponseMapper {
+    
+    private RulesModuleResponseMapper() {}
 
     private static void validateResponse(TextMessage response, String correlationId) throws RulesModelMapperException, JMSException, RulesFaultException {
 

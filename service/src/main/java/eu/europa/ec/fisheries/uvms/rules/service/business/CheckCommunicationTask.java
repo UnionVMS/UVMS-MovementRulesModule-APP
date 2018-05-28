@@ -11,22 +11,20 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.service.business;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import eu.europa.ec.fisheries.schema.rules.previous.v1.PreviousReportType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.rules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CheckCommunicationTask implements Runnable {
     private static final long TWO_HOURS_IN_MILLISECONDS = 7200000;
 
-    private final static Logger LOG = LoggerFactory.getLogger(CheckCommunicationTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CheckCommunicationTask.class);
 
     private RulesService rulesService;
 
@@ -37,17 +35,11 @@ public class CheckCommunicationTask implements Runnable {
     public void run() {
         LOG.debug("RulesTimerBean tick");
         // Get all previous reports from DB
-        List<PreviousReportType> previousReports = new ArrayList<>();
-        try {
-            previousReports = rulesService.getPreviousMovementReports();
-        } catch (RulesServiceException | RulesFaultException e) {
-            LOG.warn("[WARN] No previous movement report found");
-        }
+        List<PreviousReport> previousReports = rulesService.getPreviousMovementReports();
         try {
             // Map to fact, adding 2h to deadline
-            for (PreviousReportType previousReport : previousReports) {
+            for (PreviousReport previousReport : previousReports) {
                 PreviousReportFact fact = new PreviousReportFact();
-                fact.setMovementGuid(previousReport.getMovementGuid());
                 fact.setAssetGuid(previousReport.getAssetGuid());
 
                 Date positionTime = previousReport.getPositionTime();

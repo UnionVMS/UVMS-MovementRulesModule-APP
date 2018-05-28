@@ -6,8 +6,6 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-
-import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -15,11 +13,11 @@ import org.junit.runner.RunWith;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.europa.ec.fisheries.schema.rules.module.v1.GetAlarmListByQueryResponse;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmSearchKey;
 import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetAlarmListByQueryResponse;
 import eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian.BuildRulesRestDeployment;
 
 @RunWith(Arquillian.class)

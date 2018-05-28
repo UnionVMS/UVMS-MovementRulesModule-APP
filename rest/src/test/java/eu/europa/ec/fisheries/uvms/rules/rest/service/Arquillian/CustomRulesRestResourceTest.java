@@ -1,26 +1,31 @@
 package eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.*;
-import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleListCriteria;
-import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
-import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleSearchKey;
-import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetCustomRuleListByQueryResponse;
-import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
-import org.drools.core.command.assertion.AssertEquals;
+import java.util.List;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.ActionType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.AvailabilityType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.ConditionType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.CriteriaType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleActionType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleSegmentType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.LogicOperatorType;
+import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubCriteriaType;
+import eu.europa.ec.fisheries.schema.rules.module.v1.GetCustomRuleListByQueryResponse;
+import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleListCriteria;
+import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
+import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleSearchKey;
+import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
 
 @RunAsClient
 @RunWith(Arquillian.class)

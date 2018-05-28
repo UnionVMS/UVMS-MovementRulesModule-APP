@@ -11,22 +11,22 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.service;
 
-import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
+import java.nio.file.AccessDeniedException;
+import java.util.List;
+import javax.ejb.Local;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.UpdateSubscriptionType;
+import eu.europa.ec.fisheries.schema.rules.module.v1.GetAlarmListByQueryResponse;
+import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketListByMovementsResponse;
+import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.rules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.schema.rules.previous.v1.PreviousReportType;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketQuery;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetAlarmListByQueryResponse;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByMovementsResponse;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
@@ -39,10 +39,6 @@ import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallExcep
 import eu.europa.ec.fisheries.uvms.rules.service.business.PreviousReportFact;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
-
-import javax.ejb.Local;
-import java.nio.file.AccessDeniedException;
-import java.util.List;
 
 @Local
 public interface RulesService {
@@ -150,7 +146,7 @@ public interface RulesService {
 
     AlarmReport updateAlarmStatus(AlarmReport ticket) throws RulesServiceException, RulesFaultException, DaoException, InputArgumentException;
 
-    List<PreviousReportType> getPreviousMovementReports() throws RulesServiceException, RulesFaultException;
+    List<PreviousReport> getPreviousMovementReports();
 
     void timerRuleTriggered(String ruleName, PreviousReportFact fact) throws RulesServiceException, RulesFaultException;
 

@@ -13,8 +13,8 @@ package eu.europa.ec.fisheries.uvms.rules.service;
 
 import java.util.List;
 import javax.ejb.Local;
+import eu.europa.ec.fisheries.schema.rules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
-import eu.europa.ec.fisheries.schema.rules.source.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;

@@ -315,17 +315,9 @@ public class RulesDao {
 
     }
 
-    public List<PreviousReport> getPreviousReportList() throws DaoException {
-        try {
-            TypedQuery<PreviousReport> query = em.createNamedQuery(PreviousReport.GET_ALL_PREVIOUS_REPORTS, PreviousReport.class);
-            return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting list of previous reports ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting list ] ", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when getting list of previous reports ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting list of previous reports ] ", e);
-        }
+    public List<PreviousReport> getPreviousReportList() {
+        TypedQuery<PreviousReport> query = em.createNamedQuery(PreviousReport.GET_ALL_PREVIOUS_REPORTS, PreviousReport.class);
+        return query.getResultList();
     }
 
     // Used by timer to prevent duplicate tickets for passing the reporting
@@ -376,19 +368,8 @@ public class RulesDao {
         }
     }
 
-    public void updatePreviousReport(PreviousReport report) throws DaoException {
-        try {
-            em.merge(report);
-        } catch (EntityExistsException | IllegalArgumentException | TransactionRequiredException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new DaoException("[ Error when creating previous report. ]", e);
-        } catch (PersistenceException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new DaoException("[ Error when creating previous report. ]", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new DaoException("[ Error when creating previous report. ]", e);
-        }
+    public PreviousReport updatePreviousReport(PreviousReport report) {
+        return em.merge(report);
     }
 
     public long getNumberOfTicketsByRuleGuid(String ruleGuid){
