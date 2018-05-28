@@ -71,7 +71,6 @@ import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.rules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalModelMapperException;
@@ -85,7 +84,7 @@ import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.AlarmListResponseDto;
-import eu.europa.ec.fisheries.uvms.rules.model.dto.TicketListResponseDto;
+
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
@@ -100,7 +99,7 @@ import eu.europa.ec.fisheries.uvms.rules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.PreviousReportFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.RulesUtil;
+
 import eu.europa.ec.fisheries.uvms.rules.service.business.RulesValidator;
 import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportCountEvent;
 import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportEvent;
@@ -178,7 +177,7 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesFaultException
      */
     @Override
-    public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMarshallException, ModelMarshallException, MessageException {
+    public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, RulesModelMarshallException, ModelMarshallException, MessageException {
         LOG.info("[INFO] Create invoked in service layer");
 
         // Get organisation of user
@@ -194,7 +193,7 @@ public class RulesServiceBean implements RulesService {
                 throw new AccessDeniedException("Forbidden access");
             }
         }
-        CustomRule createdRule = null;
+
         //Copy-paste from RulesDomainModelBean to remove that class
         LOG.debug("Create in Rules");
         //CustomRule entity = CustomRuleMapper.toCustomRuleEntity(customRule);
@@ -213,12 +212,11 @@ public class RulesServiceBean implements RulesService {
         customRule.setGuid(UUID.randomUUID().toString());
 
         rulesDao.createCustomRule(customRule);
-        createdRule = customRule;
 
         // TODO: Rewrite so rules are loaded when changed
         rulesValidator.updateCustomRules();
-        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, createdRule.getGuid(), null, customRule.getUpdatedBy());
-        return createdRule;
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, customRule.getGuid(), null, customRule.getUpdatedBy());
+        return customRule;
 
 
     }
@@ -335,7 +333,7 @@ public class RulesServiceBean implements RulesService {
      * @param updateSubscriptionType
      */
     @Override
-    public CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException, DaoMappingException {
+    public CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException {
         LOG.info("[INFO] Update subscription invoked in service layer");
         if (updateSubscriptionType == null) {
             LOG.error("[ERROR] Subscription is null, returning Exception ]");
@@ -410,7 +408,6 @@ public class RulesServiceBean implements RulesService {
         entity.setArchived(true);
         entity.setActive(false);
         entity.setEndDate(new Date());
-        //CustomRuleType deletedRule = CustomRuleMapper.toCustomRuleType(entity);
 
         rulesValidator.updateCustomRules();
         auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, entity.getGuid(), null, username);
@@ -498,9 +495,8 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) throws RulesServiceException {
+    public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) throws RulesServiceException, DaoException, DaoMappingException {
         LOG.info("[INFO] Get tickets and rules by movements invoked in service layer");
-        try {
             LOG.info("[INFO] Get Tickets and Rules by movements");
 
             List<TicketAndRuleType> ticketsAndRules = new ArrayList<>();
@@ -519,14 +515,11 @@ public class RulesServiceBean implements RulesService {
             GetTicketsAndRulesByMovementsResponse response = new GetTicketsAndRulesByMovementsResponse();
             response.getTicketsAndRules().addAll(ticketsAndRules);
             return response;
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when getting list {}", e.getMessage());
-            throw new RulesServiceException(e.getMessage());
-        }
+
     }
 
     @Override
-    public long countTicketsByMovements(List<String> movements) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException {
+    public long countTicketsByMovements(List<String> movements) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException {
         LOG.info("[INFO] Get number of tickets by movements invoked in service layer");
 
 
@@ -541,7 +534,7 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public Ticket updateTicketStatus(Ticket ticket) throws RulesServiceException, RulesFaultException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException, DaoMappingException {
+    public Ticket updateTicketStatus(Ticket ticket) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException {
         LOG.info("[INFO] Update ticket status invoked in service layer");
 
         if (ticket == null || ticket.getGuid() == null) {
@@ -556,7 +549,7 @@ public class RulesServiceBean implements RulesService {
 
         rulesDao.updateTicket(entity);
 
-        //TicketType updatedTicket = TicketMapper.toTicketType(entity);
+
 
         // Notify long-polling clients of the update
         ticketUpdateEvent.fire(new NotificationMessage("guid", entity.getGuid()));
@@ -644,7 +637,7 @@ public class RulesServiceBean implements RulesService {
 
     // Triggered by RulesTimerBean
     @Override
-    public List<PreviousReportType> getPreviousMovementReports() throws RulesServiceException, RulesFaultException {
+    public List<PreviousReportType> getPreviousMovementReports() throws RulesServiceException {
         LOG.info("[INFO] Get previous movement reports invoked in service layer");
         try {
             LOG.info("[INFO] Getting list of previous reports");
@@ -662,14 +655,13 @@ public class RulesServiceBean implements RulesService {
 
     // Triggered by timer rule
     @Override
-    public void timerRuleTriggered(String ruleName, PreviousReportFact fact) throws RulesServiceException, RulesFaultException {
+    public void timerRuleTriggered(String ruleName, PreviousReportFact fact) throws RulesServiceException {
         LOG.info("[INFO] Timer rule triggered invoked in service layer");
         try {
             // Check if ticket already is created for this asset
             LOG.info("[INFO] Getting ticket by asset guid : {}", fact.getAssetGuid());
 
             Ticket ticketEntity = rulesDao.getTicketByAssetAndRule(fact.getAssetGuid(), ruleName); //ruleName gets renamed into ruleGuid in the method, dont know what is correct
-            //TicketType ticket = TicketMapper.toTicketType(ticketEntity);
 
             if (ticketEntity == null) {
                 createAssetNotSendingTicket(ruleName, fact);
@@ -687,16 +679,6 @@ public class RulesServiceBean implements RulesService {
     }
 
     private void createAssetNotSendingTicket(String ruleName, PreviousReportFact fact) throws RulesModelException {
-        /*TicketType ticketType = new TicketType();
-
-        ticketType.setAssetGuid(fact.getAssetGuid());
-        ticketType.setOpenDate(RulesUtil.dateToString(new Date()));
-        ticketType.setRuleName(ruleName);
-        ticketType.setRuleGuid(ruleName);
-        ticketType.setUpdatedBy("UVMS");
-        ticketType.setStatus(TicketStatusType.OPEN);
-        ticketType.setMovementGuid(fact.getMovementGuid());
-        ticketType.setGuid(UUID.randomUUID().toString());*/
 
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(fact.getAssetGuid());
@@ -740,7 +722,6 @@ public class RulesServiceBean implements RulesService {
             rulesDao.updateTicket(entity);
 
 
-            //TicketType updatedTicket = rulesDomainModel.updateTicketCount(ticket);
             // Notify long-polling clients of the update
             ticketUpdateEvent.fire(new NotificationMessage("guid", entity.getGuid()));
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
@@ -795,7 +776,7 @@ public class RulesServiceBean implements RulesService {
 
     }
 
-    private AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException, DaoMappingException, DaoException {
+    private AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException, DaoMappingException {
         LOG.info("[INFO] Get list of alarms from query.");
 
         if (query == null) {

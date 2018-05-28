@@ -176,5 +176,5 @@ public interface RulesService {
 
     long getNumberOfAssetsNotSending() throws RulesServiceException, RulesFaultException;
 
-    GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) throws RulesServiceException;
+    GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) throws RulesServiceException, DaoException, DaoMappingException;
 }

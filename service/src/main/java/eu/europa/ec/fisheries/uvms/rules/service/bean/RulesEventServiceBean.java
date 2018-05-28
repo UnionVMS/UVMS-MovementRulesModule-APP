@@ -184,7 +184,7 @@ public class RulesEventServiceBean implements EventService {
             GetTicketsAndRulesByMovementsRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), GetTicketsAndRulesByMovementsRequest.class);
             GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());
             rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), RulesModuleResponseMapper.getTicketsAndRulesByMovementsResponse(response.getTicketsAndRules()));
-        } catch (RulesModelMapperException | RulesServiceException | MessageException e) {
+        } catch (RulesModelMapperException | RulesServiceException | MessageException | DaoException | DaoMappingException e) {
             LOG.error("[ERROR] Error when fetching tickets and rules by movements {}", e.getMessage());
             errorEvent.fire(message);
         }
