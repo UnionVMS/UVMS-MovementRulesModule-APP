@@ -22,6 +22,10 @@ import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 @LocalBean
 @Stateless
 public class TicketMapper {
@@ -66,7 +70,7 @@ public class TicketMapper {
             ticketEntity.setStatus(ticketType.getStatus().name());
             ticketEntity.setCreatedDate(DateUtils.stringToDate(ticketType.getOpenDate()));
             ticketEntity.setRuleGuid(ticketType.getRuleGuid());
-            ticketEntity.setUpdated(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            ticketEntity.setUpdated(new Date());
             ticketEntity.setUpdatedBy(ticketType.getUpdatedBy());
             ticketEntity.setMovementGuid(ticketType.getMovementGuid());
             ticketEntity.setRuleName(ticketType.getRuleName());
@@ -87,5 +91,13 @@ public class TicketMapper {
     public static TicketType toTicketType(Ticket ticketEntity) throws DaoMappingException {
         TicketType ticketType = new TicketType();
         return toTicketType(ticketType, ticketEntity);
+    }
+
+    public static List<TicketType> listToTicketType(List<Ticket> ticketList) throws DaoMappingException {
+        List<TicketType> response = new ArrayList<TicketType>();
+        for (Ticket ticket : ticketList) {
+            response.add(toTicketType(ticket));
+        }
+        return response;
     }
 }

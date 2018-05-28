@@ -300,7 +300,7 @@ public class ValidationServiceBean implements ValidationService {
             }
 
             CustomRule entity = rulesDao.getCustomRuleByGuid(ruleGuid);
-            entity.setTriggered(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            entity.setTriggered(new Date());
             rulesDao.updateCustomRule(entity);
 
         } catch (RulesModelException | DaoException e) {

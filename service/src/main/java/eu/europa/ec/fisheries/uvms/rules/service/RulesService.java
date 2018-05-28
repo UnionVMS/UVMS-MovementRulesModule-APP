@@ -102,7 +102,7 @@ public interface RulesService {
      * @param ticket
      * @throws RulesServiceException
      */
-    TicketType updateTicketCount(TicketType ticket) throws RulesServiceException, RulesFaultException;
+    Ticket updateTicketCount(Ticket ticket) throws RulesServiceException, RulesFaultException;
 
     /**
      * Update an object
@@ -172,7 +172,7 @@ public interface RulesService {
      */
     Ticket getTicketByGuid(String guid) throws RulesServiceException;
 
-    List<TicketType> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, RulesFaultException, InputArgumentException, DaoMappingException, DaoException, SearchMapperException;
+    List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, RulesFaultException, InputArgumentException, DaoMappingException, DaoException, SearchMapperException;
 
     long getNumberOfAssetsNotSending() throws RulesServiceException, RulesFaultException;
 

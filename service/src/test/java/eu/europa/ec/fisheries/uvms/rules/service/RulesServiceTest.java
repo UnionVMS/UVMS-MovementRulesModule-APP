@@ -10,12 +10,12 @@ import javax.ejb.EJBTransactionRolledbackException;
 import eu.europa.ec.fisheries.uvms.rules.entity.*;
 import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
+
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
+
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.ActionType;
@@ -24,7 +24,7 @@ import eu.europa.ec.fisheries.schema.rules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleActionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleSegmentType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
+
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionType;
@@ -40,12 +40,10 @@ import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementPoint;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementTypeType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
+
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
 
 
 @RunWith(Arquillian.class)
@@ -386,7 +384,7 @@ public class RulesServiceTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
 
-        TicketType input = new TicketType();
+        Ticket input = new Ticket();
         try{
             rulesService.updateTicketCount(input);
             Assert.assertTrue(false);

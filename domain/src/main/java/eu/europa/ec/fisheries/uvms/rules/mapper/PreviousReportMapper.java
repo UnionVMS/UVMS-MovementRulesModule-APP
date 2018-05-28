@@ -21,6 +21,8 @@ import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+
 @LocalBean
 @Stateless
 public class PreviousReportMapper {
@@ -42,7 +44,7 @@ public class PreviousReportMapper {
         try {
             previousReportEntity.setAssetGuid(previousReportType.getAssetGuid());
             previousReportEntity.setPositionTime(previousReportType.getPositionTime());
-            previousReportEntity.setUpdated(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            previousReportEntity.setUpdated(new Date());
             previousReportEntity.setUpdatedBy("UVMS");
             return previousReportEntity;
         } catch (Exception e) {

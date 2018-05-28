@@ -298,7 +298,7 @@ public class RulesServiceBean implements RulesService {
         // Close old version
         oldEntity.setArchived(true);
         oldEntity.setActive(false);
-        oldEntity.setEndDate(DateUtils.nowUTC().toGregorianCalendar().getTime());
+        oldEntity.setEndDate(new Date());
         // Copy subscription list (ignore if provided)
         List<RuleSubscription> subscriptions = oldEntity.getRuleSubscriptionList();
         for (RuleSubscription subscription : subscriptions) {
@@ -568,7 +568,7 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public List<TicketType> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoMappingException, DaoException, SearchMapperException {
+    public List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoMappingException, DaoException, SearchMapperException {
         LOG.info("[INFO] Update all ticket status invoked in service layer");
 
         if (loggedInUser == null) {
@@ -593,20 +593,15 @@ public class RulesServiceBean implements RulesService {
             ticket.setUpdatedBy(loggedInUser);
 
             rulesDao.updateTicket(ticket);
-        }
-        List<TicketType> ticketList = new ArrayList<>();
-        for (Ticket ticket : tickets) {
-            ticketList.add(TicketMapper.toTicketType(ticket));
 
             // Notify long-polling clients of the update
             ticketUpdateEvent.fire(new NotificationMessage("guid", ticket.getGuid()));
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid(), null, loggedInUser);
         }
 
-
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-        return ticketList;
+        return tickets;
 
     }
 
@@ -674,25 +669,25 @@ public class RulesServiceBean implements RulesService {
             LOG.info("[INFO] Getting ticket by asset guid : {}", fact.getAssetGuid());
 
             Ticket ticketEntity = rulesDao.getTicketByAssetAndRule(fact.getAssetGuid(), ruleName); //ruleName gets renamed into ruleGuid in the method, dont know what is correct
-            TicketType ticket = TicketMapper.toTicketType(ticketEntity);
+            //TicketType ticket = TicketMapper.toTicketType(ticketEntity);
 
-            if (ticket == null) {
+            if (ticketEntity == null) {
                 createAssetNotSendingTicket(ruleName, fact);
-            } else if (ticket.getTicketCount() != null) {
-                ticket.setTicketCount(ticket.getTicketCount() + 1);
-                updateTicketCount(ticket);
+            } else if (ticketEntity.getTicketCount() != null) {
+                ticketEntity.setTicketCount(ticketEntity.getTicketCount() + 1);
+                updateTicketCount(ticketEntity);
             } else {
-                ticket.setTicketCount(2L);
-                updateTicketCount(ticket);
+                ticketEntity.setTicketCount(2L);
+                updateTicketCount(ticketEntity);
             }
-        } catch (RulesModelException | DaoException | DaoMappingException e) {
+        } catch (RulesModelException | DaoException e) {
             LOG.error("[ERROR] Error when getting list {}", e.getMessage());
             throw new RulesServiceException("[ERROR] Error when getting list", e);
         }
     }
 
     private void createAssetNotSendingTicket(String ruleName, PreviousReportFact fact) throws RulesModelException {
-        TicketType ticketType = new TicketType();
+        /*TicketType ticketType = new TicketType();
 
         ticketType.setAssetGuid(fact.getAssetGuid());
         ticketType.setOpenDate(RulesUtil.dateToString(new Date()));
@@ -701,26 +696,33 @@ public class RulesServiceBean implements RulesService {
         ticketType.setUpdatedBy("UVMS");
         ticketType.setStatus(TicketStatusType.OPEN);
         ticketType.setMovementGuid(fact.getMovementGuid());
-        ticketType.setGuid(UUID.randomUUID().toString());
+        ticketType.setGuid(UUID.randomUUID().toString());*/
+
+        Ticket ticket = new Ticket();
+        ticket.setAssetGuid(fact.getAssetGuid());
+        ticket.setCreatedDate(new Date());
+        ticket.setRuleName(ruleName);
+        ticket.setRuleGuid(ruleName);
+        ticket.setUpdatedBy("UVMS");
+        ticket.setStatus(TicketStatusType.OPEN.value());
+        ticket.setMovementGuid(fact.getMovementGuid());
+
 
         LOG.info("[INFO] Rule Engine creating Ticket");
-        TicketType createdTicket = null;
         try {
-            Ticket ticket = TicketMapper.toTicketEntity(ticketType);
             ticket.setTicketCount(1L);
-            Ticket tempTicket = rulesDao.createTicket(ticket);
-            createdTicket = TicketMapper.toTicketType(tempTicket);
-        } catch (DaoException | DaoMappingException e) {
+            rulesDao.createTicket(ticket);
+        } catch (DaoException e) {
             LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());
             throw new RulesModelException("[ERROR] Error when creating ticket. ]", e);
         }
 
-		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, createdTicket.getUpdatedBy());	        // Notify long-polling clients of the change
+		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid(), null, ticket.getUpdatedBy());	        // Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
     }
 
     @Override
-    public TicketType updateTicketCount(TicketType ticket) throws RulesServiceException {
+    public Ticket updateTicketCount(Ticket ticket) throws RulesServiceException {
         LOG.info("[INFO] Update ticket count invoked in service layer");
         try {
             LOG.info("[INFO] Update ticket count in Rules");
@@ -732,21 +734,20 @@ public class RulesServiceBean implements RulesService {
             Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
 
             entity.setTicketCount(ticket.getTicketCount());
-            entity.setUpdated(DateUtils.nowUTC().toGregorianCalendar().getTime());
+            entity.setUpdated(new Date());
             entity.setUpdatedBy(ticket.getUpdatedBy());
 
             rulesDao.updateTicket(entity);
 
-            TicketType updatedTicket = TicketMapper.toTicketType(entity);
 
             //TicketType updatedTicket = rulesDomainModel.updateTicketCount(ticket);
             // Notify long-polling clients of the update
-            ticketUpdateEvent.fire(new NotificationMessage("guid", updatedTicket.getGuid()));
+            ticketUpdateEvent.fire(new NotificationMessage("guid", entity.getGuid()));
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, updatedTicket.getGuid(), null, ticket.getUpdatedBy());
-            return updatedTicket;
-        } catch (RulesModelException | DaoMappingException e ) {
+            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid(), null, ticket.getUpdatedBy());
+            return entity;
+        } catch (RulesModelException e ) {
             LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
             throw new RulesServiceException("[ERROR] Error when updating ticket status. ]", e);
         }

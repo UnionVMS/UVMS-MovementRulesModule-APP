@@ -45,7 +45,7 @@ public class SanityRuleMapper {
 
     public static SanityRule toSanityRuleEntity(SanityRule sanityRuleEntity, SanityRuleType sanityRuleType) throws DaoMappingException {
         try {
-            Date now = DateUtils.nowUTC().toGregorianCalendar().getTime();
+            Date now = new Date();
 
             // Base
             sanityRuleEntity.setName(sanityRuleType.getName());

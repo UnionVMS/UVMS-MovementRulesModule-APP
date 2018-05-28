@@ -165,7 +165,8 @@ public class TicketRestResource {
     public ResponseDto updateTicketStatusByQuery(@PathParam("loggedInUser") String loggedInUser, TicketQuery query, @PathParam("status") TicketStatusType status) {
         LOG.info("Update ticket status invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.updateTicketStatusByQuery(loggedInUser, query, status), ResponseCode.OK);
+            List response = TicketMapper.listToTicketType(rulesService.updateTicketStatusByQuery(loggedInUser, query, status));
+            return new ResponseDto(response, ResponseCode.OK);
         } catch (RulesServiceException | RulesFaultException | NullPointerException | InputArgumentException | DaoMappingException | DaoException | SearchMapperException e) {
             LOG.error("[ Error when updating tickets. ] {} ", e);
             return ErrorHandler.getFault(e);

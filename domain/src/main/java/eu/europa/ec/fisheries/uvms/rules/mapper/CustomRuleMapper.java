@@ -132,7 +132,7 @@ public class CustomRuleMapper {
             Date now = new Date();
             // Base
             customRuleEntity.setName(customRuleType.getName());
-            customRuleEntity.setGuid(customRuleType.getGuid());     //why was this not here from the beginning ?!?!?!?
+            customRuleEntity.setGuid(customRuleType.getGuid());     //why was this not here from the beginning ?!?!?!?  Well because in its usage it was stored elsewhere and then given a new guid......
             customRuleEntity.setAvailability(customRuleType.getAvailability().value());
             customRuleEntity.setDescription(customRuleType.getDescription());
             customRuleEntity.setActive(customRuleType.isActive());
