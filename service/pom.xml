@@ -46,18 +46,18 @@
             <type>pom</type>
         </dependency>
         <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
-            <artifactId>rules-model</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>movement-rules-model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rules-message</artifactId>
+            <artifactId>movement-rules-message</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
-            <artifactId>rules-dbaccess-domain</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>movement-rules-dbaccess-domain</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

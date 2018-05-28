@@ -52,7 +52,7 @@
 
     <dependencies>
     	 <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>movement-rules-model</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

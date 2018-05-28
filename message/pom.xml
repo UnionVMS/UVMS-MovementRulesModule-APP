@@ -19,7 +19,7 @@
 			<type>pom</type>
 		</dependency>
         <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>movement-rules-model</artifactId>
             <version>${project.version}</version>
         </dependency>

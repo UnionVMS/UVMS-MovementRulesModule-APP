@@ -35,7 +35,7 @@
         <maven-release-plugin>2.5.3</maven-release-plugin>
         <binding.xml>binding-date.xml</binding.xml>
 
-        <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-RulesModule-MODEL.git</scm.connection>
+        <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule.git</scm.connection>
     </properties>
 
     <dependencies>
@@ -116,7 +116,7 @@
 
             <properties>
                 <scm.connection>
-                    scm:git:https://emserveje@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/uvms-rulesmodule-model.git
+                    scm:git:https://emserveje@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/UVMS-MovementRulesModule.git
                 </scm.connection>
             </properties>
         </profile>
