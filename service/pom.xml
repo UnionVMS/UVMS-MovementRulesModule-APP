@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>rules-service</artifactId>
+    <artifactId>movement-rules-service</artifactId>
     <name>${project.parent.artifactId}-service</name>
     <packaging>ejb</packaging>
 
     <parent>
-        <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
-        <artifactId>rules</artifactId>
-        <version>3.0.31-SNAPSHOT</version>
+        <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
+        <artifactId>movement-rules</artifactId>
+        <version>0.9-SNAPSHOT</version>
     </parent>
 
     <!-- PROPERTIES USED FOR LOGBACK -->

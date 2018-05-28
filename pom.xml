@@ -7,9 +7,9 @@
         <version>1.18</version>
     </parent>
 
-    <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
-    <artifactId>rules</artifactId>
-    <version>3.0.31-SNAPSHOT</version>
+    <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
+    <artifactId>movement-rules</artifactId>
+    <version>0.9-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -27,7 +27,7 @@
         <uvms.common.version>3.0.18</uvms.common.version>
 
         <project.scm.id>github</project.scm.id>
-        <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-RulesModule-APP.git</scm.connection>
+        <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule.git</scm.connection>
     </properties>
 
     <dependencyManagement>

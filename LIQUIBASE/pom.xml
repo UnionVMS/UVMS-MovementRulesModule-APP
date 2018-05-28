@@ -2,9 +2,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
-        <artifactId>rules</artifactId>
-        <version>3.0.31-SNAPSHOT</version>
+        <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
+        <artifactId>movement-rules</artifactId>
+        <version>0.9-SNAPSHOT</version>
     </parent>
 
     <artifactId>liquibase</artifactId>

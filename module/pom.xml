@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>rules-module</artifactId>
+    <artifactId>movement-rules-module</artifactId>
     <name>${project.parent.artifactId}-module</name>
     <packaging>ear</packaging>
 
     <parent>
-        <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
-        <artifactId>rules</artifactId>
-        <version>3.0.31-SNAPSHOT</version>
+        <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
+        <artifactId>movement-rules</artifactId>
+        <version>0.9-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -23,24 +23,24 @@
                     <modules>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>rules-dbaccess-domain</artifactId>
+                            <artifactId>movement-rules-dbaccess-domain</artifactId>
                         </ejbModule>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>rules-message</artifactId>
+                            <artifactId>movement-rules-message</artifactId>
                         </ejbModule>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>rules-service</artifactId>
+                            <artifactId>movement-rules-service</artifactId>
                         </ejbModule>
                         <jarModule>
                             <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
-                            <artifactId>rules-model</artifactId>
+                            <artifactId>movement-rules-model</artifactId>
                         </jarModule>
                         <webModule>
                             <groupId>${project.groupId}</groupId>
                             <context-root>${context.root}${project.parent.artifactId}</context-root>
-                            <artifactId>rules-rest</artifactId>
+                            <artifactId>movement-rules-rest</artifactId>
                         </webModule>
                     </modules>
                     <skinnyWars>true</skinnyWars>
@@ -53,30 +53,30 @@
     <dependencies>
     	 <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
-            <artifactId>rules-model</artifactId>
+            <artifactId>movement-rules-model</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rules-dbaccess-domain</artifactId>
-            <version>${project.parent.version}</version>
-            <type>ejb</type>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>rules-message</artifactId>
+            <artifactId>movement-rules-dbaccess-domain</artifactId>
             <version>${project.parent.version}</version>
             <type>ejb</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rules-service</artifactId>
+            <artifactId>movement-rules-message</artifactId>
             <version>${project.parent.version}</version>
             <type>ejb</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rules-rest</artifactId>
+            <artifactId>movement-rules-service</artifactId>
+            <version>${project.parent.version}</version>
+            <type>ejb</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>movement-rules-rest</artifactId>
             <version>${project.parent.version}</version>
             <type>war</type>
         </dependency>
