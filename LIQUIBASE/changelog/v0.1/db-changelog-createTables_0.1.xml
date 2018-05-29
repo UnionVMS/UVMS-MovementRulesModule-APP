@@ -15,18 +15,6 @@
     <include file="\schema\tables\action.xml"/>
     <include file="\schema\tables\interval.xml"/>
     <include file="\schema\tables\rulesubscriber.xml"/>
-    <include file="\schema\tables\template.xml"/>
-    <include file="\schema\tables\rule.xml"/>
-    <include file="\schema\tables\externalrule.xml"/>
-    <include file="\schema\tables\failedrule.xml"/>
-    <include file="\schema\tables\rawmessage.xml"/>
-    <include file="\schema\tables\validationmessage.xml"/>
-    <include file="\schema\tables\messageid.xml"/>
-
-    <include file="\schema\tables\rulestatus.xml"/>
-
-    <include file="\schema\tables\fishinggeartypecharacteristic.xml"/>
-
 
     <!-- SANITY RULES -->
     <include file="\schema\tables\sanityrule.xml"/>
