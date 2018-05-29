@@ -27,7 +27,7 @@
         <uvms.common.version>3.0.18</uvms.common.version>
 
         <project.scm.id>github</project.scm.id>
-        <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule.git</scm.connection>
+        <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
         <docker.dev.version>3.25.0</docker.dev.version>
     </properties>

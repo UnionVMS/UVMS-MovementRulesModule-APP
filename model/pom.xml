@@ -7,68 +7,21 @@
         <version>0.9-SNAPSHOT</version>
     </parent>
 
-    <version>0.9-SNAPSHOT</version>
     <artifactId>movement-rules-model</artifactId>
     <name>movement-rules-model</name>
     <packaging>ejb</packaging>
     <description>This module shall have interfaces, XSD, and DTOs</description>
 
     <properties>
-        <!-- sonar -->
-        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>${project.basedir}/target/coverage-reports/jacoco-unit.exec</sonar.jacoco.reportPath>
-        <sonar.language>java</sonar.language>
-
-        <release.branch.name>uvms-2.0.6-kili</release.branch.name>
-
         <wsdl.contract.name>RulesModuleService</wsdl.contract.name>
-        <wsdl.source.name>RulesDataSourceService</wsdl.source.name>
-        <javaee.version>7.0</javaee.version>
-        <sl4j.version>1.7.25</sl4j.version>
-        <logback.version>1.2.3</logback.version>
-        <logback.core.version>1.2.3</logback.core.version>
-        <junit.version>4.10</junit.version>
-        <mockito.version>1.10.19</mockito.version>
-        <powermock.version>1.6.2</powermock.version>
-        <project.scm.id>github</project.scm.id>
-        <maven-release-plugin>2.5.3</maven-release-plugin>
         <binding.xml>binding-date.xml</binding.xml>
-
-        <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule.git</scm.connection>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
-            <version>${javaee.version}</version>
             <scope>provided</scope>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${sl4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${logback.core.version}</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -148,7 +101,6 @@
         <plugins>
 			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.6.1</version>
 				<executions>
 					<execution>
 						<id>clean-generated-sources</id>
@@ -198,7 +150,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.6.201602180812</version>
                 <configuration>
                     <destFile>${sonar.jacoco.reportPath}</destFile>
                     <append>true</append>
@@ -222,14 +173,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-ejb-plugin</artifactId>
-                <version>2.3</version>
                 <configuration>
                     <ejbVersion>3.1</ejbVersion>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>${maven-release-plugin}</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.scm</groupId>
