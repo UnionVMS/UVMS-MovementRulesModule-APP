@@ -33,8 +33,8 @@ public abstract class AbstractMessageTest {
 //        testWar.addAsLibraries(files);
         
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.rules:rules-model",
-                         "eu.europa.ec.fisheries.uvms.rules:rules-service:3.0.31-SNAPSHOT",
+                .resolve("eu.europa.ec.fisheries.uvms.movement-rules:movement-rules-model",
+                         "eu.europa.ec.fisheries.uvms.movement-rules:movement-rules-service:0.9-SNAPSHOT",
                          "eu.europa.ec.fisheries.uvms:uvms-config",
                          "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message",
                          "org.apache.activemq:activemq-client")
@@ -48,6 +48,6 @@ public abstract class AbstractMessageTest {
     }
     
     public static File[] filterRulesMessage(File[] files) {
-        return Arrays.stream(files).filter(f -> !f.getName().contains("rules-message")).toArray(File[]::new);
+        return Arrays.stream(files).filter(f -> !f.getName().contains("movement-rules-message")).toArray(File[]::new);
     }
 }

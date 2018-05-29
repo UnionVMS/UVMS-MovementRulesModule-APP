@@ -26,7 +26,7 @@ public abstract class BuildRulesRestDeployment {
         testWar.addAsLibraries(files);
         
         testWar.addAsLibraries(Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.rules:rules-service")
+                .resolve("eu.europa.ec.fisheries.uvms.movement-rules:movement-rules-service")
                 .withTransitivity().asFile());
 
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.rules.rest");
