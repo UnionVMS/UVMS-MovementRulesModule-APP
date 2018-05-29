@@ -7,10 +7,4 @@
 
     <include file="\schema\initdata\sanityrule_init.xml"/>
 
-    <include file="\schema\initdata\templaterule_init.xml"/>
-
-    <include file="\schema\initdata\rule_init.xml"/>
-
-    <include file="\schema\initdata\fishinggeartypecharacteristic_init.xml"/>
-
 </databaseChangeLog>
