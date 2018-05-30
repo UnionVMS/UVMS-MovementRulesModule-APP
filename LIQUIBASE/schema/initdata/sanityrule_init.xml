@@ -93,7 +93,7 @@
             <column name="sanityrule_name" value="CFR and IRCS missing"/>
             <column name="sanityrule_guid" value="CFR and IRCS missing"/>
             <column name="sanityrule_description" value="Both CFR and IRCS must exist when FLUX or MANUAL"/>
-            <column name="sanityrule_expression" value="cfr == null &amp;&amp; ircs == null &amp;&amp; (pluginType == &quot;FLUX&quot; || comChannelType == &quot;MANUAL&quot;)"/>
+            <column name="sanityrule_expression" value="(cfr == null || ircs == null) &amp;&amp; (pluginType == &quot;FLUX&quot; || comChannelType == &quot;MANUAL&quot;)"/>
             <column name="sanityrule_updattim" valueDate="CURRENT_TIMESTAMP"/>
             <column name="sanityrule_upuser" value="UVMS"/>
         </insert>

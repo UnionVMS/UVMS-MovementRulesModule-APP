@@ -10,21 +10,24 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.service;
 
-import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleResponseMapper;
-import eu.europa.ec.fisheries.wsdl.user.module.GetUserContextRequest;
-import eu.europa.ec.fisheries.wsdl.user.module.UserBaseRequest;
-import eu.europa.ec.fisheries.wsdl.user.types.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.ArrayList;
+import java.util.List;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleResponseMapper;
+import eu.europa.ec.fisheries.wsdl.user.module.UserBaseRequest;
+import eu.europa.ec.fisheries.wsdl.user.types.ContactDetails;
+import eu.europa.ec.fisheries.wsdl.user.types.ContextSet;
+import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
+import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
 
 @MessageDriven(mappedName = "jms/queue/UVMSUserEvent", activationConfig = {
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"),
@@ -54,11 +57,15 @@ public class UserModuleMock implements MessageListener {
                     userContext.setContextSet(new ContextSet());
                     String contextResponse =  UserModuleResponseMapper.mapToGetUserContextResponse(userContext);
                     messageProducer.sendModuleResponseMessage((TextMessage) message, contextResponse);
+                    break;
+                case FIND_ORGANISATIONS:
+                    List<Organisation> organizations = new ArrayList<>();
+                    String organisationResponse = UserModuleResponseMapper.mapToFindOrganisationsResponse(organizations);
+                    messageProducer.sendModuleResponseMessage((TextMessage) message, organisationResponse);
+                    break;
                 default:
                     break;
-
             }
-
         } catch (Exception e) {
             LOG.error("UserModuleMock Error", e);
         }

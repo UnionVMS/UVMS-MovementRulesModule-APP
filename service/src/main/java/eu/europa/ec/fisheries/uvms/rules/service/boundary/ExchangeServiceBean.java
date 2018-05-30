@@ -51,7 +51,7 @@ public class ExchangeServiceBean {
     private RulesMessageProducer producer;
     
     public void sendBackToExchange(String guid, RawMovementType rawMovement, MovementRefTypeType status, String username) throws RulesModelMarshallException, MessageException {
-        LOG.info("[INFO] Sending back processed movement to exchange");
+        LOG.info("Sending back processed movement ({}) to Exchange", guid);
 
         // Map response
         MovementRefType movementRef = new MovementRefType();
@@ -66,7 +66,7 @@ public class ExchangeServiceBean {
             String exchangeResponseText = ExchangeMovementMapper.mapToProcessedMovementResponse(setReportMovementType, movementRef, username);
             producer.sendDataSourceMessage(exchangeResponseText, DataSourceQueue.EXCHANGE);
         } catch (ExchangeModelMapperException e) {
-            e.printStackTrace();
+            LOG.error("Could not send processed movement to Exchange", e);
         }
     }
     
