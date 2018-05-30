@@ -27,7 +27,7 @@ import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleSearchKey;
 import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
 
-@RunAsClient
+//@RunAsClient
 @RunWith(Arquillian.class)
 public class CustomRulesRestResourceTest extends TransactionalTests {
 
