@@ -10,6 +10,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.rest.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
@@ -27,6 +29,7 @@ import eu.europa.ec.fisheries.wsdl.user.types.ContactDetails;
 import eu.europa.ec.fisheries.wsdl.user.types.Context;
 import eu.europa.ec.fisheries.wsdl.user.types.ContextSet;
 import eu.europa.ec.fisheries.wsdl.user.types.Feature;
+import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 import eu.europa.ec.fisheries.wsdl.user.types.Role;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
 
@@ -51,7 +54,6 @@ public class UserModuleMock implements MessageListener {
                     UserContext userContext = getRulesUserContext();
                     String responseString;
                     responseString = UserModuleResponseMapper.mapToGetUserContextResponse(userContext);
-                    
                     messageProducer.sendModuleResponseMessage((TextMessage) message, responseString);
                     break;
                 case GET_CONTACT_DETAILS:
@@ -59,6 +61,12 @@ public class UserModuleMock implements MessageListener {
                     contactDetails.setOrganisationName("Test Organisation");
                     String response = UserModuleResponseMapper.mapToGetContactDetailsResponse(contactDetails);
                     messageProducer.sendModuleResponseMessage((TextMessage) message, response);
+                    break;
+                case FIND_ORGANISATIONS:
+                    List<Organisation> organizations = new ArrayList<>();
+                    String organisationResponse = UserModuleResponseMapper.mapToFindOrganisationsResponse(organizations);
+                    messageProducer.sendModuleResponseMessage((TextMessage) message, organisationResponse);
+                    break;
                 default:
                     break;
 

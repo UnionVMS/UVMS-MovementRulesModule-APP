@@ -11,14 +11,17 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.service;
 
+import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.AvailabilityType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
@@ -27,7 +30,7 @@ import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
 
 public class RulesTestHelper {
 
-    public static CustomRule createBasicCustomRuleType() {
+    public static CustomRule createBasicCustomRule() {
         CustomRule customRule = new CustomRule();
         customRule.setName("Test Rule " + System.currentTimeMillis());
         customRule.setAvailability(AvailabilityType.PRIVATE.value());
@@ -58,13 +61,34 @@ public class RulesTestHelper {
         assetId.getAssetIdList().add(assetIdList);
         rawMovementType.setAssetId(assetId);
         rawMovementFact.setRawMovementType(rawMovementType);
-        rawMovementFact.setPluginType("NAF");
+        rawMovementFact.setPluginType(PluginType.NAF.value());
+        rawMovementFact.setLatitude(1d);
+        rawMovementFact.setLongitude(1d);
+        rawMovementFact.setAssetGuid(UUID.randomUUID().toString());
+        rawMovementFact.setComChannelType("ComChannelType");
+        rawMovementFact.setPositionTime(new Date());
+        rawMovementFact.setMobileTerminalMemberNumber(getRandomIntegers(5));
+        rawMovementFact.setMobileTerminalDnid(getRandomIntegers(5));
+        rawMovementFact.setIrcs(getRandomIntegers(7));
+        rawMovementFact.setCfr(getRandomIntegers(7));
         return rawMovementFact;
     }
     
     public static MovementFact createBasicMovementFact() {
         MovementFact movementFact = new MovementFact();
+        MovementType movement = new MovementType();
+        movementFact.setMovementMovement(movement);
         return movementFact;
+    }
+    
+    public static AlarmQuery getBasicAlarmQuery() {
+        AlarmQuery query = new AlarmQuery();
+        query.setDynamic(true);
+        ListPagination pagination = new ListPagination();
+        pagination.setPage(1);
+        pagination.setListSize(100);
+        query.setPagination(pagination);
+        return query;
     }
     
     public static String getRandomIntegers(int length) {

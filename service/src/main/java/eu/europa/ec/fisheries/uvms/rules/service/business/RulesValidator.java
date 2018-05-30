@@ -16,11 +16,11 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
-import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.inject.Inject;
 import org.drools.template.parser.DefaultTemplateContainer;
 import org.drools.template.parser.TemplateContainer;
 import org.drools.template.parser.TemplateDataListener;
@@ -41,22 +41,19 @@ import eu.europa.ec.fisheries.uvms.rules.service.mapper.CustomRuleParser;
 @Singleton
 @ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
 public class RulesValidator {
-    private final static Logger LOG = LoggerFactory.getLogger(RulesValidator.class);
-//    private static final String SANITY_RESOURCE_DRL_FILE = "/rules/SanityRules.drl";
+    private static final Logger LOG = LoggerFactory.getLogger(RulesValidator.class);
     private static final String CUSTOM_RULE_DRL_FILE = "src/main/resources/rules/CustomRules.drl";
     private static final String CUSTOM_RULE_TEMPLATE = "/templates/CustomRulesTemplate.drt";
 
     private static final String SANITY_RULES_DRL_FILE = "src/main/resources/rules/SanityRules.drl";
     private static final String SANITY_RULES_TEMPLATE = "/templates/SanityRulesTemplate.drt";
 
-    @EJB
+    @Inject
     private ValidationService validationService;
 
-    private KieFileSystem sanityKfs;
     private KieContainer sanityKcontainer;
     private List<SanityRule> currentSanityRules;
 
-    private KieFileSystem customKfs;
     private KieContainer customKcontainer;
 
     @PostConstruct
@@ -66,30 +63,7 @@ public class RulesValidator {
     }
     
     @Lock(LockType.WRITE)
-    public String getSanityRuleDrlFile() {
-        LOG.debug("Updating sanity rules");
-        try {
-            // Fetch sanity rules from DB
-            List<SanityRule> sanityRules = validationService.getSanityRules();
-            if (sanityRules != null && !sanityRules.isEmpty()) {
-              //  if (checkForChanges(sanityRules)) {
-                    currentSanityRules = sanityRules;
-                    // Add sanity rules
-                    String drl = generateSanityRuleDrl(SANITY_RULES_TEMPLATE, sanityRules);
-                    sanityKfs = KieServices.Factory.get().newKieFileSystem();
-                    return drl;
-              //  }
-            }
-        } catch (RulesServiceException | RulesFaultException  e) {
-            LOG.error("[ Error when getting sanity rules ]");
-            // TODO: Throw exception???
-        }
-        return null;
-    }
-
-    @Lock(LockType.WRITE)
     public void updateSanityRules() {
-        LOG.info("Updating sanity rules");
         try {
             // Fetch sanity rules from DB
             List<SanityRule> sanityRules = validationService.getSanityRules();
@@ -101,19 +75,17 @@ public class RulesValidator {
 
                     KieServices kieServices = KieServices.Factory.get();
 
-                    sanityKfs = KieServices.Factory.get().newKieFileSystem();
+                    KieFileSystem sanityKfs = KieServices.Factory.get().newKieFileSystem();
 
                     sanityKfs.write(SANITY_RULES_DRL_FILE, drl);
                     kieServices.newKieBuilder(sanityKfs).buildAll();
                     sanityKcontainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
                 }
             } else {
-                sanityKfs = null;
                 sanityKcontainer = null;
             }
         } catch (RulesServiceException | RulesFaultException  e) {
-            LOG.error("[ Error when getting sanity rules ]");
-            // TODO: Throw exception???
+            LOG.error("Error when getting sanity rules", e);
         }
     }
 
@@ -130,7 +102,7 @@ public class RulesValidator {
 
                 KieServices kieServices = KieServices.Factory.get();
 
-                customKfs = kieServices.newKieFileSystem();
+                KieFileSystem customKfs = kieServices.newKieFileSystem();
 
                 customKfs.write(CUSTOM_RULE_DRL_FILE, drl);
 
@@ -138,12 +110,10 @@ public class RulesValidator {
                 kieServices.newKieBuilder(customKfs).buildAll();
                 customKcontainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
             } else {
-                customKfs = null;
                 customKcontainer = null;
             }
         } catch (RulesServiceException | RulesFaultException  e) {
-            LOG.error("[ Error when getting custom rules ]");
-            // TODO: Throw exception???
+            LOG.error("Error when getting custom rules", e);
         }
     }
 
