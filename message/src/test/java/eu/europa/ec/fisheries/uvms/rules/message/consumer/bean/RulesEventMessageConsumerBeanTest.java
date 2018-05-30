@@ -26,7 +26,7 @@ import eu.europa.ec.fisheries.uvms.rules.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 
-//@RunAsClient
+@RunAsClient
 @RunWith(Arquillian.class)
 public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
 
