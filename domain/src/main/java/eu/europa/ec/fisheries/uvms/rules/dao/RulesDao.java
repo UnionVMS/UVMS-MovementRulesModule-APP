@@ -201,15 +201,9 @@ public class RulesDao {
         }
     }
 
-    public Ticket createTicket(Ticket ticket) throws DaoException {
-        LOG.info("Creating ticket");
-        try {
-            em.persist(ticket);
-            return ticket;
-        } catch (Exception e) {
-            LOG.error("[ Error when persisting ticket. ] {}", e.getMessage());
-            throw new DaoException("[ Error when persisting ticket. ]", e);
-        }
+    public Ticket createTicket(Ticket ticket) {
+        em.persist(ticket);
+        return ticket;
     }
 
     public AlarmReport getOpenAlarmReportByMovementGuid(String guid) throws DaoException {
@@ -322,7 +316,7 @@ public class RulesDao {
 
     // Used by timer to prevent duplicate tickets for passing the reporting
     // deadline
-    public Ticket getTicketByAssetAndRule(String assetGuid, String ruleGuid) throws DaoException {
+    public Ticket getTicketByAssetAndRule(String assetGuid, String ruleGuid) {
         try {
             TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_ASSET_AND_RULE, Ticket.class);
             query.setParameter("assetGuid", assetGuid);
@@ -330,12 +324,6 @@ public class RulesDao {
             return query.getSingleResult();
         } catch (NoResultException e) {
             return null;
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting ticket by guid ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting ticket by guid ] ", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when getting ticket by guid ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting ticket by guid ] ", e);
         }
     }
 

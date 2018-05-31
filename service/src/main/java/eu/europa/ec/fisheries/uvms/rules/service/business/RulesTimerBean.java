@@ -11,47 +11,50 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.service.business;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.ejb.DependsOn;
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.ejb.DependsOn;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
+import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
 
 @Startup
 @Singleton
 @DependsOn({"RulesValidator"})
 public class RulesTimerBean {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RulesTimerBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RulesTimerBean.class);
 
-    @EJB
+    @Inject
     private RulesService rulesService;
 
-    @EJB
+    @Inject
     private ValidationService validationService;
 
-    @EJB
+    @Inject
     private RulesValidator rulesValidator;
+    
+    @Inject
+    private ParameterService parameterService;
 
-    private ScheduledFuture comm;
+    private ScheduledFuture<?> comm;
 
-    private ScheduledFuture changes;
+    private ScheduledFuture<?> changes;
 
     @PostConstruct
     public void postConstruct() {
         LOG.debug("RulesTimerBean init");
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
-        CheckCommunicationTask checkCommunicationTask = new CheckCommunicationTask(rulesService);
+        CheckCommunicationTask checkCommunicationTask = new CheckCommunicationTask(rulesService, parameterService);
         comm = executorService.scheduleWithFixedDelay(checkCommunicationTask, 10, 10, TimeUnit.MINUTES);
         CheckRulesChangesTask checkRulesChangesTask = new CheckRulesChangesTask(validationService, rulesValidator, rulesService);
         changes = executorService.scheduleWithFixedDelay(checkRulesChangesTask, 10, 10, TimeUnit.MINUTES);

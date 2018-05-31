@@ -95,7 +95,6 @@ import eu.europa.ec.fisheries.uvms.rules.service.boundary.MobileTerminalServiceB
 import eu.europa.ec.fisheries.uvms.rules.service.boundary.MovementServiceBean;
 import eu.europa.ec.fisheries.uvms.rules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.PreviousReportFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.rules.service.business.RulesValidator;
 import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportCountEvent;
@@ -641,83 +640,52 @@ public class RulesServiceBean implements RulesService {
 
     // Triggered by timer rule
     @Override
-    public void timerRuleTriggered(String ruleName, PreviousReportFact fact) throws RulesServiceException {
-        LOG.info("[INFO] Timer rule triggered invoked in service layer");
-        try {
-            // Check if ticket already is created for this asset
-            LOG.info("[INFO] Getting ticket by asset guid : {}", fact.getAssetGuid());
+    public void timerRuleTriggered(String ruleName, PreviousReport previousReport) {
+        LOG.info("Timer rule triggered for asset: " + previousReport.getAssetGuid());
+        // Check if ticket already is created for this asset
+        Ticket ticketEntity = rulesDao.getTicketByAssetAndRule(previousReport.getAssetGuid(), ruleName); // ruleName gets renamed
 
-            Ticket ticketEntity = rulesDao.getTicketByAssetAndRule(fact.getAssetGuid(), ruleName); //ruleName gets renamed into ruleGuid in the method, dont know what is correct
-
-            if (ticketEntity == null) {
-                createAssetNotSendingTicket(ruleName, fact);
-            } else if (ticketEntity.getTicketCount() != null) {
-                ticketEntity.setTicketCount(ticketEntity.getTicketCount() + 1);
-                updateTicketCount(ticketEntity);
-            } else {
-                ticketEntity.setTicketCount(2L);
-                updateTicketCount(ticketEntity);
-            }
-        } catch (RulesModelException | DaoException e) {
-            LOG.error("[ERROR] Error when getting list {}", e.getMessage());
-            throw new RulesServiceException("[ERROR] Error when getting list", e);
+        if (ticketEntity == null) {
+            createAssetNotSendingTicket(ruleName, previousReport);
+        } else if (ticketEntity.getTicketCount() != null) {
+            ticketEntity.setTicketCount(ticketEntity.getTicketCount() + 1);
+            updateTicketCount(ticketEntity);
+        } else {
+            ticketEntity.setTicketCount(2L);
+            updateTicketCount(ticketEntity);
         }
     }
 
-    private void createAssetNotSendingTicket(String ruleName, PreviousReportFact fact) throws RulesModelException {
-
+    private void createAssetNotSendingTicket(String ruleName, PreviousReport previousReport) {
         Ticket ticket = new Ticket();
-        ticket.setAssetGuid(fact.getAssetGuid());
+        ticket.setAssetGuid(previousReport.getAssetGuid());
         ticket.setCreatedDate(new Date());
         ticket.setRuleName(ruleName);
         ticket.setRuleGuid(ruleName);
         ticket.setUpdatedBy("UVMS");
+        ticket.setUpdated(new Date());
         ticket.setStatus(TicketStatusType.OPEN.value());
-        ticket.setMovementGuid(fact.getMovementGuid());
+        ticket.setTicketCount(1L);
+        rulesDao.createTicket(ticket);
 
-
-        LOG.info("[INFO] Rule Engine creating Ticket");
-        try {
-            ticket.setTicketCount(1L);
-            rulesDao.createTicket(ticket);
-        } catch (DaoException e) {
-            LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());
-            throw new RulesModelException("[ERROR] Error when creating ticket. ]", e);
-        }
-
-		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid(), null, ticket.getUpdatedBy());	        // Notify long-polling clients of the change
+		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid(), null, ticket.getUpdatedBy());	        
+		// Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
     }
 
     @Override
-    public Ticket updateTicketCount(Ticket ticket) throws RulesServiceException {
-        LOG.info("[INFO] Update ticket count invoked in service layer");
-        try {
-            LOG.info("[INFO] Update ticket count in Rules");
-
-            if (ticket == null || ticket.getGuid() == null) {
-                LOG.error("[ERROR] Ticket is null, can not update status ]");
-                throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Ticket is null", null);
-            }
-            Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
-
-            entity.setTicketCount(ticket.getTicketCount());
-            entity.setUpdated(new Date());
-            entity.setUpdatedBy(ticket.getUpdatedBy());
-
-            rulesDao.updateTicket(entity);
-
-
-            // Notify long-polling clients of the update
-            ticketUpdateEvent.fire(new NotificationMessage("guid", entity.getGuid()));
-            // Notify long-polling clients of the change (no value since FE will need to fetch it)
-            ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid(), null, ticket.getUpdatedBy());
-            return entity;
-        } catch (RulesModelException e ) {
-            LOG.error("[ERROR] Error when updating ticket status {}", e.getMessage());
-            throw new RulesServiceException("[ERROR] Error when updating ticket status. ]", e);
+    public Ticket updateTicketCount(Ticket ticket) {
+        if (ticket == null || ticket.getGuid() == null) {
+            throw new InputArgumentException("Ticket is null, can not upate status");
         }
+        ticket.setUpdated(new Date());
+
+        // Notify long-polling clients of the update
+        ticketUpdateEvent.fire(new NotificationMessage("guid", ticket.getGuid()));
+        // Notify long-polling clients of the change (no value since FE will need to fetch it)
+        ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
+        auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid(), null, ticket.getUpdatedBy());
+        return ticket;
     }
 
     @Override

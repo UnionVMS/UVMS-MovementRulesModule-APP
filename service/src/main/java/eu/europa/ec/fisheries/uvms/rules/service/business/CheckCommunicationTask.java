@@ -15,11 +15,11 @@ import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.rules.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.rules.service.constants.ServiceConstants;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 
 public class CheckCommunicationTask implements Runnable {
     private static final long TWO_HOURS_IN_MILLISECONDS = 7200000;
@@ -27,34 +27,49 @@ public class CheckCommunicationTask implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(CheckCommunicationTask.class);
 
     private RulesService rulesService;
+    private ParameterService parameterService;
 
-    CheckCommunicationTask(RulesService rulesService) {
+    CheckCommunicationTask(RulesService rulesService, ParameterService parameterService) {
         this.rulesService = rulesService;
+        this.parameterService = parameterService;
     }
 
     public void run() {
-        LOG.debug("RulesTimerBean tick");
-        // Get all previous reports from DB
-        List<PreviousReport> previousReports = rulesService.getPreviousMovementReports();
         try {
-            // Map to fact, adding 2h to deadline
+            LOG.debug("RulesTimerBean tick");
+            // Get all previous reports from DB
+            List<PreviousReport> previousReports = rulesService.getPreviousMovementReports();
+            long threshold = getAssetNotSendingThreshold();
+            
             for (PreviousReport previousReport : previousReports) {
-                PreviousReportFact fact = new PreviousReportFact();
-                fact.setAssetGuid(previousReport.getAssetGuid());
-
                 Date positionTime = previousReport.getPositionTime();
-                long time = positionTime.getTime() + TWO_HOURS_IN_MILLISECONDS;
-                Date threshold = new Date(time+ TWO_HOURS_IN_MILLISECONDS);
-                fact.setDeadline(threshold);
-
-                if (fact.getDeadline().getTime() <= new Date().getTime()) {
-                    LOG.info("\t[INFO] ==> Executing RULE '" + ServiceConstants.ASSET_NOT_SENDING_RULE + "', deadline:" + fact.getDeadline() + ", assetGuid:" + fact.getAssetGuid());
+                Date lastUpdated = previousReport.getUpdated();
+                if (isThresholdPassed(positionTime, lastUpdated, threshold)) {
+                    previousReport.setUpdated(new Date());
+                    LOG.info("\t ==> Executing RULE '{}', assetGuid: {}, positionTime: {}, threshold: {}",
+                            ServiceConstants.ASSET_NOT_SENDING_RULE, previousReport.getAssetGuid(), positionTime, threshold);
                     String ruleName = ServiceConstants.ASSET_NOT_SENDING_RULE;
-                    rulesService.timerRuleTriggered(ruleName, fact);
+                    rulesService.timerRuleTriggered(ruleName, previousReport);
                 }
             }
-        } catch (RulesServiceException | RulesFaultException e) {
-            LOG.error("[ Error when running checkCommunication timer ] {}", e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Could not execute 'Asset not sending' rule", e);
+        }
+    }
+    
+    private boolean isThresholdPassed(Date positionTime, Date lastUpdated, long threshold) {
+        long positionThreshold = positionTime.getTime() + threshold;
+        long updateThreshold = lastUpdated.getTime() + threshold;
+        long now = System.currentTimeMillis();
+        return positionThreshold <= now && (lastUpdated.getTime() <= positionThreshold || updateThreshold <= now);
+    }
+    
+    private long getAssetNotSendingThreshold() {
+        try {
+            String thresholdSetting = parameterService.getStringValue(ParameterKey.ASSET_NOT_SENDING_THRESHOLD.getKey());
+            return Long.valueOf(thresholdSetting);
+        } catch (Exception e) {
+            return TWO_HOURS_IN_MILLISECONDS;
         }
     }
 }
