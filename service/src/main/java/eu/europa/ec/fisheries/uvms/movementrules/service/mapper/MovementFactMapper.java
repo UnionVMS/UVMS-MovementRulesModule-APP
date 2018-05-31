@@ -26,6 +26,9 @@ import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 
 public class MovementFactMapper {
+    
+    private MovementFactMapper() {}
+    
     public static MovementFact mapMovementFact(MovementType movement, MobileTerminalType mobileTerminal, Asset asset, String comChannelType, List<AssetGroup> assetGroups, Long timeDiffInSeconds, Integer numberOfReportsLast24Hours, String channelGuid, List<String> vicinityOf) throws RulesServiceException {
         if (movement == null) {
             throw new RulesServiceException("Movement was null, asset: " + asset + ", mobileTerminal: " + mobileTerminal);

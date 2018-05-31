@@ -16,14 +16,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-
-import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmListCriteria;
-import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmSearchKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AlarmSearchFieldMapper {
 

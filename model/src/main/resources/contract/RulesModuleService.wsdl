@@ -1,29 +1,29 @@
-<definitions xmlns:module="urn:module.rules.schema.fisheries.ec.europa.eu:v1"
-             xmlns:customrule="urn:customrule.rules.schema.fisheries.ec.europa.eu:v1"
-             xmlns:ticket="urn:ticket.rules.schema.fisheries.ec.europa.eu:v1"
-             xmlns:alarm="urn:alarm.rules.schema.fisheries.ec.europa.eu:v1"
-             xmlns:common="urn:common.rules.schema.fisheries.ec.europa.eu:v1"
-             xmlns:search="urn:search.rules.schema.fisheries.ec.europa.eu:v1"
-             xmlns:movement="urn:movement.rules.schema.fisheries.ec.europa.eu:v1"
-             xmlns:exchange="urn:exchange.rules.schema.fisheries.ec.europa.eu:v1"
-             xmlns:ticketrule="urn:ticketrule.rules.schema.fisheries.ec.europa.eu:v1"
+<definitions xmlns:module="urn:module.movementrules.schema.fisheries.ec.europa.eu:v1"
+             xmlns:customrule="urn:customrule.movementrules.schema.fisheries.ec.europa.eu:v1"
+             xmlns:ticket="urn:ticket.movementrules.schema.fisheries.ec.europa.eu:v1"
+             xmlns:alarm="urn:alarm.movementrules.schema.fisheries.ec.europa.eu:v1"
+             xmlns:common="urn:common.movementrules.schema.fisheries.ec.europa.eu:v1"
+             xmlns:search="urn:search.movementrules.schema.fisheries.ec.europa.eu:v1"
+             xmlns:movement="urn:movement.movementrules.schema.fisheries.ec.europa.eu:v1"
+             xmlns:exchange="urn:exchange.movementrules.schema.fisheries.ec.europa.eu:v1"
+             xmlns:ticketrule="urn:ticketrule.movementrules.schema.fisheries.ec.europa.eu:v1"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-             name="RulesModule"
-             targetNamespace="urn:module.rules.schema.fisheries.ec.europa.eu:v1"
+             name="MovementRulesModule"
+             targetNamespace="urn:module.movementrules.schema.fisheries.ec.europa.eu:v1"
              xmlns="http://schemas.xmlsoap.org/wsdl/">
 
     <types>
-        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:module.rules.schema.fisheries.ec.europa.eu:v1">
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:module.movementrules.schema.fisheries.ec.europa.eu:v1">
 
-            <xsd:import namespace="urn:customrule.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="CustomRule.xsd"/>
-            <xsd:import namespace="urn:common.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="RulesCommon.xsd"/>
-            <xsd:import namespace="urn:search.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="RulesSearch.xsd"/>
-            <xsd:import namespace="urn:ticket.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Ticket.xsd"/>
-            <xsd:import namespace="urn:alarm.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Alarm.xsd"/>
-            <xsd:import namespace="urn:movement.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
-            <xsd:import namespace="urn:exchange.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
-            <xsd:import namespace="urn:ticketrule.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="TicketAndRule.xsd"/>
+            <xsd:import namespace="urn:customrule.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="CustomRule.xsd"/>
+            <xsd:import namespace="urn:common.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="RulesCommon.xsd"/>
+            <xsd:import namespace="urn:search.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="RulesSearch.xsd"/>
+            <xsd:import namespace="urn:ticket.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Ticket.xsd"/>
+            <xsd:import namespace="urn:alarm.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Alarm.xsd"/>
+            <xsd:import namespace="urn:movement.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
+            <xsd:import namespace="urn:exchange.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
+            <xsd:import namespace="urn:ticketrule.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="TicketAndRule.xsd"/>
 
             <!-- Rules Base Request -->
             <xsd:simpleType name="RulesModuleMethod">

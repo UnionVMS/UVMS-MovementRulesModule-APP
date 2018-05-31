@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
 import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditObjectTypeEnum;
-import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditOperationEnum;
+import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditObjectTypeEnum;
+import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditOperationEnum;
 
 @Stateless
 public class AuditServiceBean {

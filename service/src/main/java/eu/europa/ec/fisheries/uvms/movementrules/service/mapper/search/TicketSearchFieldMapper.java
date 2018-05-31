@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.rules.search.v1.TicketListCriteria;
-import eu.europa.ec.fisheries.schema.rules.search.v1.TicketSearchKey;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
@@ -28,6 +28,8 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperE
 public class TicketSearchFieldMapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(TicketSearchFieldMapper.class);
+    
+    private TicketSearchFieldMapper() {}
 
     /**
      * Creates a search SQL based on the search fields

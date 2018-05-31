@@ -13,15 +13,17 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import java.util.List;
 import java.util.UUID;
-
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalType;
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList;
-import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdList;
-import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
+import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 
 public class RawMovementFactMapper {
+    
+    private RawMovementFactMapper() {}
+    
     public static RawMovementFact mapRawMovementFact(RawMovementType rawMovement, MobileTerminalType mobileTerminal, Asset asset, String pluginType) {
         RawMovementFact fact = new RawMovementFact();
         fact.setRawMovementType(rawMovement);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:asset="urn:asset.rules.schema.fisheries.ec.europa.eu:v1"
+<xsd:schema xmlns:asset="urn:asset.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="urn:asset.rules.schema.fisheries.ec.europa.eu:v1"
+            targetNamespace="urn:asset.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
     
     <xsd:complexType name="AssetId">

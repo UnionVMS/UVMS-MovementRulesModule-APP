@@ -16,13 +16,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-
-import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleListCriteria;
-import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleSearchKey;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCriteria;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 
 public class CustomRuleSearchFieldMapper {
 

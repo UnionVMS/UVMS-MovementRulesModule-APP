@@ -24,9 +24,12 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 public class RulesUtil {
-    final static String FORMAT = "yyyy-MM-dd HH:mm:ss Z";
+    
+    private static final String FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
-    public static Date stringToDate(String dateString) throws IllegalArgumentException {
+    private RulesUtil() {}
+    
+    public static Date stringToDate(String dateString) {
         if (dateString != null) {
             DateTimeFormatter formatter = DateTimeFormat.forPattern(FORMAT).withOffsetParsed();
             DateTime dateTime = formatter.withZoneUTC().parseDateTime(dateString);

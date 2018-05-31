@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:mobterm="urn:mobileterminal.rules.schema.fisheries.ec.europa.eu:v1"
+<xsd:schema xmlns:mobterm="urn:mobileterminal.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="urn:mobileterminal.rules.schema.fisheries.ec.europa.eu:v1"
+            targetNamespace="urn:mobileterminal.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
     
     <xsd:complexType name="MobileTerminalType">
