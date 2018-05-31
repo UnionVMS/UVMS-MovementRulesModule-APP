@@ -30,14 +30,6 @@
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
         <docker.dev.version>3.25.0</docker.dev.version>
-
-
-
-            <!-- Sonar -->
-            <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-            <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-            <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
-            <sonar.language>java</sonar.language>
     </properties>
 
     <dependencyManagement>
@@ -124,30 +116,23 @@
         <connection>${scm.connection}</connection>
         <tag>HEAD</tag>
     </scm>
-
     <build>
-        <plugins>
-    <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.1</version>
-        <configuration>
-            <destFile>${sonar.jacoco.reportPath}</destFile>
-            <append>true</append>
-        </configuration>
-        <executions>
-            <execution>
-                <id>agent</id>
-                <goals>
-                    <goal>prepare-agent</goal>
-                </goals>
-            </execution>
-        </executions>
-    </plugin>
-        </plugins>
+    <plugins>
+        <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.7.8</version>
+            <executions>
+                <execution>
+                    <id>prepare-agent</id>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
     </build>
-
-
     <profiles>
         <profile>
             <id>belgium-local</id>
@@ -193,5 +178,6 @@
         <module>service</module>
         <module>message</module>
         <module>module</module>
+        <module>jacoco-reports</module>
     </modules>
 </project>
