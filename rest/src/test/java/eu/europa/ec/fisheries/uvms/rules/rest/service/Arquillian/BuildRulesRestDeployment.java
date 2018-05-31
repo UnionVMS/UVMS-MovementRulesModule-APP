@@ -42,6 +42,7 @@ public abstract class BuildRulesRestDeployment {
         ObjectMapper objectMapper = new ObjectMapper();
         Client client = ClientBuilder.newClient();
         client.register(new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS));
-        return client.target("http://localhost:28080/test/rest");
+        //return client.target("http://localhost:28080/test/rest");
+        return client.target("http://localhost:8080/test/rest");
     }
 }

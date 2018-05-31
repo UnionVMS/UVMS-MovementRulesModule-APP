@@ -24,7 +24,7 @@ public class SanityRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
-    @RunAsClient
+    //@RunAsClient
     public void getSanityRulesTest() throws Exception{
         String response = getWebTarget().path("/sanityrules/listAll").request(MediaType.APPLICATION_JSON).get(String.class);
 

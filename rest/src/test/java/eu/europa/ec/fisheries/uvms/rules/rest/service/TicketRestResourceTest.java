@@ -24,7 +24,7 @@ import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.rules.rest.service.Arquillian.BuildRulesRestDeployment;
 
-@RunAsClient
+//@RunAsClient
 @RunWith(Arquillian.class)
 public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
