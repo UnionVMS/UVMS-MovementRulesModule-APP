@@ -22,6 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+import java.util.Objects;
 
 //@formatter:off
 @Entity
@@ -91,12 +92,19 @@ public class RuleAction implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+
+        return Objects.hash(id, action, value, order, customRule);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof RuleAction) {
             RuleAction other = (RuleAction) obj;
 
             if (action != null && !action.equals(other.action)) {
                 return false;
+
             } else if (action == null && other.action != null) {
                 return false;
             }

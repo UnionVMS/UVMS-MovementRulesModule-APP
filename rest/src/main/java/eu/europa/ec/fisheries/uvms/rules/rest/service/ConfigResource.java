@@ -125,11 +125,7 @@ public class ConfigResource {
             ActionType actionType = actionTypes[i];
             switch (actionType) {
                 case SEND_TO_FLUX:
-                    needValue = true;
-                    break;
                 case SEND_TO_NAF:
-                    needValue = true;
-                    break;
                 case EMAIL:
                     needValue = true;
                     break;

@@ -12,10 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.rules.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -266,6 +263,12 @@ public class CustomRule implements Serializable {
 
     public void setRuleSubscriptionList(List<RuleSubscription> ruleSubscriptionList) {
         this.ruleSubscriptionList = ruleSubscriptionList;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, name, guid, description, availability, organisation, startDate, endDate, active, archived, triggered, updated, updatedBy, ruleSubscriptionList, ruleSegmentList, ruleActionList, intervals);
     }
 
     @Override

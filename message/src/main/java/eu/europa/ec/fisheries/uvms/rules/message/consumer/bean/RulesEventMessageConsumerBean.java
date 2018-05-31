@@ -87,6 +87,11 @@ public class RulesEventMessageConsumerBean implements MessageListener {
         try {
             RulesBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, RulesBaseRequest.class);
             RulesModuleMethod method = request.getMethod();
+            if (method == null) {
+                LOG.error("[ Request method is null ]");
+                errorEvent.fire(new EventMessage(textMessage, ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules: Request method is null")));
+            }
+
             LOG.info("Request message method: " + method.value());
             switch (method) {
                 case SET_MOVEMENT_REPORT:
@@ -112,10 +117,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                     errorEvent.fire(new EventMessage(textMessage, ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Method not implemented:" + method.name())));
                     break;
             }
-            if (method == null) {
-                LOG.error("[ Request method is null ]");
-                errorEvent.fire(new EventMessage(textMessage, ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules: Request method is null")));
-            }
+
         } catch (NullPointerException | RulesModelMarshallException e) {
             LOG.error("[ Error when receiving message in rules: {}]", e.getMessage());
             errorEvent.fire(new EventMessage(textMessage, ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules:" + e.getMessage())));

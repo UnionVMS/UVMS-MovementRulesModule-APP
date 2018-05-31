@@ -46,6 +46,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>movement-rules-rest</artifactId>
             <version>${project.parent.version}</version>
+           <type>war</type>
             <scope>provided</scope>
         </dependency>
     </dependencies>

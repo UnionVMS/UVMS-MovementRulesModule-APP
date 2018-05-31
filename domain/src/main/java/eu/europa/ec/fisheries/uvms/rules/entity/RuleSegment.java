@@ -22,6 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+import java.util.Objects;
 
 //@formatter:off
 @Entity
@@ -143,6 +144,12 @@ public class RuleSegment implements Serializable {
 
     public void setCustomRule(CustomRule customRule) {
         this.customRule = customRule;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, startOperator, criteria, subCriteria, condition, value, endOperator, logicOperator, order, customRule);
     }
 
     @Override
