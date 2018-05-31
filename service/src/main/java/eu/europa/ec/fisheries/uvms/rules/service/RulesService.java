@@ -36,7 +36,6 @@ import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
-import eu.europa.ec.fisheries.uvms.rules.service.business.PreviousReportFact;
 import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 
@@ -98,7 +97,7 @@ public interface RulesService {
      * @param ticket
      * @throws RulesServiceException
      */
-    Ticket updateTicketCount(Ticket ticket) throws RulesServiceException, RulesFaultException;
+    Ticket updateTicketCount(Ticket ticket);
 
     /**
      * Update an object
@@ -148,7 +147,7 @@ public interface RulesService {
 
     List<PreviousReport> getPreviousMovementReports();
 
-    void timerRuleTriggered(String ruleName, PreviousReportFact fact) throws RulesServiceException, RulesFaultException;
+    void timerRuleTriggered(String ruleName, PreviousReport previousReport);
 
     String reprocessAlarm(List<String> alarms, String username) throws RulesServiceException, RulesModelException, DaoMappingException, DaoException;
 

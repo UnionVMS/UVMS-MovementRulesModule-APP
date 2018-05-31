@@ -78,7 +78,6 @@ public class RulesEventServiceBean implements EventService {
     private RulesService rulesService;
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void pingReceived(@Observes @PingReceivedEvent EventMessage eventMessage) {
         try {
             PingResponse pingResponse = new PingResponse();
@@ -92,7 +91,6 @@ public class RulesEventServiceBean implements EventService {
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void setMovementReportReceived(@Observes @SetMovementReportReceivedEvent EventMessage message) {
         LOG.info("[INFO] Validating movement from Received from Exchange Module..");
         try {
@@ -108,7 +106,6 @@ public class RulesEventServiceBean implements EventService {
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void getCustomRule(@Observes @GetCustomRuleReceivedEvent EventMessage message) {
         LOG.info("[INFO] Get custom rule by guid..");
         try {
@@ -128,7 +125,6 @@ public class RulesEventServiceBean implements EventService {
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void getTicketsByMovements(@Observes @GetTicketsByMovementsEvent EventMessage message) {
         LOG.info("[INFO] Fetch tickets by movements..");
         try {
@@ -150,7 +146,6 @@ public class RulesEventServiceBean implements EventService {
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void countTicketsByMovementsEvent(@Observes @CountTicketsByMovementsEvent EventMessage message) {
         LOG.info("[INFO] Count tickets by movements..");
         try {
@@ -170,7 +165,6 @@ public class RulesEventServiceBean implements EventService {
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void getTicketsAndRulesByMovementsEvent(@Observes @GetTicketsAndRulesByMovementsEvent EventMessage message) {
         LOG.info("[INFO] Fetch tickets and rules by movements..");
         try {

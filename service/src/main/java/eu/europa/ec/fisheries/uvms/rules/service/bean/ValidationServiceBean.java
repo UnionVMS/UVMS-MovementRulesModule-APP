@@ -521,7 +521,7 @@ public class ValidationServiceBean implements ValidationService {
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, createdTicket.getUpdatedBy());
-        } catch (DaoException | DaoMappingException e) {
+        } catch (DaoMappingException e) {
             LOG.error("[ Failed to create ticket! ] {}", e.getMessage());
             LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());
         }

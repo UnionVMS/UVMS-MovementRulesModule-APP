@@ -20,7 +20,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Stateless
-public class RulesConfigHelper implements ConfigHelper {
+public class MovementRulesConfigHelper implements ConfigHelper {
 
     @PersistenceContext
     protected EntityManager em;
@@ -36,7 +36,7 @@ public class RulesConfigHelper implements ConfigHelper {
 
     @Override
     public String getModuleName() {
-        return "rules";
+        return "movementrules";
     }
     
 	@Override
