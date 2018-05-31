@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.mapper;
+package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,13 +30,13 @@ import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.Interval;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleAction;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleSegment;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleSubscription;
-import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 
 public class CustomRuleMapper {
     

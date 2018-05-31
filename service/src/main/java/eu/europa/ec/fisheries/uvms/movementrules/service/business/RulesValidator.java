@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.service.business;
+package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import java.io.InputStream;
 import java.util.List;
@@ -30,12 +30,12 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleParser;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.rules.service.mapper.CustomRuleParser;
 
 @Startup
 @Singleton

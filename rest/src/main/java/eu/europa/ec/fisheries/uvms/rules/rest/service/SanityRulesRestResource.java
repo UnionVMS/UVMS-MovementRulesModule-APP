@@ -21,17 +21,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.SanityRuleMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.SanityRuleMapper;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.rest.error.ErrorHandler;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 
 @Path("/sanityrules")
 @Stateless
@@ -59,7 +56,7 @@ public class SanityRulesRestResource {
         try {
             List<SanityRule> sanityRules = validationService.getSanityRules();
             return new ResponseDto(SanityRuleMapper.toSanityRuleTypeList(sanityRules), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException | DaoMappingException ex) {
+        } catch (Exception ex) {
             LOG.error("[ Error when getting all sanity rules. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }

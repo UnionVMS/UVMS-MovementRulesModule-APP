@@ -9,22 +9,21 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.mapper.search;
+package eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 
 public class TicketSearchFieldMapper {
 
@@ -36,7 +35,7 @@ public class TicketSearchFieldMapper {
      * @param searchFields
      * @param isDynamic
      * @return
-     * @throws eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException
+     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
     public static String createSelectSearchSql(List<TicketSearchValue> searchFields, List<String> validRuleGuids, boolean isDynamic) throws SearchMapperException {
         StringBuilder selectBuffer = new StringBuilder();
@@ -59,7 +58,7 @@ public class TicketSearchFieldMapper {
                 .append(TicketSearchField.RULE_GUID.getFieldName());
 
         selectBuffer.append(" IN ( ");
-        selectBuffer.append("'").append(UvmsConstants.ASSET_NOT_SENDING_RULE).append("'");
+        selectBuffer.append("'").append(ServiceConstants.ASSET_NOT_SENDING_RULE).append("'");
         for (String validRuleGuid : validRuleGuids) {
             selectBuffer.append(", ");
             selectBuffer.append("'").append(validRuleGuid).append("'");
@@ -84,7 +83,7 @@ public class TicketSearchFieldMapper {
      * @param searchFields
      * @param isDynamic
      * @return
-     * @throws eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException
+     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
     public static String createCountSearchSql(List<TicketSearchValue> searchFields, List<String> validRuleGuids, boolean isDynamic) throws SearchMapperException {
         StringBuilder countBuffer = new StringBuilder();
@@ -106,7 +105,7 @@ public class TicketSearchFieldMapper {
                 .append(TicketSearchField.RULE_GUID.getFieldName());
 
         countBuffer.append(" IN ( ");
-        countBuffer.append("'").append(UvmsConstants.ASSET_NOT_SENDING_RULE).append("'");
+        countBuffer.append("'").append(ServiceConstants.ASSET_NOT_SENDING_RULE).append("'");
         for (String validRuleGuid : validRuleGuids) {
             countBuffer.append(", ");
             countBuffer.append("'").append(validRuleGuid).append("'");

@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.service.bean;
+package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
@@ -62,23 +62,44 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalModelMapperException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalUnmarshallException;
-import eu.europa.ec.fisheries.uvms.rules.constant.UvmsConstants;
-import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleSubscription;
-import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.AlarmMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.AlarmSearchValue;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchValue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AssetServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ConfigServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.MobileTerminalServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.MovementServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AssetAssetIdMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MobileTerminalMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MovementFactMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.RawMovementFactMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.AlarmSearchFieldMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.AlarmSearchValue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchFieldMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.AlarmListResponseDto;
@@ -86,28 +107,6 @@ import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.AssetServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.AuditServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.ConfigServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.ExchangeServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.MobileTerminalServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.MovementServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.UserServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.RulesValidator;
-import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportCountEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.TicketCountEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.TicketEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.TicketUpdateEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.rules.service.mapper.AssetAssetIdMapper;
-import eu.europa.ec.fisheries.uvms.rules.service.mapper.MobileTerminalMapper;
-import eu.europa.ec.fisheries.uvms.rules.service.mapper.MovementFactMapper;
-import eu.europa.ec.fisheries.uvms.rules.service.mapper.RawMovementFactMapper;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
@@ -241,10 +240,15 @@ public class RulesServiceBean implements RulesService {
      * {@inheritDoc}
      *
      * @param oldCustomRule
+     * @throws MessageException 
+     * @throws RulesModelMarshallException 
+     * @throws ModelMarshallException 
+     * @throws AccessDeniedException 
      * @throws RulesServiceException
+     * @throws DaoException 
      */
     @Override
-    public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, RulesModelMarshallException, ModelMarshallException, RulesModelException, MessageException, DaoException {
+    public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, RulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException, DaoException {
         LOG.info("[INFO] Update custom rule invoked in service layer");
         // Get organisation of user
         String organisationName = userService.getOrganisationName(oldCustomRule.getUpdatedBy());
@@ -268,19 +272,16 @@ public class RulesServiceBean implements RulesService {
 
     }
     //Copy from RulesDomainModelBean to remove that class
-    private CustomRule internalUpdateCustomRule(CustomRule newEntity)  throws RulesModelException, DaoException {
+    private CustomRule internalUpdateCustomRule(CustomRule newEntity) throws DaoException {
         LOG.debug("Update custom rule in Rules");
 
         if (newEntity == null) {
-            LOG.error("[ERROR] Custom Rule is null, returning Exception ]");
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Custom Rule is null", null);
+            throw new IllegalArgumentException("Custom Rule is null");
         }
 
         if (newEntity.getGuid() == null) {
-            LOG.error("[ERROR] GUID of Custom Rule is null, returning Exception. ]");
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("GUID of Custom Rule is null", null);
+            throw new IllegalArgumentException("GUID of Custom Rule is null");
         }
-
 
         CustomRule oldEntity = rulesDao.getCustomRuleByGuid(newEntity.getGuid());
         newEntity.setGuid(UUID.randomUUID().toString());
@@ -312,10 +313,11 @@ public class RulesServiceBean implements RulesService {
      * {@inheritDoc}
      *
      * @param oldCustomRule
+     * @throws DaoException 
      * @throws RulesServiceException
      */
     @Override
-    public CustomRule updateCustomRule(CustomRule oldCustomRule) throws RulesServiceException, RulesModelException, DaoException {
+    public CustomRule updateCustomRule(CustomRule oldCustomRule) throws DaoException {
         LOG.info("[INFO] Update custom rule invoked in service layer by timer");
 
         CustomRule updatedCustomRule = internalUpdateCustomRule(oldCustomRule);
@@ -330,16 +332,15 @@ public class RulesServiceBean implements RulesService {
      * @param updateSubscriptionType
      */
     @Override
-    public CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException {
+    public CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, DaoException {
         LOG.info("[INFO] Update subscription invoked in service layer");
         if (updateSubscriptionType == null) {
-            LOG.error("[ERROR] Subscription is null, returning Exception ]");
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Subscription is null", null);
+            throw new IllegalArgumentException("Subscription is null");
         }
 
         boolean validRequest = updateSubscriptionType.getSubscription().getType() != null && updateSubscriptionType.getSubscription().getOwner() != null;
         if (!validRequest) {
-            throw new RulesServiceException("Not a valid subscription!");
+            throw new IllegalArgumentException("Not a valid subscription!");
         }
 
         LOG.debug("Update custom rule subscription in Rules");
@@ -347,7 +348,7 @@ public class RulesServiceBean implements RulesService {
 
         if (updateSubscriptionType.getRuleGuid() == null) {
             LOG.error("[ERROR] Custom Rule GUID for Subscription is null, returning Exception. ]");
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Custom Rule GUID for Subscription is null", null);
+            throw new IllegalArgumentException("Custom Rule GUID for Subscription is null");
         }
 
         CustomRule customRuleEntity = rulesDao.getCustomRuleByGuid(updateSubscriptionType.getRuleGuid());
@@ -390,7 +391,7 @@ public class RulesServiceBean implements RulesService {
     public CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMapperException {
         LOG.info("[INFO] Deleting custom rule by guid: {}.", guid);
         if (guid == null) {
-            throw new InputArgumentException("No custom rule to remove");
+            throw new IllegalArgumentException("No custom rule to remove");
         }
 
         CustomRule customRuleFromDb = getCustomRuleByGuid(guid);
@@ -432,14 +433,14 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, SearchMapperException, DaoException, DaoMappingException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException {
+    public GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, SearchMapperException, DaoException, DaoMappingException {
         LOG.info("[INFO] Get ticket list invoked in service layer");
 
         if (query == null) {
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Ticket list query is null");
+            throw new IllegalArgumentException("Ticket list query is null");
         }
         if (query.getPagination() == null) {
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Pagination in ticket list query is null");
+            throw new IllegalArgumentException("Pagination in ticket list query is null");
         }
 
         Integer listSize = query.getPagination().getListSize();
@@ -470,13 +471,13 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoException, DaoMappingException {
+    public GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, DaoException, DaoMappingException {
         LOG.info("[INFO] Get tickets by movements invoked in service layer");
         if (movements == null) {
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is null");
+            throw new IllegalArgumentException("Movements list is null");
         }
         if (movements.isEmpty()) {
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is empty");
+            throw new IllegalArgumentException("Movements list is empty");
         }
 
         List<TicketType> ticketList = new ArrayList<>();
@@ -516,27 +517,26 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public long countTicketsByMovements(List<String> movements) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException {
+    public long countTicketsByMovements(List<String> movements) throws RulesServiceException {
         LOG.info("[INFO] Get number of tickets by movements invoked in service layer");
 
 
         if (movements == null) {
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is null");
+            throw new IllegalArgumentException("Movements list is null");
         }
         if (movements.isEmpty()) {
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Movements list is empty");
+            throw new IllegalArgumentException("Movements list is empty");
         }
 
         return rulesDao.countTicketListByMovements(movements);
     }
 
     @Override
-    public Ticket updateTicketStatus(Ticket ticket) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException {
+    public Ticket updateTicketStatus(Ticket ticket) throws RulesServiceException {
         LOG.info("[INFO] Update ticket status invoked in service layer");
 
         if (ticket == null || ticket.getGuid() == null) {
-            LOG.error("[ERROR] Ticket is null, can not update status ]");
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Ticket is null", null);
+            throw new IllegalArgumentException("Ticket is null");
         }
         Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
 
@@ -558,20 +558,17 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException, DaoMappingException, DaoException, SearchMapperException {
+    public List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, DaoMappingException, DaoException, SearchMapperException {
         LOG.info("[INFO] Update all ticket status invoked in service layer");
 
         if (loggedInUser == null) {
-            LOG.error("[ERROR] LoggedInUser is null, can not update status ]");
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("LoggedInUser is null", null);
+            throw new IllegalArgumentException("LoggedInUser is null, can not update status");
         }
         if (status == null) {
-            LOG.error("[ERROR] Status is null, can not update status ]");
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Status is null", null);
+            throw new IllegalArgumentException("Status is null, can not update status");
         }
         if (query == null) {
-            LOG.error("[ERROR] Status is null, can not update status ]");
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Status is null", null);
+            throw new IllegalArgumentException("Status is null, can not update status");
         }
         List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
         List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
@@ -599,18 +596,17 @@ public class RulesServiceBean implements RulesService {
     public long getNumberOfAssetsNotSending() throws RulesServiceException {
 
         LOG.info("[INFO] Counting assets not sending");
-        return rulesDao.getNumberOfTicketsByRuleGuid(UvmsConstants.ASSET_NOT_SENDING_RULE);
+        return rulesDao.getNumberOfTicketsByRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
 
     }
 
     @Override
-    public AlarmReport updateAlarmStatus(AlarmReport alarm) throws RulesServiceException, DaoException, eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException {
+    public AlarmReport updateAlarmStatus(AlarmReport alarm) throws RulesServiceException, DaoException {
         LOG.info("[INFO] Update alarm status invoked in service layer");
 
         AlarmReport entity = rulesDao.getAlarmReportByGuid(alarm.getGuid());
         if (entity == null) {
-            LOG.error("[ERROR] Alarm is null, can not update status ]");
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Alarm is null", null);
+            throw new IllegalArgumentException("Alarm is null", null);
         }
 
         entity.setStatus(alarm.getStatus());
@@ -676,7 +672,7 @@ public class RulesServiceBean implements RulesService {
     @Override
     public Ticket updateTicketCount(Ticket ticket) {
         if (ticket == null || ticket.getGuid() == null) {
-            throw new InputArgumentException("Ticket is null, can not upate status");
+            throw new IllegalArgumentException("Ticket is null, can not upate status");
         }
         ticket.setUpdated(new Date());
 
@@ -734,10 +730,10 @@ public class RulesServiceBean implements RulesService {
         LOG.info("[INFO] Get list of alarms from query.");
 
         if (query == null) {
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Alarm list query is null");
+            throw new IllegalArgumentException("Alarm list query is null");
         }
         if (query.getPagination() == null) {
-            throw new eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException("Pagination in alarm list query is null");
+            throw new IllegalArgumentException("Pagination in alarm list query is null");
         }
 
 

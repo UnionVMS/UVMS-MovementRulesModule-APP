@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.rules.service.business;
+package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -23,12 +23,12 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.GetAlarmListByQueryResponse
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmSearchKey;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleSegment;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.rules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 
 @RunWith(Arquillian.class)
 public class RulesValidatorTest extends TransactionalTests {

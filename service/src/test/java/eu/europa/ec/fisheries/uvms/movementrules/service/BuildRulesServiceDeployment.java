@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.rules.service;
+package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -24,7 +24,9 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addAsResource(new File("src/main/resources/templates/CustomRulesTemplate.drt"),"/templates/CustomRulesTemplate.drt");
         testWar.addAsResource(new File("src/main/resources/templates/SanityRulesTemplate.drt"),"/templates/SanityRulesTemplate.drt");
 
-        testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.rules.service");
+        testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.movementrules.service");
+        
+        testWar.addAsResource("persistence-integration.xml", "META-INF/persistence.xml");
 
         return testWar;
     }

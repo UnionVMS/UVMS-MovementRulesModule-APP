@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.service.boundary;
+package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,10 +34,10 @@ import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementDuplicateExc
 import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementFaultException;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MovementBaseTypeMapper;
 import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.rules.service.mapper.MovementBaseTypeMapper;
 
 @Stateless
 public class MovementServiceBean {

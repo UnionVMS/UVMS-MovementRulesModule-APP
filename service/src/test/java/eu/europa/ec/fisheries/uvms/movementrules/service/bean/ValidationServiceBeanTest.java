@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.rules.service.bean;
+package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import org.jboss.arquillian.junit.Arquillian;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
@@ -18,14 +17,14 @@ import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleListCriteria;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleSearchKey;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.rules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
-import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 
 @RunWith(Arquillian.class)
 public class ValidationServiceBeanTest extends TransactionalTests {

@@ -157,7 +157,6 @@
     <modules>
 		<module>LIQUIBASE</module>
 		<module>model</module>
-        <module>domain</module>
         <module>rest</module>
         <module>service</module>
         <module>message</module>

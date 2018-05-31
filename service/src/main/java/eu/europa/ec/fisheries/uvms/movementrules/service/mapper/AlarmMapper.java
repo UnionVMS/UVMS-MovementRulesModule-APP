@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.mapper;
+package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -39,15 +39,15 @@ import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementTypeType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.rules.entity.Activity;
-import eu.europa.ec.fisheries.uvms.rules.entity.AlarmItem;
-import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
-import eu.europa.ec.fisheries.uvms.rules.entity.Asset;
-import eu.europa.ec.fisheries.uvms.rules.entity.MobileTerminal;
-import eu.europa.ec.fisheries.uvms.rules.entity.MobileTerminalId;
-import eu.europa.ec.fisheries.uvms.rules.entity.Position;
-import eu.europa.ec.fisheries.uvms.rules.entity.RawMovement;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Activity;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmItem;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Asset;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.MobileTerminal;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.MobileTerminalId;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Position;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,9 +123,9 @@ public class AlarmMapper {
                         }
                         List<AssetIdList> assetIdLists = new ArrayList<>();
 
-                        List<eu.europa.ec.fisheries.uvms.rules.entity.AssetIdList> assetIdListArray = alarmReportEntity.getRawMovement().getAsset()
+                        List<eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList> assetIdListArray = alarmReportEntity.getRawMovement().getAsset()
                                 .getAssetIdList();
-                        for (eu.europa.ec.fisheries.uvms.rules.entity.AssetIdList assetIdList : assetIdListArray) {
+                        for (eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList assetIdList : assetIdListArray) {
                             AssetIdList assetIdListRaw = new AssetIdList();
                             assetIdListRaw.setValue(assetIdList.getValue());
                             if (assetIdList.getType() != null) {
@@ -291,9 +291,9 @@ public class AlarmMapper {
 
                 if (rawMovementType.getAssetId().getAssetIdList() != null) {
                     List<AssetIdList> assetIdList = rawMovementType.getAssetId().getAssetIdList();
-                    ArrayList<eu.europa.ec.fisheries.uvms.rules.entity.AssetIdList> assetIdListsEntityList = new ArrayList<eu.europa.ec.fisheries.uvms.rules.entity.AssetIdList>();
+                    ArrayList<eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList> assetIdListsEntityList = new ArrayList<eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList>();
                     for (AssetIdList assetIdListRaw : assetIdList) {
-                        eu.europa.ec.fisheries.uvms.rules.entity.AssetIdList assetIdListEntity = new eu.europa.ec.fisheries.uvms.rules.entity.AssetIdList();
+                        eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList assetIdListEntity = new eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList();
                         assetIdListEntity.setValue(assetIdListRaw.getValue());
                         assetIdListEntity.setAsset(asset);
                         if (assetIdListRaw.getIdType() != null) {

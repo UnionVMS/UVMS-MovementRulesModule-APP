@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.service.bean;
+package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,40 +41,38 @@ import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.rules.entity.AlarmItem;
-import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.RawMovement;
-import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.AlarmMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchValue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmItem;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchFieldMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.AuditServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.ExchangeServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.boundary.UserServiceBean;
-import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.RulesUtil;
-import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportCountEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.TicketCountEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.TicketEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.wsdl.user.module.FindOrganisationsResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
@@ -149,14 +147,14 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     @Override
-    public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException, InputArgumentException, DaoMappingException, SearchMapperException, DaoException {
+    public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException, DaoMappingException, SearchMapperException, DaoException {
         LOG.info("Get custom rules by query invoked in service layer");
 
         if (query == null) {
-            throw new InputArgumentException("Custom rule list query is null");
+            throw new IllegalArgumentException("Custom rule list query is null");
         }
         if (query.getPagination() == null) {
-            throw new InputArgumentException("Pagination in custom rule list query is null");
+            throw new IllegalArgumentException("Pagination in custom rule list query is null");
         }
 
         CustomRuleListResponseDto customRuleListByQuery = new CustomRuleListResponseDto();
@@ -294,14 +292,14 @@ public class ValidationServiceBean implements ValidationService {
 
             if (ruleGuid == null) {
                 LOG.error("[ERROR] GUID of Custom Rule is null, returning Exception. ]");
-                throw new InputArgumentException("GUID of Custom Rule is null", null);
+                throw new IllegalArgumentException("GUID of Custom Rule is null");
             }
 
             CustomRule entity = rulesDao.getCustomRuleByGuid(ruleGuid);
             entity.setTriggered(new Date());
             rulesDao.updateCustomRule(entity);
 
-        } catch (RulesModelException | DaoException e) {
+        } catch (DaoException e) {
             LOG.error("[ERROR] Error when updating last triggered on rule {} {}", ruleGuid, e.getMessage());
             LOG.warn("[ Failed to update last triggered date for rule {} ]", ruleGuid);
         }

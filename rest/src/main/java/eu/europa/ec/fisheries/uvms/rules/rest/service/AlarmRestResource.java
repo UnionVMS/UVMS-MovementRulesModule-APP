@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.rest.service;
 
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.servlet.http.HttpServletRequest;
@@ -23,34 +24,25 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.security.Principal;
-import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.AlarmListResponseDto;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.rest.error.ErrorHandler;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Path("/alarms")
 @Stateless
 public class AlarmRestResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AlarmRestResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AlarmRestResource.class);
 
     @EJB
     private RulesService rulesService;
@@ -78,7 +70,7 @@ public class AlarmRestResource {
         LOG.info("Get alarm list invoked in rest layer");
         try {
             return new ResponseDto(rulesService.getAlarmList(query), ResponseCode.OK);
-        } catch (RulesServiceException | NullPointerException | DaoException | DaoMappingException | RulesModelException  e) {
+        } catch (Exception  e) {
             LOG.error("[ Error when getting alarm list by query. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }
@@ -101,7 +93,7 @@ public class AlarmRestResource {
         try {
             AlarmReportType response = AlarmMapper.toAlarmReportType(rulesService.updateAlarmStatus(AlarmMapper.toAlarmReportEntity(alarmReportType)));
             return new ResponseDto(response, ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException | InputArgumentException | DaoMappingException | DaoException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when updating Alarm. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }
@@ -123,7 +115,7 @@ public class AlarmRestResource {
         try {
             AlarmReportType response = AlarmMapper.toAlarmReportType(rulesService.getAlarmReportByGuid(guid));
             return new ResponseDto(response, ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | DaoMappingException | DaoException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when getting alarm by GUID. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }
@@ -146,7 +138,7 @@ public class AlarmRestResource {
         LOG.info("Reprocess alarm invoked in rest layer");
         try {
             return new ResponseDto(rulesService.reprocessAlarm(alarmGuidList, request.getRemoteUser()), ResponseCode.OK);
-        } catch (RulesServiceException | NullPointerException | DaoException | DaoMappingException | RulesModelException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when reprocessing. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }
@@ -169,7 +161,7 @@ public class AlarmRestResource {
 
         try {
             return new ResponseDto(validationService.getNumberOfOpenAlarmReports(), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when getting number of open alarms. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }

@@ -9,18 +9,18 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.service.mapper;
+package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubCriteriaType;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.Interval;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleAction;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleSegment;
-import eu.europa.ec.fisheries.uvms.rules.service.business.CustomRuleDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.CustomRuleDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 
 public class CustomRuleParser {
     

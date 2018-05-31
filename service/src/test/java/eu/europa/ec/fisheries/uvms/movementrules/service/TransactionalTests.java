@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.rules.service;
+package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import javax.inject.Inject;
 import javax.transaction.HeuristicMixedException;

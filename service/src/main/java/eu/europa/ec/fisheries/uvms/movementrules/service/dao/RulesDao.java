@@ -9,30 +9,28 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.dao;
+package eu.europa.ec.fisheries.uvms.movementrules.service.dao;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
 import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.rules.entity.AlarmReport;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
-import eu.europa.ec.fisheries.uvms.rules.entity.RuleSubscription;
-import eu.europa.ec.fisheries.uvms.rules.entity.SanityRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.CustomRuleSearchValue;
-import eu.europa.ec.fisheries.uvms.rules.mapper.search.TicketSearchValue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.NoEntityFoundException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchValue;
 
 @Stateless
 public class RulesDao {

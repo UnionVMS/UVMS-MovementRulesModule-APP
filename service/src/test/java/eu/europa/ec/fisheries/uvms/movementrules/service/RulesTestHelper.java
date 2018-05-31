@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.service;
+package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import java.util.Date;
 import java.util.Random;
@@ -24,9 +24,9 @@ import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.rules.search.v1.ListPagination;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.rules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 
 public class RulesTestHelper {
 

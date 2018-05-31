@@ -9,26 +9,19 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.service.business;
+package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import java.util.Date;
 import java.util.List;
-
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleIntervalType;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.entity.Interval;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 
 public class CheckRulesChangesTask implements Runnable {
 

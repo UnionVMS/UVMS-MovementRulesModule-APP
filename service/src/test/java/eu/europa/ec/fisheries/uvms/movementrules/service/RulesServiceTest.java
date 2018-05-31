@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.rules.service;
+package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
@@ -6,16 +6,10 @@ import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.EJBTransactionRolledbackException;
-
-import eu.europa.ec.fisheries.uvms.rules.entity.*;
-import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.rules.exception.NoEntityFoundException;
-
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.ActionType;
@@ -24,7 +18,6 @@ import eu.europa.ec.fisheries.schema.rules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleActionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleSegmentType;
-
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubscriptionType;
@@ -40,10 +33,17 @@ import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementPoint;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementTypeType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
-
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.NoEntityFoundException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 
 
 @RunWith(Arquillian.class)
@@ -97,7 +97,7 @@ public class RulesServiceTest extends TransactionalTests {
         try {
             rulesService.getCustomRuleByGuid("dummyGuid");
             Assert.assertTrue(false);
-        }catch (EJBTransactionRolledbackException e){
+        }catch (RulesServiceException e){
             Assert.assertTrue(true);
         }
 
@@ -122,7 +122,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateCustomRule(input, "test", "test");
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
@@ -130,7 +130,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateCustomRule(null);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
@@ -165,18 +165,21 @@ public class RulesServiceTest extends TransactionalTests {
     }
 
     @Test
-    public void deleteCustomRuleWithDummyGuidTest() throws Exception {          //a test with proper exectuion exists among the rest tests
+    public void deleteCustomRuleWithNullGuidTest() throws Exception {          //a test with proper exectuion exists among the rest tests
         try {
             rulesService.deleteCustomRule(null, "testUser", "testFeature", "testApp");
             Assert.assertTrue(false);
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
-
+    }
+    
+    @Test
+    public void deleteCustomRuleWithDummyGuidTest() throws Exception {
         try {
             rulesService.deleteCustomRule("dummyGuid", "testUser", "testFeature", "testApp");
             Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
+        } catch (RulesServiceException e) {
             Assert.assertTrue(true);
         }
     }
@@ -186,7 +189,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateSubscription(null, "testUser");
             Assert.assertTrue(false);
-        }catch (InputArgumentException e){
+        }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
@@ -214,7 +217,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateSubscription(input, "testUser"); //no rule Guid
             Assert.assertTrue(false);
-        }catch (InputArgumentException e){
+        }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
         input.setRuleGuid("dummyGuid");
@@ -263,7 +266,7 @@ public class RulesServiceTest extends TransactionalTests {
         try {
             rulesService.getTicketList(null, null);   //missing query
             Assert.assertTrue(false);
-        }catch (InputArgumentException e){
+        }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
@@ -272,7 +275,7 @@ public class RulesServiceTest extends TransactionalTests {
         try {
             rulesService.getTicketList(null, input);    //missing pagination
             Assert.assertTrue(false);
-        }catch (InputArgumentException e){
+        }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
     }
@@ -282,7 +285,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.getTicketsByMovements(null);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
         List<String> input = new ArrayList<String>();
@@ -290,7 +293,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.getTicketsByMovements(input);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
@@ -300,7 +303,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.getTicketsByMovements(null);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
@@ -309,7 +312,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.getTicketsByMovements(input);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
     }
@@ -319,7 +322,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateTicketStatus(null);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
@@ -327,7 +330,7 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateTicketStatus(input);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
     }
@@ -337,21 +340,21 @@ public class RulesServiceTest extends TransactionalTests {
         try{
             rulesService.updateTicketStatusByQuery(null, null, null);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateTicketStatusByQuery("test user", null, null);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateTicketStatusByQuery("test user", null, TicketStatusType.OPEN);
             Assert.assertTrue(false);
-        }catch(InputArgumentException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
         TicketQuery input = new TicketQuery();

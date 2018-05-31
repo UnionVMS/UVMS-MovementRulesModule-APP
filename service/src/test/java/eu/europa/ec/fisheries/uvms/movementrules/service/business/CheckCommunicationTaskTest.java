@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.rules.service.business;
+package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -14,13 +14,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
-import eu.europa.ec.fisheries.uvms.rules.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.rules.entity.PreviousReport;
-import eu.europa.ec.fisheries.uvms.rules.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.rules.service.config.ParameterKey;
-import eu.europa.ec.fisheries.uvms.rules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 @RunWith(Arquillian.class)
 public class CheckCommunicationTaskTest extends TransactionalTests {

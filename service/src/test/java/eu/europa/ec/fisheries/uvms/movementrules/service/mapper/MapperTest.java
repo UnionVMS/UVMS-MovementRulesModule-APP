@@ -9,13 +9,18 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.mapper;
+package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-
 import java.util.List;
-
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CriteriaType;
@@ -26,17 +31,10 @@ import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.rules.MockData;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.MockData;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MapperTest {

@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.rules.mapper.search;
+package eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +20,8 @@ import java.util.Map.Entry;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.rules.search.v1.AlarmSearchKey;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class AlarmSearchFieldMapper {
      * @param searchFields
      * @param isDynamic
      * @return
-     * @throws eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException
+     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
     public static String createSelectSearchSql(List<AlarmSearchValue> searchFields, boolean isDynamic) throws SearchMapperException {
         StringBuilder selectBuffer = new StringBuilder();
@@ -67,7 +67,7 @@ public class AlarmSearchFieldMapper {
      * @param searchFields
      * @param isDynamic
      * @return
-     * @throws eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException
+     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
     public static String createCountSearchSql(List<AlarmSearchValue> searchFields, boolean isDynamic) throws SearchMapperException {
         StringBuilder countBuffer = new StringBuilder();

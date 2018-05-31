@@ -27,12 +27,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
 import eu.europa.ec.fisheries.uvms.rules.longpolling.constants.LongPollingConstants;
-import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportCountEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.AlarmReportEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.TicketCountEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.TicketEvent;
-import eu.europa.ec.fisheries.uvms.rules.service.event.TicketUpdateEvent;
 
 @WebServlet(asyncSupported = true, urlPatterns = { LongPollingConstants.ALARM_REPORT_PATH, LongPollingConstants.TICKET_UPDATE_PATH, LongPollingConstants.TICKET_COUNT_PATH, LongPollingConstants.ALARM_REPORT_COUNT_PATH })
 public class LongPollingHttpServlet extends HttpServlet {

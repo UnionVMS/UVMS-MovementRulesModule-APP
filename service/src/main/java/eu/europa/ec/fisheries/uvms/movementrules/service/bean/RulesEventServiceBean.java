@@ -10,12 +10,10 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more d
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package eu.europa.ec.fisheries.uvms.rules.service.bean;
+package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -35,10 +33,12 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
 import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.EventService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.rules.message.event.CountTicketsByMovementsEvent;
 import eu.europa.ec.fisheries.uvms.rules.message.event.ErrorEvent;
@@ -58,9 +58,6 @@ import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallExcep
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.ModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.rules.service.EventService;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 
 @Stateless
 public class RulesEventServiceBean implements EventService {
@@ -138,7 +135,7 @@ public class RulesEventServiceBean implements EventService {
             GetTicketListByMovementsResponse response = rulesService.getTicketsByMovements(request.getMovementGuids());
             String responseString = RulesModuleResponseMapper.mapToGetTicketListByMovementsResponse(response.getTickets());
             rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), responseString);
-        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoMappingException | InputArgumentException | DaoException e) {
+        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoMappingException | DaoException e) {
             LOG.error("[ERROR] Error when fetching tickets by movements {}", e.getMessage());
             errorEvent.fire(message);
         }
@@ -158,7 +155,7 @@ public class RulesEventServiceBean implements EventService {
             CountTicketsByMovementsRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), CountTicketsByMovementsRequest.class);
             long response = rulesService.countTicketsByMovements(request.getMovementGuids());
             rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), RulesModuleResponseMapper.mapToCountTicketListByMovementsResponse(response));
-        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoException | InputArgumentException e) {
+        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoException e) {
             LOG.error("[ERROR] Error when fetching ticket count by movements {}", e.getMessage());
             errorEvent.fire(message);
         }
