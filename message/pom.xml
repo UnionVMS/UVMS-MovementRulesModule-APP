@@ -11,6 +11,11 @@
         <artifactId>movement-rules</artifactId>
         <version>0.9-SNAPSHOT</version>
     </parent>
+    
+    <properties>
+    	<docker.dev.start.phase>test-compile</docker.dev.start.phase>
+        <docker.dev.prestop.phase>validate</docker.dev.prestop.phase>
+    </properties>
 
     <dependencies>
         <dependency>

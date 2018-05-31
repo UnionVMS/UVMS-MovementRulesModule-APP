@@ -14,19 +14,19 @@ package eu.europa.ec.fisheries.uvms.rules.rest.error;
 import java.nio.file.AccessDeniedException;
 
 import eu.europa.ec.fisheries.schema.rules.common.v1.RulesFault;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
 
 public class ErrorHandler {
 
     public static ResponseDto getFault(Exception ex) {
         if (ex instanceof RulesServiceException) {
-            if (ex instanceof eu.europa.ec.fisheries.uvms.rules.service.exception.InputArgumentException) {
+            if (ex instanceof IllegalArgumentException) {
                 return new ResponseDto<String>(ex.getMessage(), ResponseCode.INPUT_ERROR);
             }
 

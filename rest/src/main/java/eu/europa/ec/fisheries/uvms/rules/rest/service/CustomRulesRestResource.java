@@ -11,6 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.rest.service;
 
+import java.nio.file.AccessDeniedException;
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.servlet.ServletContext;
@@ -25,10 +27,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.nio.file.AccessDeniedException;
-import java.util.List;
-import java.util.UUID;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleIntervalType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleSegmentType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.CustomRuleType;
@@ -36,24 +36,15 @@ import eu.europa.ec.fisheries.schema.rules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.rules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import eu.europa.ec.fisheries.uvms.rules.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.CustomRuleMapper;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.rest.error.ErrorHandler;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Path("/customrules")
 @Stateless
@@ -118,7 +109,7 @@ public class CustomRulesRestResource {
         try {
             List<CustomRule> customRulesByUser = validationService.getCustomRulesByUser(userName);
             return new ResponseDto(CustomRuleMapper.toCustomRuleTypeList(customRulesByUser), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException | DaoMappingException ex) {
+        } catch (Exception ex) {
             LOG.error("[ Error when getting all custom rules. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
@@ -141,7 +132,7 @@ public class CustomRulesRestResource {
         LOG.info("Get custom rules by query invoked in rest layer");
         try {
             return new ResponseDto(validationService.getCustomRulesByQuery(query), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException | SearchMapperException | DaoException | DaoMappingException | InputArgumentException ex) {
+        } catch (Exception ex) {
             LOG.error("[ Error when getting custom rules by query. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
@@ -165,7 +156,7 @@ public class CustomRulesRestResource {
         try {
             CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.getCustomRuleByGuid(guid));
             return new ResponseDto(response, ResponseCode.OK);
-        } catch (RulesFaultException | RulesModelMapperException | RulesServiceException | NullPointerException | DaoMappingException ex) {
+        } catch (Exception ex) {
             LOG.error("[ Error when getting custom rule by guid. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
@@ -216,7 +207,7 @@ public class CustomRulesRestResource {
         try {
             CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.updateSubscription(updateSubscriptionType, request.getRemoteUser()));
             return new ResponseDto(response, ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException | DaoMappingException | InputArgumentException | DaoException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when updating subscription and custom rule. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
@@ -239,11 +230,11 @@ public class CustomRulesRestResource {
         try {
             CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.deleteCustomRule(guid, request.getRemoteUser(),UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)));
             return new ResponseDto(response, ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException | DaoMappingException | DaoException | RulesModelMapperException e) {
-            LOG.error("[ Error when deleting custom rule. ] {} ", e);
-            return ErrorHandler.getFault(e);
         } catch (AccessDeniedException e) {
             LOG.error("Forbidden access", e.getMessage());
+            return ErrorHandler.getFault(e);
+        } catch (Exception e) {
+            LOG.error("[ Error when deleting custom rule. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }

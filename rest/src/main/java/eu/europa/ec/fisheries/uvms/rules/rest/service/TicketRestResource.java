@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.rules.rest.service;
 
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
@@ -21,28 +22,20 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.rules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.rules.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.rules.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.rules.exception.SearchMapperException;
-import eu.europa.ec.fisheries.uvms.rules.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.dto.TicketListResponseDto;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.rules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.rules.rest.error.ErrorHandler;
-import eu.europa.ec.fisheries.uvms.rules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.rules.service.ValidationService;
-import eu.europa.ec.fisheries.uvms.rules.service.exception.RulesServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Path("/tickets")
 @Stateless
@@ -73,7 +66,7 @@ public class TicketRestResource {
         LOG.info("Get tickets list invoked in rest layer");
         try {
             return new ResponseDto(rulesService.getTicketList(loggedInUser, query), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException  | NullPointerException | InputArgumentException | DaoMappingException | DaoException | SearchMapperException ex) {
+        } catch (Exception ex) {
             LOG.error("[ERROR] Error when getting ticket list by query ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
@@ -96,7 +89,7 @@ public class TicketRestResource {
         LOG.info("Get tickets by movements invoked in rest layer");
         try {
             return new ResponseDto(rulesService.getTicketsByMovements(movements), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException  | NullPointerException | DaoMappingException | InputArgumentException | DaoException ex) {
+        } catch (Exception ex) {
             LOG.error("[ Error when getting ticket list by movements. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
@@ -118,7 +111,7 @@ public class TicketRestResource {
     public ResponseDto countTicketsByMovements(List<String> movements) {
         try {
             return new ResponseDto(rulesService.countTicketsByMovements(movements), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | DaoException | InputArgumentException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when counting number of open tickets by movements. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
@@ -143,7 +136,7 @@ public class TicketRestResource {
 
             TicketType response = TicketMapper.toTicketType(rulesService.updateTicketStatus(TicketMapper.toTicketEntity(ticketType)));
             return new ResponseDto(response, ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException | InputArgumentException | DaoMappingException | DaoException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when updating ticket. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
@@ -167,7 +160,7 @@ public class TicketRestResource {
         try {
             List response = TicketMapper.listToTicketType(rulesService.updateTicketStatusByQuery(loggedInUser, query, status));
             return new ResponseDto(response, ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | NullPointerException | InputArgumentException | DaoMappingException | DaoException | SearchMapperException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when updating tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
@@ -189,7 +182,7 @@ public class TicketRestResource {
         try {
             TicketType response = TicketMapper.toTicketType(rulesService.getTicketByGuid(guid));
             return new ResponseDto(response, ResponseCode.OK);
-        } catch (RulesServiceException | DaoMappingException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when getting ticket by GUID. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
@@ -211,7 +204,7 @@ public class TicketRestResource {
 
         try {
             return new ResponseDto(validationService.getNumberOfOpenTickets(loggedInUser), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException | DaoException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when getting number of open tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
@@ -232,7 +225,7 @@ public class TicketRestResource {
     public ResponseDto getNumberOfAssetsNotSending() {
         try {
             return new ResponseDto(rulesService.getNumberOfAssetsNotSending(), ResponseCode.OK);
-        } catch (RulesServiceException | RulesFaultException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when getting number of assets not sending. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
