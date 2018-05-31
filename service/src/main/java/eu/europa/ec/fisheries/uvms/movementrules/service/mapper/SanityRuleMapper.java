@@ -16,16 +16,16 @@ import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.rules.customrule.v1.SanityRuleType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SanityRuleType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 
 public class SanityRuleMapper {
     
-    private SanityRuleMapper() {}
-
     private static final Logger LOG = LoggerFactory.getLogger(SanityRuleMapper.class);
+
+    private SanityRuleMapper() {}
 
     public static SanityRuleType toSanityRuleType(SanityRuleType sanityRuleType, SanityRule sanityRuleEntity) throws DaoMappingException {
         try {

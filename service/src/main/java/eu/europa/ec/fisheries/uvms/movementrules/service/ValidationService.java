@@ -13,8 +13,9 @@ package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import java.util.List;
 import javax.ejb.Local;
-import eu.europa.ec.fisheries.schema.rules.module.v1.GetCustomRuleListByQueryResponse;
-import eu.europa.ec.fisheries.schema.rules.search.v1.CustomRuleQuery;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
@@ -23,7 +24,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesFaultException;
 
 @Local
 public interface ValidationService {

@@ -15,13 +15,13 @@ import javax.ejb.Local;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
-import eu.europa.ec.fisheries.uvms.rules.message.event.CountTicketsByMovementsEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.GetCustomRuleReceivedEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.GetTicketsAndRulesByMovementsEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.GetTicketsByMovementsEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.PingReceivedEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.SetMovementReportReceivedEvent;
-import eu.europa.ec.fisheries.uvms.rules.message.event.carrier.EventMessage;
+import eu.europa.ec.fisheries.uvms.movementrules.message.event.CountTicketsByMovementsEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetCustomRuleReceivedEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetTicketsAndRulesByMovementsEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetTicketsByMovementsEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.message.event.PingReceivedEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.message.event.SetMovementReportReceivedEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.message.event.carrier.EventMessage;
 
 @Local
 public interface EventService {

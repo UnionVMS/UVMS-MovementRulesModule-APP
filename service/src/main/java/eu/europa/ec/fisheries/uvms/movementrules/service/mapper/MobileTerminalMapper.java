@@ -12,7 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 
-import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.MobileTerminalType;
+import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.MobileTerminalType;
 
 /**
  * Created by osdjup on 2016-05-18.

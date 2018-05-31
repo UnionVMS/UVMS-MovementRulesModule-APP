@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:search="urn:search.rules.schema.fisheries.ec.europa.eu:v1"
+<xsd:schema xmlns:search="urn:search.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="urn:search.rules.schema.fisheries.ec.europa.eu:v1"
+            targetNamespace="urn:search.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
 
     <xsd:simpleType name="CustomRuleSearchKey">

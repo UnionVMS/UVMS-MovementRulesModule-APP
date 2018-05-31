@@ -17,16 +17,16 @@ import javax.inject.Inject;
 import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
 import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelValidationException;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.message.consumer.RulesResponseConsumer;
+import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
@@ -94,13 +94,13 @@ public class AssetServiceBean {
 
             // Get possible search parameters
             for (AssetIdList id : ids) {
-                if (eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType.CFR.equals(id.getIdType())) {
+                if (eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType.CFR.equals(id.getIdType())) {
                     cfr = id.getValue();
                 }
-                if (eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType.IRCS.equals(id.getIdType())) {
+                if (eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType.IRCS.equals(id.getIdType())) {
                     ircs = id.getValue();
                 }
-                if (eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType.MMSI.equals(id.getIdType())) {
+                if (eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType.MMSI.equals(id.getIdType())) {
                     mmsi = id.getValue();
                 }
 

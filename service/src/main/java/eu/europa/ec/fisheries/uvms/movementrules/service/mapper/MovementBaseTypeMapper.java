@@ -20,13 +20,13 @@ import eu.europa.ec.fisheries.schema.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementPoint;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementTypeType;
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList;
-import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 
-/**
- * Created by osdjup on 2016-05-18.
- */
 public class MovementBaseTypeMapper {
+    
+    private MovementBaseTypeMapper() {}
+    
     public static MovementBaseType mapRawMovementFact(RawMovementType rawMovement) {
         MovementBaseType movement = new MovementBaseType();
         movement.setActivity(mapMovementActivityType(rawMovement.getActivity()));
@@ -46,7 +46,7 @@ public class MovementBaseTypeMapper {
         return movement;
     }
 
-    private static MovementActivityType mapMovementActivityType(eu.europa.ec.fisheries.schema.rules.movement.v1.MovementActivityType rawActivityType) {
+    private static MovementActivityType mapMovementActivityType(eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementActivityType rawActivityType) {
         if (rawActivityType == null) {
             return null;
         }
@@ -58,7 +58,7 @@ public class MovementBaseTypeMapper {
         return activityType;
     }
 
-    private static MovementActivityTypeType mapMovementActivityTypeType(eu.europa.ec.fisheries.schema.rules.movement.v1.MovementActivityTypeType rawActivityTypeType) {
+    private static MovementActivityTypeType mapMovementActivityTypeType(eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementActivityTypeType rawActivityTypeType) {
         if (rawActivityTypeType == null) {
             return null;
         }
@@ -69,7 +69,7 @@ public class MovementBaseTypeMapper {
         }
     }
 
-    private static AssetId mapAssetId(eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId rawAssetId) {
+    private static AssetId mapAssetId(eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId rawAssetId) {
         if (rawAssetId == null) {
             return null;
         }
@@ -81,7 +81,7 @@ public class MovementBaseTypeMapper {
             for (AssetIdList assetIdList : rawAssetId.getAssetIdList()) {
                 assetId.setValue(assetIdList.getValue());
                 assetId.setIdType(AssetIdType.valueOf(assetIdList.getIdType().value()));
-                if (assetIdList.getIdType().equals(eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType.GUID)) {
+                if (assetIdList.getIdType().equals(eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType.GUID)) {
                     break;
                 }
             }
@@ -92,7 +92,7 @@ public class MovementBaseTypeMapper {
         return assetId;
     }
 
-    private static MovementTypeType mapMovementTypeType(eu.europa.ec.fisheries.schema.rules.movement.v1.MovementTypeType rawMovementTypeType) {
+    private static MovementTypeType mapMovementTypeType(eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementTypeType rawMovementTypeType) {
         if (rawMovementTypeType == null) {
             return null;
         }
@@ -103,7 +103,7 @@ public class MovementBaseTypeMapper {
         }
     }
 
-    private static MovementPoint mapMovementPoint(eu.europa.ec.fisheries.schema.rules.movement.v1.MovementPoint rawMovementPoint) {
+    private static MovementPoint mapMovementPoint(eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementPoint rawMovementPoint) {
         if (rawMovementPoint == null) {
             return null;
         }
@@ -115,7 +115,7 @@ public class MovementBaseTypeMapper {
         return movementPoint;
     }
 
-    private static MovementSourceType mapSourceType(eu.europa.ec.fisheries.schema.rules.movement.v1.MovementSourceType rawMovementSourceType) {
+    private static MovementSourceType mapSourceType(eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType rawMovementSourceType) {
         if (rawMovementSourceType == null) {
             return null;
         }

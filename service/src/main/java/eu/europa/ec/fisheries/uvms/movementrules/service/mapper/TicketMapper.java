@@ -11,27 +11,23 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-
-import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.schema.rules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 
-@LocalBean
-@Stateless
 public class TicketMapper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TicketMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TicketMapper.class);
 
+    private TicketMapper() {}
+    
     public static TicketType toTicketType(TicketType ticketType, Ticket ticketEntity) throws DaoMappingException {
         if (ticketEntity == null) {
             return null;
@@ -94,7 +90,7 @@ public class TicketMapper {
     }
 
     public static List<TicketType> listToTicketType(List<Ticket> ticketList) throws DaoMappingException {
-        List<TicketType> response = new ArrayList<TicketType>();
+        List<TicketType> response = new ArrayList<>();
         for (Ticket ticket : ticketList) {
             response.add(toTicketType(ticket));
         }

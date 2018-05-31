@@ -14,15 +14,13 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.config.module.v1.SettingsListResponse;
 import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.config.model.mapper.ModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.rules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.rules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.rules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.message.consumer.RulesResponseConsumer;
+import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
 
 @Stateless
 public class ConfigServiceBean {

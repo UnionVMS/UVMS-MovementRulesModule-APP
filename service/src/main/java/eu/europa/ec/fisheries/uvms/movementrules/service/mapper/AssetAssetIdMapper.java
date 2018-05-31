@@ -11,12 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList;
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 
 public class AssetAssetIdMapper {
+    
+    private AssetAssetIdMapper() {}
 
     public static AssetId mapAssetToAssetId(eu.europa.ec.fisheries.wsdl.asset.types.Asset asset) {
         AssetId newAssetId = new AssetId();

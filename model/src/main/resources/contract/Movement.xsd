@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:movement="urn:movement.rules.schema.fisheries.ec.europa.eu:v1"
-            xmlns:asset="urn:asset.rules.schema.fisheries.ec.europa.eu:v1"
-            xmlns:mobterm="urn:mobileterminal.rules.schema.fisheries.ec.europa.eu:v1"
+<xsd:schema xmlns:movement="urn:movement.movementrules.schema.fisheries.ec.europa.eu:v1"
+            xmlns:asset="urn:asset.movementrules.schema.fisheries.ec.europa.eu:v1"
+            xmlns:mobterm="urn:mobileterminal.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="urn:movement.rules.schema.fisheries.ec.europa.eu:v1"
+            targetNamespace="urn:movement.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
 
-    <xsd:import namespace="urn:asset.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Asset.xsd"/>
-    <xsd:import namespace="urn:mobileterminal.rules.schema.fisheries.ec.europa.eu:v1" schemaLocation="MobileTerminal.xsd"/>
+    <xsd:import namespace="urn:asset.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Asset.xsd"/>
+    <xsd:import namespace="urn:mobileterminal.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="MobileTerminal.xsd"/>
 
     <!-- Type received in UNIONVMS -->
     <xsd:complexType name="RawMovementType">
