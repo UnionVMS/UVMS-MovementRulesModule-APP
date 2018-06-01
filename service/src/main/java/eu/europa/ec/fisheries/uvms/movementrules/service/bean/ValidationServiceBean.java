@@ -168,8 +168,8 @@ public class ValidationServiceBean implements ValidationService {
         String sql = CustomRuleSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
         String countSql = CustomRuleSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
 
-        Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql, searchKeyValues);
-        List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql, searchKeyValues);
+        Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql);
+        List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql);
 
         for (CustomRule entity : customRuleEntityList) {
             customRuleList.add(CustomRuleMapper.toCustomRuleType(entity));
@@ -555,8 +555,6 @@ public class ValidationServiceBean implements ValidationService {
             alarmItems.add(alarmItemType);
             alarmReport.getAlarmItem().addAll(alarmItems);
 
-            LOG.info("[INFO] Rule Engine creating Alarm Report");
-
             String movementGuid = null;
             if (alarmReport.getRawMovement() != null) {
                 movementGuid = alarmReport.getRawMovement().getGuid();
@@ -594,9 +592,8 @@ public class ValidationServiceBean implements ValidationService {
             alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.CREATE, createdAlarmReport.getGuid(), null, alarmReport.getUpdatedBy());
-        } catch (DaoException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when creating alarm report {}", e.getMessage());
-            LOG.error("[ Failed to create alarm! ] {}", e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Failed to create alarm!", e);
         }
     }
 

@@ -24,6 +24,7 @@ import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
@@ -84,6 +85,15 @@ public class RulesTestHelper {
     public static AlarmQuery getBasicAlarmQuery() {
         AlarmQuery query = new AlarmQuery();
         query.setDynamic(true);
+        ListPagination pagination = new ListPagination();
+        pagination.setPage(1);
+        pagination.setListSize(100);
+        query.setPagination(pagination);
+        return query;
+    }
+    
+    public static TicketQuery getBasicTicketQuery() {
+        TicketQuery query = new TicketQuery();
         ListPagination pagination = new ListPagination();
         pagination.setPage(1);
         pagination.setListSize(100);

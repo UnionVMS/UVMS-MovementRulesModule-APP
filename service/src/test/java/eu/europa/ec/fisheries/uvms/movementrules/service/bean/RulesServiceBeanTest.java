@@ -1,17 +1,21 @@
-package eu.europa.ec.fisheries.uvms.movementrules.service;
+package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import javax.ejb.EJB;
+import java.util.UUID;
 import javax.ejb.EJBTransactionRolledbackException;
+import javax.inject.Inject;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetType;
+import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
@@ -24,18 +28,17 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
-import eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType;
-import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.MobileTerminalType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementActivityType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementActivityTypeType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementComChannelType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementPoint;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementTypeType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
@@ -46,18 +49,14 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceE
 
 
 @RunWith(Arquillian.class)
-public class RulesServiceTest extends TransactionalTests {
+public class RulesServiceBeanTest extends TransactionalTests {
 
-
-    @EJB
+    @Inject
     RulesService rulesService;
 
-    @Test
-    public void worldsBestTestTest(){
-        Assert.assertTrue(true);
-    }
-
-
+    @Inject
+    RulesDao rulesDao;
+    
     @Test
     public void createCustomRuleTest() throws Exception{
         CustomRule input = getCompleteNewCustomRule();
@@ -160,7 +159,31 @@ public class RulesServiceTest extends TransactionalTests {
         }catch(NoEntityFoundException e){
             Assert.assertTrue(true);
         }
-
+    }
+    
+    // TODO check these tests
+    @Ignore
+    @Test
+    public void updateCustomRuleTest() throws Exception {
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        String newDescription = "Updated description";
+        createdCustomRule.setDescription(newDescription);
+        CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule);
+        assertThat(updatedCustomRule.getDescription(), is(newDescription));
+        assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+    }
+   
+    @Ignore
+    @Test
+    public void updateCustomRuleWithUsernameTest() throws Exception {
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        String newDescription = "Updated description";
+        createdCustomRule.setDescription(newDescription);
+        CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule, "", "");
+        assertThat(updatedCustomRule.getDescription(), is(newDescription));
+        assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
     }
 
     @Test
@@ -278,6 +301,27 @@ public class RulesServiceTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
     }
+    
+    @Test
+    public void getTicketListTest() throws Exception {
+        String user = "Test user";
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        customRule.setUpdatedBy(user);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        Ticket ticket = getBasicTicket();
+        ticket.setRuleGuid(createdCustomRule.getGuid());
+        Ticket createdTicket = rulesDao.createTicket(ticket);
+        
+        TicketQuery query = RulesTestHelper.getBasicTicketQuery();
+        TicketListCriteria criteria = new TicketListCriteria();
+        criteria.setKey(TicketSearchKey.TICKET_GUID);
+        criteria.setValue(createdTicket.getGuid());
+        query.getTicketSearchCriteria().add(criteria);
+        GetTicketListByQueryResponse ticketList = rulesService.getTicketList(user, query);
+        List<TicketType> tickets = ticketList.getTickets();
+        assertThat(tickets.size(), is(1));
+    }
 
     @Test
     public void getTicketsByMovementsNegativeTest() throws Exception{ //a test with proper input is among the rest tests
@@ -295,8 +339,20 @@ public class RulesServiceTest extends TransactionalTests {
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
-
     }
+    
+    @Test
+    public void getTicketsByMovementsTest() throws Exception {
+        Ticket ticket = getBasicTicket();
+        String movementGuid = UUID.randomUUID().toString();
+        ticket.setMovementGuid(movementGuid);
+        rulesDao.createTicket(ticket);
+        
+        GetTicketListByMovementsResponse ticketsByMovements = rulesService.getTicketsByMovements(Arrays.asList(movementGuid));
+        List<TicketType> tickets = ticketsByMovements.getTickets();
+        assertThat(tickets.size(), is(1));
+    }
+
     @Test
     public void countTicketsByMovementNegativeTest() throws Exception { //a test with proper input is among the rest tests
         try{
@@ -315,6 +371,17 @@ public class RulesServiceTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
     }
+    
+    @Test
+    public void countTicketsByMovementTest() throws Exception {
+        Ticket ticket = getBasicTicket();
+        String movementGuid = UUID.randomUUID().toString();
+        ticket.setMovementGuid(movementGuid);
+        rulesDao.createTicket(ticket);
+        
+        long ticketsByMovements = rulesService.countTicketsByMovements(Arrays.asList(movementGuid));
+        assertThat(ticketsByMovements, is(1L));
+    }
 
     @Test
     public void updateTicketStatusNegativeTest() throws Exception {     //a test with proper input is among the rest tests
@@ -332,6 +399,18 @@ public class RulesServiceTest extends TransactionalTests {
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
+    }
+    
+    @Test
+    public void updateTicketStatusTest() throws Exception {
+        Ticket ticket = getBasicTicket();
+        Ticket createdTicket = rulesDao.createTicket(ticket);
+        String newStatus = "New status";
+        createdTicket.setStatus(newStatus);
+        
+        Ticket updatedTicket = rulesService.updateTicketStatus(createdTicket);
+        assertThat(updatedTicket.getStatus(), is(newStatus));
+        assertThat(updatedTicket.getGuid(), is(createdTicket.getGuid()));
     }
 
     @Test
@@ -365,6 +444,31 @@ public class RulesServiceTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
     }
+    
+    @Test
+    public void updateTicketStatusByQueryTest() throws Exception {
+        String user = "Test user";
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        customRule.setUpdatedBy(user);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        Ticket ticket = getBasicTicket();
+        ticket.setRuleGuid(createdCustomRule.getGuid());
+        ticket.setStatus(TicketStatusType.OPEN.value());
+        Ticket createdTicket = rulesDao.createTicket(ticket);
+        
+        TicketQuery query = RulesTestHelper.getBasicTicketQuery();
+        TicketListCriteria criteria = new TicketListCriteria();
+        criteria.setKey(TicketSearchKey.TICKET_GUID);
+        criteria.setValue(createdTicket.getGuid());
+        query.getTicketSearchCriteria().add(criteria);
+        
+        rulesService.updateTicketStatusByQuery(user, query, TicketStatusType.PENDING);
+        
+        Ticket fetchedTicket = rulesService.getTicketByGuid(createdTicket.getGuid());
+        assertThat(fetchedTicket.getStatus(), is(TicketStatusType.PENDING.value()));
+        assertThat(fetchedTicket.getGuid(), is(createdTicket.getGuid()));
+    }
 
     @Test
     public void updateAlarmStatusNegativeTest() throws Exception{ //a test with proper input is among the rest tests
@@ -375,6 +479,18 @@ public class RulesServiceTest extends TransactionalTests {
         }catch(NoEntityFoundException e){
             Assert.assertTrue(true);
         }
+    }
+    
+    @Test
+    public void updateAlarmStatusTest() throws Exception {
+        AlarmReport alarmReport = getBasicAlarmReport();
+        AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
+        String newStatus = "New status";
+        createdAlarmReport.setStatus(newStatus);
+        
+        AlarmReport updatedAlarmReport = rulesService.updateAlarmStatus(createdAlarmReport);
+        assertThat(updatedAlarmReport.getStatus(), is(newStatus));
+        assertThat(updatedAlarmReport.getGuid(), is(createdAlarmReport.getGuid()));
     }
 
     @Test
@@ -396,67 +512,8 @@ public class RulesServiceTest extends TransactionalTests {
     }
 
     //getAlarmReportByGuid and getTicketByGuid have tests among the rest tests
-
-
-    @Test
-    public void setMovementReportReceivedTest() throws Exception {
-        RawMovementType input = new RawMovementType();
-        AssetId assetId = new AssetId();
-        assetId.setAssetType(AssetType.AIR);
-        input.setAssetId(assetId);
-
-        input.setPositionTime(new Date());
-        MovementPoint movementPoint = new MovementPoint();
-        movementPoint.setLatitude(0.0D);
-        movementPoint.setLongitude(0.0D);
-        input.setPosition(movementPoint);
-
-        input.setAssetName("test boat");
-        input.setComChannelType(MovementComChannelType.FLUX);
-        input.setFlagState("SWE");
-
-        MobileTerminalType mobileTerminalType = new MobileTerminalType();
-        mobileTerminalType.setConnectId("test connect id");
-        mobileTerminalType.setGuid("test MTT guid");
-        input.setMobileTerminal(mobileTerminalType);
-
-        input.setMovementType(MovementTypeType.POS);
-        input.setReportedCourse(0.1D);
-        input.setReportedSpeed(0.2D);
-        input.setSource(MovementSourceType.NAF);
-
-        MovementActivityType movementActivityType = new MovementActivityType();
-        movementActivityType.setCallback("callback");
-        movementActivityType.setMessageId("test message ID");
-        movementActivityType.setMessageType(MovementActivityTypeType.CAT);
-        input.setActivity(movementActivityType);
-        input.setConnectId("rmt connectID");
-        input.setDateRecieved(new Date());
-        input.setExternalMarking("marking");
-        input.setPluginName("plugin name");
-        input.setPluginType(PluginType.FLUX.value());
-        input.setStatus("bored");
-        input.setAckResponseMessageID("ack message");
-        input.setInternalReferenceNumber("42");
-        input.setTripNumber(42D);
-
-
-
-        try{
-            rulesService.setMovementReportReceived(null, null, null);
-            Assert.assertTrue(false);
-        }catch(EJBTransactionRolledbackException e){
-            Assert.assertTrue(true);
-        }
-
-        rulesService.setMovementReportReceived(input, null, null);  //right now this only checks that there are no exceptions thrown
-
-
-    }
-
-
-
-
+    
+    
     private CustomRule getCompleteNewCustomRule(){
         CustomRule customRule = new CustomRule();
 
@@ -524,5 +581,25 @@ public class RulesServiceTest extends TransactionalTests {
         customRule.getRuleActionList().add(ruleAction);
 
         return customRule;
+    }
+    
+    private Ticket getBasicTicket() {
+        Ticket ticket = new Ticket();
+        ticket.setAssetGuid(UUID.randomUUID().toString());
+        ticket.setStatus(TicketStatusType.OPEN.value());
+        ticket.setCreatedDate(new Date());
+        ticket.setRuleName("Test Rule");
+        ticket.setUpdated(new Date());
+        ticket.setUpdatedBy("Test user");
+        return ticket;
+    }
+    
+    private AlarmReport getBasicAlarmReport() {
+        AlarmReport alarmReport = new AlarmReport();
+        alarmReport.setAssetGuid(UUID.randomUUID().toString());
+        alarmReport.setStatus(AlarmStatusType.OPEN.value());
+        alarmReport.setUpdated(new Date());
+        alarmReport.setUpdatedBy("Test user");
+        return alarmReport;
     }
 }
