@@ -101,7 +101,7 @@ public class MovementReportProcessorBean {
                 }
             } else {
                 asset = assetService.getAssetByCfrIrcs(rawMovement.getAssetId());
-                if (!isPluginTypeWithoutMobileTerminal(rawMovement.getPluginType()) && asset != null) {
+                if (isPluginTypeWithoutMobileTerminal(rawMovement.getPluginType()) && asset != null) {
                     mobileTerminal = mobileTerminalService.findMobileTerminalByAsset(asset.getAssetId().getGuid());
                     rawMovement.setMobileTerminal(MobileTerminalMapper.mapMobileTerminal(mobileTerminal));
                 }

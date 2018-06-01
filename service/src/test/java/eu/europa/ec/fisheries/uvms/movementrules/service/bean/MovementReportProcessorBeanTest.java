@@ -58,6 +58,7 @@ public class MovementReportProcessorBeanTest extends TransactionalTests {
         List<PreviousReport> previousReportsBefore = rulesService.getPreviousMovementReports();
         
         rawMovement.setMobileTerminal(null);
+        rawMovement.setPluginType("NAF");
         movementReport.setMovementReportReceived(rawMovement, "NAF", "TEST");
         
         List<PreviousReport> previousReportsAfter = rulesService.getPreviousMovementReports();
