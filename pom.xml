@@ -116,7 +116,23 @@
         <connection>${scm.connection}</connection>
         <tag>HEAD</tag>
     </scm>
-
+    <build>
+    <plugins>
+        <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.7.8</version>
+            <executions>
+                <execution>
+                    <id>prepare-agent</id>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+    </build>
     <profiles>
         <profile>
             <id>belgium-local</id>
@@ -161,5 +177,6 @@
         <module>service</module>
         <module>message</module>
         <module>module</module>
+        <module>jacoco-reports</module>
     </modules>
 </project>

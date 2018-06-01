@@ -20,11 +20,11 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.BuildRulesRestDeployment;
 
+//@RunAsClient
 @RunWith(Arquillian.class)
 public class AlarmRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
-    @RunAsClient
     public void getAlarmListTest() throws Exception {
         AlarmQuery basicAlarmQuery = getBasicAlarmQuery();
         AlarmListCriteria criteria = new AlarmListCriteria();
@@ -70,7 +70,6 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     
     
     @Test
-    @RunAsClient
     public void reprocessAlarmTest() throws Exception {
         String response = getWebTarget()
                 .path("alarms/reprocess")
@@ -83,7 +82,6 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     
     
     @Test
-    @RunAsClient
     public void getNumberOfOpenAlarmReportsTest() throws Exception {
         String response = getWebTarget()
                 .path("alarms/countopen")

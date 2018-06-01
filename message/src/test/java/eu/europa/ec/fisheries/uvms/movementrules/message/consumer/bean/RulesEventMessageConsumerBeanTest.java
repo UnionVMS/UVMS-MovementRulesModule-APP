@@ -24,13 +24,13 @@ import eu.europa.ec.fisheries.uvms.movementrules.message.TestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.RulesModuleRequestMapper;
 
+@RunAsClient
 @RunWith(Arquillian.class)
 public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
 
     private JMSHelper jmsHelper = new JMSHelper();
     
     @Test
-    @RunAsClient
     public void pingTest() throws Exception {
         PingRequest request = new PingRequest();
         request.setMethod(RulesModuleMethod.PING);
@@ -44,7 +44,6 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
     }
     
     @Test
-    @RunAsClient
     public void setMovementReportTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = RulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
@@ -59,7 +58,6 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
     }
     
     @Test
-    @RunAsClient
     public void setMovementReportCreateTwoPositionsTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = RulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
@@ -83,7 +81,6 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
     }
     
     @Test
-    @RunAsClient
     public void setMovementReportNullLatitudeShouldTriggerSanityRuleTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         movement.getPosition().setLatitude(null);
@@ -96,7 +93,6 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
     }
     
     @Test
-    @RunAsClient
     public void setMovementReportFutureDateShouldTriggerSanityRuleTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         movement.setPositionTime(new Date(new Date().getTime() + 100000));

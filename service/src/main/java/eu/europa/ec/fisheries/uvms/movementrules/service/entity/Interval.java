@@ -23,6 +23,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 //@formatter:off
 @Entity
@@ -81,8 +82,15 @@ public class Interval implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+
+        return Objects.hash(id, start, end, customRule);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof Interval) {
+
             Interval other = (Interval) obj;
             if (start != null && start.getTime() != other.start.getTime()) {
                 return false;
