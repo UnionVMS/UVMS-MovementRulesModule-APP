@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:customrule="urn:customrule.rules.schema.fisheries.ec.europa.eu:v1"
+<xsd:schema xmlns:customrule="urn:customrule.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="urn:customrule.rules.schema.fisheries.ec.europa.eu:v1"
+            targetNamespace="urn:customrule.movementrules.schema.fisheries.ec.europa.eu:v1"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
 
     <xsd:complexType name="CustomRuleType">
