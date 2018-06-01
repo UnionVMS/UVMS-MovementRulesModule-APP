@@ -152,8 +152,6 @@ public interface RulesService {
 
     String reprocessAlarm(List<String> alarms, String username) throws RulesServiceException, RulesModelException, DaoMappingException, DaoException;
 
-    void setMovementReportReceived(RawMovementType rawMovementType, String pluginType, String username) throws RulesServiceException;
-
     /**
      * @param guid the GUID of an alarm
      * @return an alarm

@@ -10,19 +10,21 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
-import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
-import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.config.model.exception.ModelMarshallException;
-import eu.europa.ec.fisheries.uvms.config.model.mapper.ModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
-import java.util.Arrays;
+import eu.europa.ec.fisheries.schema.config.module.v1.ConfigModuleBaseRequest;
+import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
+import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
+import eu.europa.ec.fisheries.uvms.config.model.mapper.ModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 
 @MessageDriven(mappedName = "jms/queue/UVMSConfigEvent", activationConfig = {
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"),
@@ -35,17 +37,32 @@ public class ConfigServiceMock implements MessageListener {
     
     @Override
     public void onMessage(Message message) {
+        TextMessage textMessage = (TextMessage) message;
         try {
-            SettingType mockSetting = new SettingType();
-            mockSetting.setKey("Key");
-            mockSetting.setValue("Value");
-            mockSetting.setDescription("From ConfigServiceMock.java");
-            String response = ModuleResponseMapper.toPullSettingsResponse(Arrays.asList(mockSetting), PullSettingsStatus.OK);
-            messageProducer.sendModuleResponseMessage((TextMessage) message, response);
-        } catch (ModelMarshallException e) {
-
-        } catch (MessageException e){
-
+            ConfigModuleBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ConfigModuleBaseRequest.class);
+            switch (request.getMethod()) {
+                case PULL:
+                    SettingType mockSetting = new SettingType();
+                    mockSetting.setKey("Key");
+                    mockSetting.setValue("Value");
+                    mockSetting.setDescription("From ConfigServiceMock.java");
+                    String pullResponse = ModuleResponseMapper.toPullSettingsResponse(Arrays.asList(mockSetting), PullSettingsStatus.OK);
+                    messageProducer.sendModuleResponseMessage((TextMessage) message, pullResponse);
+                    break;
+                case LIST:
+                    List<SettingType> settings = new ArrayList<>();
+                    SettingType setting = new SettingType();
+                    setting.setKey("asset.default.flagstate");
+                    setting.setValue("SWE");
+                    settings.add(setting);
+                    String listResponse = ModuleResponseMapper.toSettingsListResponse(settings);
+                    messageProducer.sendModuleResponseMessage((TextMessage) message, listResponse);
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            
         }
     }
 }

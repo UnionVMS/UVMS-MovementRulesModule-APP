@@ -11,31 +11,7 @@
 	
 	<assembly-descriptor>
 		<interceptor-binding>
-			<ejb-name>MessageServiceBean</ejb-name>
-			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
-		</interceptor-binding>
-		<interceptor-binding>
-			<ejb-name>RuleAssetsBean</ejb-name>
-			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
-		</interceptor-binding>
-		<interceptor-binding>
-			<ejb-name>RulesFishingGearBean</ejb-name>
-			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
-		</interceptor-binding>
-		<interceptor-binding>
-			<ejb-name>RulePostProcessBean</ejb-name>
-			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
-		</interceptor-binding>
-		<interceptor-binding>
-			<ejb-name>RulesActivityServiceBean</ejb-name>
-			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
-		</interceptor-binding>
-		<interceptor-binding>
-			<ejb-name>RulesEngineBean</ejb-name>
-			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
-		</interceptor-binding>
-		<interceptor-binding>
-			<ejb-name>RulesPreProcessBean</ejb-name>
+			<ejb-name>RulesEventServiceBean</ejb-name>
 			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
 		</interceptor-binding>
 		<interceptor-binding>
@@ -44,6 +20,10 @@
 		</interceptor-binding>
 		<interceptor-binding>
 			<ejb-name>ValidationServiceBean</ejb-name>
+			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
+		</interceptor-binding>
+		<interceptor-binding>
+			<ejb-name>MovementReportBean</ejb-name>
 			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
 		</interceptor-binding>
 	</assembly-descriptor>

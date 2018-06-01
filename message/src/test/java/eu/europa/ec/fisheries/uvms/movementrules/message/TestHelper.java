@@ -38,7 +38,7 @@ public class TestHelper {
         movement.setDateRecieved(new Date());
         movement.setMovementType(MovementTypeType.POS);
         movement.setPluginName("PLUGIN");
-        movement.setPluginType("SATELLITE_RECEIVER");
+        movement.setPluginType("NAF");
         MovementPoint movementPoint = new MovementPoint();
         movementPoint.setLatitude(56d);
         movementPoint.setLongitude(11d);

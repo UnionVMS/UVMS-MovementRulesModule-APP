@@ -71,8 +71,11 @@ public class RulesEventServiceBean implements EventService {
     @Inject
     private RulesMessageProducer rulesProducer;
 
-    @EJB
+    @Inject
     private RulesService rulesService;
+    
+    @Inject
+    private MovementReportProcessorBean movementReportBean;
 
     @Override
     public void pingReceived(@Observes @PingReceivedEvent EventMessage eventMessage) {
@@ -96,7 +99,7 @@ public class RulesEventServiceBean implements EventService {
                 LOG.error("[ERROR] Error, Set Movement Report invoked but it is not the intended method, caller is trying : " + baseRequest.getMethod().name());
             }
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
-            rulesService.setMovementReportReceived(request.getRequest(), request.getType().name(), baseRequest.getUsername());
+            movementReportBean.setMovementReportReceived(request.getRequest(), request.getType().name(), baseRequest.getUsername());
         } catch (RulesModelMapperException | RulesServiceException e) {
             LOG.error("[ERROR] Error when creating movement {}", e.getMessage());
         }
