@@ -11,13 +11,11 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.dao;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +27,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.NoEntityFoundException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchValue;
 
 @Stateless
 public class RulesDao {
@@ -41,68 +37,50 @@ public class RulesDao {
     private EntityManager em;
 
     public CustomRule createCustomRule(CustomRule entity){
-
         em.persist(entity);
         return entity;
     }
 
     public CustomRule getCustomRuleByGuid(String guid) throws DaoException {
-
         try {
             TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
-            LOG.error("[ No custom rule with guid '{}' can be found ]", guid);
             throw new NoEntityFoundException("[ No custom rule with guid: " + guid + " can be found ]", e);
         } catch (Exception e) {
-            LOG.error("[ Error when getting CustomRule by GUID. ] '{}'", e.getMessage());
             throw new DaoException("[ Error when getting CustomRule by GUID. ] ", e);
         }
 
     }
 
     public Ticket getTicketByGuid(String guid){
-
         TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_GUID, Ticket.class);
         query.setParameter("guid", guid);
         return query.getSingleResult();
     }
 
-    public List<Ticket> getTicketsByMovements(List<String> movements) throws DaoException {
-        try {
-            TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKETS_BY_MOVEMENTS, Ticket.class);
-            query.setParameter("movements", movements);
-            return query.getResultList();
-        } catch (NoResultException e) {
-            // TODO: Return empty list???
-            LOG.error("[ No tickets found for movements ]");
-            throw new NoEntityFoundException("[ No tickets found for movements ]", e);
-        }
+    public List<Ticket> getTicketsByMovements(List<String> movements) {
+        TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKETS_BY_MOVEMENTS, Ticket.class);
+        query.setParameter("movements", movements);
+        return query.getResultList();
     }
 
-    public long countTicketListByMovements(List<String> movements){
+    public long countTicketListByMovements(List<String> movements) {
         TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_TICKETS_BY_MOVEMENTS, Long.class);
         query.setParameter("movements", movements);
         return query.getSingleResult();
     }
 
-    public List<String> getCustomRulesForTicketsByUser(String owner) throws DaoException {
-        try {
-            TypedQuery<String> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, String.class);
-            query.setParameter("owner", owner);
-            return query.getResultList();
-        } catch (NoResultException e) {
-            return new ArrayList<>();
-        } catch (Exception e) {
-            LOG.error("[ Error when getting Tickets by userName. ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting Tickets by userName. ] ", e);
-        }
+    public List<String> getCustomRulesForTicketsByUser(String owner) {
+        TypedQuery<String> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, String.class);
+        query.setParameter("owner", owner);
+        return query.getResultList();
     }
 
-    public long getNumberOfOpenAlarms(){
-            TypedQuery<Long> query = em.createNamedQuery(AlarmReport.COUNT_OPEN_ALARMS, Long.class);
-            return query.getSingleResult();
+    public long getNumberOfOpenAlarms() {
+        TypedQuery<Long> query = em.createNamedQuery(AlarmReport.COUNT_OPEN_ALARMS, Long.class);
+        return query.getSingleResult();
     }
 
     public long getNumberOfOpenTickets(List<String> validRuleGuids){
@@ -115,61 +93,39 @@ public class RulesDao {
         }
     }
 
-    public AlarmReport getAlarmReportByGuid(String guid) throws DaoException {
+    public AlarmReport getAlarmReportByGuid(String guid) throws NoEntityFoundException {
         try {
             TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_ALARM_BY_GUID, AlarmReport.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
-            LOG.error("[ Alarm with guid {} can't be found ]", guid);
             throw new NoEntityFoundException("[ Alarm with guid " + guid + " can't be found ]", e);
         }
     }
 
-    public CustomRule updateCustomRule(CustomRule entity) throws DaoException {
-        try {
-            em.merge(entity);
-            em.flush();
-            return entity;
-        } catch (IllegalArgumentException | TransactionRequiredException e) {
-            LOG.error("[ Error when updating CustomRule ] {}", e.getMessage());
-            throw new DaoException("[ Error when updating CustomRule ]", e);
-        }
+    public CustomRule updateCustomRule(CustomRule entity) {
+        return em.merge(entity);
     }
 
-    public void removeSubscription(RuleSubscription entity) throws DaoException {
-        try {
-            em.remove(entity);
-            em.flush();
-        } catch (IllegalArgumentException | TransactionRequiredException e) {
-            LOG.error("[ Error when removing subscription ] {}", e.getMessage());
-            throw new DaoException("[ Error when removing subscription ]", e);
-        }
+    public void removeSubscription(RuleSubscription entity) {
+        em.remove(entity);
     }
 
     public void detachSubscription(RuleSubscription subscription) throws DaoException {
         try {
             em.detach(subscription);
             subscription.setId(null);
-        } catch (IllegalArgumentException | TransactionRequiredException e) {
-            LOG.error("[ Error when detaching subscription ] {}", e.getMessage());
-            throw new DaoException("[ Error when detaching subscription ]", e);
         } catch (Exception e) {
-            LOG.error("[ Error when detaching subscription ] {}", e.getMessage());
             throw new DaoException("[ Error when detaching subscription ]", e);
         }
     }
 
-    public Ticket updateTicket(Ticket entity){
-        em.merge(entity);
-        em.flush();
-        return entity;
+    public Ticket updateTicket(Ticket entity) {
+        return em.merge(entity);
     }
 
     public AlarmReport updateAlarm(AlarmReport entity){
-        em.merge(entity);
-        em.flush();
-        return entity;
+        return em.merge(entity);
     }
 
     public List<CustomRule> getRunnableCustomRuleList() {
@@ -188,15 +144,9 @@ public class RulesDao {
         return query.getResultList();
     }
 
-    public AlarmReport createAlarmReport(AlarmReport alarmReport) throws DaoException {
-        LOG.info("Creating alarm report");
-        try {
-            em.persist(alarmReport);
-            return alarmReport;
-        } catch (Exception e) {
-            LOG.error("[ Error when persisting alarm report. ] {}", e.getMessage());
-            throw new DaoException("[ Error when persisting alarm report. ]", e);
-        }
+    public AlarmReport createAlarmReport(AlarmReport alarmReport) {
+        em.persist(alarmReport);
+        return alarmReport;
     }
 
     public Ticket createTicket(Ticket ticket) {
@@ -204,107 +154,70 @@ public class RulesDao {
         return ticket;
     }
 
-    public AlarmReport getOpenAlarmReportByMovementGuid(String guid) throws DaoException {
-        AlarmReport errorReport;
+    public AlarmReport getOpenAlarmReportByMovementGuid(String guid) {
         try {
             TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID, AlarmReport.class);
             query.setParameter("movementGuid", guid);
-            errorReport = query.getSingleResult();
+            return query.getSingleResult();
         } catch (NoResultException e) {
-            LOG.debug("Fist position report");
             return null;
-        } catch (Exception e) {
-            LOG.error("[ Error when getting error report. ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting error report. ]", e);
         }
-
-        return errorReport;
     }
 
-    public Long getCustomRuleListSearchCount(String countSql, List<CustomRuleSearchValue> searchKeyValues) throws DaoException {
+    public Long getCustomRuleListSearchCount(String countSql) {
         LOG.debug("CUSTOM RULE SQL QUERY IN LIST COUNT: {}", countSql);
 
         TypedQuery<Long> query = em.createQuery(countSql, Long.class);
-
         return query.getSingleResult();
     }
 
-    public List<CustomRule> getCustomRuleListPaginated(Integer page, Integer listSize, String sql, List<CustomRuleSearchValue> searchKeyValues)
-            throws DaoException {
-        try {
-            LOG.debug("CUSTOM RULE SQL QUERY IN LIST PAGINATED: {}", sql);
+    public List<CustomRule> getCustomRuleListPaginated(Integer page, Integer listSize, String sql) {
+        LOG.debug("CUSTOM RULE SQL QUERY IN LIST PAGINATED: {}", sql);
 
-            TypedQuery<CustomRule> query = em.createQuery(sql, CustomRule.class);
-
-            query.setFirstResult(listSize * (page - 1));
-            query.setMaxResults(listSize);
-
-            return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error getting custom rule list paginated ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting custom rule list ] ", e);
-        } catch (Exception e) {
-            LOG.error("[ Error getting custom rule list paginated ]  {}", e.getMessage());
-            throw new DaoException("[ Error when getting custom rule list ] ", e);
-        }
+        TypedQuery<CustomRule> query = em.createQuery(sql, CustomRule.class);
+        query.setFirstResult(listSize * (page - 1));
+        query.setMaxResults(listSize);
+        return query.getResultList();
     }
 
-    public Long getAlarmListSearchCount(String countSql){  //, List<AlarmSearchValue> searchKeyValues was not used
+    public Long getAlarmListSearchCount(String countSql) {
         LOG.debug("ALARM SQL QUERY IN LIST COUNT: {}", countSql);
 
         TypedQuery<Long> query = em.createQuery(countSql, Long.class);
-
         return query.getSingleResult();
     }
 
-    public List<AlarmReport> getAlarmListPaginated(Integer page, Integer listSize, String sql){ // List<AlarmSearchValue> searchKeyValues was  not used
+    public List<AlarmReport> getAlarmListPaginated(Integer page, Integer listSize, String sql) {
 
         LOG.debug("ALARM SQL QUERY IN LIST PAGINATED: {}", sql);
 
         TypedQuery<AlarmReport> query = em.createQuery(sql, AlarmReport.class);
-
         query.setFirstResult(listSize * (page - 1));
         query.setMaxResults(listSize);
-
         return query.getResultList();
     }
 
-    public Long getTicketListSearchCount(String countSql, List<TicketSearchValue> searchKeyValues) throws DaoException {
+    public Long getTicketListSearchCount(String countSql) {
         LOG.debug("TICKET SQL QUERY IN LIST COUNT: {}", countSql);
 
         TypedQuery<Long> query = em.createQuery(countSql, Long.class);
-
         return query.getSingleResult();
     }
 
-    public List<Ticket> getTicketListPaginated(Integer page, Integer listSize, String sql, List<TicketSearchValue> searchKeyValues)
-            throws DaoException {
-        try {
-            LOG.debug("TICKET SQL QUERY IN LIST PAGINATED: {}", sql);
+    public List<Ticket> getTicketListPaginated(Integer page, Integer listSize, String sql) {
+        LOG.debug("TICKET SQL QUERY IN LIST PAGINATED: {}", sql);
 
-            TypedQuery<Ticket> query = em.createQuery(sql, Ticket.class);
-
-            query.setFirstResult(listSize * (page - 1));
-            query.setMaxResults(listSize);
-
-            return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error getting ticket list paginated ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting ticket list ] ", e);
-        } catch (Exception e) {
-            LOG.error("[ Error getting ticket list paginated ]  {}", e.getMessage());
-            throw new DaoException("[ Error when getting ticket list ] ", e);
-        }
+        TypedQuery<Ticket> query = em.createQuery(sql, Ticket.class);
+        query.setFirstResult(listSize * (page - 1));
+        query.setMaxResults(listSize);
+        return query.getResultList();
     }
 
-    public List<Ticket> getTicketList(String sql, List<TicketSearchValue> searchKeyValues){
-
+    public List<Ticket> getTicketList(String sql) {
         LOG.debug("TICKET SQL QUERY IN LIST: {}", sql);
 
         TypedQuery<Ticket> query = em.createQuery(sql, Ticket.class);
-
         return query.getResultList();
-
     }
 
     public List<PreviousReport> getPreviousReportList() {
@@ -327,7 +240,7 @@ public class RulesDao {
 
     // Used by timer to prevent duplicate tickets for passing the reporting
     // deadline
-    public AlarmReport getAlarmReportByAssetAndRule(String assetGuid, String ruleGuid) throws DaoException {
+    public AlarmReport getAlarmReportByAssetAndRule(String assetGuid, String ruleGuid) {
         try {
             TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_ALARM_REPORT_BY_ASSET_GUID_AND_RULE_GUID, AlarmReport.class);
             query.setParameter("assetGuid", assetGuid);
@@ -335,12 +248,6 @@ public class RulesDao {
             return query.getSingleResult();
         } catch (NoResultException e) {
             return null;
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting alarm report by guid ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting alarm report by guid ] ", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when getting alarm report by guid ] {}", e.getMessage());
-            throw new DaoException("[ Error when getting alarm report by guid ] ", e);
         }
     }
 

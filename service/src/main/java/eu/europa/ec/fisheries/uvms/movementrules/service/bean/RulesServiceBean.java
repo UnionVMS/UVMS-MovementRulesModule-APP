@@ -450,8 +450,8 @@ public class RulesServiceBean implements RulesService {
 
         String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleGuids, true);
         String countSql = TicketSearchFieldMapper.createCountSearchSql(searchKeyValues, validRuleGuids, true);
-        Long numberMatches = rulesDao.getTicketListSearchCount(countSql, searchKeyValues);
-        List<Ticket> ticketEntityList = rulesDao.getTicketListPaginated(query.getPagination().getPage(), listSize, sql, searchKeyValues);
+        Long numberMatches = rulesDao.getTicketListSearchCount(countSql);
+        List<Ticket> ticketEntityList = rulesDao.getTicketListPaginated(query.getPagination().getPage(), listSize, sql);
 
         List<TicketType> ticketList = new ArrayList<>();
         for (Ticket entity : ticketEntityList) {
@@ -573,7 +573,7 @@ public class RulesServiceBean implements RulesService {
         List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
         List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
         String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleGuids, true);
-        List<Ticket> tickets = rulesDao.getTicketList(sql, searchKeyValues);
+        List<Ticket> tickets = rulesDao.getTicketList(sql);
         for (Ticket ticket : tickets) {
             ticket.setStatus(status.name());
             ticket.setUpdated(new Date());
