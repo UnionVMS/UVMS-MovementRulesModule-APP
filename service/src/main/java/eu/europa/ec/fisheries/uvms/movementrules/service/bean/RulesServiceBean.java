@@ -250,6 +250,7 @@ public class RulesServiceBean implements RulesService {
         oldEntity.setActive(false);
         oldEntity.setEndDate(new Date());
         // Copy subscription list (ignore if provided)
+        // Copy to new array to avoid concurrent modification exception
         List<RuleSubscription> subscriptions = new ArrayList<>(oldEntity.getRuleSubscriptionList());
         for (RuleSubscription subscription : subscriptions) {
             rulesDao.detachSubscription(subscription);
