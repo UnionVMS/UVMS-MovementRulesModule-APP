@@ -12,7 +12,6 @@ import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
@@ -161,8 +160,6 @@ public class RulesServiceBeanTest extends TransactionalTests {
         }
     }
     
-    // TODO check these tests
-    @Ignore
     @Test
     public void updateCustomRuleTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
@@ -174,7 +171,6 @@ public class RulesServiceBeanTest extends TransactionalTests {
         assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
     }
    
-    @Ignore
     @Test
     public void updateCustomRuleWithUsernameTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
