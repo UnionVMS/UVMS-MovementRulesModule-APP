@@ -13,10 +13,12 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.internal.CriteriaImpl.Subcriteria;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.CustomRuleDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
@@ -342,7 +344,11 @@ public class CustomRuleParser {
     private static String createInterval(Interval interval) {
         StringBuilder sb = new StringBuilder();
         if (interval.getStart() != null) {
-            sb.append(interval.getStart());
+            // TODO find a better solution than date to string to date conversion
+            String start = RulesUtil.dateToString(interval.getStart());
+            sb.append("RulesUtil.stringToDate(\"");
+            sb.append(start);
+            sb.append("\")");
             sb.append(" <= positionTime");
         }
 
@@ -351,8 +357,11 @@ public class CustomRuleParser {
         }
 
         if (interval.getEnd() != null) {
+            String end = RulesUtil.dateToString(interval.getEnd());
             sb.append("positionTime <= ");
-            sb.append(interval.getEnd());
+            sb.append("RulesUtil.stringToDate(\"");
+            sb.append(end);
+            sb.append("\")");
         }
         return sb.toString();
     }

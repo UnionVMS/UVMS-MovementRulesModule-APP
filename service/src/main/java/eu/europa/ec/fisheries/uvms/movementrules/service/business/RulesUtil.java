@@ -18,7 +18,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
+import java.util.TimeZone;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -44,6 +44,7 @@ public class RulesUtil {
         String dateString = null;
         if (date != null) {
             DateFormat df = new SimpleDateFormat(FORMAT);
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
             dateString = df.format(date);
         }
         return dateString;

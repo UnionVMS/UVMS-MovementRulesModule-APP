@@ -76,17 +76,17 @@ public class CustomRuleParserTest {
 
         // First interval
         Interval interval1 = new Interval();
-        String interval1start = "2000-10-01 02:00:00 +0200";
+        String interval1start = "2000-10-01 00:00:00 +0000";
         interval1.setStart(RulesUtil.stringToDate(interval1start));
-        String interval1end = "2000-10-30 01:00:00 +0100";
+        String interval1end = "2000-10-30 00:00:00 +0000";
         interval1.setEnd(RulesUtil.stringToDate(interval1end));
         customRule.getIntervals().add(interval1);
 
         // First interval
         Interval interval2 = new Interval();
-        String interval2start = "2015-01-01 01:00:00 +0100";
+        String interval2start = "2015-01-01 00:00:00 +0000";
         interval2.setStart(RulesUtil.stringToDate(interval2start));
-        String interval2end = "2016-12-31 01:00:00 +0100";
+        String interval2end = "2016-12-31 00:00:00 +0000";
         interval2.setEnd(RulesUtil.stringToDate(interval2end));
         customRule.getIntervals().add(interval2);
 
@@ -111,7 +111,7 @@ public class CustomRuleParserTest {
         rawRules.add(customRule);
 
         String expectedRule =
-                "(cfr == \"SWE111111\" || cfr == \"SWE222222\") && mobileTerminalMemberNumber == \"ABC99\" && (" + RulesUtil.stringToDate(interval1start) + " <= positionTime && positionTime <= " + RulesUtil.stringToDate(interval1end) + " || " + RulesUtil.stringToDate(interval2start) + " <= positionTime && positionTime <= " + RulesUtil.stringToDate(interval2end) + ")";
+                "(cfr == \"SWE111111\" || cfr == \"SWE222222\") && mobileTerminalMemberNumber == \"ABC99\" && (RulesUtil.stringToDate(\"" + interval1start + "\") <= positionTime && positionTime <= RulesUtil.stringToDate(\"" + interval1end + "\") || RulesUtil.stringToDate(\"" + interval2start + "\") <= positionTime && positionTime <= RulesUtil.stringToDate(\"" + interval2end + "\"))";
 
         List<CustomRuleDto> rules = CustomRuleParser.parseRules(rawRules);
         assertEquals(expectedRule, rules.get(0)

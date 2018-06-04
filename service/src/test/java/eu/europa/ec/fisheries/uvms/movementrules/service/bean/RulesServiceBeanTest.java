@@ -1,10 +1,12 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +42,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
@@ -87,6 +90,22 @@ public class RulesServiceBeanTest extends TransactionalTests {
         output = rulesService.createCustomRule(input, "test", "test");
         Assert.assertNotNull(output.getGuid());
 
+    }
+    
+    @Test
+    public void createCustomRuleWithIntervalTest() throws Exception {
+        CustomRule customRule = getCompleteNewCustomRule();
+        Interval interval = new Interval();
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR, -1);
+        interval.setStart(calendar.getTime());
+        interval.setEnd(new Date());
+        customRule.getIntervals().add(interval);
+        
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        assertThat(createdCustomRule.getGuid(), is(notNullValue()));
+        Long createdIntervalId = createdCustomRule.getIntervals().get(0).getId();
+        assertThat(createdIntervalId, is(notNullValue()));
     }
 
     @Test
