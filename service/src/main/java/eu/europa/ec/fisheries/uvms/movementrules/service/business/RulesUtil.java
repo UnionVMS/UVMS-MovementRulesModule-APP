@@ -11,17 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.GregorianCalendar;
+
 import java.util.TimeZone;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 public class RulesUtil {
     
@@ -29,12 +24,12 @@ public class RulesUtil {
 
     private RulesUtil() {}
     
-    public static Date stringToDate(String dateString) {
+    public static Date stringToDate(String dateString) throws ParseException {
         if (dateString != null) {
-            DateTimeFormatter formatter = DateTimeFormat.forPattern(FORMAT).withOffsetParsed();
-            DateTime dateTime = formatter.withZoneUTC().parseDateTime(dateString);
-            GregorianCalendar cal = dateTime.toGregorianCalendar();
-            return cal.getTime();
+            DateFormat df = new SimpleDateFormat(FORMAT);
+            df.parse(dateString);
+
+            return df.parse(dateString);
         } else {
             return null;
         }
@@ -48,30 +43,6 @@ public class RulesUtil {
             dateString = df.format(date);
         }
         return dateString;
-    }
-
-    public static String xmlGregorianToString(XMLGregorianCalendar timestamp) {
-        if (timestamp == null) {
-            return null;
-        } else {
-            return dateToString(timestamp.toGregorianCalendar().getTime());
-        }
-    }
-
-    public static String gregorianToString(GregorianCalendar timestamp) {
-        if (timestamp == null) {
-            return null;
-        } else {
-            return dateToString(timestamp.getTime());
-        }
-    }
-
-    public static XMLGregorianCalendar dateToXmlGregorian(Date timestamp) throws DatatypeConfigurationException {
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(timestamp);
-        XMLGregorianCalendar xmlCalendar = null;
-        xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-        return xmlCalendar;
     }
 
 }

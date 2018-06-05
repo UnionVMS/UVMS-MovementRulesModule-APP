@@ -1,8 +1,13 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
+import java.util.Date;
 import java.util.List;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
@@ -12,15 +17,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleSegmentType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
@@ -44,6 +40,31 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid()).request(MediaType.APPLICATION_JSON).delete(String.class);
 
         Assert.assertEquals(200, getReturnCode(deleteResponse));
+
+    }
+
+    @Test
+    public void createChangeSubscriptionAndDeleteCustomRule() throws Exception {
+        CustomRuleType customRule = getCompleteNewCustomRule();
+
+        String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+        CustomRuleType returnCrt = deserializeResponseDto(response, CustomRuleType.class);
+
+        UpdateSubscriptionType updateSubscriptionType = new UpdateSubscriptionType();
+        SubscriptionType subscriptionType = returnCrt.getSubscriptions().get(0);
+        updateSubscriptionType.setSubscription(subscriptionType);
+
+        updateSubscriptionType.setRuleGuid(returnCrt.getGuid());
+
+        updateSubscriptionType.setOperation(SubscritionOperationType.REMOVE);
+
+        response = getWebTarget().path("/customrules/subscription").request(MediaType.APPLICATION_JSON).post(Entity.json(updateSubscriptionType), String.class);
+        Assert.assertEquals(200, getReturnCode(response));
+        returnCrt = deserializeResponseDto(response, CustomRuleType.class);
+        Assert.assertTrue(returnCrt.getSubscriptions().isEmpty());
+
+        getWebTarget().path("/customrules/" + returnCrt.getGuid()).request(MediaType.APPLICATION_JSON).delete(String.class);
 
     }
 
