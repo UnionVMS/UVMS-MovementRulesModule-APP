@@ -32,7 +32,6 @@ import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
@@ -58,6 +57,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmItem;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountEvent;
@@ -148,8 +148,6 @@ public class ValidationServiceBean implements ValidationService {
 
     @Override
     public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException, DaoMappingException, SearchMapperException, DaoException {
-        LOG.info("Get custom rules by query invoked in service layer");
-
         if (query == null) {
             throw new IllegalArgumentException("Custom rule list query is null");
         }
@@ -195,7 +193,7 @@ public class ValidationServiceBean implements ValidationService {
     // Triggered by rule engine
     @Override
     public void customRuleTriggered(String ruleName, String ruleGuid, MovementFact fact, String actions) {
-        LOG.info("Performing actions on triggered user rules");
+        LOG.info("Performing actions on triggered user rules, rule: {}", ruleName);
 
         Date auditTimestamp = new Date();
 
@@ -260,18 +258,18 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     private void sendMailToSubscribers(String ruleGuid, String ruleName, MovementFact fact) {
-        CustomRuleType customRuleType = null;
+        CustomRule customRule = null;
         try {
-            CustomRule entity = rulesDao.getCustomRuleByGuid(ruleGuid);
-            customRuleType = CustomRuleMapper.toCustomRuleType(entity);
-        } catch (DaoException | DaoMappingException e) {
+            customRule = rulesDao.getCustomRuleByGuid(ruleGuid);
+        } catch (DaoException e) {
             LOG.error("[ Failed to fetch rule when sending email to subscribers due to erro when getting CustomRule by GUID! ] {}", e.getMessage());
+            return;
         }
 
-        List<SubscriptionType> subscriptions = customRuleType.getSubscriptions();
+        List<RuleSubscription> subscriptions = customRule.getRuleSubscriptionList();
         if (subscriptions != null) {
-            for (SubscriptionType subscription : subscriptions) {
-                if (SubscriptionTypeType.EMAIL.equals(subscription.getType())) {
+            for (RuleSubscription subscription : subscriptions) {
+                if (SubscriptionTypeType.EMAIL.value().equals(subscription.getType())) {
                     try {
                         // Find current email address
                         GetContactDetailResponse userResponse = userService.getContactDetails(subscription.getOwner());
@@ -288,10 +286,7 @@ public class ValidationServiceBean implements ValidationService {
 
     private void updateLastTriggered(String ruleGuid) {
         try {
-            LOG.info("[INFO] Update custom rule in Rules");
-
             if (ruleGuid == null) {
-                LOG.error("[ERROR] GUID of Custom Rule is null, returning Exception. ]");
                 throw new IllegalArgumentException("GUID of Custom Rule is null");
             }
 
@@ -300,8 +295,7 @@ public class ValidationServiceBean implements ValidationService {
             rulesDao.updateCustomRule(entity);
 
         } catch (DaoException e) {
-            LOG.error("[ERROR] Error when updating last triggered on rule {} {}", ruleGuid, e.getMessage());
-            LOG.warn("[ Failed to update last triggered date for rule {} ]", ruleGuid);
+            LOG.warn("Failed to update last triggered date for rule {}", ruleGuid, e);
         }
     }
     
@@ -341,7 +335,7 @@ public class ValidationServiceBean implements ValidationService {
                 }
             }
 
-            LOG.info("[ No plugin of the correct type found. Nothing was sent ]");
+            LOG.info("No plugin of type {} was found. Nothing was sent", pluginType);
         } catch (ExchangeModelMapperException | MessageException | ModelMarshallException | RulesModelMarshallException e) {
             LOG.error("[ Failed to send to endpoint! ] {}", e.getMessage());
         }
@@ -379,9 +373,9 @@ public class ValidationServiceBean implements ValidationService {
                     return;
                 }
             }
-            LOG.info("[ No plugin of the correct type found. Nothing was sent ]");
+            LOG.info("No plugin of the correct type found. Nothing was sent.");
         } catch (ExchangeModelMapperException | MessageException e) {
-            LOG.error("[ Failed to send email! ] {}", e.getMessage());
+            LOG.error("Failed to send email! {}", e.getMessage());
         }
     }
 
@@ -485,7 +479,6 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     private void createTicket(String ruleName, String ruleGuid, MovementFact fact) {
-        LOG.info("Create ticket invoked in service layer");
         try {
             TicketType ticketType = new TicketType();
 
@@ -505,8 +498,6 @@ public class ValidationServiceBean implements ValidationService {
                     ticketType.setRecipient(fact.getAreaCodes().get(i));
                 }
             }
-
-            LOG.info("[INFO] Rule Engine creating Ticket");
 
             Ticket ticket = TicketMapper.toTicketEntity(ticketType);
             ticket.setTicketCount(1L);
@@ -528,7 +519,7 @@ public class ValidationServiceBean implements ValidationService {
     // Triggered by rule engine
     @Override
     public void createAlarmReport(String ruleName, RawMovementFact fact) {
-        LOG.info("Create alarm invoked in validation service");
+        LOG.info("Create alarm invoked in validation service, rule: {}", ruleName);
         try {
             // TODO: Decide who sets the guid, Rules or Exchange
             if (fact.getRawMovementType().getGuid() == null) {
@@ -599,14 +590,13 @@ public class ValidationServiceBean implements ValidationService {
 
     @Override
     public long getNumberOfOpenAlarmReports() throws RulesServiceException {
-        LOG.info("[INFO] Counting open alarms");
+        LOG.info("Counting open alarms");
         return rulesDao.getNumberOfOpenAlarms();
     }
 
     @Override
     public long getNumberOfOpenTickets(String userName) throws RulesServiceException, DaoException {
-
-        LOG.info("[INFO] Counting open tickets");
+        LOG.info("Counting open tickets for user: {}", userName);
         List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);
         if (!validRuleGuids.isEmpty()) {
             return rulesDao.getNumberOfOpenTickets(validRuleGuids);
