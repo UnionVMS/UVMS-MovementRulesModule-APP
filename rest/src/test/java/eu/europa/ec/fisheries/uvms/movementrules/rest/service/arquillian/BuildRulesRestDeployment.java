@@ -4,6 +4,7 @@ import java.io.File;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -45,4 +46,5 @@ public abstract class BuildRulesRestDeployment {
         //return client.target("http://localhost:28080/test/rest");
         return client.target("http://localhost:8080/test/rest");
     }
+
 }
