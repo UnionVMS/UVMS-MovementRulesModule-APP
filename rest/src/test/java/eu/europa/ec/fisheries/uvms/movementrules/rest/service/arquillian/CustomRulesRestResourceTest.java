@@ -1,14 +1,10 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
-import java.util.Date;
 import java.util.List;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
@@ -158,10 +154,6 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         response = getWebTarget().path("/customrules/listByQuery").request(MediaType.APPLICATION_JSON).post(Entity.json(customRuleQuery), String.class);
         Assert.assertEquals(200, getReturnCode(response));
 
-        /*final ObjectNode data = OBJECT_MAPPER.readValue(response, ObjectNode.class);
-        String valueAsString = OBJECT_MAPPER.writeValueAsString(data.get("data"));
-        CollectionType ct = OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, CustomRuleType.class);
-        List<CustomRuleType> dataValue = OBJECT_MAPPER.readValue(valueAsString, ct);*/
         GetCustomRuleListByQueryResponse returnResult = deserializeResponseDto(response, GetCustomRuleListByQueryResponse.class);
 
         CustomRuleType returnCrt = returnResult.getCustomRules().get(0);
