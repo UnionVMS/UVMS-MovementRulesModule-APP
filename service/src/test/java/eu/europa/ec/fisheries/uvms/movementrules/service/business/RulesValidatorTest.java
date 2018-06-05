@@ -330,7 +330,7 @@ public class RulesValidatorTest extends TransactionalTests {
         long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         assertThat(ticketsAfter, is(ticketsBefore));
     }
-    
+
     @Test
     public void evaluateMovementFactTriggerPositionTimeRuleTest() throws Exception {
         Date positionTime = getTimestamp();

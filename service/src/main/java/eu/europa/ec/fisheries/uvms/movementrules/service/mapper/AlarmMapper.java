@@ -18,6 +18,8 @@ import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmItemType;
@@ -357,14 +359,6 @@ public class AlarmMapper {
     public static AlarmReportType toAlarmReportType(AlarmReport alarmReportEntity) throws DaoMappingException {
         AlarmReportType alarmReportType = new AlarmReportType();
         return toAlarmReportType(alarmReportType, alarmReportEntity);
-    }
-
-    public static XMLGregorianCalendar dateToXmlGregorian(Date timestamp) throws DatatypeConfigurationException {
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(timestamp);
-        XMLGregorianCalendar xmlCalendar = null;
-        xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-        return xmlCalendar;
     }
 
 }
