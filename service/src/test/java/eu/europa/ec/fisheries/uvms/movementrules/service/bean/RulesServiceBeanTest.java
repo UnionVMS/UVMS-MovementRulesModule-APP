@@ -16,6 +16,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
@@ -29,8 +30,12 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetAlarmListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQueryResponse;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
@@ -296,7 +301,23 @@ public class RulesServiceBeanTest extends TransactionalTests {
         Assert.assertEquals("vms_admin_com", output.getRuleSubscriptionList().get(0).getOwner());
     }
 
-    //test for getAlarmList among the rest tests
+    @Test
+    public void getAlarmListTest() throws Exception {
+        AlarmReport alarmReport = getBasicAlarmReport();
+        AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
+        
+        AlarmQuery query = RulesTestHelper.getBasicAlarmQuery();
+        AlarmListCriteria criteria = new AlarmListCriteria();
+        criteria.setKey(AlarmSearchKey.ALARM_GUID);
+        criteria.setValue(createdAlarmReport.getGuid());
+        query.getAlarmSearchCriteria().add(criteria);
+        
+        GetAlarmListByQueryResponse alarmList = rulesService.getAlarmList(query);
+        List<AlarmReportType> alarms = alarmList.getAlarms();
+        
+        assertThat(alarms.size(), is(1));
+        assertThat(alarms.get(0).getGuid(), is(createdAlarmReport.getGuid()));
+    }
 
     @Test
     public void getTicketListNegativeTest() throws Exception {   //a test with proper input is among the rest tests
