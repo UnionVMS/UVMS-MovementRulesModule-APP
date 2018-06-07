@@ -130,8 +130,6 @@ public class RulesServiceBean implements RulesService {
      */
     @Override
     public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, RulesModelMarshallException, ModelMarshallException, MessageException {
-        LOG.info("[INFO] Create invoked in service layer");
-
         // Get organisation of user
         String organisationName = userService.getOrganisationName(customRule.getUpdatedBy());
         if (organisationName != null) {
@@ -145,10 +143,6 @@ public class RulesServiceBean implements RulesService {
                 throw new AccessDeniedException("Forbidden access");
             }
         }
-
-        //Copy-paste from RulesDomainModelBean to remove that class
-        LOG.debug("Create in Rules");
-        //CustomRule entity = CustomRuleMapper.toCustomRuleEntity(customRule);
 
         List<RuleSubscription> subscriptionEntities = new ArrayList<>();
         RuleSubscription creatorSubscription = new RuleSubscription();
@@ -182,10 +176,8 @@ public class RulesServiceBean implements RulesService {
      */
     @Override
     public CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException {
-        LOG.info("[INFO] Get Custom Rule by guid invoked in service layer");
         try {
             return rulesDao.getCustomRuleByGuid(guid);
-
         } catch (DaoException e) {
             LOG.error("[ERROR] Error when getting CustomRule by GUID ] {}", e.getMessage());
             throw new RulesServiceException(e.getMessage(), e);
@@ -205,7 +197,6 @@ public class RulesServiceBean implements RulesService {
      */
     @Override
     public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, RulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException, DaoException {
-        LOG.info("[INFO] Update custom rule invoked in service layer");
         // Get organisation of user
         String organisationName = userService.getOrganisationName(oldCustomRule.getUpdatedBy());
         if (organisationName != null) {
@@ -272,8 +263,6 @@ public class RulesServiceBean implements RulesService {
      */
     @Override
     public CustomRule updateCustomRule(CustomRule oldCustomRule) throws DaoException {
-        LOG.info("[INFO] Update custom rule invoked in service layer by timer");
-
         CustomRule updatedCustomRule = internalUpdateCustomRule(oldCustomRule);
         auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid(), null, oldCustomRule.getUpdatedBy());
         return updatedCustomRule;
@@ -287,7 +276,6 @@ public class RulesServiceBean implements RulesService {
      */
     @Override
     public CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, DaoException {
-        LOG.info("[INFO] Update subscription invoked in service layer");
         if (updateSubscriptionType == null) {
             throw new IllegalArgumentException("Subscription is null");
         }
@@ -297,11 +285,7 @@ public class RulesServiceBean implements RulesService {
             throw new IllegalArgumentException("Not a valid subscription!");
         }
 
-        LOG.debug("Update custom rule subscription in Rules");
-
-
         if (updateSubscriptionType.getRuleGuid() == null) {
-            LOG.error("[ERROR] Custom Rule GUID for Subscription is null, returning Exception. ]");
             throw new IllegalArgumentException("Custom Rule GUID for Subscription is null");
         }
 
@@ -375,8 +359,6 @@ public class RulesServiceBean implements RulesService {
      */
     @Override
     public GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, RulesModelException, DaoMappingException, DaoException {
-        LOG.info("[INFO] Get alarm list invoked in service layer");
-
         AlarmListResponseDto alarmList = getAlarmListByQuery(query);
         GetAlarmListByQueryResponse response = new GetAlarmListByQueryResponse();
         response.getAlarms().addAll(alarmList.getAlarmList());
@@ -388,8 +370,6 @@ public class RulesServiceBean implements RulesService {
 
     @Override
     public GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, SearchMapperException, DaoException, DaoMappingException {
-        LOG.info("[INFO] Get ticket list invoked in service layer");
-
         if (query == null) {
             throw new IllegalArgumentException("Ticket list query is null");
         }
@@ -426,7 +406,6 @@ public class RulesServiceBean implements RulesService {
 
     @Override
     public GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, DaoException, DaoMappingException {
-        LOG.info("[INFO] Get tickets by movements invoked in service layer");
         if (movements == null) {
             throw new IllegalArgumentException("Movements list is null");
         }
@@ -447,34 +426,27 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) throws RulesServiceException, DaoException, DaoMappingException {
-        LOG.info("[INFO] Get tickets and rules by movements invoked in service layer");
-            LOG.info("[INFO] Get Tickets and Rules by movements");
+    public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) throws DaoException, DaoMappingException {
+        List<TicketAndRuleType> ticketsAndRules = new ArrayList<>();
+        // TODO: This can be done more efficiently with some join stuff
+        List<Ticket> tickets = rulesDao.getTicketsByMovements(movements);
+        for (Ticket ticket : tickets) {
+            CustomRule rule = rulesDao.getCustomRuleByGuid(ticket.getRuleGuid());
+            TicketType ticketType = TicketMapper.toTicketType(ticket);
+            CustomRuleType ruleType = CustomRuleMapper.toCustomRuleType(rule);
+            TicketAndRuleType ticketsAndRule = new TicketAndRuleType();
+            ticketsAndRule.setTicket(ticketType);
+            ticketsAndRule.setRule(ruleType);
+            ticketsAndRules.add(ticketsAndRule);
+        }
 
-            List<TicketAndRuleType> ticketsAndRules = new ArrayList<>();
-            // TODO: This can be done more efficiently with some join stuff
-            List<Ticket> tickets = rulesDao.getTicketsByMovements(movements);
-            for (Ticket ticket : tickets) {
-                CustomRule rule = rulesDao.getCustomRuleByGuid(ticket.getRuleGuid());
-                TicketType ticketType = TicketMapper.toTicketType(ticket);
-                CustomRuleType ruleType = CustomRuleMapper.toCustomRuleType(rule);
-                TicketAndRuleType ticketsAndRule = new TicketAndRuleType();
-                ticketsAndRule.setTicket(ticketType);
-                ticketsAndRule.setRule(ruleType);
-                ticketsAndRules.add(ticketsAndRule);
-            }
-
-            GetTicketsAndRulesByMovementsResponse response = new GetTicketsAndRulesByMovementsResponse();
-            response.getTicketsAndRules().addAll(ticketsAndRules);
-            return response;
-
+        GetTicketsAndRulesByMovementsResponse response = new GetTicketsAndRulesByMovementsResponse();
+        response.getTicketsAndRules().addAll(ticketsAndRules);
+        return response;
     }
 
     @Override
     public long countTicketsByMovements(List<String> movements) throws RulesServiceException {
-        LOG.info("[INFO] Get number of tickets by movements invoked in service layer");
-
-
         if (movements == null) {
             throw new IllegalArgumentException("Movements list is null");
         }
@@ -487,8 +459,6 @@ public class RulesServiceBean implements RulesService {
 
     @Override
     public Ticket updateTicketStatus(Ticket ticket) throws RulesServiceException {
-        LOG.info("[INFO] Update ticket status invoked in service layer");
-
         if (ticket == null || ticket.getGuid() == null) {
             throw new IllegalArgumentException("Ticket is null");
         }
@@ -500,21 +470,17 @@ public class RulesServiceBean implements RulesService {
 
         rulesDao.updateTicket(entity);
 
-
-
         // Notify long-polling clients of the update
         ticketUpdateEvent.fire(new NotificationMessage("guid", entity.getGuid()));
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-        auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid(), /*ticket.getComment()*/"", ticket.getUpdatedBy());    //ticket.getComment was empty before the change
+        auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid(), "", ticket.getUpdatedBy());
         return entity;
 
     }
 
     @Override
     public List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, DaoMappingException, DaoException, SearchMapperException {
-        LOG.info("[INFO] Update all ticket status invoked in service layer");
-
         if (loggedInUser == null) {
             throw new IllegalArgumentException("LoggedInUser is null, can not update status");
         }
@@ -548,16 +514,11 @@ public class RulesServiceBean implements RulesService {
 
     @Override
     public long getNumberOfAssetsNotSending() throws RulesServiceException {
-
-        LOG.info("[INFO] Counting assets not sending");
         return rulesDao.getNumberOfTicketsByRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
-
     }
 
     @Override
     public AlarmReport updateAlarmStatus(AlarmReport alarm) throws RulesServiceException, DaoException {
-        LOG.info("[INFO] Update alarm status invoked in service layer");
-
         AlarmReport entity = rulesDao.getAlarmReportByGuid(alarm.getGuid());
         if (entity == null) {
             throw new IllegalArgumentException("Alarm is null", null);
@@ -572,14 +533,12 @@ public class RulesServiceBean implements RulesService {
 
         rulesDao.updateAlarm(entity);
 
-
         // Notify long-polling clients of the change
         alarmReportEvent.fire(new NotificationMessage("guid", entity.getGuid()));
         // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
         alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
         auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, entity.getGuid(), null, alarm.getUpdatedBy());
         return entity;
-
     }
 
     // Triggered by RulesTimerBean
@@ -591,7 +550,7 @@ public class RulesServiceBean implements RulesService {
     // Triggered by timer rule
     @Override
     public void timerRuleTriggered(String ruleName, PreviousReport previousReport) {
-        LOG.info("Timer rule triggered for asset: " + previousReport.getAssetGuid());
+        LOG.info("Timer rule triggered for asset: {}", previousReport.getAssetGuid());
         // Check if ticket already is created for this asset
         Ticket ticketEntity = rulesDao.getTicketByAssetAndRule(previousReport.getAssetGuid(), ruleName); // ruleName gets renamed
 
@@ -640,21 +599,16 @@ public class RulesServiceBean implements RulesService {
 
     @Override
     public AlarmReport getAlarmReportByGuid(String guid) throws DaoException {
-        LOG.info("[INFO] Getting alarm report by guid");
         return rulesDao.getAlarmReportByGuid(guid);
     }
 
     @Override
     public Ticket getTicketByGuid(String guid) throws RulesServiceException{
-
-        LOG.info("[INFO] Getting ticket by guid");
         return rulesDao.getTicketByGuid(guid);
     }
 
     @Override
     public String reprocessAlarm(List<String> alarmGuids, String username) throws RulesServiceException, DaoMappingException, DaoException, RulesModelException {
-        LOG.info("[INFO] Reprocess alarms invoked in service layer");
-
         AlarmQuery query = mapToOpenAlarmQuery(alarmGuids);
         AlarmListResponseDto alarms = getAlarmListByQuery(query);
 
@@ -680,9 +634,7 @@ public class RulesServiceBean implements RulesService {
 
     }
 
-    private AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws RulesModelException, DaoMappingException {
-        LOG.info("[INFO] Get list of alarms from query.");
-
+    private AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws DaoMappingException {
         if (query == null) {
             throw new IllegalArgumentException("Alarm list query is null");
         }
