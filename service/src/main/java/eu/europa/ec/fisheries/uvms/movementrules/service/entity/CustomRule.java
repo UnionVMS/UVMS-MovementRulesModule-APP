@@ -271,7 +271,6 @@ public class CustomRule implements Serializable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id, name, guid, description, availability, organisation, startDate, endDate, active, archived, triggered, updated, updatedBy, ruleSubscriptionList, ruleSegmentList, ruleActionList, intervals);
     }
 
@@ -279,35 +278,14 @@ public class CustomRule implements Serializable {
     public boolean equals(Object obj) {
         if (obj instanceof CustomRule) {
             CustomRule other = (CustomRule) obj;
-            if(hashCode() != other.hashCode()){
+            if (!getRuleSegmentList().equals(other.getRuleSegmentList())) {
                 return false;
             }
-            if (getRuleSegmentList().size() == other.getRuleSegmentList().size()) {
-                for (int i = 0; i < getRuleSegmentList().size(); i++) {
-                    RuleSegment a = getRuleSegmentList().get(i);
-                    RuleSegment b = other.getRuleSegmentList().get(i);
-                    if (!a.equals(b)) {
-                        return false;
-                    }
-                }
+            if (!getRuleActionList().equals(other.getRuleActionList())) {
+                return false;
             }
-            if (getRuleActionList().size() == other.getRuleActionList().size()) {
-                for (int i = 0; i < getRuleActionList().size(); i++) {
-                    RuleAction a = getRuleActionList().get(i);
-                    RuleAction b = other.getRuleActionList().get(i);
-                    if (!a.equals(b)) {
-                        return false;
-                    }
-                }
-            }
-            if (getIntervals().size() == other.getIntervals().size()) {
-                for (int i = 0; i < getIntervals().size(); i++) {
-                    Interval a = getIntervals().get(i);
-                    Interval b = other.getIntervals().get(i);
-                    if (!a.equals(b)) {
-                        return false;
-                    }
-                }
+            if (!getIntervals().equals(other.getIntervals())) {
+                return false;
             }
             return true;
         }
