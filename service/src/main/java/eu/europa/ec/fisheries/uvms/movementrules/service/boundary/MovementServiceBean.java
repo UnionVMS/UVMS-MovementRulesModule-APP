@@ -83,7 +83,6 @@ public class MovementServiceBean {
         dateRangeCriteria.setKey(RangeKeyType.DATE);
         Date twentyFourHoursAgo = new Date(thisTime.getTime() - TWENTYFOUR_HOURS_IN_MILLISEC);
         dateRangeCriteria.setFrom(twentyFourHoursAgo.toString());
-        //String to = RulesUtil.xmlGregorianToString(thisTime);
         dateRangeCriteria.setTo(thisTime.toString());
         query.getMovementRangeSearchCriteria().add(dateRangeCriteria);
 

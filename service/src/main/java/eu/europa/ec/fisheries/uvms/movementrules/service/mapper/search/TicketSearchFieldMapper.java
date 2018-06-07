@@ -39,7 +39,7 @@ public class TicketSearchFieldMapper {
      * @return
      * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
-    public static String createSelectSearchSql(List<TicketSearchValue> searchFields, List<String> validRuleGuids, boolean isDynamic) throws SearchMapperException {
+    public static String createSelectSearchSql(List<TicketSearchValue> searchFields, List<String> validRuleGuids, boolean isDynamic) {
         StringBuilder selectBuffer = new StringBuilder();
         selectBuffer.append("SELECT ")
                 .append(TicketSearchTables.TICKET.getTableAlias())
@@ -73,7 +73,7 @@ public class TicketSearchFieldMapper {
                 .append(".")
                 .append(TicketSearchField.FROM_DATE.getFieldName())
                 .append(" DESC");
-        LOG.info("[ SQL: ] {}", selectBuffer.toString());
+        LOG.info("[ SQL: ] {}", selectBuffer);
         return selectBuffer.toString();
     }
 
@@ -87,7 +87,7 @@ public class TicketSearchFieldMapper {
      * @return
      * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
-    public static String createCountSearchSql(List<TicketSearchValue> searchFields, List<String> validRuleGuids, boolean isDynamic) throws SearchMapperException {
+    public static String createCountSearchSql(List<TicketSearchValue> searchFields, List<String> validRuleGuids, boolean isDynamic) {
         StringBuilder countBuffer = new StringBuilder();
         countBuffer.append("SELECT COUNT(")
                 .append(TicketSearchTables.TICKET.getTableAlias())
@@ -114,7 +114,7 @@ public class TicketSearchFieldMapper {
         }
         countBuffer.append(" )");
 
-        LOG.debug("[ COUNT SQL: ]{}", countBuffer.toString());
+        LOG.debug("[ COUNT SQL: ]{}", countBuffer);
         return countBuffer.toString();
     }
 
@@ -128,7 +128,7 @@ public class TicketSearchFieldMapper {
      * @return
      * @throws SearchMapperException
      */
-    private static String createSearchSql(List<TicketSearchValue> criteriaList, boolean dynamic) throws SearchMapperException {
+    private static String createSearchSql(List<TicketSearchValue> criteriaList, boolean dynamic) {
 
         String operator = " OR ";
         if (dynamic) {
@@ -171,7 +171,7 @@ public class TicketSearchFieldMapper {
      * @param builder
      * @throws SearchMapperException
      */
-    private static void createCriteria(List<TicketSearchValue> criteria, TicketSearchField field, StringBuilder builder) throws SearchMapperException {
+    private static void createCriteria(List<TicketSearchValue> criteria, TicketSearchField field, StringBuilder builder) {
         if (criteria.size() == 1) {
             TicketSearchValue searchValue = criteria.get(0);
             builder
@@ -183,7 +183,7 @@ public class TicketSearchFieldMapper {
         }
     }
 
-    private static String buildInSqlStatement(List<TicketSearchValue> searchValues, TicketSearchField field) throws SearchMapperException {
+    private static String buildInSqlStatement(List<TicketSearchValue> searchValues, TicketSearchField field) {
         StringBuilder builder = new StringBuilder();
 
         builder.append(buildTableAliasName(field));
@@ -202,7 +202,7 @@ public class TicketSearchFieldMapper {
         return builder.toString();
     }
 
-    private static String buildValueFromClassType(TicketSearchValue entry) throws SearchMapperException {
+    private static String buildValueFromClassType(TicketSearchValue entry) {
         StringBuilder builder = new StringBuilder();
         if (entry.getField().getClazz().isAssignableFrom(Integer.class)) {
             builder.append(entry.getValue());
@@ -225,7 +225,7 @@ public class TicketSearchFieldMapper {
      * @return
      * @throws SearchMapperException
      */
-    private static String addParameters(TicketSearchValue entry) throws SearchMapperException {
+    private static String addParameters(TicketSearchValue entry) {
         StringBuilder builder = new StringBuilder();
 
         switch (entry.getField()) {
@@ -286,7 +286,7 @@ public class TicketSearchFieldMapper {
      * @param searchValues
      * @return
      */
-    private static HashMap<TicketSearchField, List<TicketSearchValue>> combineSearchFields(List<TicketSearchValue> searchValues) throws SearchMapperException {
+    private static HashMap<TicketSearchField, List<TicketSearchValue>> combineSearchFields(List<TicketSearchValue> searchValues) {
         HashMap<TicketSearchField, List<TicketSearchValue>> values = new HashMap<>();
         for (TicketSearchValue search : searchValues) {
             if (values.containsKey(search.getField())) {
@@ -307,7 +307,7 @@ public class TicketSearchFieldMapper {
      * @return
      * @throws DaoMappingException
      */
-    public static List<TicketSearchValue> mapSearchField(List<TicketListCriteria> criteriaList) throws DaoMappingException {
+    public static List<TicketSearchValue> mapSearchField(List<TicketListCriteria> criteriaList) {
 
         if (criteriaList == null || criteriaList.isEmpty()) {
             LOG.debug(" Non valid search criteria when mapping TicketListCriteria to TicketSearchValue, List is null or empty");

@@ -36,7 +36,7 @@ public class AlarmSearchFieldMapper {
      * @return
      * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
-    public static String createSelectSearchSql(List<AlarmSearchValue> searchFields, boolean isDynamic) throws SearchMapperException {
+    public static String createSelectSearchSql(List<AlarmSearchValue> searchFields, boolean isDynamic) {
         StringBuilder selectBuffer = new StringBuilder();
         selectBuffer.append("SELECT ")
                 .append(AlarmSearchTables.ALARM_REPORT.getTableAlias())
@@ -54,7 +54,7 @@ public class AlarmSearchFieldMapper {
                 .append(".")
                 .append(AlarmSearchField.FROM_DATE.getFieldName())
                 .append(" DESC");
-        LOG.info("[ SQL: ] {}", selectBuffer.toString());
+        LOG.info("[ SQL: ] {}", selectBuffer);
         return selectBuffer.toString();
     }
 
@@ -68,7 +68,7 @@ public class AlarmSearchFieldMapper {
      * @return
      * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
-    public static String createCountSearchSql(List<AlarmSearchValue> searchFields, boolean isDynamic) throws SearchMapperException {
+    public static String createCountSearchSql(List<AlarmSearchValue> searchFields, boolean isDynamic) {
         StringBuilder countBuffer = new StringBuilder();
         countBuffer.append("SELECT COUNT(")
                 .append(AlarmSearchTables.ALARM_REPORT.getTableAlias())
@@ -81,7 +81,7 @@ public class AlarmSearchFieldMapper {
             countBuffer.append(createSearchSql(searchFields, isDynamic));
         }
 
-        LOG.debug("[ COUNT SQL: ]" + countBuffer.toString());
+        LOG.debug("[ COUNT SQL: {}]", countBuffer);
         return countBuffer.toString();
     }
 
@@ -95,7 +95,7 @@ public class AlarmSearchFieldMapper {
      * @return
      * @throws SearchMapperException
      */
-    private static String createSearchSql(List<AlarmSearchValue> criteriaList, boolean dynamic) throws SearchMapperException {
+    private static String createSearchSql(List<AlarmSearchValue> criteriaList, boolean dynamic) {
 
         String operator = " OR ";
         if (dynamic) {
@@ -106,7 +106,7 @@ public class AlarmSearchFieldMapper {
 
         HashMap<AlarmSearchField, List<AlarmSearchValue>> orderedValues = combineSearchFields(criteriaList);
 
-        builder.append(buildJoin(orderedValues, dynamic));
+        builder.append(buildJoin(orderedValues));
         if (!orderedValues.isEmpty()) {
 
             builder.append("WHERE ");
@@ -139,7 +139,7 @@ public class AlarmSearchFieldMapper {
      * @param builder
      * @throws SearchMapperException
      */
-    private static void createCriteria(List<AlarmSearchValue> criteria, AlarmSearchField field, StringBuilder builder) throws SearchMapperException {
+    private static void createCriteria(List<AlarmSearchValue> criteria, AlarmSearchField field, StringBuilder builder) {
         if (criteria.size() == 1) {
             AlarmSearchValue searchValue = criteria.get(0);
             builder
@@ -151,7 +151,7 @@ public class AlarmSearchFieldMapper {
         }
     }
 
-    private static String buildInSqlStatement(List<AlarmSearchValue> searchValues, AlarmSearchField field) throws SearchMapperException {
+    private static String buildInSqlStatement(List<AlarmSearchValue> searchValues, AlarmSearchField field) {
         StringBuilder builder = new StringBuilder();
 
         builder.append(buildTableAliasName(field));
@@ -170,7 +170,7 @@ public class AlarmSearchFieldMapper {
         return builder.toString();
     }
 
-    private static String buildValueFromClassType(AlarmSearchValue entry) throws SearchMapperException {
+    private static String buildValueFromClassType(AlarmSearchValue entry) {
         StringBuilder builder = new StringBuilder();
         if (entry.getField().getClazz().isAssignableFrom(Integer.class)) {
             builder.append(entry.getValue());
@@ -208,10 +208,9 @@ public class AlarmSearchFieldMapper {
      * there is no need for a join and the JQL query runs faster
      *
      * @param orderedValues
-     * @param fetch
      * @return
      */
-    private static String buildJoin(HashMap<AlarmSearchField, List<AlarmSearchValue>> orderedValues, boolean fetch) {
+    private static String buildJoin(HashMap<AlarmSearchField, List<AlarmSearchValue>> orderedValues) {
         StringBuilder builder = new StringBuilder();
 
         if (orderedValues.containsKey(AlarmSearchField.RULE_GUID) || orderedValues.containsKey(AlarmSearchField.RULE_NAME)) {
@@ -235,7 +234,7 @@ public class AlarmSearchFieldMapper {
      * @return
      * @throws SearchMapperException
      */
-    private static String addParameters(AlarmSearchValue entry) throws SearchMapperException {
+    private static String addParameters(AlarmSearchValue entry) {
         StringBuilder builder = new StringBuilder();
 
         switch (entry.getField()) {
@@ -293,7 +292,7 @@ public class AlarmSearchFieldMapper {
      * @param searchValues
      * @return
      */
-    private static HashMap<AlarmSearchField, List<AlarmSearchValue>> combineSearchFields(List<AlarmSearchValue> searchValues) throws SearchMapperException {
+    private static HashMap<AlarmSearchField, List<AlarmSearchValue>> combineSearchFields(List<AlarmSearchValue> searchValues) {
         HashMap<AlarmSearchField, List<AlarmSearchValue>> values = new HashMap<>();
         for (AlarmSearchValue search : searchValues) {
             if (values.containsKey(search.getField())) {
@@ -314,7 +313,7 @@ public class AlarmSearchFieldMapper {
      * @return
      * @throws DaoMappingException
      */
-    public static List<AlarmSearchValue> mapSearchField(List<AlarmListCriteria> criteriaList) throws DaoMappingException {
+    public static List<AlarmSearchValue> mapSearchField(List<AlarmListCriteria> criteriaList) {
 
         if (criteriaList == null || criteriaList.isEmpty()) {
             LOG.debug(" Non valid search criteria when mapping AlarmListCriteria to AlarmSearchValue, List is null or empty");

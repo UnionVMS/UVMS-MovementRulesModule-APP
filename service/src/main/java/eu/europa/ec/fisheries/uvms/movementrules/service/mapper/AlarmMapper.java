@@ -13,13 +13,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmItemType;
@@ -292,7 +286,7 @@ public class AlarmMapper {
 
                 if (rawMovementType.getAssetId().getAssetIdList() != null) {
                     List<AssetIdList> assetIdList = rawMovementType.getAssetId().getAssetIdList();
-                    ArrayList<eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList> assetIdListsEntityList = new ArrayList<eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList>();
+                    ArrayList<eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList> assetIdListsEntityList = new ArrayList<>();
                     for (AssetIdList assetIdListRaw : assetIdList) {
                         eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList assetIdListEntity = new eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList();
                         assetIdListEntity.setValue(assetIdListRaw.getValue());
