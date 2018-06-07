@@ -43,7 +43,7 @@ import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 @RequiresFeature(UnionVMSFeature.viewAlarmRules)
 public class ConfigResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ConfigResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigResource.class);
 
     /**
      * @responseMessage 200 Get all config for custom rules

@@ -88,8 +88,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
             RulesBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, RulesBaseRequest.class);
             RulesModuleMethod method = request.getMethod();
             if (method == null) {
-                LOG.error("[ Request method is null ]");
-                errorEvent.fire(new EventMessage(textMessage, ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules: Request method is null")));
+                throw new NullPointerException("[ Request method is null ]");
             }
 
             LOG.info("Request message method: " + method.value());

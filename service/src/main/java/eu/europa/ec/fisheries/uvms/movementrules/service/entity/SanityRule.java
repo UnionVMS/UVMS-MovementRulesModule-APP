@@ -43,30 +43,30 @@ public class SanityRule implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "sanityrule_id")
-    private Long id;
+    private Long id;        //internal DB id
 
     @NotNull
     @Column(name = "sanityrule_name")
-    private String name;
+    private String name;    //exists in Type, same name
 
     @NotNull
     @Column(name = "sanityrule_guid")
-    private String guid;
+    private String guid;    //exists in Type, same name
 
     @Column(name = "sanityrule_description")
-    private String description;
+    private String description; //exists in Type, same name
 
     @Column(name = "sanityrule_expression")
-    private String expression;
+    private String expression;  //exists in Type, same name
 
     @Column(name = "sanityrule_updattim")
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;
+    private Date updated;       //exists in Type, same name
 
     @Column(name = "sanityrule_upuser")
     @NotNull
-    private String updatedBy;
+    private String updatedBy;   //exists in Type, same name
 
     public SanityRule() {
     }

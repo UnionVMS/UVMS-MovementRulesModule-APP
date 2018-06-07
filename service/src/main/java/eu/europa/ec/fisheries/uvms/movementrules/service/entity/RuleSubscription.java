@@ -11,6 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,13 +37,13 @@ public class RuleSubscription implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "rulesub_id")
-    private Long id;
+    private Long id;        //internal DB id
 
     @Column(name = "rulesub_owner")
-    private String owner;
+    private String owner;   //exists in Type, same name
 
     @Column(name = "rulesub_type")
-    private String type;
+    private String type;    //expects a value from SubscriptionTypeType, exists in Type, same name
 
     @JoinColumn(name = "rulesub_rule_id", referencedColumnName = "rule_id")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -62,6 +64,8 @@ public class RuleSubscription implements Serializable {
     public void setType(String type) {
         this.type = type;
     }
+
+    public void setType(SubscriptionTypeType type) {this.type = type.value();}
 
     public String getOwner() {
         return owner;

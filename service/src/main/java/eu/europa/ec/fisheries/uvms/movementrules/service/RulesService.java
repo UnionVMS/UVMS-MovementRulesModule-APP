@@ -19,7 +19,6 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetAlarmListByQuery
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
