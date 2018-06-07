@@ -11,6 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
+
 import java.io.Serializable;
 import java.util.*;
 import javax.persistence.CascadeType;
@@ -52,64 +54,64 @@ public class CustomRule implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "rule_id")
-    private Long id;
+    private Long id;        //internal DB id
 
     @Column(name = "rule_name")
-    private String name;
+    private String name;    //exists in Type, same name
 
     @Column(name = "rule_guid")
-    private String guid;
+    private String guid;    //exists in Type, same name
 
     @Column(name = "rule_description")
-    private String description;
+    private String description; //exists in Type, same name
 
     @Column(name = "rule_availability")
-    private String availability;
+    private String availability;    //expects a value from AvailabilityType, exists in Type, same name
 
     @Column(name = "rule_organisation")
-    private String organisation;
+    private String organisation;    //exists in Type, same name
 
     @Column(name = "rule_startdate")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date startDate;
+    private Date startDate;         //exists in Type as the value timeIntervals
 
     @Column(name = "rule_enddate")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date endDate;
+    private Date endDate;           //exists in Type as the value timeIntervals
 
     @Column(name = "rule_active")
-    private Boolean active;
+    private Boolean active;         //exists in Type, same name     TODO: Make requires not null
 
     @Column(name = "rule_archived")
-    private Boolean archived;
+    private Boolean archived;       //exists in Type, same name     TODO: Make requires not null
 
     @Column(name = "rule_lasttriggered")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date triggered;
+    private Date triggered;         //exists in Type names lastTriggered
 
     @Column(name = "rule_updattim")
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;
+    private Date updated;           //exists in Type, same name
 
     @Column(name = "rule_upuser")
     @NotNull
-    private String updatedBy;
+    private String updatedBy;       //exists in Type, same name
 
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<RuleSubscription> ruleSubscriptionList;
-
-    //@OrderBy("order")
-    @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<RuleSegment> ruleSegmentList;
+    private List<RuleSubscription> ruleSubscriptionList;    //exists in Type as subscriptions
 
     //@OrderBy("order")
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<RuleAction> ruleActionList;
+    private List<RuleSegment> ruleSegmentList;      //exists in Type as definitions
+
+    //@OrderBy("order")
+    @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<RuleAction> ruleActionList;    //exists in Type as actions
 
     //@OrderBy("start")
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Interval> intervals;
+    private List<Interval> intervals;           //exists in Type as timeIntervals
 
     public CustomRule() {
         this.guid = UUID.randomUUID().toString();
@@ -154,6 +156,8 @@ public class CustomRule implements Serializable {
     public void setAvailability(String availability) {
         this.availability = availability;
     }
+
+    public void setAvailability(AvailabilityType at) {availability = at.value();}
 
     public String getOrganisation() {
         return organisation;
@@ -275,6 +279,9 @@ public class CustomRule implements Serializable {
     public boolean equals(Object obj) {
         if (obj instanceof CustomRule) {
             CustomRule other = (CustomRule) obj;
+            if(hashCode() != other.hashCode()){
+                return false;
+            }
             if (getRuleSegmentList().size() == other.getRuleSegmentList().size()) {
                 for (int i = 0; i < getRuleSegmentList().size(); i++) {
                     RuleSegment a = getRuleSegmentList().get(i);

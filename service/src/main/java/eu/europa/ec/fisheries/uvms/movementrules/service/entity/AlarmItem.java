@@ -39,16 +39,16 @@ public class AlarmItem implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "alarmitem_id")
-    private Long id;
+    private Long id;                //internal DB ID
 
     @Column(name = "alarmitem_guid")
-    private String guid;
+    private String guid;            //Globally unique ID, exists in Type, same name
 
     @Column(name = "alarmitem_rulename")
-    private String ruleName;
+    private String ruleName;        //exists in Type, same name
 
     @Column(name = "alarmitem_ruleguid")
-    private String ruleGuid;
+    private String ruleGuid;        //exists in Type, same name
 
     @Column(name = "alarmitem_updattim")
     @NotNull

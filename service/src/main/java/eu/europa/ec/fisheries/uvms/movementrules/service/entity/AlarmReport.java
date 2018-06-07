@@ -11,6 +11,9 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
+import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
+import eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,41 +61,41 @@ public class AlarmReport implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "alarmrep_id")
-    private Long id;
+    private Long id;        //internal DB id
 
     @Column(name = "alarmrep_plugintype")
-    private String pluginType;
+    private String pluginType;  //Expects values from the class PluginType, exists in Type, same name  TODO: make the *Type class use an enum instead of a string
 
     @Column(name = "alarmrep_guid")
-    private String guid;
+    private String guid;    //exists in Type, same name
 
     @Column(name = "alarmrep_assetguid")
-    private String assetGuid;
+    private String assetGuid;   //exists in Type, same name
 
     @Column(name = "alarmrep_status")
-    private String status;
+    private String status;  //Expects values from teh class AlarmsStatusType, exists in Type, same name
 
     @Column(name = "alarmrep_recipient")
-    private String recipient;
+    private String recipient;   //exists in Type, same name
 
     @Column(name = "alarmrep_createddate")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
+    private Date createdDate;   //exists in Type as openDate
 
     @Column(name = "alarmrep_updattim")
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;
+    private Date updated;       //exists in Type, same name
 
     @Column(name = "alarmrep_upuser")
     @NotNull
-    private String updatedBy;
+    private String updatedBy;   //exists in Type, same name
 
     @OneToOne(mappedBy = "alarmReport", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private RawMovement rawMovement;
+    private RawMovement rawMovement;    //exists in Type, same name
 
     @OneToMany(mappedBy = "alarmReport", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<AlarmItem> alarmItemList;
+    private List<AlarmItem> alarmItemList;  //exists in Type, same name
 
     public AlarmReport() {
         this.guid = UUID.randomUUID().toString();
@@ -113,6 +116,8 @@ public class AlarmReport implements Serializable {
     public void setPluginType(String pluginType) {
         this.pluginType = pluginType;
     }
+
+    public void setPluginType(PluginType pt) {pluginType = pt.value();}
 
     public String getGuid() {
         return guid;
@@ -137,6 +142,8 @@ public class AlarmReport implements Serializable {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public void setStatus(AlarmStatusType ast) {status = ast.value();}
 
     public String getRecipient() {
         return recipient;

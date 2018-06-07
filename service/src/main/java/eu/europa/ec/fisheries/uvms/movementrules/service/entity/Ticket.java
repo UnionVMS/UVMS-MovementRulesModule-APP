@@ -12,6 +12,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
@@ -52,50 +54,50 @@ public class Ticket implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ticket_id")
-    private Long id;
+    private Long id;        //internal DB id
 
     @Column(name = "ticket_guid")
-    private String guid;
+    private String guid;    //exists in Type, same name
 
     @Column(name = "ticket_assetguid")
-    private String assetGuid;
+    private String assetGuid;   //exists in Type, same name
 
     @Column(name = "ticket_mobileterminalguid")
-    private String mobileTerminalGuid;
+    private String mobileTerminalGuid;  //exists in Type, same name
 
     @Column(name = "ticket_channelguid")
-    private String channelGuid;
+    private String channelGuid;     //exists in Type, same name
 
     @Column(name = "ticket_ruleguid")
-    private String ruleGuid;
+    private String ruleGuid;        //exists in Type, same name
 
     @Column(name = "ticket_rulename")
-    private String ruleName;
+    private String ruleName;        //exists in Type, same name
 
     @Column(name = "ticket_recipient")
-    private String recipient;
+    private String recipient;       //exists in Type, same name
 
     @Column(name = "ticket_movementguid")
-    private String movementGuid;
+    private String movementGuid;    //exists in Type, same name
 
     @Column(name = "ticket_status")
-    private String status;
+    private String status;          //expects values from TicketStatusType, exists in Type, same name
 
     @Column(name = "ticket_count")
-    private Long ticketCount;
+    private Long ticketCount;       //exists in Type, same name
 
     @Column(name = "ticket_createddate")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
+    private Date createdDate;       //exists in Type as openDate
 
     @Column(name = "ticket_updattim")
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;
+    private Date updated;       //exists in Type, same name
 
     @Column(name = "ticket_upuser")
     @NotNull
-    private String updatedBy;
+    private String updatedBy;   //exists in Type, same name
 
     @PrePersist
     public void prePersist() {
@@ -181,6 +183,8 @@ public class Ticket implements Serializable {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public void setStatus(TicketStatusType tss) {status = tss.value();}
 
     public Long getTicketCount() {
         return ticketCount;
