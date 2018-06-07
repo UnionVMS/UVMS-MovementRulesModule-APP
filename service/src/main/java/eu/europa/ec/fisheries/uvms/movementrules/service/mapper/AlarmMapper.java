@@ -211,6 +211,8 @@ public class AlarmMapper {
             alarmReportEntity.setRecipient(alarmReportType.getRecipient());
             alarmReportEntity.setPluginType(alarmReportType.getPluginType());
 
+            alarmReportEntity.setGuid(alarmReportType.getGuid());
+
             return alarmReportEntity;
         } catch (Exception e) {
             LOG.error("[ Error when mapping to entity. ] {}", e.getMessage());

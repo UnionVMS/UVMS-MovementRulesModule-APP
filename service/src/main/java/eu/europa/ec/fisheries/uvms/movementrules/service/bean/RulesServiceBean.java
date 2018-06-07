@@ -639,7 +639,7 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public AlarmReport getAlarmReportByGuid(String guid) throws RulesServiceException, DaoException {
+    public AlarmReport getAlarmReportByGuid(String guid) throws DaoException {
         LOG.info("[INFO] Getting alarm report by guid");
         return rulesDao.getAlarmReportByGuid(guid);
     }
