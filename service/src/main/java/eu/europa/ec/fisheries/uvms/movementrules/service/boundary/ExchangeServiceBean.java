@@ -50,7 +50,7 @@ public class ExchangeServiceBean {
     @Inject
     private RulesMessageProducer producer;
     
-    public void sendBackToExchange(String guid, RawMovementType rawMovement, MovementRefTypeType status, String username) throws RulesModelMarshallException, MessageException {
+    public void sendBackToExchange(String guid, RawMovementType rawMovement, MovementRefTypeType status, String username) throws MessageException {
         LOG.info("Sending back processed movement ({}) to Exchange", guid);
 
         // Map response

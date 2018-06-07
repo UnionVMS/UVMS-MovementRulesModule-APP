@@ -35,7 +35,7 @@ public class CustomRuleSearchFieldMapper {
      * @return
      * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
-    public static String createSelectSearchSql(List<CustomRuleSearchValue> searchFields, boolean isDynamic) throws SearchMapperException {
+    public static String createSelectSearchSql(List<CustomRuleSearchValue> searchFields, boolean isDynamic) {
         StringBuilder selectBuffer = new StringBuilder();
         selectBuffer.append("SELECT ")
                 .append(CustomRuleSearchTables.CUSTOM_RULE.getTableAlias())
@@ -53,7 +53,7 @@ public class CustomRuleSearchFieldMapper {
                 .append(".")
                 .append(CustomRuleSearchField.NAME.getFieldName())
                 .append(" DESC");
-        LOG.info("[ SQL: ] {}", selectBuffer.toString());
+        LOG.info("[ SQL: ] {}", selectBuffer);
         return selectBuffer.toString();
     }
 
@@ -67,7 +67,7 @@ public class CustomRuleSearchFieldMapper {
      * @return
      * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
-    public static String createCountSearchSql(List<CustomRuleSearchValue> searchFields, boolean isDynamic) throws SearchMapperException {
+    public static String createCountSearchSql(List<CustomRuleSearchValue> searchFields, boolean isDynamic) {
         StringBuilder countBuffer = new StringBuilder();
         countBuffer.append("SELECT COUNT(")
                 .append(CustomRuleSearchTables.CUSTOM_RULE.getTableAlias())
@@ -80,7 +80,7 @@ public class CustomRuleSearchFieldMapper {
             countBuffer.append(createSearchSql(searchFields, isDynamic));
         }
 
-        LOG.debug("[ COUNT SQL: ]" + countBuffer.toString());
+        LOG.debug("[ COUNT SQL: {} ]", countBuffer);
         return countBuffer.toString();
     }
 
@@ -94,7 +94,7 @@ public class CustomRuleSearchFieldMapper {
      * @return
      * @throws SearchMapperException
      */
-    private static String createSearchSql(List<CustomRuleSearchValue> criteriaList, boolean dynamic) throws SearchMapperException {
+    private static String createSearchSql(List<CustomRuleSearchValue> criteriaList, boolean dynamic) {
 
         String operator = " OR ";
         if (dynamic) {
@@ -105,7 +105,7 @@ public class CustomRuleSearchFieldMapper {
 
         HashMap<CustomRuleSearchField, List<CustomRuleSearchValue>> orderedValues = combineSearchFields(criteriaList);
 
-        builder.append(buildJoin(orderedValues, dynamic));
+        builder.append(buildJoin(orderedValues));
         if (!orderedValues.isEmpty()) {
 
             // Never select any archived rules
@@ -145,7 +145,7 @@ public class CustomRuleSearchFieldMapper {
      * @param builder
      * @throws SearchMapperException
      */
-    private static void createCriteria(List<CustomRuleSearchValue> criteria, CustomRuleSearchField field, StringBuilder builder) throws SearchMapperException {
+    private static void createCriteria(List<CustomRuleSearchValue> criteria, CustomRuleSearchField field, StringBuilder builder) {
         if (criteria.size() == 1) {
             CustomRuleSearchValue searchValue = criteria.get(0);
             builder
@@ -159,7 +159,7 @@ public class CustomRuleSearchFieldMapper {
 
     }
 
-    private static String buildInSqlStatement(List<CustomRuleSearchValue> searchValues, CustomRuleSearchField field) throws SearchMapperException {
+    private static String buildInSqlStatement(List<CustomRuleSearchValue> searchValues, CustomRuleSearchField field) {
         StringBuilder builder = new StringBuilder();
 
         builder.append(buildTableAliasName(field));
@@ -178,7 +178,7 @@ public class CustomRuleSearchFieldMapper {
         return builder.toString();
     }
 
-    private static String buildValueFromClassType(CustomRuleSearchValue entry) throws SearchMapperException {
+    private static String buildValueFromClassType(CustomRuleSearchValue entry) {
         StringBuilder builder = new StringBuilder();
         if (entry.getField().getClazz().isAssignableFrom(Integer.class)) {
             builder.append(entry.getValue());
@@ -216,10 +216,9 @@ public class CustomRuleSearchFieldMapper {
      * there is no need for a join and the JQL query runs faster
      *
      * @param orderedValues
-     * @param fetch
      * @return
      */
-    private static String buildJoin(HashMap<CustomRuleSearchField, List<CustomRuleSearchValue>> orderedValues, boolean fetch) {
+    private static String buildJoin(HashMap<CustomRuleSearchField, List<CustomRuleSearchValue>> orderedValues) {
         StringBuilder builder = new StringBuilder();
 
         if (orderedValues.containsKey(CustomRuleSearchField.TICKET_ACTION_USER)) {
@@ -243,7 +242,7 @@ public class CustomRuleSearchFieldMapper {
      * @return
      * @throws SearchMapperException
      */
-    private static String addParameters(CustomRuleSearchValue entry) throws SearchMapperException {
+    private static String addParameters(CustomRuleSearchValue entry) {
         StringBuilder builder = new StringBuilder();
 
         switch (entry.getField()) {
@@ -295,7 +294,7 @@ public class CustomRuleSearchFieldMapper {
      * @param searchValues
      * @return
      */
-    private static HashMap<CustomRuleSearchField, List<CustomRuleSearchValue>> combineSearchFields(List<CustomRuleSearchValue> searchValues) throws SearchMapperException {
+    private static HashMap<CustomRuleSearchField, List<CustomRuleSearchValue>> combineSearchFields(List<CustomRuleSearchValue> searchValues) {
         HashMap<CustomRuleSearchField, List<CustomRuleSearchValue>> values = new HashMap<>();
         for (CustomRuleSearchValue search : searchValues) {
             if (values.containsKey(search.getField())) {
@@ -316,7 +315,7 @@ public class CustomRuleSearchFieldMapper {
      * @return
      * @throws DaoMappingException
      */
-    public static List<CustomRuleSearchValue> mapSearchField(List<CustomRuleListCriteria> criteriaList) throws DaoMappingException {
+    public static List<CustomRuleSearchValue> mapSearchField(List<CustomRuleListCriteria> criteriaList) {
 
         if (criteriaList == null || criteriaList.isEmpty()) {
             LOG.debug(" Non valid search criteria when mapping CustomRuleListCriteria to CustomRuleSearchValue, List is null or empty");
