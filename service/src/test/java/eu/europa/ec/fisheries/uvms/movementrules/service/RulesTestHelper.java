@@ -19,7 +19,12 @@ import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
@@ -28,16 +33,62 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 
 public class RulesTestHelper {
 
     public static CustomRule createBasicCustomRule() {
         CustomRule customRule = new CustomRule();
-        customRule.setName("Test Rule " + System.currentTimeMillis());
-        customRule.setAvailability(AvailabilityType.PRIVATE.value());
-        customRule.setUpdatedBy("Test User");
+
+        customRule.setName("Test rule" + " (" + System.currentTimeMillis() + ")");
+        customRule.setAvailability(AvailabilityType.PRIVATE);
+        customRule.setUpdatedBy("vms_admin_com");
         customRule.setActive(true);
         customRule.setArchived(false);
+        return customRule;
+    }
+    
+    public static CustomRule createCompleteCustomRule() {
+        CustomRule customRule = new CustomRule();
+
+        customRule.setName("Test rule" + " (" + System.currentTimeMillis() + ")");
+        customRule.setAvailability(AvailabilityType.PRIVATE);
+        customRule.setUpdatedBy("vms_admin_com");
+        customRule.setActive(true);
+        customRule.setArchived(false);
+
+        RuleSegment flagStateRule = new RuleSegment();
+        flagStateRule.setStartOperator("(");
+        flagStateRule.setCriteria(CriteriaType.ASSET.value());
+        flagStateRule.setSubCriteria(SubCriteriaType.FLAG_STATE.value());
+        flagStateRule.setCondition(ConditionType.EQ.value());
+        flagStateRule.setValue("SWE");
+        flagStateRule.setEndOperator(")");
+        flagStateRule.setLogicOperator(LogicOperatorType.AND.value());
+        flagStateRule.setOrder(0);
+        flagStateRule.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(flagStateRule);
+
+        RuleSegment areaRule = new RuleSegment();
+        areaRule.setStartOperator("(");
+        areaRule.setCriteria(CriteriaType.AREA.value());
+        areaRule.setSubCriteria(SubCriteriaType.AREA_CODE.value());
+        areaRule.setCondition(ConditionType.EQ.value());
+        areaRule.setValue("DNK");
+        areaRule.setEndOperator(")");
+        areaRule.setLogicOperator(LogicOperatorType.NONE.value());
+        areaRule.setOrder(1);
+        areaRule.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(areaRule);
+
+        RuleAction action = new RuleAction();
+        action.setAction(ActionType.SEND_TO_FLUX.value());
+        action.setValue("DNK");
+        action.setOrder(0);
+        action.setCustomRule(customRule);
+        customRule.getRuleActionList().add(action);
+
         return customRule;
     }
     

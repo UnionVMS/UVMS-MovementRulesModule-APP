@@ -37,7 +37,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     
     @Test
     public void getCustomRulesByUserTest() throws Exception {
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         List<CustomRule> customRulesByUser = validationService.getCustomRulesByUser(createdCustomRule.getUpdatedBy());
@@ -47,7 +47,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     @Test
     public void getRunnableCustomRulesTest() throws Exception {
         List<CustomRule> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         rulesService.createCustomRule(customRule, "", "");
         
         List<CustomRule> runnableCustomRulesAfter = validationService.getRunnableCustomRules();
@@ -57,7 +57,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     @Test
     public void getRunnableCustomRulesInactivateRuleTest() throws Exception {
         List<CustomRule> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         List<CustomRule> runnableCustomRulesAfter = validationService.getRunnableCustomRules();
@@ -77,7 +77,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     
     @Test
     public void getCustomRuleListByQueryGuidTest() throws Exception {
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         CustomRuleQuery query = RulesTestHelper.createBasicCustomRuleQuery();
@@ -99,7 +99,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     
     @Test
     public void getCustomRuleListByQueryUserTest() throws Exception {
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         CustomRuleQuery query = RulesTestHelper.createBasicCustomRuleQuery();
@@ -123,7 +123,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         calendar.set(Calendar.MILLISECOND, 0);
         Date timestamp = calendar.getTime();
         
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         MovementFact movementFact = RulesTestHelper.createBasicMovementFact();
@@ -139,7 +139,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     
     @Test
     public void customRuleTriggeredNewTicketShouldBeCreatedTest() throws Exception {
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
@@ -153,7 +153,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     
     @Test
     public void customRuleTriggeredSendToNAFTest() throws Exception {
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());

@@ -186,7 +186,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     
     @Test
     public void updateCustomRuleTest() throws Exception {
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         String newDescription = "Updated description";
         createdCustomRule.setDescription(newDescription);
@@ -197,7 +197,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
    
     @Test
     public void updateCustomRuleWithUsernameTest() throws Exception {
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         String newDescription = "Updated description";
         createdCustomRule.setDescription(newDescription);
