@@ -177,6 +177,9 @@ public class CustomRulesRestResource {
     public ResponseDto update(final CustomRuleType customRuleType) {
         LOG.info("Update custom rule invoked in rest layer");
         try {
+            if(!validate(customRuleType)){
+                return new ResponseDto<String>("Custom rule data is not correct", ResponseCode.INPUT_ERROR);
+            }
             CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(customRuleType);
             CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.updateCustomRule(customRule, UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)));
             return new ResponseDto(response, ResponseCode.OK);
@@ -247,6 +250,7 @@ public class CustomRulesRestResource {
         return cfgName;
     }
 
+    //TODO: Add more to this function to stop it from letting invalid stuff past
     private boolean validate(CustomRuleType customRule){
         boolean valid = true;
         if(customRule.getName()==null || customRule.getName().isEmpty()){
@@ -263,6 +267,10 @@ public class CustomRulesRestResource {
         int endOperators = 0;
         for (int i = 0; i < customRule.getDefinitions().size(); i++) {
             CustomRuleSegmentType segment = customRule.getDefinitions().get(i);
+            if(!(segment.getStartOperator().equals("(") || segment.getStartOperator().isEmpty()) || !(segment.getEndOperator().equals(")") || segment.getEndOperator().isEmpty())){
+                valid = false;
+                break;
+            }
             startOperators += segment.getStartOperator().length();
             endOperators += segment.getEndOperator().length();
             if (LogicOperatorType.NONE.equals(segment.getLogicBoolOperator()) && i < (customRule.getDefinitions().size() - 1)) {
