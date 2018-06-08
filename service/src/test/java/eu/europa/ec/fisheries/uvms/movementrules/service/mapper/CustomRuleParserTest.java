@@ -707,5 +707,56 @@ public class CustomRuleParserTest {
         assertEquals("SEND_TO_FLUX,DNK;", rules.get(0).getAction());
 
     }
+    
+    @Test
+    public void testParseRulesUnorderedSegments() throws Exception {
+        List<CustomRule> rawRules = new ArrayList<CustomRule>();
 
+        CustomRule customRule = new CustomRule();
+        customRule.setName("Name");
+        customRule.setAvailability(AvailabilityType.PRIVATE.value());
+
+        // Second part of rule
+        RuleSegment segment2 = new RuleSegment();
+        segment2.setStartOperator("");
+        segment2.setCriteria(CriteriaType.ASSET.value());
+        segment2.setSubCriteria(SubCriteriaType.ASSET_CFR.value());
+        segment2.setCondition(ConditionType.EQ.value());
+        segment2.setValue("SWE222222");
+        segment2.setEndOperator(")");
+        segment2.setLogicOperator(LogicOperatorType.AND.value());
+        segment2.setOrder(1);
+        customRule.getRuleSegmentList().add(segment2);
+
+        // Third part of rule
+        RuleSegment segment3 = new RuleSegment();
+        segment3.setStartOperator("");
+        segment3.setCriteria(CriteriaType.MOBILE_TERMINAL.value());
+        segment3.setSubCriteria(SubCriteriaType.MT_MEMBER_ID.value());
+        segment3.setCondition(ConditionType.EQ.value());
+        segment3.setValue("ABC99");
+        segment3.setEndOperator("");
+        segment3.setLogicOperator(LogicOperatorType.NONE.value());
+        segment3.setOrder(2);
+        customRule.getRuleSegmentList().add(segment3);
+
+        // First part of rule
+        RuleSegment segment1 = new RuleSegment();
+        segment1.setStartOperator("(");
+        segment1.setCriteria(CriteriaType.ASSET.value());
+        segment1.setSubCriteria(SubCriteriaType.ASSET_CFR.value());
+        segment1.setCondition(ConditionType.EQ.value());
+        segment1.setValue("\"SWE111111\"");  // Test that quotation is removed
+        segment1.setEndOperator("");
+        segment1.setLogicOperator(LogicOperatorType.OR.value());
+        segment1.setOrder(0);
+        customRule.getRuleSegmentList().add(segment1);
+
+        rawRules.add(customRule);
+
+        String expectedRule = "(cfr == \"SWE111111\" || cfr == \"SWE222222\") && mobileTerminalMemberNumber == \"ABC99\"";
+
+        List<CustomRuleDto> rules = CustomRuleParser.parseRules(rawRules);
+        assertEquals(expectedRule, rules.get(0).getExpression());
+    }
 }
