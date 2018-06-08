@@ -83,7 +83,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         Assert.assertEquals(500, getReturnCode(response)); //500 since this one is a spontaneous null pointer....
 
 
-        customRuleIntervalType.setStart(RulesUtil.dateToString(new Date()));
+        customRuleIntervalType.setStart(RulesUtil.dateToString(new Date(System.currentTimeMillis() + 1000L)));
         response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(511, getReturnCode(response));
 
