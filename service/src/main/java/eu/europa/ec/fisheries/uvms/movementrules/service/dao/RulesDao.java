@@ -149,6 +149,11 @@ public class RulesDao {
         return alarmReport;
     }
 
+    public void removeAlarmReportAfterTests(AlarmReport alarmReport) {
+        em.remove(em.contains(alarmReport) ? alarmReport : em.merge(alarmReport));
+        //em.remove(alarmReport);
+    }
+
     public Ticket createTicket(Ticket ticket) {
         em.persist(ticket);
         return ticket;

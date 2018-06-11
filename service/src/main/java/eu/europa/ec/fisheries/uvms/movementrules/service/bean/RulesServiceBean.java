@@ -175,7 +175,7 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException {
+    public CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException {
         try {
             return rulesDao.getCustomRuleByGuid(guid);
         } catch (DaoException e) {
@@ -275,7 +275,7 @@ public class RulesServiceBean implements RulesService {
      * @param updateSubscriptionType
      */
     @Override
-    public CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, DaoException {
+    public CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws DaoException {
         if (updateSubscriptionType == null) {
             throw new IllegalArgumentException("Subscription is null");
         }
@@ -326,7 +326,7 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMapperException {
+    public CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, DaoException, RulesModelMapperException {
         LOG.info("[INFO] Deleting custom rule by guid: {}.", guid);
         if (guid == null) {
             throw new IllegalArgumentException("No custom rule to remove");
@@ -358,7 +358,7 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, RulesModelException, DaoMappingException, DaoException {
+    public GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws DaoMappingException {
         AlarmListResponseDto alarmList = getAlarmListByQuery(query);
         GetAlarmListByQueryResponse response = new GetAlarmListByQueryResponse();
         response.getAlarms().addAll(alarmList.getAlarmList());
@@ -369,7 +369,7 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, SearchMapperException, DaoException, DaoMappingException {
+    public GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws DaoMappingException {
         if (query == null) {
             throw new IllegalArgumentException("Ticket list query is null");
         }
@@ -405,7 +405,7 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, DaoException, DaoMappingException {
+    public GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws DaoMappingException {
         if (movements == null) {
             throw new IllegalArgumentException("Movements list is null");
         }
@@ -446,7 +446,7 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public long countTicketsByMovements(List<String> movements) throws RulesServiceException {
+    public long countTicketsByMovements(List<String> movements) {
         if (movements == null) {
             throw new IllegalArgumentException("Movements list is null");
         }
@@ -458,7 +458,7 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public Ticket updateTicketStatus(Ticket ticket) throws RulesServiceException {
+    public Ticket updateTicketStatus(Ticket ticket) {
         if (ticket == null || ticket.getGuid() == null) {
             throw new IllegalArgumentException("Ticket is null");
         }
@@ -480,7 +480,7 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, DaoMappingException, DaoException, SearchMapperException {
+    public List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) {
         if (loggedInUser == null) {
             throw new IllegalArgumentException("LoggedInUser is null, can not update status");
         }
@@ -513,12 +513,12 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public long getNumberOfAssetsNotSending() throws RulesServiceException {
+    public long getNumberOfAssetsNotSending() {
         return rulesDao.getNumberOfTicketsByRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
     }
 
     @Override
-    public AlarmReport updateAlarmStatus(AlarmReport alarm) throws RulesServiceException, DaoException {
+    public AlarmReport updateAlarmStatus(AlarmReport alarm) throws DaoException {
         AlarmReport entity = rulesDao.getAlarmReportByGuid(alarm.getGuid());
         if (entity == null) {
             throw new IllegalArgumentException("Alarm is null", null);
@@ -603,12 +603,12 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public Ticket getTicketByGuid(String guid) throws RulesServiceException{
+    public Ticket getTicketByGuid(String guid){
         return rulesDao.getTicketByGuid(guid);
     }
 
     @Override
-    public String reprocessAlarm(List<String> alarmGuids, String username) throws RulesServiceException, DaoMappingException, DaoException, RulesModelException {
+    public String reprocessAlarm(List<String> alarmGuids, String username) throws RulesServiceException, DaoMappingException, DaoException {
         AlarmQuery query = mapToOpenAlarmQuery(alarmGuids);
         AlarmListResponseDto alarms = getAlarmListByQuery(query);
 

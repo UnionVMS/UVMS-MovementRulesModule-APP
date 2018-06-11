@@ -41,71 +41,71 @@ public class RawMovement implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "rawmove_id")
-    private Long id;
+    private Long id;        //internal DB id
 
     @Column(name = "rawmove_guid")
-    private String guid;
+    private String guid;    //exist in type, same name
 
     @Column(name = "rawmove_status")
-    private String status;
+    private String status; //exist in type, same name
 
     @Column(name = "rawmove_comchanneltype")
-    private String comChannelType;
+    private String comChannelType;  //expecs values from the MovementComChannelType class, exist in type, same name
 
     @Column(name = "rawmove_connectid")
-    private String connectId;
+    private String connectId;   //exist in type, same name
 
     @Column(name = "rawmove_reportedspeed")
-    private Double reportedSpeed;
+    private Double reportedSpeed;   //exist in type, same name
 
     @Column(name = "rawmove_reportedcourse")
-    private Double reportedCourse;
+    private Double reportedCourse;    //exist in type, same name
 
     @Column(name = "rawmove_movementtype")
-    private String movementType;
+    private String movementType;    //expects values from the MovementTypeType class, exist in type, same name
 
     @Column(name = "rawmove_source")
-    private String source;
+    private String source;          //expects values from teh MovementSourceType class, exist in type, same name
 
     @Column(name = "rawmove_active")
-    private Boolean active;
+    private Boolean active;         //does not exist in Type, does exist in AlarmReportType as inactivatePosition
 
     @Column(name = "rawmove_positiontime")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date positionTime;
+    private Date positionTime;  //exist in type, same name
 
     @Column(name = "rawmove_updattim")
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;
+    private Date updated;       //exist in type as dateRecieved
 
     @Column(name = "rawmove_upuser")
     @NotNull
-    private String updatedBy;
+    private String updatedBy;   //does not exist in type
 
     @Column(name = "rawmove_assetname")
-    private String assetName;
+    private String assetName;   //exist in type, same name
     @Column(name = "rawmove_flagstate")
-    private String flagState;
+    private String flagState;   //exist in type, same name
     @Column(name = "rawmove_externalmarking")
-    private String externalMarking;
+    private String externalMarking; //exist in type, same name
 
 
     @JoinColumn(name = "rawmove_alarmrep_id", referencedColumnName = "alarmrep_id")
     @ManyToOne(fetch = FetchType.LAZY)
-    private AlarmReport alarmReport;
+    private AlarmReport alarmReport;    //does not exist in type
 
     @OneToOne(mappedBy = "rawMovement", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Asset asset;
+    private Asset asset;                //does not exist in type
 
     @OneToOne(mappedBy = "rawMovement", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Position position;
+    private Position position;          //exist in type, same name
 
     @OneToOne(mappedBy = "rawMovement", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Activity activity;
+    private Activity activity;          //exist in type, same name
 
     @OneToOne(mappedBy = "rawMovement", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private MobileTerminal mobileTerminal;
+    private MobileTerminal mobileTerminal;  //exist in type, same name
 
     public Long getId() {
         return id;
