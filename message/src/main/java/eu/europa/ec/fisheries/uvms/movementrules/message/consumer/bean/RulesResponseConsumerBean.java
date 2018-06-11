@@ -31,7 +31,7 @@ public class RulesResponseConsumerBean extends AbstractConsumer implements Rules
 
     @Override
     public String getDestinationName() {
-        return MessageConstants.QUEUE_RULES;
+        return MessageConstants.QUEUE_MOVEMENTRULES;
     }
 
     @Override

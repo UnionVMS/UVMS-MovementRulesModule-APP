@@ -18,11 +18,12 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 
 public class JMSHelper {
 
     private static final long TIMEOUT = 20000;
-    private static final String RULES_QUEUE = "UVMSRulesEvent";
+    private static final String MOVEMENTRULES_QUEUE = MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME;
     private static final String RESPONSE_QUEUE = "RulesTestQueue";
 
     private ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
@@ -32,7 +33,7 @@ public class JMSHelper {
         try {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Queue responseQueue = session.createQueue(RESPONSE_QUEUE);
-            Queue assetQueue = session.createQueue(RULES_QUEUE);
+            Queue assetQueue = session.createQueue(MOVEMENTRULES_QUEUE);
 
             TextMessage message = session.createTextMessage();
             message.setJMSReplyTo(responseQueue);

@@ -49,7 +49,7 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
 
     @PostConstruct
     public void init() {
-        rulesResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_RULES);
+        rulesResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MOVEMENTRULES);
         movementQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MODULE_MOVEMENT);
         configQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_CONFIG);
         assetQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_ASSET_EVENT);
@@ -129,7 +129,7 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
 
     @Override
     public String getDestinationName() {
-        return MessageConstants.QUEUE_RULES;
+        return MessageConstants.QUEUE_MOVEMENTRULES;
     }
 
 }
