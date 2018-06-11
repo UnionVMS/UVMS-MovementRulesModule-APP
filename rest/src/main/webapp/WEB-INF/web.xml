@@ -13,7 +13,7 @@
     
     <context-param>
         <param-name>javamelody.datasources</param-name>
-        <param-value>java:/jdbc/uvms_rules</param-value>
+        <param-value>java:/jdbc/uvms_movementrules</param-value>
     </context-param>
 	<listener>
 		<listener-class>net.bull.javamelody.SessionListener</listener-class>
@@ -36,7 +36,7 @@
 		</init-param>
 		<init-param>
 			<param-name>datasources</param-name>
-			<param-value>java:/jdbc/uvms_rules</param-value>
+			<param-value>java:/jdbc/uvms_movementrules</param-value>
 		</init-param>
 	</filter>
 	<filter-mapping>

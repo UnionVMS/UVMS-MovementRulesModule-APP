@@ -173,7 +173,6 @@ public class RulesValidatorTest extends TransactionalTests {
         assertSanityRuleWasTriggered("ComChannel Type missing", timestamp);
     }
     
-    @Ignore // Enable this test when liquibase update is released
     @Test
     public void triggerCfrAndIrcsMissingRule() throws Exception {
         Date timestamp = getTimestamp();

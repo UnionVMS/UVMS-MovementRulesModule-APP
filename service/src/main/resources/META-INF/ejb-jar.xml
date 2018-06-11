@@ -23,7 +23,11 @@
 			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
 		</interceptor-binding>
 		<interceptor-binding>
-			<ejb-name>MovementReportBean</ejb-name>
+			<ejb-name>MovementReportProcessorBean</ejb-name>
+			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
+		</interceptor-binding>
+		<interceptor-binding>
+			<ejb-name>RulesValidator</ejb-name>
 			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
 		</interceptor-binding>
 	</assembly-descriptor>
