@@ -33,9 +33,6 @@ public class ErrorHandler {
         }
 
         if (ex instanceof RulesModelException) {
-            if (ex instanceof eu.europa.ec.fisheries.uvms.movementrules.model.exception.InputArgumentException) {
-                return new ResponseDto<String>(ex.getMessage(), ResponseCode.MAPPING_ERROR);
-            }
 
             if (ex instanceof RulesModelMarshallException) {
                 return new ResponseDto<String>(ex.getMessage(), ResponseCode.MAPPING_ERROR);

@@ -26,11 +26,8 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesBaseRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
-import eu.europa.ec.fisheries.uvms.movementrules.message.event.CountTicketsByMovementsEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetCustomRuleReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetTicketsAndRulesByMovementsEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetTicketsByMovementsEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.PingReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.SetMovementReportReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.carrier.EventMessage;
@@ -53,18 +50,6 @@ public class RulesEventMessageConsumerBean implements MessageListener {
     private Event<EventMessage> setMovementReportRecievedEvent;
 
     @Inject
-    @GetTicketsByMovementsEvent
-    private Event<EventMessage> getTicketsByMovementsEvent;
-
-    @Inject
-    @CountTicketsByMovementsEvent
-    private Event<EventMessage> countTicketByMovementsEvent;
-
-    @Inject
-    @GetCustomRuleReceivedEvent
-    private Event<EventMessage> getCustomRuleRecievedEvent;
-
-    @Inject
     @GetTicketsAndRulesByMovementsEvent
     private Event<EventMessage> getTicketsAndRulesByMovementsEvent;
 
@@ -81,7 +66,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
         String id = UUID.randomUUID().toString();
         MDC.put("clientName", id);
         MDC.remove("requestId");
-        LOG.debug("Message received in rules. Times redelivered: " + getTimesRedelivered(message));
+        LOG.debug("Message received in rules. Times redelivered: {}", getTimesRedelivered(message));
         TextMessage textMessage = (TextMessage) message;
         MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         try {
@@ -91,25 +76,16 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                 throw new NullPointerException("[ Request method is null ]");
             }
 
-            LOG.info("Request message method: " + method.value());
+            LOG.info("Request message method: {}", method.value());
             switch (method) {
                 case SET_MOVEMENT_REPORT:
                     setMovementReportRecievedEvent.fire(new EventMessage(textMessage));
                     break;
-                case PING:
-                    pingReceivedEvent.fire(new EventMessage(textMessage));
-                    break;
-                case GET_CUSTOM_RULE:
-                    getCustomRuleRecievedEvent.fire(new EventMessage(textMessage));
-                    break;
-                case GET_TICKETS_BY_MOVEMENTS:
-                    getTicketsByMovementsEvent.fire(new EventMessage(textMessage));
-                    break;
-                case COUNT_TICKETS_BY_MOVEMENTS:
-                    countTicketByMovementsEvent.fire(new EventMessage(textMessage));
-                    break;
                 case GET_TICKETS_AND_RULES_BY_MOVEMENTS:
                     getTicketsAndRulesByMovementsEvent.fire(new EventMessage(textMessage));
+                    break;
+                case PING:
+                    pingReceivedEvent.fire(new EventMessage(textMessage));
                     break;
                  default:
                     LOG.error("[ Request method '{}' is not implemented ]", method.name());

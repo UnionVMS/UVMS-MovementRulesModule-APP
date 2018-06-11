@@ -3,7 +3,9 @@ package eu.europa.ec.fisheries.uvms.movementrules.message.consumer.bean;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -95,7 +97,9 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
     @Test
     public void setMovementReportFutureDateShouldTriggerSanityRuleTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
-        movement.setPositionTime(new Date(new Date().getTime() + 100000));
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.add(Calendar.HOUR, 1);
+        movement.setPositionTime(calendar.getTime());
         String request = RulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request);
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");

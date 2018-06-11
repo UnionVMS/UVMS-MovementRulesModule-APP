@@ -12,20 +12,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.CountTicketsByMovementsRequest;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleRequest;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsByMovementsRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesBaseRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
@@ -34,11 +28,8 @@ import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallExcep
 import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.movementrules.message.event.CountTicketsByMovementsEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetCustomRuleReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetTicketsAndRulesByMovementsEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetTicketsByMovementsEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.PingReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.SetMovementReportReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.carrier.EventMessage;
@@ -46,7 +37,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessagePr
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
@@ -57,7 +47,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 
 @Stateless
 public class RulesEventServiceBean implements EventService {
@@ -92,11 +81,10 @@ public class RulesEventServiceBean implements EventService {
 
     @Override
     public void setMovementReportReceived(@Observes @SetMovementReportReceivedEvent EventMessage message) {
-        LOG.info("[INFO] Validating movement from Received from Exchange Module..");
         try {
             RulesBaseRequest baseRequest = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RulesBaseRequest.class);
             if (baseRequest.getMethod() != RulesModuleMethod.SET_MOVEMENT_REPORT) {
-                LOG.error("[ERROR] Error, Set Movement Report invoked but it is not the intended method, caller is trying : " + baseRequest.getMethod().name());
+                LOG.error("[ERROR] Error, Set Movement Report invoked but it is not the intended method, caller is trying : {}", baseRequest.getMethod().name());
             }
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
             movementReportBean.setMovementReportReceived(request.getRequest(), request.getType().name(), baseRequest.getUsername());
@@ -106,72 +94,12 @@ public class RulesEventServiceBean implements EventService {
     }
 
     @Override
-    public void getCustomRule(@Observes @GetCustomRuleReceivedEvent EventMessage message) {
-        LOG.info("[INFO] Get custom rule by guid..");
-        try {
-            RulesBaseRequest baseRequest = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RulesBaseRequest.class);
-            if (baseRequest.getMethod() != RulesModuleMethod.GET_CUSTOM_RULE) {
-                errorEvent.fire(new EventMessage(message.getJmsMessage(), ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE,
-                        "[ERROR] Error, Get Custom Rule invoked but it is not the intended method, caller is trying: "
-                                + baseRequest.getMethod().name())));
-            }
-            GetCustomRuleRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), GetCustomRuleRequest.class);
-            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.getCustomRuleByGuid(request.getGuid()));
-            rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), RulesModuleResponseMapper.mapToGetCustomRuleResponse(response));
-        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoMappingException e) {
-            LOG.error("[ERROR] Error when fetching rule by guid {}", e.getMessage());
-            errorEvent.fire(message);
-        }
-    }
-
-    @Override
-    public void getTicketsByMovements(@Observes @GetTicketsByMovementsEvent EventMessage message) {
-        LOG.info("[INFO] Fetch tickets by movements..");
-        try {
-            RulesBaseRequest baseRequest = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RulesBaseRequest.class);
-            if (baseRequest.getMethod() != RulesModuleMethod.GET_TICKETS_BY_MOVEMENTS) {
-                errorEvent.fire(new EventMessage(message.getJmsMessage(), ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE,
-                        "[ERROR] Error, Get Tickets By Movements invoked but it is not the intended method, caller is trying: "
-                                + baseRequest.getMethod().name())));
-            }
-            GetTicketsByMovementsRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), GetTicketsByMovementsRequest.class);
-            GetTicketListByMovementsResponse response = rulesService.getTicketsByMovements(request.getMovementGuids());
-            String responseString = RulesModuleResponseMapper.mapToGetTicketListByMovementsResponse(response.getTickets());
-            rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), responseString);
-        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoMappingException | DaoException e) {
-            LOG.error("[ERROR] Error when fetching tickets by movements {}", e.getMessage());
-            errorEvent.fire(message);
-        }
-
-    }
-
-    @Override
-    public void countTicketsByMovementsEvent(@Observes @CountTicketsByMovementsEvent EventMessage message) {
-        LOG.info("[INFO] Count tickets by movements..");
-        try {
-            RulesBaseRequest baseRequest = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RulesBaseRequest.class);
-            if (baseRequest.getMethod() != RulesModuleMethod.COUNT_TICKETS_BY_MOVEMENTS) {
-                errorEvent.fire(new EventMessage(message.getJmsMessage(), ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE,
-                        "[ERROR] Error, count tickets by movements invoked but it is not the intended method, caller is trying: "
-                                + baseRequest.getMethod().name())));
-            }
-            CountTicketsByMovementsRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), CountTicketsByMovementsRequest.class);
-            long response = rulesService.countTicketsByMovements(request.getMovementGuids());
-            rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), RulesModuleResponseMapper.mapToCountTicketListByMovementsResponse(response));
-        } catch (RulesModelMapperException | RulesServiceException | RulesFaultException | MessageException | DaoException e) {
-            LOG.error("[ERROR] Error when fetching ticket count by movements {}", e.getMessage());
-            errorEvent.fire(message);
-        }
-    }
-
-    @Override
     public void getTicketsAndRulesByMovementsEvent(@Observes @GetTicketsAndRulesByMovementsEvent EventMessage message) {
-        LOG.info("[INFO] Fetch tickets and rules by movements..");
         try {
             RulesBaseRequest baseRequest = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RulesBaseRequest.class);
             if (baseRequest.getMethod() != RulesModuleMethod.GET_TICKETS_AND_RULES_BY_MOVEMENTS) {
                 errorEvent.fire(new EventMessage(message.getJmsMessage(), ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE,
-                        "[ERROR] Error, Get Tickets And Rules By Movements invoked but it is not the intended method, caller is trying: "
+                        "[ERROR] Error, Get Tickets And Rules By Movements invoked but it is not the intended method, caller is trying: {}"
                                 + baseRequest.getMethod().name())));
             }
             GetTicketsAndRulesByMovementsRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), GetTicketsAndRulesByMovementsRequest.class);
@@ -182,18 +110,4 @@ public class RulesEventServiceBean implements EventService {
             errorEvent.fire(message);
         }
     }
-
-
- 
-    @SuppressWarnings("unused")
-	private void sendAuditMessage(AuditObjectTypeEnum type, AuditOperationEnum operation, String affectedObject, String comment, String username) {
-        try {
-            String message = AuditLogMapper.mapToAuditLog(type.getValue(), operation.getValue(), affectedObject, comment, username);
-            rulesProducer.sendDataSourceMessage(message, DataSourceQueue.AUDIT);
-        }
-        catch (AuditModelMarshallException | MessageException e) {
-            LOG.error("[ERROR] Error when sending message to Audit {}", e.getMessage());
-        }
-    }
-
 }

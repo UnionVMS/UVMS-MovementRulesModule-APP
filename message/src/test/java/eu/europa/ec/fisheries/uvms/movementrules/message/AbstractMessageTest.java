@@ -34,7 +34,7 @@ public abstract class AbstractMessageTest {
         
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
                 .resolve("eu.europa.ec.fisheries.uvms.movement-rules:movement-rules-model",
-                         "eu.europa.ec.fisheries.uvms.movement-rules:movement-rules-service:0.9-SNAPSHOT",
+                         "eu.europa.ec.fisheries.uvms.movement-rules:movement-rules-service:0.9.1-SNAPSHOT",
                          "eu.europa.ec.fisheries.uvms:uvms-config",
                          "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message",
                          "org.apache.activemq:activemq-client")
