@@ -341,7 +341,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     @Test
     public void getTicketListTest() throws Exception {
         String user = "Test user";
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         customRule.setUpdatedBy(user);
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
@@ -484,7 +484,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     @Test
     public void updateTicketStatusByQueryTest() throws Exception {
         String user = "Test user";
-        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         customRule.setUpdatedBy(user);
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
