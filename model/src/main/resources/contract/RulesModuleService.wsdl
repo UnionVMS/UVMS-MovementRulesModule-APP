@@ -34,9 +34,6 @@
                     <!-- Ping -->
                     <xsd:enumeration value="PING"/>
 
-                    <xsd:enumeration value="GET_CUSTOM_RULE"/>
-                    <xsd:enumeration value="GET_TICKETS_BY_MOVEMENTS"/>
-                    <xsd:enumeration value="COUNT_TICKETS_BY_MOVEMENTS"/>
                     <xsd:enumeration value="GET_TICKETS_AND_RULES_BY_MOVEMENTS"/>
 				</xsd:restriction>
             </xsd:simpleType>
