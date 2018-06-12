@@ -8,8 +8,11 @@ import java.util.Date;
 import java.util.TimeZone;
 import javax.jms.Message;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
@@ -31,6 +34,11 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.RulesModuleRequest
 public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
 
     private JMSHelper jmsHelper = new JMSHelper();
+
+    @Before
+    public void clearExchangeQueue() throws Exception {
+        jmsHelper.clearQueue(MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
+    }
     
     @Test
     public void pingTest() throws Exception {
