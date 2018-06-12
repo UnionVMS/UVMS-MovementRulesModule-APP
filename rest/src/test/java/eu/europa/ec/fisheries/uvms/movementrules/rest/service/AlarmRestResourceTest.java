@@ -55,7 +55,9 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
                 .post(Entity.json(basicAlarmQuery), String.class);
         
         GetAlarmListByQueryResponse alarmList = deserializeResponseDto(response, GetAlarmListByQueryResponse.class);
-        assertThat(alarmList.getAlarms().size(), is(0));
+        assertThat(alarmList.getAlarms().size(), is(notNullValue()));
+
+        int prevNumberOfReports = alarmList.getAlarms().size();
 
         AlarmReport alarmReport = getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
@@ -68,7 +70,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
                 .post(Entity.json(basicAlarmQuery), String.class);
 
         alarmList = deserializeResponseDto(response, GetAlarmListByQueryResponse.class);
-        assertThat(alarmList.getAlarms().size(), is(1));
+        assertThat(alarmList.getAlarms().size(), is(prevNumberOfReports + 1));
         assertEquals(createdAlarmReport.getGuid(), alarmList.getAlarms().get(0).getGuid());
         assertEquals(createdAlarmReport.getStatus(), alarmList.getAlarms().get(0).getStatus().value());
 
@@ -202,6 +204,8 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         Integer openAlarmReports = deserializeResponseDto(response, Integer.class);
         assertThat(openAlarmReports, is(notNullValue()));
 
+        int prevNumberOfReports = openAlarmReports;
+
         AlarmReport alarmReport = getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
 
@@ -212,7 +216,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
                 .get(String.class);
 
         openAlarmReports = deserializeResponseDto(response, Integer.class);
-        assertThat(openAlarmReports, is(1));
+        assertThat(openAlarmReports, is(prevNumberOfReports + 1 ));
 
         AlarmReport alarmReport2 = getBasicAlarmReport();
         AlarmReport createdAlarmReport2 = rulesDao.createAlarmReport(alarmReport2);
@@ -223,7 +227,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
                 .get(String.class);
 
         openAlarmReports = deserializeResponseDto(response, Integer.class);
-        assertThat(openAlarmReports, is(2));
+        assertThat(openAlarmReports, is(prevNumberOfReports + 2 ));
 
         rulesDao.removeAlarmReportAfterTests(createdAlarmReport);
         rulesDao.removeAlarmReportAfterTests(createdAlarmReport2);
