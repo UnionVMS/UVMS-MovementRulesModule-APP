@@ -121,6 +121,7 @@ public class RulesTestHelper {
         rawMovementFact.setPositionTime(new Date());
         rawMovementFact.setMobileTerminalMemberNumber(getRandomIntegers(5));
         rawMovementFact.setMobileTerminalDnid(getRandomIntegers(5));
+        rawMovementFact.setMobileTerminalConnectId(UUID.randomUUID().toString());
         rawMovementFact.setIrcs(getRandomIntegers(7));
         rawMovementFact.setCfr(getRandomIntegers(7));
         return rawMovementFact;

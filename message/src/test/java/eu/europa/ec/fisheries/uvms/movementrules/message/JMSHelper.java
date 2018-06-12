@@ -11,12 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.message;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import javax.jms.*;
+
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class JMSHelper {
@@ -58,6 +54,20 @@ public class JMSHelper {
             Queue responseQueue = session.createQueue(queue);
 
             return session.createConsumer(responseQueue).receive(TIMEOUT);
+        } finally {
+            connection.close();
+        }
+    }
+
+    public void clearQueue(String queue) throws Exception {
+        Connection connection = connectionFactory.createConnection();
+        try {
+            connection.start();
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue responseQueue = session.createQueue(queue);
+
+            MessageConsumer consumer = session.createConsumer(responseQueue);
+            while (consumer.receiveNoWait() != null);
         } finally {
             connection.close();
         }
