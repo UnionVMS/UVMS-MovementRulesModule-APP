@@ -27,7 +27,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.message.AbstractMessageTest;
 import eu.europa.ec.fisheries.uvms.movementrules.message.JMSHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.message.TestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.RulesModuleRequestMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleRequestMapper;
 
 @RunAsClient
 @RunWith(Arquillian.class)
@@ -56,7 +56,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
     @Test
     public void setMovementReportTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
-        String request = RulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
+        String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request);
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
         
@@ -70,7 +70,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
     @Test
     public void setMovementReportCreateTwoPositionsTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
-        String request = RulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
+        String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request);
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
         
@@ -80,7 +80,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
         assertThat(returnedMovement.getAssetId().getAssetIdList().get(0).getValue(), is(movement.getAssetId().getAssetIdList().get(0).getValue()));
         
         RawMovementType movement2 = TestHelper.createBasicMovement();
-        request = RulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement2, "testUser");
+        request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement2, "testUser");
         correlationId = jmsHelper.sendMessageToRules(request);
         responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
         
@@ -94,7 +94,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
     public void setMovementReportNullLatitudeShouldTriggerSanityRuleTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         movement.getPosition().setLatitude(null);
-        String request = RulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
+        String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request);
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
         
@@ -108,7 +108,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.HOUR, 1);
         movement.setPositionTime(calendar.getTime());
-        String request = RulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
+        String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request);
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
         

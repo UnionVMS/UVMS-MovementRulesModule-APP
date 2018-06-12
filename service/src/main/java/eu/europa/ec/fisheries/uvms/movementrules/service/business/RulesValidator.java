@@ -30,7 +30,7 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesFaultException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
@@ -84,7 +84,7 @@ public class RulesValidator {
             } else {
                 sanityKcontainer = null;
             }
-        } catch (RulesServiceException | RulesFaultException  e) {
+        } catch (RulesServiceException | MovementRulesFaultException  e) {
             LOG.error("Error when getting sanity rules", e);
         }
     }
@@ -112,7 +112,7 @@ public class RulesValidator {
             } else {
                 customKcontainer = null;
             }
-        } catch (RulesServiceException | RulesFaultException  e) {
+        } catch (RulesServiceException | MovementRulesFaultException  e) {
             LOG.error("Error when getting custom rules", e);
         }
     }

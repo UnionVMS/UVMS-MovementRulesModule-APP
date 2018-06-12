@@ -9,24 +9,22 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.model.constant;
+package eu.europa.ec.fisheries.uvms.movementrules.service.constants;
 
-public enum AuditObjectTypeEnum {
-
-    CUSTOM_RULE("Custom Rule"),
-    TICKET("Ticket"),
-    ALARM("Alarm"),
-    CUSTOM_RULE_ACTION("Custom Rule Action Triggered"),
-    CUSTOM_RULE_SUBSCRIPTION("Custom Rule Subscription");
+public enum AuditOperationEnum {
+    CREATE("Create"),
+    UPDATE("Update"),
+    DELETE("Delete"),
+    SEND_EMAIL("Send Email"),
+    SEND_TO_ENDPOINT("Send To Endpoint");
 
     private String value;
 
-    AuditObjectTypeEnum(String value) {
+    AuditOperationEnum(String value) {
         this.value = value;
     }
 
     public String getValue() {
         return value;
     }
-
 }

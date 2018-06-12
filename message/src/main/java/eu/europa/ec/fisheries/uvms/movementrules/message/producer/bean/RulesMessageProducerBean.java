@@ -30,7 +30,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQue
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 
 @Stateless
@@ -92,7 +92,7 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
             LOG.debug("Sending error message back from Rules module to recipient on JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getFault());
             this.sendResponseMessageToSender(message.getJmsMessage(), data, "Rules");
-        } catch (RulesModelMarshallException | JMSException | MessageException e) {
+        } catch (MovementRulesModelMarshallException | JMSException | MessageException e) {
             LOG.error("Error when returning Error message to recipient");
         }
     }

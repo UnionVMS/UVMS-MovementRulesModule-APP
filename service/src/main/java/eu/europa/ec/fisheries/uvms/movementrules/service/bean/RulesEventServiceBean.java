@@ -24,24 +24,18 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesBaseRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
-import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetTicketsAndRulesByMovementsEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.PingReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.SetMovementReportReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditObjectTypeEnum;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.ModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.RulesModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.EventService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
@@ -73,7 +67,7 @@ public class RulesEventServiceBean implements EventService {
             pingResponse.setResponse("pong");
             String pingResponseText = JAXBMarshaller.marshallJaxBObjectToString(pingResponse);
             rulesProducer.sendModuleResponseMessage(eventMessage.getJmsMessage(), pingResponseText);
-        } catch (RulesModelMarshallException | MessageException e) {
+        } catch (MovementRulesModelMarshallException | MessageException e) {
             LOG.error("[ERROR] Error when responding to ping {}", e.getMessage());
             errorEvent.fire(eventMessage);
         }
@@ -88,7 +82,7 @@ public class RulesEventServiceBean implements EventService {
             }
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
             movementReportBean.setMovementReportReceived(request.getRequest(), request.getType().name(), baseRequest.getUsername());
-        } catch (RulesModelMapperException | RulesServiceException e) {
+        } catch (MovementRulesModelMapperException | RulesServiceException e) {
             LOG.error("[ERROR] Error when creating movement {}", e.getMessage());
         }
     }
@@ -98,14 +92,14 @@ public class RulesEventServiceBean implements EventService {
         try {
             RulesBaseRequest baseRequest = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RulesBaseRequest.class);
             if (baseRequest.getMethod() != RulesModuleMethod.GET_TICKETS_AND_RULES_BY_MOVEMENTS) {
-                errorEvent.fire(new EventMessage(message.getJmsMessage(), ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE,
+                errorEvent.fire(new EventMessage(message.getJmsMessage(), MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE,
                         "[ERROR] Error, Get Tickets And Rules By Movements invoked but it is not the intended method, caller is trying: {}"
                                 + baseRequest.getMethod().name())));
             }
             GetTicketsAndRulesByMovementsRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), GetTicketsAndRulesByMovementsRequest.class);
             GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());
-            rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), RulesModuleResponseMapper.getTicketsAndRulesByMovementsResponse(response.getTicketsAndRules()));
-        } catch (RulesModelMapperException | RulesServiceException | MessageException | DaoException | DaoMappingException e) {
+            rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), MovementRulesModuleResponseMapper.getTicketsAndRulesByMovementsResponse(response.getTicketsAndRules()));
+        } catch (MovementRulesModelMapperException | RulesServiceException | MessageException | DaoException | DaoMappingException e) {
             LOG.error("[ERROR] Error when fetching tickets and rules by movements {}", e.getMessage());
             errorEvent.fire(message);
         }

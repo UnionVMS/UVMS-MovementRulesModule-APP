@@ -32,9 +32,9 @@ import eu.europa.ec.fisheries.uvms.movementrules.message.event.PingReceivedEvent
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.SetMovementReportReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.ModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleResponseMapper;
 
 @MessageDriven(mappedName = MessageConstants.QUEUE_MOVEMENTRULES_EVENT, activationConfig = {
         @ActivationConfigProperty(propertyName = MessageConstants.MESSAGING_TYPE_STR, propertyValue = MessageConstants.CONNECTION_TYPE),
@@ -89,13 +89,13 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                     break;
                  default:
                     LOG.error("[ Request method '{}' is not implemented ]", method.name());
-                    errorEvent.fire(new EventMessage(textMessage, ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Method not implemented:" + method.name())));
+                    errorEvent.fire(new EventMessage(textMessage, MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Method not implemented:" + method.name())));
                     break;
             }
 
-        } catch (NullPointerException | RulesModelMarshallException e) {
+        } catch (NullPointerException | MovementRulesModelMarshallException e) {
             LOG.error("[ Error when receiving message in rules: {}]", e.getMessage());
-            errorEvent.fire(new EventMessage(textMessage, ModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules:" + e.getMessage())));
+            errorEvent.fire(new EventMessage(textMessage, MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules:" + e.getMessage())));
         } finally {
             MDC.remove("clientName");
         }

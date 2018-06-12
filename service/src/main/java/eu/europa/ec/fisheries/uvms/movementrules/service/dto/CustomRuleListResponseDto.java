@@ -9,26 +9,26 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
+package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
 import java.io.Serializable;
 import java.util.List;
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
 
-public class TicketListResponseDto implements Serializable {
+public class CustomRuleListResponseDto implements Serializable {
 
     private static final long serialVersionUID = 1;
 
-    private List<TicketType> ticketList;
+    private List<CustomRuleType> customRuleList;
     private int totalNumberOfPages;
     private int currentPage;
 
-    public List<TicketType> getTicketList() {
-        return ticketList;
+    public List<CustomRuleType> getCustomRuleList() {
+        return customRuleList;
     }
 
-    public void setTicketList(List<TicketType> ticketList) {
-        this.ticketList = ticketList;
+    public void setCustomRuleList(List<CustomRuleType> customRuleList) {
+        this.customRuleList = customRuleList;
     }
 
     public int getTotalNumberOfPages() {

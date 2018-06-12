@@ -15,7 +15,7 @@ import java.util.List;
 import javax.ejb.Local;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesFaultException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
@@ -27,13 +27,13 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperE
 
 @Local
 public interface ValidationService {
-    List<CustomRule> getCustomRulesByUser(String userName) throws RulesServiceException, RulesFaultException;
+    List<CustomRule> getCustomRulesByUser(String userName) throws RulesServiceException, MovementRulesFaultException;
 
-    List<CustomRule> getRunnableCustomRules() throws RulesServiceException, RulesFaultException;
+    List<CustomRule> getRunnableCustomRules() throws RulesServiceException, MovementRulesFaultException;
 
-    List<SanityRule> getSanityRules() throws RulesServiceException, RulesFaultException;
+    List<SanityRule> getSanityRules() throws RulesServiceException, MovementRulesFaultException;
 
-    GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException, DaoMappingException, SearchMapperException, DaoException;
+    GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, MovementRulesFaultException, DaoMappingException, SearchMapperException, DaoException;
 
     // Triggered by rule engine
     void customRuleTriggered(String ruleName, String ruleGuid, MovementFact fact, String actions);
@@ -45,11 +45,11 @@ public interface ValidationService {
      * @return number of open alarms
      * @throws RulesServiceException if unsuccessful
      */
-    long getNumberOfOpenAlarmReports() throws RulesServiceException, RulesFaultException;
+    long getNumberOfOpenAlarmReports() throws RulesServiceException, MovementRulesFaultException;
 
     /**
      * @return number of open tickets
      * @throws RulesServiceException if unsuccessful
      */
-    long getNumberOfOpenTickets(String userName) throws RulesServiceException, RulesFaultException, DaoException;
+    long getNumberOfOpenTickets(String userName) throws RulesServiceException, MovementRulesFaultException, DaoException;
 }

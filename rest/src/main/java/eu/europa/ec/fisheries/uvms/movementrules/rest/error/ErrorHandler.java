@@ -13,10 +13,10 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.error;
 
 import java.nio.file.AccessDeniedException;
 import eu.europa.ec.fisheries.schema.movementrules.common.v1.RulesFault;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesFaultException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
@@ -32,21 +32,21 @@ public class ErrorHandler {
             return new ResponseDto<String>(ex.getMessage(), ResponseCode.SERVICE_ERROR);
         }
 
-        if (ex instanceof RulesModelException) {
+        if (ex instanceof MovementRulesModelException) {
 
-            if (ex instanceof RulesModelMarshallException) {
+            if (ex instanceof MovementRulesModelMarshallException) {
                 return new ResponseDto<String>(ex.getMessage(), ResponseCode.MAPPING_ERROR);
             }
 
-            if (ex instanceof RulesFaultException) {
-                return extractFault((RulesFaultException) ex);
+            if (ex instanceof MovementRulesFaultException) {
+                return extractFault((MovementRulesFaultException) ex);
             }
 
             return new ResponseDto<String>(ex.getMessage(), ResponseCode.MODEL_ERROR);
         }
 
-        if (ex instanceof RulesModelMapperException) {
-            if (ex instanceof RulesModelMarshallException) {
+        if (ex instanceof MovementRulesModelMapperException) {
+            if (ex instanceof MovementRulesModelMarshallException) {
                 return new ResponseDto<String>(ex.getMessage(), ResponseCode.MAPPING_ERROR);
             }
         }
@@ -58,7 +58,7 @@ public class ErrorHandler {
         return new ResponseDto<String>(ex.getMessage(), ResponseCode.UNDEFINED_ERROR);
     }
 
-    private static ResponseDto<String> extractFault(RulesFaultException ex) {
+    private static ResponseDto<String> extractFault(MovementRulesFaultException ex) {
         RulesFault fault = ex.getRulesFault();
 
         if (fault != null) {
