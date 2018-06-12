@@ -17,14 +17,14 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesB
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 
-public class RulesModuleRequestMapper {
+public class MovementRulesModuleRequestMapper {
 
-    private RulesModuleRequestMapper() {}
+    private MovementRulesModuleRequestMapper() {}
     
-    public static String createSetMovementReportRequest(PluginType type, RawMovementType rawMovementType, String username) throws RulesModelMapperException {
+    public static String createSetMovementReportRequest(PluginType type, RawMovementType rawMovementType, String username) throws MovementRulesModelMapperException {
         SetMovementReportRequest request = new SetMovementReportRequest();
         request.setMethod(RulesModuleMethod.SET_MOVEMENT_REPORT);
         request.setType(type);
@@ -33,7 +33,7 @@ public class RulesModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createGetTicketsAndRulesByMovementsRequest(List<String> movementsGuids) throws RulesModelMarshallException {
+    public static String createGetTicketsAndRulesByMovementsRequest(List<String> movementsGuids) throws MovementRulesModelMarshallException {
         GetTicketsAndRulesByMovementsRequest request = new GetTicketsAndRulesByMovementsRequest();
         request.setMethod(RulesModuleMethod.GET_TICKETS_AND_RULES_BY_MOVEMENTS);
         request.getMovementGuids().addAll(movementsGuids);

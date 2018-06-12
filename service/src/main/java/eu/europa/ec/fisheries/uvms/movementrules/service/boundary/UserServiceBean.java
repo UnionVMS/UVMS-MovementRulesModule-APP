@@ -20,7 +20,7 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.movementrules.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
@@ -42,7 +42,7 @@ public class UserServiceBean {
     @Inject
     private RulesMessageProducer producer;
     
-    public UserContext getFullUserContext(String remoteUser, String applicationName) throws RulesServiceException, RulesModelMarshallException {
+    public UserContext getFullUserContext(String remoteUser, String applicationName) throws RulesServiceException, MovementRulesModelMarshallException {
         LOG.debug("Request getFullUserContext({}, {})", remoteUser, applicationName);
         UserContext userContext = null;
         UserContextId contextId = new UserContextId();
@@ -64,7 +64,7 @@ public class UserServiceBean {
                 throw new RulesServiceException("Unable to receive a response from USM.");
             }
         } catch (ModelMarshallException e) {
-            throw new RulesModelMarshallException("Unexpected exception while trying to get user context.", e);
+            throw new MovementRulesModelMarshallException("Unexpected exception while trying to get user context.", e);
         } catch (MessageException e) {
             LOG.error("Unable to receive a response from USM.");
             throw new RulesServiceException("Unable to receive a response from USM.");
@@ -72,7 +72,7 @@ public class UserServiceBean {
         return userContext;
     }
     
-    public String getOrganisationName(String username) throws ModelMarshallException, MessageException, RulesModelMarshallException {
+    public String getOrganisationName(String username) throws ModelMarshallException, MessageException, MovementRulesModelMarshallException {
         GetContactDetailResponse userResponse = getContactDetails(username);
         if (userResponse != null && userResponse.getContactDetails() != null) {
             return userResponse.getContactDetails().getOrganisationName();
@@ -81,14 +81,14 @@ public class UserServiceBean {
         }
     }
     
-    public GetContactDetailResponse getContactDetails(String username) throws ModelMarshallException, MessageException, RulesModelMarshallException {
+    public GetContactDetailResponse getContactDetails(String username) throws ModelMarshallException, MessageException, MovementRulesModelMarshallException {
         String userRequest = UserModuleRequestMapper.mapToGetContactDetailsRequest(username);
         String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER);
         TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
         return JAXBMarshaller.unmarshallTextMessage(userMessage, GetContactDetailResponse.class);
     }
     
-    public FindOrganisationsResponse findOrganisation(String nationIsoName) throws ModelMarshallException, MessageException, RulesModelMarshallException {
+    public FindOrganisationsResponse findOrganisation(String nationIsoName) throws ModelMarshallException, MessageException, MovementRulesModelMarshallException {
         String userRequest = UserModuleRequestMapper.mapToFindOrganisationsRequest(nationIsoName);
         String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER);
         TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);

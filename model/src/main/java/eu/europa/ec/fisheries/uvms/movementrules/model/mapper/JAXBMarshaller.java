@@ -25,11 +25,13 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 
 public class JAXBMarshaller {
 
-    private final static Logger LOG = LoggerFactory.getLogger(JAXBMarshaller.class);
+    private JAXBMarshaller() {}
+    
+    private static final Logger LOG = LoggerFactory.getLogger(JAXBMarshaller.class);
 
     private static Map<String, JAXBContext> contexts = new HashMap<>();
 
@@ -40,9 +42,9 @@ public class JAXBMarshaller {
      * @param data
      * @return
      * @throws
-     * eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException
+     * eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException
      */
-    public static <T> String marshallJaxBObjectToString(T data) throws RulesModelMarshallException {
+    public static <T> String marshallJaxBObjectToString(T data) throws MovementRulesModelMarshallException {
         try {
             JAXBContext jaxbContext = contexts.get(data.getClass().getName());
             if (jaxbContext == null) {
@@ -62,7 +64,7 @@ public class JAXBMarshaller {
             return marshalled;
         } catch (JAXBException ex) {
             LOG.error("[ Error when marshalling object to string ] {} ", ex.getMessage());
-            throw new RulesModelMarshallException("[ Error when marshalling Object to String ]", ex);        }
+            throw new MovementRulesModelMarshallException("[ Error when marshalling Object to String ]", ex);        }
     }
 
     /**
@@ -74,9 +76,9 @@ public class JAXBMarshaller {
      * @param clazz pperException
      * @return
      * @throws
-     * eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException
+     * eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException
      */
-    public static <R> R unmarshallTextMessage(TextMessage textMessage, Class clazz) throws RulesModelMarshallException {
+    public static <R> R unmarshallTextMessage(TextMessage textMessage, Class clazz) throws MovementRulesModelMarshallException {
         try {
             JAXBContext jc = contexts.get(clazz.getName());
             if (jc == null) {
@@ -94,11 +96,11 @@ public class JAXBMarshaller {
             LOG.debug("Unmarshalling time: {}", (System.currentTimeMillis() - before));
             return object;
         } catch (JMSException | JAXBException ex) {
-            throw new RulesModelMarshallException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
+            throw new MovementRulesModelMarshallException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
         }
     }
 
-    public static <R> R unMarshallMessage(String textMessage, Class clazz, Schema schema) throws RulesModelMarshallException {
+    public static <R> R unMarshallMessage(String textMessage, Class clazz, Schema schema) throws MovementRulesModelMarshallException {
         try {
             JAXBContext jc = JAXBContext.newInstance(clazz);
             Unmarshaller unmarshaller = jc.createUnmarshaller();
@@ -112,11 +114,11 @@ public class JAXBMarshaller {
             LOG.debug("Unmarshalling time: {}", (System.currentTimeMillis() - before));
             return object;
         } catch (JAXBException ex) {
-            throw new RulesModelMarshallException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
+            throw new MovementRulesModelMarshallException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
         }
     }
 
-    public static <R> R unMarshallMessage(String textMessage, Class clazz) throws RulesModelMarshallException {
+    public static <R> R unMarshallMessage(String textMessage, Class clazz) throws MovementRulesModelMarshallException {
         return unMarshallMessage(textMessage, clazz, null);
     }
 

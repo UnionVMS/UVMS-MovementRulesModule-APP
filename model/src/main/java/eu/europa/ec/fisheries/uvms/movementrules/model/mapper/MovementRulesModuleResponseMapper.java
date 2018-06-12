@@ -22,64 +22,71 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesB
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesFaultException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.constant.FaultCode;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 
-public class RulesModuleResponseMapper {
+public class MovementRulesModuleResponseMapper {
     
-    private RulesModuleResponseMapper() {}
+    private MovementRulesModuleResponseMapper() {}
 
-    private static void validateResponse(TextMessage response, String correlationId) throws RulesModelMapperException, JMSException, RulesFaultException {
+    private static void validateResponse(TextMessage response, String correlationId) throws MovementRulesModelMapperException, JMSException, MovementRulesFaultException {
 
         if (response == null) {
-            throw new RulesModelMapperException("Error when validating response in ResponseMapper: Reesponse is Null");
+            throw new MovementRulesModelMapperException("Error when validating response in ResponseMapper: Reesponse is Null");
         }
 
         if (response.getJMSCorrelationID() == null) {
-            throw new RulesModelMapperException("No corelationId in response (Null) . Expected was: " + correlationId);
+            throw new MovementRulesModelMapperException("No corelationId in response (Null) . Expected was: " + correlationId);
         }
 
         if (!correlationId.equalsIgnoreCase(response.getJMSCorrelationID())) {
-            throw new RulesModelMapperException("Wrong corelationId in response. Expected was: " + correlationId + "But actual was: " + response.getJMSCorrelationID());
+            throw new MovementRulesModelMapperException("Wrong corelationId in response. Expected was: " + correlationId + "But actual was: " + response.getJMSCorrelationID());
         }
 
         try {
             RulesFault rulesFault = JAXBMarshaller.unmarshallTextMessage(response, RulesFault.class);
-            throw new RulesFaultException(response.getText(), rulesFault);
-        } catch (RulesModelMarshallException e) {
+            throw new MovementRulesFaultException(response.getText(), rulesFault);
+        } catch (MovementRulesModelMarshallException e) {
             // All is well
         }
     }
 
-    public static String mapToGetTicketListByMovementsResponse(List<TicketType> movementList) throws RulesModelMarshallException {
+    public static String mapToGetTicketListByMovementsResponse(List<TicketType> movementList) throws MovementRulesModelMarshallException {
         GetTicketsByMovementsResponse response = new GetTicketsByMovementsResponse();
         response.getTickets().addAll(movementList);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static String mapToCountTicketListByMovementsResponse(long count) throws RulesModelMarshallException {
+    public static String mapToCountTicketListByMovementsResponse(long count) throws MovementRulesModelMarshallException {
         CountTicketsByMovementsResponse response = new CountTicketsByMovementsResponse();
         response.setCount(count);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static String mapToGetCustomRuleResponse(CustomRuleType rule) throws RulesModelMarshallException {
+    public static String mapToGetCustomRuleResponse(CustomRuleType rule) throws MovementRulesModelMarshallException {
         GetCustomRuleResponse response = new GetCustomRuleResponse();
         response.setCustomRule(rule);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static GetTicketsAndRulesByMovementsResponse mapToGetTicketsAndRulesByMovementsFromResponse(TextMessage message) throws RulesModelMarshallException, RulesModelMapperException, JMSException, RulesFaultException {
+    public static GetTicketsAndRulesByMovementsResponse mapToGetTicketsAndRulesByMovementsFromResponse(TextMessage message) throws MovementRulesModelMarshallException, MovementRulesModelMapperException, JMSException, MovementRulesFaultException {
         validateResponse(message, message.getJMSCorrelationID());
-        GetTicketsAndRulesByMovementsResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetTicketsAndRulesByMovementsResponse.class);
-        return response;
+        return JAXBMarshaller.unmarshallTextMessage(message, GetTicketsAndRulesByMovementsResponse.class);
     }
 
-    public static String getTicketsAndRulesByMovementsResponse(List<TicketAndRuleType> ticketAndRuleType) throws RulesModelMapperException {
+    public static String getTicketsAndRulesByMovementsResponse(List<TicketAndRuleType> ticketAndRuleType) throws MovementRulesModelMapperException {
         GetTicketsAndRulesByMovementsResponse response = new GetTicketsAndRulesByMovementsResponse();
         response.getTicketsAndRules().addAll(ticketAndRuleType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
+    public static RulesFault createFaultMessage(FaultCode code, String message) {
+        RulesFault fault = new RulesFault();
+        fault.setCode(code.getCode());
+        fault.setMessage(message);
+        return fault;
+    }
+    
 }

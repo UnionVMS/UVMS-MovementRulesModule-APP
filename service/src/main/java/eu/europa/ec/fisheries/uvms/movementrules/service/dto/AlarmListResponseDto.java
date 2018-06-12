@@ -9,26 +9,26 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
+package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
 import java.io.Serializable;
 import java.util.List;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
+import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
 
-public class CustomRuleListResponseDto implements Serializable {
+public class AlarmListResponseDto implements Serializable {
 
     private static final long serialVersionUID = 1;
 
-    private List<CustomRuleType> customRuleList;
+    private List<AlarmReportType> alarmList;
     private int totalNumberOfPages;
     private int currentPage;
 
-    public List<CustomRuleType> getCustomRuleList() {
-        return customRuleList;
+    public List<AlarmReportType> getAlarmList() {
+        return alarmList;
     }
 
-    public void setCustomRuleList(List<CustomRuleType> customRuleList) {
-        this.customRuleList = customRuleList;
+    public void setAlarmList(List<AlarmReportType> alarmList) {
+        this.alarmList = alarmList;
     }
 
     public int getTotalNumberOfPages() {

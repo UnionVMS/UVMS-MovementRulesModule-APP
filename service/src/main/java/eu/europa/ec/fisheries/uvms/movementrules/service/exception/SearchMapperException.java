@@ -11,9 +11,9 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.exception;
 
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelException;
 
-public class SearchMapperException extends RulesModelException {
+public class SearchMapperException extends MovementRulesModelException {
 
     private static final long serialVersionUID = 1L;
 
