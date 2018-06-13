@@ -1,12 +1,22 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
+import java.util.Date;
+import java.util.UUID;
+import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +37,9 @@ import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.BuildRu
 @RunWith(Arquillian.class)
 public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
+    @Inject
+    RulesDao rulesDao;
+
     @Test
     public void getTicketListTest() throws Exception {
         TicketQuery query = getBasicTicketQuery();
@@ -41,7 +54,60 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .post(Entity.json(query), String.class);
         
         GetTicketListByQueryResponse ticketList = deserializeResponseDto(response, GetTicketListByQueryResponse.class);
-        assertThat(ticketList.getTickets().size(), is(0));
+        assertNotNull(ticketList.getTickets());
+        int numberOfTickets = ticketList.getTickets().size();
+
+        Ticket ticket = new Ticket();
+        ticket.setUpdated(new Date());
+        ticket.setCreatedDate(new Date());
+        ticket.setStatus(TicketStatusType.OPEN);
+        ticket.setUpdatedBy("test user");
+        ticket.setRuleGuid("tmp rule guid");
+        ticket.setAssetGuid("tmp asset guid");
+        ticket.setMovementGuid("tmp movement guid");
+        ticket.setRuleName("tmp rule name");
+        ticket.setTicketCount(1L);
+        ticket.setChannelGuid("tmp channel guid");
+        ticket.setMobileTerminalGuid(" tmp mobile terminal guid");
+        ticket.setRecipient("tmp recipient");
+
+        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(getCompleteNewCustomRule());
+        customRule.setGuid(UUID.randomUUID().toString());
+        customRule.setAvailability(AvailabilityType.GLOBAL);
+        customRule.setUpdatedBy("testUser");
+        RuleSubscription ruleSubscription = new RuleSubscription();
+        ruleSubscription.setType(SubscriptionTypeType.TICKET);
+        ruleSubscription.setCustomRule(customRule);
+        ruleSubscription.setOwner("testUser");
+        customRule.getRuleSubscriptionList().add(ruleSubscription);
+        customRule = rulesDao.createCustomRule(customRule);
+
+        ticket.setRuleName(customRule.getName());
+        ticket.setRuleGuid(customRule.getGuid());
+        ticket.setUpdatedBy("testUser");
+
+        Ticket createdTicket = rulesDao.createTicket(ticket);
+        rulesDao.flush();
+        response = getWebTarget()
+                .path("tickets/list/" + "testUser")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(query), String.class);
+
+        ticketList = deserializeResponseDto(response, GetTicketListByQueryResponse.class);
+        assertThat(ticketList.getTickets().size(), is(numberOfTickets + 1));
+
+        rulesDao.removeTicketAfterTests(createdTicket);
+        rulesDao.removeCustomRuleAfterTests(customRule);
+    }
+
+    @Test
+    public void negativeGetTicketListTest() throws Exception{
+        String response = getWebTarget()
+                .path("tickets/list/" + "testUser")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(new TicketQuery()), String.class);
+
+        assertEquals(500, getReturnCode(response));
     }
     
     @Test
@@ -150,6 +216,11 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         query.setPagination(pagination);
         return query;
     }
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    private int getReturnCode(String responsDto) throws Exception{
+        return objectMapper.readValue(responsDto, ObjectNode.class).get("code").asInt();
+    }
     
     private static <T> T deserializeResponseDto(String responseDto, Class<T> clazz) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -157,5 +228,48 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         JsonNode jsonNode = node.get("data");
         return objectMapper.readValue(objectMapper.writeValueAsString(jsonNode), clazz);
     }
-    
+
+    private CustomRuleType getCompleteNewCustomRule(){
+        CustomRuleType customRule = new CustomRuleType();
+
+        customRule.setName("Flag SWE && area DNK => Send to DNK" + " (" + System.currentTimeMillis() + ")");
+        customRule.setAvailability(AvailabilityType.PRIVATE);
+        customRule.setUpdatedBy("vms_admin_com");
+        customRule.setActive(true);
+        customRule.setArchived(false);
+
+        // If flagstate = SWE
+        CustomRuleSegmentType flagStateRule = new CustomRuleSegmentType();
+        flagStateRule.setStartOperator("(");
+        flagStateRule.setCriteria(CriteriaType.ASSET);
+        flagStateRule.setSubCriteria(SubCriteriaType.FLAG_STATE);
+        flagStateRule.setCondition(ConditionType.EQ);
+        flagStateRule.setValue("SWE");
+        flagStateRule.setEndOperator(")");
+        flagStateRule.setLogicBoolOperator(LogicOperatorType.AND);
+        flagStateRule.setOrder("0");
+        customRule.getDefinitions().add(flagStateRule);
+
+        // and area = DNK
+        CustomRuleSegmentType areaRule = new CustomRuleSegmentType();
+        areaRule.setStartOperator("(");
+        areaRule.setCriteria(CriteriaType.AREA);
+        areaRule.setSubCriteria(SubCriteriaType.AREA_CODE);
+        areaRule.setCondition(ConditionType.EQ);
+        areaRule.setValue("DNK");
+        areaRule.setEndOperator(")");
+        areaRule.setLogicBoolOperator(LogicOperatorType.NONE);
+        areaRule.setOrder("1");
+        customRule.getDefinitions().add(areaRule);
+
+        // then send to FLUX DNK
+        CustomRuleActionType action = new CustomRuleActionType();
+        action.setAction(ActionType.SEND_TO_FLUX);
+        action.setValue("FLUX DNK");
+        action.setOrder("0");
+
+        customRule.getActions().add(action);
+
+        return customRule;
+    }
 }
