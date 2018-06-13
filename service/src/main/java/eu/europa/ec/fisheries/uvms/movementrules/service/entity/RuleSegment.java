@@ -29,42 +29,42 @@ import java.util.Objects;
 @Table(name = "rulesegment")
 @XmlRootElement
 //@formatter:on
-public class RuleSegment implements Serializable {
+public class RuleSegment implements Serializable {  //Type class is customRuleSegmentType
 
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ruleseg_id")
-    private Long id;
+    private Long id;        //internal DB id
 
     @Column(name = "ruleseg_start_operator")
-    private String startOperator;
+    private String startOperator;   //exists in type, same name, preferably ( or empty
 
     @Column(name = "ruleseg_criteria")
-    private String criteria;
+    private String criteria;    //Expects a value from the CriteriaType class, exists in type, same name
 
     @Column(name = "ruleseg_subcriteria")
-    private String subCriteria;
+    private String subCriteria; //Expects a value from the SubCriteriaType class, exists in type, same name
 
     @Column(name = "ruleseg_condition")
-    private String condition;
+    private String condition;   //Expects a value from the ConditionType class, exists in type, same name
 
     @Column(name = "ruleseg_value")
-    private String value;
+    private String value;       //exists in type, same name
 
     @Column(name = "ruleseg_end_operator")
-    private String endOperator;
+    private String endOperator; //exists in type, same name, preferably ) or empty
 
     @Column(name = "ruleseg_logic_operator")
-    private String logicOperator;
+    private String logicOperator;   //Expects a value from the LogicOperatorType class, exists in type, same name
 
     @Column(name = "ruleseg_order")
-    private Integer order;
+    private Integer order;  //exists in type, same name
 
     @JoinColumn(name = "ruleseg_rule_id", referencedColumnName = "rule_id")
     @ManyToOne(fetch = FetchType.LAZY)
-    private CustomRule customRule;
+    private CustomRule customRule;  //does not exist in type
 
     public Long getId() {
         return id;
