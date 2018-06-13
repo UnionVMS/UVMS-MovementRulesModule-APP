@@ -20,8 +20,8 @@ import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditObjectTypeEnum;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditOperationEnum;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTypeEnum;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 
 @Stateless
 public class AuditServiceBean {

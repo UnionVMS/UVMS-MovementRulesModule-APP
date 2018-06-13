@@ -45,18 +45,19 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditObjectTypeEnum;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditOperationEnum;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.AlarmListResponseDto;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesFaultException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTypeEnum;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -124,10 +125,10 @@ public class RulesServiceBean implements RulesService {
      *
      * @param customRule
      * @throws RulesServiceException
-     * @throws RulesFaultException
+     * @throws MovementRulesFaultException
      */
     @Override
-    public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, RulesModelMarshallException, ModelMarshallException, MessageException {
+    public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, MovementRulesModelMarshallException, ModelMarshallException, MessageException {
         // Get organisation of user
         String organisationName = userService.getOrganisationName(customRule.getUpdatedBy());
         if (organisationName != null) {
@@ -187,13 +188,13 @@ public class RulesServiceBean implements RulesService {
      *
      * @param oldCustomRule
      * @throws MessageException 
-     * @throws RulesModelMarshallException 
+     * @throws MovementRulesModelMarshallException 
      * @throws ModelMarshallException 
      * @throws AccessDeniedException 
      * @throws RulesServiceException
      */
     @Override
-    public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, RulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException {
+    public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, MovementRulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException {
         // Get organisation of user
         String organisationName = userService.getOrganisationName(oldCustomRule.getUpdatedBy());
         if (organisationName != null) {
@@ -322,7 +323,7 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, RulesModelMapperException {
+    public CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, MovementRulesModelMapperException {
         LOG.info("[INFO] Deleting custom rule by guid: {}.", guid);
         if (guid == null) {
             throw new IllegalArgumentException("No custom rule to remove");

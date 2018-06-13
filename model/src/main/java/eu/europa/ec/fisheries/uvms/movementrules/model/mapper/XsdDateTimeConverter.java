@@ -19,6 +19,9 @@ import java.util.GregorianCalendar;
  * Created by osdjup on 2016-09-01.
  */
 public class XsdDateTimeConverter {
+    
+    private XsdDateTimeConverter() {}
+    
     public static Date unmarshal(String dateTime) {
         return DatatypeConverter.parseDate(dateTime).getTime();
     }

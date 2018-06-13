@@ -23,10 +23,10 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesFaultException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -44,9 +44,9 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, RulesModelMarshallException, ModelMarshallException, MessageException;
+    CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, MovementRulesFaultException, AccessDeniedException, MovementRulesModelMarshallException, ModelMarshallException, MessageException;
 
-    CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException;
+    CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, MovementRulesFaultException ;
 
     /**
      * Lists (all) custom rules
@@ -56,7 +56,7 @@ public interface RulesService {
      */
 //    List<CustomRuleType> getCustomRuleList() throws RulesServiceException;
 
-    CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, RulesModelMapperException;
+    CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, MovementRulesFaultException, AccessDeniedException, MovementRulesModelMapperException;
 
     /**
      * Lists alarms by query
@@ -64,7 +64,7 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, RulesModelException;
+    GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, MovementRulesModelException;
 
     /**
      * Lists tickets by query
@@ -72,11 +72,11 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, RulesFaultException;
+    GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, MovementRulesFaultException;
 
-    GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException;
+    GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, MovementRulesFaultException;
 
-    long countTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException;
+    long countTicketsByMovements(List<String> movements) throws RulesServiceException, MovementRulesFaultException;
 
     /**
      * Update a ticket status
@@ -101,7 +101,7 @@ public interface RulesService {
      * @throws AccessDeniedException 
      * @throws RulesServiceException
      */
-    CustomRule updateCustomRule(CustomRule customRuleType, String featureName, String applicationName) throws ModelMarshallException, RulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException;
+    CustomRule updateCustomRule(CustomRule customRuleType, String featureName, String applicationName) throws ModelMarshallException, MovementRulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException;
 
     /**
      * Update an object
@@ -137,22 +137,22 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException, RulesModelMapperException, RulesFaultException
      */
-    CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException;
+    CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException, MovementRulesModelMapperException, MovementRulesFaultException;
 
-    AlarmReport updateAlarmStatus(AlarmReport ticket) throws RulesServiceException, RulesFaultException;
+    AlarmReport updateAlarmStatus(AlarmReport ticket) throws RulesServiceException, MovementRulesFaultException;
 
     List<PreviousReport> getPreviousMovementReports();
 
     void timerRuleTriggered(String ruleName, PreviousReport previousReport);
 
-    String reprocessAlarm(List<String> alarms, String username) throws RulesServiceException, RulesModelException;
+    String reprocessAlarm(List<String> alarms, String username) throws RulesServiceException, MovementRulesModelException;
 
     /**
      * @param guid the GUID of an alarm
      * @return an alarm
      * @throws RulesServiceException if unsuccessful
      */
-    AlarmReport getAlarmReportByGuid(String guid) throws RulesServiceException, RulesFaultException;
+    AlarmReport getAlarmReportByGuid(String guid) throws RulesServiceException, MovementRulesFaultException;
 
     /**
      * @param guid the GUID of a ticket
@@ -161,9 +161,9 @@ public interface RulesService {
      */
     Ticket getTicketByGuid(String guid) throws RulesServiceException;
 
-    List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, RulesFaultException;
+    List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, MovementRulesFaultException;
 
-    long getNumberOfAssetsNotSending() throws RulesServiceException, RulesFaultException;
+    long getNumberOfAssetsNotSending() throws RulesServiceException, MovementRulesFaultException;
 
     GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) throws RulesServiceException;
 }

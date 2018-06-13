@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
@@ -74,7 +74,7 @@ public class CheckRulesChangesTask implements Runnable {
                 LOG.debug("Clear outdated custom rules");
                 rulesValidator.updateCustomRules();
             }
-        } catch (RulesServiceException | RulesModelException e) {
+        } catch (RulesServiceException | MovementRulesModelException e) {
             LOG.error("[ Error when getting sanity rules ]");
             // TODO: Throw exception???
         }

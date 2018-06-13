@@ -11,18 +11,15 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.model.exception;
 
-import eu.europa.ec.fisheries.schema.movementrules.common.v1.RulesFault;
-
-public class RulesFaultException extends RulesModelException {
+public class MovementRulesModelMarshallException extends MovementRulesModelMapperException {
     private static final long serialVersionUID = 1L;
-    private RulesFault fault;
 
-    public RulesFaultException(String message, RulesFault fault) {
+    public MovementRulesModelMarshallException(String message) {
         super(message);
-        this.fault = fault;
     }
 
-    public RulesFault getRulesFault() {
-        return fault;
+    public MovementRulesModelMarshallException(String message, Throwable cause) {
+        super(message, cause);
     }
+
 }

@@ -41,10 +41,8 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditObjectTypeEnum;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditOperationEnum;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.CustomRuleListResponseDto;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
@@ -52,7 +50,10 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBea
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTypeEnum;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmItem;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
@@ -143,7 +144,7 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     @Override
-    public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) {
+    public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, MovementRulesFaultException {
         if (query == null) {
             throw new IllegalArgumentException("Custom rule list query is null");
         }
@@ -332,7 +333,7 @@ public class ValidationServiceBean implements ValidationService {
             }
 
             LOG.info("No plugin of type {} was found. Nothing was sent", pluginType);
-        } catch (ExchangeModelMapperException | MessageException | ModelMarshallException | RulesModelMarshallException e) {
+        } catch (ExchangeModelMapperException | MessageException | ModelMarshallException | MovementRulesModelMarshallException e) {
             LOG.error("[ Failed to send to endpoint! ] {}", e.getMessage());
         }
         
