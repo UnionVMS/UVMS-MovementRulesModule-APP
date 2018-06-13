@@ -240,7 +240,7 @@ public class MovementReportProcessorBean {
 
             executor.shutdown();
             return movementFact;
-        } catch (RulesServiceException | NullPointerException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             executor.shutdown();
             throw new RulesServiceException("Error likely caused by a duplicate movement.", e);
         }

@@ -33,8 +33,6 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.MockData;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MapperTest {
@@ -48,7 +46,7 @@ public class MapperTest {
     }
 
     @Test
-    public void testEntityToModel() throws DaoException, DaoMappingException {
+    public void testEntityToModel() throws Exception {
         Integer id = 1;
         CustomRule entity = MockData.getCustomRuleEntity(id);
 
@@ -141,7 +139,7 @@ public class MapperTest {
     }
 
     @Test
-    public void testModelToEntity() throws DaoException, DaoMappingException {
+    public void testModelToEntity()  {
         Integer id = 1;
         CustomRuleType model = MockData.getModel(id);
 
@@ -163,7 +161,7 @@ public class MapperTest {
 
     // TODO:
     @Test
-    public void testEntityAndModelToEntity() throws DaoException, DaoMappingException {
+    public void testEntityAndModelToEntity() {
         int id = 1;
         CustomRule entity = MockData.getCustomRuleEntity(id);
         CustomRuleType model = MockData.getModel(1);
@@ -175,7 +173,7 @@ public class MapperTest {
 
     // TODO:
     @Test
-    public void testEntityAndModelToModel() throws DaoException, DaoMappingException {
+    public void testEntityAndModelToModel() {
         int id = 1;
         CustomRule entity = MockData.getCustomRuleEntity(id);
         CustomRuleType model = MockData.getModel(id);

@@ -20,7 +20,6 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 
 public class TicketMapper {
 
@@ -28,68 +27,57 @@ public class TicketMapper {
 
     private TicketMapper() {}
     
-    public static TicketType toTicketType(TicketType ticketType, Ticket ticketEntity) throws DaoMappingException {
+    public static TicketType toTicketType(TicketType ticketType, Ticket ticketEntity) {
         if (ticketEntity == null) {
             return null;
         }
-
-        try {
-            ticketType.setAssetGuid(ticketEntity.getAssetGuid());
-            ticketType.setMobileTerminalGuid(ticketEntity.getMobileTerminalGuid());
-            ticketType.setChannelGuid(ticketEntity.getChannelGuid());
-            ticketType.setGuid(ticketEntity.getGuid());
-            ticketType.setStatus(TicketStatusType.valueOf(ticketEntity.getStatus()));
-            ticketType.setOpenDate(DateUtils.dateToString(ticketEntity.getCreatedDate()));
-            ticketType.setUpdated(DateUtils.dateToString(ticketEntity.getUpdated()));
-            ticketType.setUpdatedBy(ticketEntity.getUpdatedBy());
-            ticketType.setRuleGuid(ticketEntity.getRuleGuid());
-            ticketType.setMovementGuid(ticketEntity.getMovementGuid());
-            ticketType.setRuleName(ticketEntity.getRuleName());
-            ticketType.setRecipient(ticketEntity.getRecipient());
-            if (ticketEntity.getTicketCount() != null) {
-                ticketType.setTicketCount(ticketEntity.getTicketCount());
-            }
-
-            return ticketType;
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping to model. ] {}", e.getMessage());
-            throw new DaoMappingException("[ Error when mapping to model. ]", e);
+        ticketType.setAssetGuid(ticketEntity.getAssetGuid());
+        ticketType.setMobileTerminalGuid(ticketEntity.getMobileTerminalGuid());
+        ticketType.setChannelGuid(ticketEntity.getChannelGuid());
+        ticketType.setGuid(ticketEntity.getGuid());
+        ticketType.setStatus(TicketStatusType.valueOf(ticketEntity.getStatus()));
+        ticketType.setOpenDate(DateUtils.dateToString(ticketEntity.getCreatedDate()));
+        ticketType.setUpdated(DateUtils.dateToString(ticketEntity.getUpdated()));
+        ticketType.setUpdatedBy(ticketEntity.getUpdatedBy());
+        ticketType.setRuleGuid(ticketEntity.getRuleGuid());
+        ticketType.setMovementGuid(ticketEntity.getMovementGuid());
+        ticketType.setRuleName(ticketEntity.getRuleName());
+        ticketType.setRecipient(ticketEntity.getRecipient());
+        if (ticketEntity.getTicketCount() != null) {
+            ticketType.setTicketCount(ticketEntity.getTicketCount());
         }
+
+        return ticketType;
     }
 
-    public static Ticket toTicketEntity(Ticket ticketEntity, TicketType ticketType) throws DaoMappingException {
-        try {
-            ticketEntity.setAssetGuid(ticketType.getAssetGuid());
-            ticketEntity.setMobileTerminalGuid(ticketType.getMobileTerminalGuid());
-            ticketEntity.setChannelGuid(ticketType.getChannelGuid());
-            ticketEntity.setGuid(ticketType.getGuid());
-            ticketEntity.setStatus(ticketType.getStatus().name());
-            ticketEntity.setCreatedDate(DateUtils.stringToDate(ticketType.getOpenDate()));
-            ticketEntity.setRuleGuid(ticketType.getRuleGuid());
-            ticketEntity.setUpdated(new Date());
-            ticketEntity.setUpdatedBy(ticketType.getUpdatedBy());
-            ticketEntity.setMovementGuid(ticketType.getMovementGuid());
-            ticketEntity.setRuleName(ticketType.getRuleName());
-            ticketEntity.setRecipient(ticketType.getRecipient());
+    public static Ticket toTicketEntity(Ticket ticketEntity, TicketType ticketType) {
+        ticketEntity.setAssetGuid(ticketType.getAssetGuid());
+        ticketEntity.setMobileTerminalGuid(ticketType.getMobileTerminalGuid());
+        ticketEntity.setChannelGuid(ticketType.getChannelGuid());
+        ticketEntity.setGuid(ticketType.getGuid());
+        ticketEntity.setStatus(ticketType.getStatus().name());
+        ticketEntity.setCreatedDate(DateUtils.stringToDate(ticketType.getOpenDate()));
+        ticketEntity.setRuleGuid(ticketType.getRuleGuid());
+        ticketEntity.setUpdated(new Date());
+        ticketEntity.setUpdatedBy(ticketType.getUpdatedBy());
+        ticketEntity.setMovementGuid(ticketType.getMovementGuid());
+        ticketEntity.setRuleName(ticketType.getRuleName());
+        ticketEntity.setRecipient(ticketType.getRecipient());
 
-            return ticketEntity;
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping to entity. ] {}", e.getMessage());
-            throw new DaoMappingException("[ Error when mapping to entity. ]", e);
-        }
+        return ticketEntity;
     }
 
-    public static Ticket toTicketEntity(TicketType ticketType) throws DaoMappingException {
+    public static Ticket toTicketEntity(TicketType ticketType) {
         Ticket ticketEntity = new Ticket();
         return toTicketEntity(ticketEntity, ticketType);
     }
 
-    public static TicketType toTicketType(Ticket ticketEntity) throws DaoMappingException {
+    public static TicketType toTicketType(Ticket ticketEntity) {
         TicketType ticketType = new TicketType();
         return toTicketType(ticketType, ticketEntity);
     }
 
-    public static List<TicketType> listToTicketType(List<Ticket> ticketList) throws DaoMappingException {
+    public static List<TicketType> listToTicketType(List<Ticket> ticketList) {
         List<TicketType> response = new ArrayList<>();
         for (Ticket ticket : ticketList) {
             response.add(toTicketType(ticket));

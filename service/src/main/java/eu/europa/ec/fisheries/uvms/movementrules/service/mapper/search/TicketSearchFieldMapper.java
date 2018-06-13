@@ -22,8 +22,6 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 
 public class TicketSearchFieldMapper {
 
@@ -324,8 +322,8 @@ public class TicketSearchFieldMapper {
                 }else {
                     searchFields.add(new TicketSearchValue(field, criteria.getValue()));
                 }
-            } catch (SearchMapperException ex) {
-                LOG.debug("[ Error when mapping to search field... continuing with other criteria ]");
+            } catch (IllegalArgumentException ex) {
+                LOG.debug("[ Error with criteria {} when mapping to search field... continuing with other criteria ]", criteria);
             }
         }
 
@@ -340,7 +338,7 @@ public class TicketSearchFieldMapper {
      * @return
      * @throws SearchMapperException
      */
-    private static TicketSearchField mapCriteria(TicketSearchKey key) throws SearchMapperException {
+    private static TicketSearchField mapCriteria(TicketSearchKey key) {
         switch (key) {
             case TICKET_GUID:
                 return TicketSearchField.TICKET_GUID;
@@ -361,7 +359,7 @@ public class TicketSearchFieldMapper {
             case UPDATED_BY:
                 return TicketSearchField.UPDATED_BY;
             default:
-                throw new SearchMapperException("No field found: " + key.name());
+                throw new IllegalArgumentException("No field found: " + key.name());
         }
 
     }

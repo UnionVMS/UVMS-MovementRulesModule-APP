@@ -38,8 +38,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.EventService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 
 @Stateless
@@ -99,7 +97,7 @@ public class RulesEventServiceBean implements EventService {
             GetTicketsAndRulesByMovementsRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), GetTicketsAndRulesByMovementsRequest.class);
             GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());
             rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), MovementRulesModuleResponseMapper.getTicketsAndRulesByMovementsResponse(response.getTicketsAndRules()));
-        } catch (MovementRulesModelMapperException | RulesServiceException | MessageException | DaoException | DaoMappingException e) {
+        } catch (MovementRulesModelMapperException | RulesServiceException | MessageException  e) {
             LOG.error("[ERROR] Error when fetching tickets and rules by movements {}", e.getMessage());
             errorEvent.fire(message);
         }
