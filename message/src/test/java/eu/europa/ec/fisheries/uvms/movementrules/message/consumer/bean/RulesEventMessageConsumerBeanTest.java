@@ -4,12 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 import javax.jms.Message;
 import javax.jms.TextMessage;
-
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
@@ -23,6 +20,7 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.message.AbstractMessageTest;
 import eu.europa.ec.fisheries.uvms.movementrules.message.JMSHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.message.TestHelper;
@@ -38,6 +36,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
     @Before
     public void clearExchangeQueue() throws Exception {
         jmsHelper.clearQueue(MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
+        jmsHelper.clearQueue(MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME);
     }
     
     @Test
@@ -58,7 +57,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request);
-        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
+        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         assertThat(movementResponse.getMovementRefType().getType(), is(MovementRefTypeType.MOVEMENT));
@@ -72,7 +71,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request);
-        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
+        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         MovementBaseType returnedMovement = movementResponse.getOrgRequest().getMovement();
@@ -82,7 +81,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
         RawMovementType movement2 = TestHelper.createBasicMovement();
         request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement2, "testUser");
         correlationId = jmsHelper.sendMessageToRules(request);
-        responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
+        responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse2 = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         MovementBaseType returnedMovement2 = movementResponse2.getOrgRequest().getMovement();
@@ -96,7 +95,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
         movement.getPosition().setLatitude(null);
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request);
-        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
+        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         assertThat(movementResponse.getMovementRefType().getType(), is(MovementRefTypeType.ALARM));
@@ -110,7 +109,7 @@ public class RulesEventMessageConsumerBeanTest extends AbstractMessageTest {
         movement.setPositionTime(calendar.getTime());
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request);
-        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, "UVMSExchangeEvent");
+        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         assertThat(movementResponse.getMovementRefType().getType(), is(MovementRefTypeType.ALARM));

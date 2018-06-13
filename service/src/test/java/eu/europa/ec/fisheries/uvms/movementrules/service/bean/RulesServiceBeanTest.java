@@ -30,9 +30,6 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetAlarmListByQueryResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
@@ -40,14 +37,16 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
@@ -312,8 +311,8 @@ public class RulesServiceBeanTest extends TransactionalTests {
         criteria.setValue(createdAlarmReport.getGuid());
         query.getAlarmSearchCriteria().add(criteria);
         
-        GetAlarmListByQueryResponse alarmList = rulesService.getAlarmList(query);
-        List<AlarmReportType> alarms = alarmList.getAlarms();
+        AlarmListResponseDto alarmList = rulesService.getAlarmList(query);
+        List<AlarmReportType> alarms = alarmList.getAlarmList();
         
         assertThat(alarms.size(), is(1));
         assertThat(alarms.get(0).getGuid(), is(createdAlarmReport.getGuid()));
@@ -354,8 +353,8 @@ public class RulesServiceBeanTest extends TransactionalTests {
         criteria.setKey(TicketSearchKey.TICKET_GUID);
         criteria.setValue(createdTicket.getGuid());
         query.getTicketSearchCriteria().add(criteria);
-        GetTicketListByQueryResponse ticketList = rulesService.getTicketList(user, query);
-        List<TicketType> tickets = ticketList.getTickets();
+        TicketListResponseDto ticketList = rulesService.getTicketList(user, query);
+        List<Ticket> tickets = ticketList.getTicketList();
         assertThat(tickets.size(), is(1));
     }
 
@@ -384,9 +383,8 @@ public class RulesServiceBeanTest extends TransactionalTests {
         ticket.setMovementGuid(movementGuid);
         rulesDao.createTicket(ticket);
         
-        GetTicketListByMovementsResponse ticketsByMovements = rulesService.getTicketsByMovements(Arrays.asList(movementGuid));
-        List<TicketType> tickets = ticketsByMovements.getTickets();
-        assertThat(tickets.size(), is(1));
+        List<Ticket> ticketsByMovements = rulesService.getTicketsByMovements(Arrays.asList(movementGuid));
+        assertThat(ticketsByMovements.size(), is(1));
     }
 
     @Test
@@ -546,6 +544,24 @@ public class RulesServiceBeanTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
     }
+    
+    @Test
+    public void reprocessAlarmTest() throws Exception {
+        AlarmReport alarm1 = getBasicAlarmReport();
+        alarm1.setRawMovement(getBasicRawMovement());
+        AlarmReport createdAlarm1 = rulesDao.createAlarmReport(alarm1);
+        AlarmReport alarm2 = getBasicAlarmReport();
+        alarm2.setRawMovement(getBasicRawMovement());
+        AlarmReport createdAlarm2 = rulesDao.createAlarmReport(alarm2);
+        
+        String response = rulesService.reprocessAlarm(Arrays.asList(createdAlarm1.getGuid(), createdAlarm2.getGuid()), "Test user");
+        assertThat(response, is("OK"));
+        
+        AlarmReport fetchedAlarm1 = rulesService.getAlarmReportByGuid(createdAlarm1.getGuid());
+        assertThat(fetchedAlarm1.getStatus(), is(AlarmStatusType.REPROCESSED.value()));
+        AlarmReport fetchedAlarm2 = rulesService.getAlarmReportByGuid(createdAlarm1.getGuid());
+        assertThat(fetchedAlarm2.getStatus(), is(AlarmStatusType.REPROCESSED.value()));
+    }
 
     //getAlarmReportByGuid and getTicketByGuid have tests among the rest tests
     
@@ -638,4 +654,12 @@ public class RulesServiceBeanTest extends TransactionalTests {
         alarmReport.setUpdatedBy("Test user");
         return alarmReport;
     }
+    
+    private RawMovement getBasicRawMovement() {
+        RawMovement rawMovement = new RawMovement();
+        rawMovement.setUpdated(new Date());
+        rawMovement.setUpdatedBy("Test");
+        return rawMovement;
+    }
+    
 }

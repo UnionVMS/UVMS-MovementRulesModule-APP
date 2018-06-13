@@ -13,21 +13,21 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
 import java.io.Serializable;
 import java.util.List;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 
 public class CustomRuleListResponseDto implements Serializable {
 
     private static final long serialVersionUID = 1;
 
-    private List<CustomRuleType> customRuleList;
+    private List<CustomRule> customRuleList;
     private int totalNumberOfPages;
     private int currentPage;
 
-    public List<CustomRuleType> getCustomRuleList() {
+    public List<CustomRule> getCustomRuleList() {
         return customRuleList;
     }
 
-    public void setCustomRuleList(List<CustomRuleType> customRuleList) {
+    public void setCustomRuleList(List<CustomRule> customRuleList) {
         this.customRuleList = customRuleList;
     }
 

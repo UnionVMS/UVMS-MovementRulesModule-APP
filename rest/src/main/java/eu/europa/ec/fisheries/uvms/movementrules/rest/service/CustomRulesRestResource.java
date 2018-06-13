@@ -34,6 +34,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleSegme
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
@@ -41,6 +42,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
@@ -131,7 +133,12 @@ public class CustomRulesRestResource {
     public ResponseDto getCustomRulesByQuery(CustomRuleQuery query) {
         LOG.info("Get custom rules by query invoked in rest layer");
         try {
-            return new ResponseDto(validationService.getCustomRulesByQuery(query), ResponseCode.OK);
+            CustomRuleListResponseDto customRulesListDto = validationService.getCustomRulesByQuery(query);
+            GetCustomRuleListByQueryResponse response = new GetCustomRuleListByQueryResponse();
+            response.setTotalNumberOfPages(customRulesListDto.getTotalNumberOfPages());
+            response.setCurrentPage(customRulesListDto.getCurrentPage());
+            response.getCustomRules().addAll(CustomRuleMapper.toCustomRuleTypeList(customRulesListDto.getCustomRuleList()));
+            return new ResponseDto(response, ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when getting custom rules by query. ] {} ", ex);
             return ErrorHandler.getFault(ex);

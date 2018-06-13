@@ -28,9 +28,6 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetAlarmListByQueryResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
@@ -44,7 +41,6 @@ import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleTy
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
@@ -56,6 +52,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperatio
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -69,7 +66,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
@@ -358,18 +354,40 @@ public class RulesServiceBean implements RulesService {
      * @throws RulesServiceException
      */
     @Override
-    public GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws DaoMappingException {
-        AlarmListResponseDto alarmList = getAlarmListByQuery(query);
-        GetAlarmListByQueryResponse response = new GetAlarmListByQueryResponse();
-        response.getAlarms().addAll(alarmList.getAlarmList());
-        response.setTotalNumberOfPages(alarmList.getTotalNumberOfPages());
-        response.setCurrentPage(alarmList.getCurrentPage());
-        return response;
+    public AlarmListResponseDto getAlarmList(AlarmQuery query) throws DaoMappingException {
+        if (query == null) {
+            throw new IllegalArgumentException("Alarm list query is null");
+        }
+        if (query.getPagination() == null) {
+            throw new IllegalArgumentException("Pagination in alarm list query is null");
+        }
 
+        Integer page = query.getPagination().getPage();
+        Integer listSize = query.getPagination().getListSize();
+
+        List<AlarmSearchValue> searchKeyValues = AlarmSearchFieldMapper.mapSearchField(query.getAlarmSearchCriteria());
+
+        String sql = AlarmSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
+        String countSql = AlarmSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
+
+        Long numberMatches = rulesDao.getAlarmListSearchCount(countSql);
+        List<AlarmReport> alarmEntityList = rulesDao.getAlarmListPaginated(page, listSize, sql);
+
+        int numberOfPages = (int) (numberMatches / listSize);
+        if (numberMatches % listSize != 0) {
+            numberOfPages += 1;
+        }
+
+        AlarmListResponseDto response = new AlarmListResponseDto();
+        response.setTotalNumberOfPages(numberOfPages);
+        response.setCurrentPage(query.getPagination().getPage());
+        response.setAlarmList(AlarmMapper.toAlarmReportTypeList(alarmEntityList));
+
+        return response;
     }
 
     @Override
-    public GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws DaoMappingException {
+    public TicketListResponseDto getTicketList(String loggedInUser, TicketQuery query) throws DaoMappingException {
         if (query == null) {
             throw new IllegalArgumentException("Ticket list query is null");
         }
@@ -381,31 +399,25 @@ public class RulesServiceBean implements RulesService {
         List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
         List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
 
-
         String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleGuids, true);
         String countSql = TicketSearchFieldMapper.createCountSearchSql(searchKeyValues, validRuleGuids, true);
         Long numberMatches = rulesDao.getTicketListSearchCount(countSql);
         List<Ticket> ticketEntityList = rulesDao.getTicketListPaginated(query.getPagination().getPage(), listSize, sql);
 
-        List<TicketType> ticketList = new ArrayList<>();
-        for (Ticket entity : ticketEntityList) {
-            ticketList.add(TicketMapper.toTicketType(entity));
-        }
         int numberOfPages = (int) (numberMatches / listSize);
         if (numberMatches % listSize != 0) {
             numberOfPages += 1;
         }
 
-        GetTicketListByQueryResponse response = new GetTicketListByQueryResponse();
-        response.setCurrentPage(query.getPagination().getPage());
-        response.setTotalNumberOfPages(numberOfPages);
-        response.getTickets().addAll(ticketList);
-        return response;
-
+        TicketListResponseDto ticketListDto = new TicketListResponseDto();
+        ticketListDto.setCurrentPage(query.getPagination().getPage());
+        ticketListDto.setTotalNumberOfPages(numberOfPages);
+        ticketListDto.setTicketList(ticketEntityList);
+        return ticketListDto;
     }
 
     @Override
-    public GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws DaoMappingException {
+    public List<Ticket> getTicketsByMovements(List<String> movements) throws DaoMappingException {
         if (movements == null) {
             throw new IllegalArgumentException("Movements list is null");
         }
@@ -413,16 +425,7 @@ public class RulesServiceBean implements RulesService {
             throw new IllegalArgumentException("Movements list is empty");
         }
 
-        List<TicketType> ticketList = new ArrayList<>();
-        List<Ticket> ticketEntityList = rulesDao.getTicketsByMovements(movements);
-        for (Ticket entity : ticketEntityList) {
-            ticketList.add(TicketMapper.toTicketType(entity));
-        }
-
-        GetTicketListByMovementsResponse response = new GetTicketListByMovementsResponse();
-        response.getTickets().addAll(ticketList);
-        return response;
-
+        return rulesDao.getTicketsByMovements(movements);
     }
 
     @Override
@@ -610,7 +613,7 @@ public class RulesServiceBean implements RulesService {
     @Override
     public String reprocessAlarm(List<String> alarmGuids, String username) throws RulesServiceException, DaoMappingException, DaoException {
         AlarmQuery query = mapToOpenAlarmQuery(alarmGuids);
-        AlarmListResponseDto alarms = getAlarmListByQuery(query);
+        AlarmListResponseDto alarms = getAlarmList(query);
 
         for (AlarmReportType alarm : alarms.getAlarmList()) {
             // Cannot reprocess without a movement (i.e. "Asset not sending" alarm)
@@ -632,44 +635,6 @@ public class RulesServiceBean implements RulesService {
         // TODO: Better
         return "OK";
 
-    }
-
-    private AlarmListResponseDto getAlarmListByQuery(AlarmQuery query) throws DaoMappingException {
-        if (query == null) {
-            throw new IllegalArgumentException("Alarm list query is null");
-        }
-        if (query.getPagination() == null) {
-            throw new IllegalArgumentException("Pagination in alarm list query is null");
-        }
-
-
-        Integer page = query.getPagination().getPage();
-        Integer listSize = query.getPagination().getListSize();
-
-        List<AlarmSearchValue> searchKeyValues = AlarmSearchFieldMapper.mapSearchField(query.getAlarmSearchCriteria());
-
-        String sql = AlarmSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
-        String countSql = AlarmSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
-
-        Long numberMatches = rulesDao.getAlarmListSearchCount(countSql);
-        List<AlarmReport> alarmEntityList = rulesDao.getAlarmListPaginated(page, listSize, sql);
-
-        List<AlarmReportType> alarmList = new ArrayList<>();
-        for (AlarmReport entity : alarmEntityList) {
-            alarmList.add(AlarmMapper.toAlarmReportType(entity));
-        }
-
-        int numberOfPages = (int) (numberMatches / listSize);
-        if (numberMatches % listSize != 0) {
-            numberOfPages += 1;
-        }
-
-        AlarmListResponseDto response = new AlarmListResponseDto();
-        response.setTotalNumberOfPages(numberOfPages);
-        response.setCurrentPage(query.getPagination().getPage());
-        response.setAlarmList(alarmList);
-
-        return response;
     }
 
     private AlarmQuery mapToOpenAlarmQuery(List<String> alarmGuids) {

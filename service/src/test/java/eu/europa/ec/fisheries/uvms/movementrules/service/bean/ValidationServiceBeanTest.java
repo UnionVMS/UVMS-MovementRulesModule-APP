@@ -23,6 +23,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 
@@ -86,12 +87,12 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         criteria.setValue(createdCustomRule.getGuid());
         query.getCustomRuleSearchCriteria().add(criteria);
         
-        GetCustomRuleListByQueryResponse customRulesResponse = validationService.getCustomRulesByQuery(query);
-        List<CustomRuleType> customRules = customRulesResponse.getCustomRules();
+        CustomRuleListResponseDto customRulesResponse = validationService.getCustomRulesByQuery(query);
+        List<CustomRule> customRules = customRulesResponse.getCustomRuleList();
         
         assertThat(customRules.size(), is(1));
         
-        CustomRuleType fetchedCustomRule = customRules.get(0);
+        CustomRule fetchedCustomRule = customRules.get(0);
         assertThat(fetchedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
         assertThat(fetchedCustomRule.getName(), is(createdCustomRule.getName()));
         assertThat(fetchedCustomRule.getUpdatedBy(), is(createdCustomRule.getUpdatedBy()));
@@ -108,8 +109,8 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         criteria.setValue(createdCustomRule.getUpdatedBy());
         query.getCustomRuleSearchCriteria().add(criteria);
         
-        GetCustomRuleListByQueryResponse customRulesResponse = validationService.getCustomRulesByQuery(query);
-        List<CustomRuleType> customRules = customRulesResponse.getCustomRules();
+        CustomRuleListResponseDto customRulesResponse = validationService.getCustomRulesByQuery(query);
+        List<CustomRule> customRules = customRulesResponse.getCustomRuleList();
         
         assertTrue(customRules.size() > 0);
         

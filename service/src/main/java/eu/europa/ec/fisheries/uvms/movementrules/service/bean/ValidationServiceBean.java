@@ -147,16 +147,13 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     @Override
-    public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, MovementRulesFaultException, DaoMappingException, SearchMapperException, DaoException {
+    public CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, MovementRulesFaultException, DaoMappingException, SearchMapperException, DaoException {
         if (query == null) {
             throw new IllegalArgumentException("Custom rule list query is null");
         }
         if (query.getPagination() == null) {
             throw new IllegalArgumentException("Pagination in custom rule list query is null");
         }
-
-        CustomRuleListResponseDto customRuleListByQuery = new CustomRuleListResponseDto();
-        List<CustomRuleType> customRuleList = new ArrayList<>();
 
         Integer page = query.getPagination().getPage();
         Integer listSize = query.getPagination().getListSize();
@@ -168,26 +165,17 @@ public class ValidationServiceBean implements ValidationService {
 
         Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql);
         List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql);
-
-        for (CustomRule entity : customRuleEntityList) {
-            customRuleList.add(CustomRuleMapper.toCustomRuleType(entity));
-        }
-
+        
         int numberOfPages = (int) (numberMatches / listSize);
         if (numberMatches % listSize != 0) {
             numberOfPages += 1;
         }
 
+        CustomRuleListResponseDto customRuleListByQuery = new CustomRuleListResponseDto();
         customRuleListByQuery.setTotalNumberOfPages(numberOfPages);
         customRuleListByQuery.setCurrentPage(query.getPagination().getPage());
-        customRuleListByQuery.setCustomRuleList(customRuleList);
-
-
-        GetCustomRuleListByQueryResponse response = new GetCustomRuleListByQueryResponse();
-        response.setTotalNumberOfPages(customRuleListByQuery.getTotalNumberOfPages());
-        response.setCurrentPage(customRuleListByQuery.getCurrentPage());
-        response.getCustomRules().addAll(customRuleListByQuery.getCustomRuleList());
-        return response;
+        customRuleListByQuery.setCustomRuleList(customRuleEntityList);
+        return customRuleListByQuery;
     }
 
     // Triggered by rule engine
