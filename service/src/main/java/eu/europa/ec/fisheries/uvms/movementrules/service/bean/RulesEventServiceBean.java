@@ -24,18 +24,13 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesBaseRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
-import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.GetTicketsAndRulesByMovementsEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.PingReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.SetMovementReportReceivedEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditObjectTypeEnum;
-import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
@@ -44,8 +39,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.ModuleResponseMapp
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.RulesModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.EventService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 
 @Stateless
@@ -105,7 +98,7 @@ public class RulesEventServiceBean implements EventService {
             GetTicketsAndRulesByMovementsRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), GetTicketsAndRulesByMovementsRequest.class);
             GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());
             rulesProducer.sendModuleResponseMessage(message.getJmsMessage(), RulesModuleResponseMapper.getTicketsAndRulesByMovementsResponse(response.getTicketsAndRules()));
-        } catch (RulesModelMapperException | RulesServiceException | MessageException | DaoException | DaoMappingException e) {
+        } catch (RulesModelMapperException | RulesServiceException | MessageException  e) {
             LOG.error("[ERROR] Error when fetching tickets and rules by movements {}", e.getMessage());
             errorEvent.fire(message);
         }

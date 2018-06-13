@@ -34,7 +34,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 
 public class CustomRuleMapper {
 
@@ -42,183 +41,173 @@ public class CustomRuleMapper {
 
     private CustomRuleMapper() {};
 
-    public static CustomRuleType toCustomRuleType(CustomRuleType customRuleType, CustomRule customRuleEntity) throws DaoMappingException {
-        try {
-            // Base
-            customRuleType.setGuid(customRuleEntity.getGuid());
-            customRuleType.setName(customRuleEntity.getName());
-            if (customRuleEntity.getAvailability() != null) {
-                customRuleType.setAvailability(AvailabilityType.fromValue(customRuleEntity.getAvailability()));
-            }
-            customRuleType.setDescription(customRuleEntity.getDescription());
-            customRuleType.setActive(customRuleEntity.getActive());
-            customRuleType.setArchived(customRuleEntity.getArchived());
-            customRuleType.setLastTriggered(DateUtils.dateToString(customRuleEntity.getTriggered()));
-            customRuleType.setUpdated(DateUtils.dateToString(customRuleEntity.getUpdated()));
-            customRuleType.setUpdatedBy(customRuleEntity.getUpdatedBy());
-            customRuleType.setOrganisation(customRuleEntity.getOrganisation());
-
-            // Rule segments
-            List<RuleSegment> ruleSegments = customRuleEntity.getRuleSegmentList();
-            for (RuleSegment ruleSegment : ruleSegments) {
-                CustomRuleSegmentType customRuleSegmentType = new CustomRuleSegmentType();
-                customRuleSegmentType.setStartOperator(ruleSegment.getStartOperator());
-                if (ruleSegment.getCriteria() != null) {
-                    customRuleSegmentType.setCriteria(CriteriaType.fromValue(ruleSegment.getCriteria()));
-                }
-                if (ruleSegment.getSubCriteria() != null) {
-                    customRuleSegmentType.setSubCriteria(SubCriteriaType.fromValue(ruleSegment.getSubCriteria()));
-                }
-                if (ruleSegment.getCondition() != null) {
-                    customRuleSegmentType.setCondition(ConditionType.fromValue(ruleSegment.getCondition()));
-                }
-                customRuleSegmentType.setValue(ruleSegment.getValue());
-                customRuleSegmentType.setEndOperator(ruleSegment.getEndOperator());
-                if (ruleSegment.getLogicOperator() != null) {
-                    customRuleSegmentType.setLogicBoolOperator(LogicOperatorType.fromValue(ruleSegment.getLogicOperator()));
-                }
-                customRuleSegmentType.setOrder(ruleSegment.getOrder().toString());
-
-                customRuleType.getDefinitions().add(customRuleSegmentType);
-            }
-
-            // Rule actions
-            List<RuleAction> ruleActions = customRuleEntity.getRuleActionList();
-            for (RuleAction ruleAction : ruleActions) {
-                CustomRuleActionType customRuleActionType = new CustomRuleActionType();
-                if (ruleAction.getAction() != null) {
-                    customRuleActionType.setAction(ActionType.fromValue(ruleAction.getAction()));
-                }
-                customRuleActionType.setValue(ruleAction.getValue());
-                customRuleActionType.setOrder(ruleAction.getOrder().toString());
-
-                customRuleType.getActions().add(customRuleActionType);
-            }
-
-            // Intervals
-            List<Interval> intervals = customRuleEntity.getIntervals();
-            for (Interval interval : intervals) {
-                CustomRuleIntervalType customRuleIntervalType = new CustomRuleIntervalType();
-                customRuleIntervalType.setStart(DateUtils.dateToString(interval.getStart()));
-                customRuleIntervalType.setEnd(DateUtils.dateToString(interval.getEnd()));
-
-                customRuleType.getTimeIntervals().add(customRuleIntervalType);
-            }
-
-            // Rule subscriptions
-            List<RuleSubscription> ruleSubscriptions = customRuleEntity.getRuleSubscriptionList();
-            for (RuleSubscription ruleSubscription : ruleSubscriptions) {
-                SubscriptionType subscriptionType = new SubscriptionType();
-                subscriptionType.setOwner(ruleSubscription.getOwner());
-                if (ruleSubscription.getType() != null) {
-                    subscriptionType.setType(SubscriptionTypeType.fromValue(ruleSubscription.getType()));
-                }
-                customRuleType.getSubscriptions().add(subscriptionType);
-            }
-
-            return customRuleType;
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping to custom rule model. ] {}", e.getMessage());
-            throw new DaoMappingException("[ Error when mapping to custom rule model. ]", e);
+    public static CustomRuleType toCustomRuleType(CustomRuleType customRuleType, CustomRule customRuleEntity) {
+        // Base
+        customRuleType.setGuid(customRuleEntity.getGuid());
+        customRuleType.setName(customRuleEntity.getName());
+        if (customRuleEntity.getAvailability() != null) {
+            customRuleType.setAvailability(AvailabilityType.fromValue(customRuleEntity.getAvailability()));
         }
+        customRuleType.setDescription(customRuleEntity.getDescription());
+        customRuleType.setActive(customRuleEntity.getActive());
+        customRuleType.setArchived(customRuleEntity.getArchived());
+        customRuleType.setLastTriggered(DateUtils.dateToString(customRuleEntity.getTriggered()));
+        customRuleType.setUpdated(DateUtils.dateToString(customRuleEntity.getUpdated()));
+        customRuleType.setUpdatedBy(customRuleEntity.getUpdatedBy());
+        customRuleType.setOrganisation(customRuleEntity.getOrganisation());
+
+        // Rule segments
+        List<RuleSegment> ruleSegments = customRuleEntity.getRuleSegmentList();
+        for (RuleSegment ruleSegment : ruleSegments) {
+            CustomRuleSegmentType customRuleSegmentType = new CustomRuleSegmentType();
+            customRuleSegmentType.setStartOperator(ruleSegment.getStartOperator());
+            if (ruleSegment.getCriteria() != null) {
+                customRuleSegmentType.setCriteria(CriteriaType.fromValue(ruleSegment.getCriteria()));
+            }
+            if (ruleSegment.getSubCriteria() != null) {
+                customRuleSegmentType.setSubCriteria(SubCriteriaType.fromValue(ruleSegment.getSubCriteria()));
+            }
+            if (ruleSegment.getCondition() != null) {
+                customRuleSegmentType.setCondition(ConditionType.fromValue(ruleSegment.getCondition()));
+            }
+            customRuleSegmentType.setValue(ruleSegment.getValue());
+            customRuleSegmentType.setEndOperator(ruleSegment.getEndOperator());
+            if (ruleSegment.getLogicOperator() != null) {
+                customRuleSegmentType.setLogicBoolOperator(LogicOperatorType.fromValue(ruleSegment.getLogicOperator()));
+            }
+            customRuleSegmentType.setOrder(ruleSegment.getOrder().toString());
+
+            customRuleType.getDefinitions().add(customRuleSegmentType);
+        }
+
+        // Rule actions
+        List<RuleAction> ruleActions = customRuleEntity.getRuleActionList();
+        for (RuleAction ruleAction : ruleActions) {
+            CustomRuleActionType customRuleActionType = new CustomRuleActionType();
+            if (ruleAction.getAction() != null) {
+                customRuleActionType.setAction(ActionType.fromValue(ruleAction.getAction()));
+            }
+            customRuleActionType.setValue(ruleAction.getValue());
+            customRuleActionType.setOrder(ruleAction.getOrder().toString());
+
+            customRuleType.getActions().add(customRuleActionType);
+        }
+
+        // Intervals
+        List<Interval> intervals = customRuleEntity.getIntervals();
+        for (Interval interval : intervals) {
+            CustomRuleIntervalType customRuleIntervalType = new CustomRuleIntervalType();
+            customRuleIntervalType.setStart(DateUtils.dateToString(interval.getStart()));
+            customRuleIntervalType.setEnd(DateUtils.dateToString(interval.getEnd()));
+
+            customRuleType.getTimeIntervals().add(customRuleIntervalType);
+        }
+
+        // Rule subscriptions
+        List<RuleSubscription> ruleSubscriptions = customRuleEntity.getRuleSubscriptionList();
+        for (RuleSubscription ruleSubscription : ruleSubscriptions) {
+            SubscriptionType subscriptionType = new SubscriptionType();
+            subscriptionType.setOwner(ruleSubscription.getOwner());
+            if (ruleSubscription.getType() != null) {
+                subscriptionType.setType(SubscriptionTypeType.fromValue(ruleSubscription.getType()));
+            }
+            customRuleType.getSubscriptions().add(subscriptionType);
+        }
+
+        return customRuleType;
     }
 
-    public static CustomRule toCustomRuleEntity(CustomRule customRuleEntity, CustomRuleType customRuleType) throws DaoMappingException {
-        try {
-            //Date now = DateUtils.nowUTC().toGregorianCalendar().getTime();   //just writing new Date() is apperently way to simple.......
+    public static CustomRule toCustomRuleEntity(CustomRule customRuleEntity, CustomRuleType customRuleType) {
+        //Date now = DateUtils.nowUTC().toGregorianCalendar().getTime();   //just writing new Date() is apperently way to simple.......
 
-            Date now = new Date();
-            // Base
-            customRuleEntity.setName(customRuleType.getName());
-            customRuleEntity.setGuid(customRuleType.getGuid());     //why was this not here from the beginning ?!?!?!?  Well because in its usage it was stored elsewhere and then given a new guid......
-            customRuleEntity.setAvailability(customRuleType.getAvailability().value());
-            customRuleEntity.setDescription(customRuleType.getDescription());
-            customRuleEntity.setActive(customRuleType.isActive());
-            customRuleEntity.setArchived(customRuleType.isArchived());
-            customRuleEntity.setStartDate(now);
-            customRuleEntity.setTriggered(DateUtils.stringToDate(customRuleType.getLastTriggered()));
-            customRuleEntity.setUpdated(now);
-            customRuleEntity.setUpdatedBy(customRuleType.getUpdatedBy());
-            customRuleEntity.setOrganisation(customRuleType.getOrganisation());
+        Date now = new Date();
+        // Base
+        customRuleEntity.setName(customRuleType.getName());
+        customRuleEntity.setGuid(customRuleType.getGuid());     //why was this not here from the beginning ?!?!?!?  Well because in its usage it was stored elsewhere and then given a new guid......
+        customRuleEntity.setAvailability(customRuleType.getAvailability().value());
+        customRuleEntity.setDescription(customRuleType.getDescription());
+        customRuleEntity.setActive(customRuleType.isActive());
+        customRuleEntity.setArchived(customRuleType.isArchived());
+        customRuleEntity.setStartDate(now);
+        customRuleEntity.setTriggered(DateUtils.stringToDate(customRuleType.getLastTriggered()));
+        customRuleEntity.setUpdated(now);
+        customRuleEntity.setUpdatedBy(customRuleType.getUpdatedBy());
+        customRuleEntity.setOrganisation(customRuleType.getOrganisation());
 
-            // Rule segments
-            List<CustomRuleSegmentType> ruleSegmentTypes = customRuleType.getDefinitions();
-            List<RuleSegment> ruleSegmentEntities = new ArrayList<>();
-            for (CustomRuleSegmentType customRuleSegmentType : ruleSegmentTypes) {
-                RuleSegment ruleSegment = new RuleSegment();
-                if (customRuleSegmentType != null) {
-                    ruleSegment.setStartOperator(customRuleSegmentType.getStartOperator());
-                    if (customRuleSegmentType.getCriteria() != null) {
-                        ruleSegment.setCriteria(customRuleSegmentType.getCriteria().name());
-                    }
-                    if (customRuleSegmentType.getSubCriteria() != null) {
-                        ruleSegment.setSubCriteria(customRuleSegmentType.getSubCriteria().name());
-                    }
-                    if (customRuleSegmentType.getCondition() != null) {
-                        ruleSegment.setCondition(customRuleSegmentType.getCondition().name());
-                    }
-                    // Remove quotations from the value, since it totally messes up the rule engine
-                    ruleSegment.setValue(customRuleSegmentType.getValue().replace("\"",""));
-                    ruleSegment.setEndOperator(customRuleSegmentType.getEndOperator());
-                    if (customRuleSegmentType.getLogicBoolOperator() != null) {
-                        ruleSegment.setLogicOperator(customRuleSegmentType.getLogicBoolOperator().name());
-                    }
-                    ruleSegment.setOrder(Integer.valueOf(customRuleSegmentType.getOrder()));
-                    ruleSegment.setCustomRule(customRuleEntity);
+        // Rule segments
+        List<CustomRuleSegmentType> ruleSegmentTypes = customRuleType.getDefinitions();
+        List<RuleSegment> ruleSegmentEntities = new ArrayList<>();
+        for (CustomRuleSegmentType customRuleSegmentType : ruleSegmentTypes) {
+            RuleSegment ruleSegment = new RuleSegment();
+            if (customRuleSegmentType != null) {
+                ruleSegment.setStartOperator(customRuleSegmentType.getStartOperator());
+                if (customRuleSegmentType.getCriteria() != null) {
+                    ruleSegment.setCriteria(customRuleSegmentType.getCriteria().name());
                 }
-                ruleSegmentEntities.add(ruleSegment);
-            }
-            customRuleEntity.getRuleSegmentList().addAll(ruleSegmentEntities);
-
-            // Rule actions
-            List<CustomRuleActionType> ruleActionTypes = customRuleType.getActions();
-            List<RuleAction> ruleActionEntities = new ArrayList<>();
-            for (CustomRuleActionType customRuleActionType : ruleActionTypes) {
-                RuleAction ruleAction = new RuleAction();
-                if (customRuleActionType != null) {
-                    ruleAction.setAction(customRuleActionType.getAction().value());
-                    ruleAction.setValue(customRuleActionType.getValue());
-                    ruleAction.setOrder(Integer.valueOf(customRuleActionType.getOrder()));
-                    ruleAction.setCustomRule(customRuleEntity);
+                if (customRuleSegmentType.getSubCriteria() != null) {
+                    ruleSegment.setSubCriteria(customRuleSegmentType.getSubCriteria().name());
                 }
-                ruleActionEntities.add(ruleAction);
-            }
-            customRuleEntity.getRuleActionList().addAll(ruleActionEntities);
-
-            // Intervals
-            List<CustomRuleIntervalType> customRuleIntervalTypes = customRuleType.getTimeIntervals();
-            List<Interval> ruleActiveIntervalEntities = new ArrayList<>();
-            for (CustomRuleIntervalType customRuleActionType : customRuleIntervalTypes) {
-                Interval ruleActiveInterval = new Interval();
-                if (customRuleActionType != null) {
-                    ruleActiveInterval.setStart(DateUtils.stringToDate(customRuleActionType.getStart()));
-                    ruleActiveInterval.setEnd(DateUtils.stringToDate(customRuleActionType.getEnd()));
-                    ruleActiveInterval.setCustomRule(customRuleEntity);
+                if (customRuleSegmentType.getCondition() != null) {
+                    ruleSegment.setCondition(customRuleSegmentType.getCondition().name());
                 }
-                ruleActiveIntervalEntities.add(ruleActiveInterval);
+                // Remove quotations from the value, since it totally messes up the rule engine
+                ruleSegment.setValue(customRuleSegmentType.getValue().replace("\"",""));
+                ruleSegment.setEndOperator(customRuleSegmentType.getEndOperator());
+                if (customRuleSegmentType.getLogicBoolOperator() != null) {
+                    ruleSegment.setLogicOperator(customRuleSegmentType.getLogicBoolOperator().name());
+                }
+                ruleSegment.setOrder(Integer.valueOf(customRuleSegmentType.getOrder()));
+                ruleSegment.setCustomRule(customRuleEntity);
             }
-            customRuleEntity.getIntervals().addAll(ruleActiveIntervalEntities);
+            ruleSegmentEntities.add(ruleSegment);
+        }
+        customRuleEntity.getRuleSegmentList().addAll(ruleSegmentEntities);
+
+        // Rule actions
+        List<CustomRuleActionType> ruleActionTypes = customRuleType.getActions();
+        List<RuleAction> ruleActionEntities = new ArrayList<>();
+        for (CustomRuleActionType customRuleActionType : ruleActionTypes) {
+            RuleAction ruleAction = new RuleAction();
+            if (customRuleActionType != null) {
+                ruleAction.setAction(customRuleActionType.getAction().value());
+                ruleAction.setValue(customRuleActionType.getValue());
+                ruleAction.setOrder(Integer.valueOf(customRuleActionType.getOrder()));
+                ruleAction.setCustomRule(customRuleEntity);
+            }
+            ruleActionEntities.add(ruleAction);
+        }
+        customRuleEntity.getRuleActionList().addAll(ruleActionEntities);
+
+        // Intervals
+        List<CustomRuleIntervalType> customRuleIntervalTypes = customRuleType.getTimeIntervals();
+        List<Interval> ruleActiveIntervalEntities = new ArrayList<>();
+        for (CustomRuleIntervalType customRuleActionType : customRuleIntervalTypes) {
+            Interval ruleActiveInterval = new Interval();
+            if (customRuleActionType != null) {
+                ruleActiveInterval.setStart(DateUtils.stringToDate(customRuleActionType.getStart()));
+                ruleActiveInterval.setEnd(DateUtils.stringToDate(customRuleActionType.getEnd()));
+                ruleActiveInterval.setCustomRule(customRuleEntity);
+            }
+            ruleActiveIntervalEntities.add(ruleActiveInterval);
+        }
+        customRuleEntity.getIntervals().addAll(ruleActiveIntervalEntities);
 
 //            // NOTE: Don't map subscriptions in this method
 
-            return customRuleEntity;
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping to custom rule entity. ] {}", e.getMessage());
-            throw new DaoMappingException("[ Error when mapping to custom rule entity. ]", e);
-        }
+        return customRuleEntity;
     }
 
-    public static CustomRule toCustomRuleEntity(CustomRuleType customRuleType) throws DaoMappingException {
+    public static CustomRule toCustomRuleEntity(CustomRuleType customRuleType) {
         CustomRule customRuleEntity = new CustomRule();
         return toCustomRuleEntity(customRuleEntity, customRuleType);
     }
 
-    public static CustomRuleType toCustomRuleType(CustomRule customRuleEntity) throws DaoMappingException {
+    public static CustomRuleType toCustomRuleType(CustomRule customRuleEntity) {
         CustomRuleType customRuleType = new CustomRuleType();
         return toCustomRuleType(customRuleType, customRuleEntity);
     }
     
-    public static List<CustomRuleType> toCustomRuleTypeList(List<CustomRule> customRules) throws DaoMappingException {
+    public static List<CustomRuleType> toCustomRuleTypeList(List<CustomRule> customRules) {
         List<CustomRuleType> customRuleTypes = new ArrayList<>();
         for (CustomRule customRule : customRules) {
             customRuleTypes.add(toCustomRuleType(customRule));

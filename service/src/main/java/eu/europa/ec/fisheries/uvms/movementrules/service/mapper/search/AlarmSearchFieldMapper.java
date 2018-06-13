@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 
 public class AlarmSearchFieldMapper {
 
@@ -34,7 +32,7 @@ public class AlarmSearchFieldMapper {
      * @param searchFields
      * @param isDynamic
      * @return
-     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
+     *
      */
     public static String createSelectSearchSql(List<AlarmSearchValue> searchFields, boolean isDynamic) {
         StringBuilder selectBuffer = new StringBuilder();
@@ -66,7 +64,7 @@ public class AlarmSearchFieldMapper {
      * @param searchFields
      * @param isDynamic
      * @return
-     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
+     *
      */
     public static String createCountSearchSql(List<AlarmSearchValue> searchFields, boolean isDynamic) {
         StringBuilder countBuffer = new StringBuilder();
@@ -329,8 +327,8 @@ public class AlarmSearchFieldMapper {
                 }else {
                     searchFields.add(new AlarmSearchValue(field, criteria.getValue()));
                 }
-            } catch (SearchMapperException ex) {
-                LOG.debug("[ Error when mapping to search field... continuing with other criteria ]");
+            } catch (IllegalArgumentException ex) {
+                LOG.debug("[ Error whit criteria {} when mapping to search field... continuing with other criteria ]", criteria);
             }
         }
 
@@ -345,7 +343,7 @@ public class AlarmSearchFieldMapper {
      * @return
      * @throws SearchMapperException
      */
-    private static AlarmSearchField mapCriteria(AlarmSearchKey key) throws SearchMapperException {
+    private static AlarmSearchField mapCriteria(AlarmSearchKey key) {
         switch (key) {
             case ALARM_GUID:
                 return AlarmSearchField.ALARM_GUID;
@@ -364,7 +362,7 @@ public class AlarmSearchFieldMapper {
             case RULE_NAME:
                 return AlarmSearchField.RULE_NAME;
             default:
-                throw new SearchMapperException("No field found: " + key.name());
+                throw new IllegalArgumentException("No field found: " + key.name());
         }
     }
 

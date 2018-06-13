@@ -19,6 +19,8 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
@@ -36,14 +38,12 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.CustomRuleListResponseDto;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
@@ -64,13 +64,9 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountE
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
@@ -147,7 +143,7 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     @Override
-    public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, RulesFaultException, DaoMappingException, SearchMapperException, DaoException {
+    public GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) {
         if (query == null) {
             throw new IllegalArgumentException("Custom rule list query is null");
         }
@@ -261,7 +257,7 @@ public class ValidationServiceBean implements ValidationService {
         CustomRule customRule = null;
         try {
             customRule = rulesDao.getCustomRuleByGuid(ruleGuid);
-        } catch (DaoException e) {
+        } catch (Exception e) {
             LOG.error("[ Failed to fetch rule when sending email to subscribers due to erro when getting CustomRule by GUID! ] {}", e.getMessage());
             return;
         }
@@ -294,7 +290,7 @@ public class ValidationServiceBean implements ValidationService {
             entity.setTriggered(new Date());
             rulesDao.updateCustomRule(entity);
 
-        } catch (DaoException e) {
+        } catch (Exception e) {
             LOG.warn("Failed to update last triggered date for rule {}", ruleGuid, e);
         }
     }
@@ -480,29 +476,30 @@ public class ValidationServiceBean implements ValidationService {
 
     private void createTicket(String ruleName, String ruleGuid, MovementFact fact) {
         try {
-            TicketType ticketType = new TicketType();
+            Ticket ticket = new Ticket();
 
-            ticketType.setAssetGuid(fact.getAssetGuid());
-            ticketType.setMobileTerminalGuid(fact.getMobileTerminalGuid());
-            ticketType.setChannelGuid(fact.getChannelGuid());
-            ticketType.setOpenDate(RulesUtil.dateToString(new Date()));
-            ticketType.setRuleName(ruleName);
-            ticketType.setRuleGuid(ruleGuid);
-            ticketType.setStatus(TicketStatusType.OPEN);
-            ticketType.setUpdatedBy("UVMS");
-            ticketType.setMovementGuid(fact.getMovementGuid());
-            ticketType.setGuid(UUID.randomUUID().toString());
+            ticket.setAssetGuid(fact.getAssetGuid());
+            ticket.setMobileTerminalGuid(fact.getMobileTerminalGuid());
+            ticket.setChannelGuid(fact.getChannelGuid());
+            ticket.setCreatedDate(new Date());
+            ticket.setUpdated(new Date());
+            ticket.setRuleName(ruleName);
+            ticket.setRuleGuid(ruleGuid);
+            ticket.setStatus(TicketStatusType.OPEN.value());
+            ticket.setUpdatedBy("UVMS");
+            ticket.setMovementGuid(fact.getMovementGuid());
+            //ticket.setGuid(UUID.randomUUID().toString());
 
             for (int i = 0; i < fact.getAreaTypes().size(); i++) {
                 if ("EEZ".equals(fact.getAreaTypes().get(i))) {
-                    ticketType.setRecipient(fact.getAreaCodes().get(i));
+                    ticket.setRecipient(fact.getAreaCodes().get(i));
                 }
             }
 
-            Ticket ticket = TicketMapper.toTicketEntity(ticketType);
+            //Ticket ticket = TicketMapper.toTicketEntity(ticketType);
             ticket.setTicketCount(1L);
-            Ticket tempTicket = rulesDao.createTicket(ticket);
-            TicketType createdTicket = TicketMapper.toTicketType(tempTicket);
+            Ticket createdTicket = rulesDao.createTicket(ticket);
+            //TicketType createdTicket = TicketMapper.toTicketType(tempTicket);
 
             ticketEvent.fire(new NotificationMessage("guid", createdTicket.getGuid()));
 
@@ -510,7 +507,7 @@ public class ValidationServiceBean implements ValidationService {
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, createdTicket.getUpdatedBy());
-        } catch (DaoMappingException e) {
+        } catch (Exception e) { //TODO: figure out if we are to have this kind of exception handling here and if we are to catch everything
             LOG.error("[ Failed to create ticket! ] {}", e.getMessage());
             LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());
         }
@@ -589,13 +586,13 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     @Override
-    public long getNumberOfOpenAlarmReports() throws RulesServiceException {
+    public long getNumberOfOpenAlarmReports() {
         LOG.info("Counting open alarms");
         return rulesDao.getNumberOfOpenAlarms();
     }
 
     @Override
-    public long getNumberOfOpenTickets(String userName) throws RulesServiceException, DaoException {
+    public long getNumberOfOpenTickets(String userName) {
         LOG.info("Counting open tickets for user: {}", userName);
         List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);
         if (!validRuleGuids.isEmpty()) {

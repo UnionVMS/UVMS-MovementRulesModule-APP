@@ -25,8 +25,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.NoEntityFoundException;
 
 @Stateless
 public class RulesDao {
@@ -41,15 +39,14 @@ public class RulesDao {
         return entity;
     }
 
-    public CustomRule getCustomRuleByGuid(String guid) throws DaoException {
+    public CustomRule getCustomRuleByGuid(String guid) {
         try {
             TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
-            throw new NoEntityFoundException("[ No custom rule with guid: " + guid + " can be found ]", e);
-        } catch (Exception e) {
-            throw new DaoException("[ Error when getting CustomRule by GUID. ] ", e);
+            //throw new NoEntityFoundException("[ No custom rule with guid: " + guid + " can be found ]", e);
+            throw new NoResultException("[ No custom rule with guid: " + guid + " can be found ]");  //Trying to remove NoEntityFoundException but I still want the error message, so maybe do it this way?
         }
 
     }
@@ -93,13 +90,14 @@ public class RulesDao {
         }
     }
 
-    public AlarmReport getAlarmReportByGuid(String guid) throws NoEntityFoundException {
+    public AlarmReport getAlarmReportByGuid(String guid) {
         try {
             TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_ALARM_BY_GUID, AlarmReport.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
-            throw new NoEntityFoundException("[ Alarm with guid " + guid + " can't be found ]", e);
+            //throw new NoEntityFoundException("[ No custom rule with guid: " + guid + " can be found ]", e);
+            throw new NoResultException("[ No custom rule with guid: " + guid + " can be found ]");  //Trying to remove NoEntityFoundException but I still want the error message, so maybe do it this way?
         }
     }
 
@@ -111,13 +109,9 @@ public class RulesDao {
         em.remove(entity);
     }
 
-    public void detachSubscription(RuleSubscription subscription) throws DaoException {
-        try {
-            em.detach(subscription);
-            subscription.setId(null);
-        } catch (Exception e) {
-            throw new DaoException("[ Error when detaching subscription ]", e);
-        }
+    public void detachSubscription(RuleSubscription subscription) {
+        em.detach(subscription);
+        subscription.setId(null);
     }
 
     public Ticket updateTicket(Ticket entity) {

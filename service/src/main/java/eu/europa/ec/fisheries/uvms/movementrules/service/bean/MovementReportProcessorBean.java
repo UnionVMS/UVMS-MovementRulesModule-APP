@@ -129,7 +129,7 @@ public class MovementReportProcessorBean {
                 // Tell Exchange that the report caused an alarm
                 exchangeService.sendBackToExchange(null, rawMovement, MovementRefTypeType.ALARM, username);
             }
-        } catch (MessageException | MobileTerminalModelMapperException | MobileTerminalUnmarshallException | JMSException | AssetModelMapperException | RulesModelMapperException | InterruptedException | ExecutionException e) {
+        } catch (MessageException | MobileTerminalModelMapperException | MobileTerminalUnmarshallException | JMSException | AssetModelMapperException | InterruptedException | ExecutionException e) {
             throw new RulesServiceException(e.getMessage());
         }
     }
@@ -153,7 +153,7 @@ public class MovementReportProcessorBean {
         }
     }
 
-    private MovementFact collectMovementData(MobileTerminalType mobileTerminal, Asset asset, final RawMovementType rawMovement, final String username) throws MessageException, RulesModelMapperException, ExecutionException, InterruptedException, RulesServiceException {
+    private MovementFact collectMovementData(MobileTerminalType mobileTerminal, Asset asset, final RawMovementType rawMovement, final String username) throws ExecutionException, InterruptedException, RulesServiceException {
         int threadNum = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadNum);
         Integer numberOfReportsLast24Hours;
@@ -240,7 +240,7 @@ public class MovementReportProcessorBean {
 
             executor.shutdown();
             return movementFact;
-        } catch (RulesServiceException | NullPointerException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             executor.shutdown();
             throw new RulesServiceException("Error likely caused by a duplicate movement.", e);
         }

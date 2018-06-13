@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
+
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,7 +53,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 
 
@@ -118,7 +119,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         try {
             rulesService.getCustomRuleByGuid("dummyGuid");
             Assert.assertTrue(false);
-        }catch (RulesServiceException e){
+        }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
@@ -172,14 +173,14 @@ public class RulesServiceBeanTest extends TransactionalTests {
 
             rulesService.updateCustomRule(input, "test", "test");
             Assert.assertTrue(false);
-        }catch(NoEntityFoundException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateCustomRule(input);
             Assert.assertTrue(false);
-        }catch(NoEntityFoundException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
     }
@@ -221,7 +222,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         try {
             rulesService.deleteCustomRule("dummyGuid", "testUser", "testFeature", "testApp");
             Assert.assertTrue(false);
-        } catch (RulesServiceException e) {
+        } catch (EJBTransactionRolledbackException e) {
             Assert.assertTrue(true);
         }
     }
@@ -270,7 +271,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         try{
             rulesService.updateSubscription(input, "testUser"); //non-existant rule guid
             Assert.assertTrue(false);
-        }catch (NoEntityFoundException e){
+        }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
@@ -512,7 +513,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         try{
             rulesService.updateAlarmStatus(input);
             Assert.assertTrue(false);
-        }catch(NoEntityFoundException e){
+        }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
     }

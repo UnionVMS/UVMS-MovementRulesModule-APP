@@ -42,7 +42,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.MobileTerminal;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.MobileTerminalId;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Position;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 
 public class AlarmMapper {
 
@@ -50,189 +49,176 @@ public class AlarmMapper {
     
     private AlarmMapper() {}
 
-    private static AlarmReportType toAlarmReportType(AlarmReportType alarmReportType, AlarmReport alarmReportEntity) throws DaoMappingException {
+    private static AlarmReportType toAlarmReportType(AlarmReportType alarmReportType, AlarmReport alarmReportEntity) {
         if (alarmReportEntity == null) {
             return null;
         }
 
-        try {
-            // Base
-            alarmReportType.setGuid(alarmReportEntity.getGuid());
-            alarmReportType.setAssetGuid(alarmReportEntity.getAssetGuid());
-            alarmReportType.setOpenDate(DateUtils.dateToString(alarmReportEntity.getCreatedDate()));
-            if (alarmReportEntity.getStatus() != null) {
-                alarmReportType.setStatus(AlarmStatusType.valueOf(alarmReportEntity.getStatus()));
+        // Base
+        alarmReportType.setGuid(alarmReportEntity.getGuid());
+        alarmReportType.setAssetGuid(alarmReportEntity.getAssetGuid());
+        alarmReportType.setOpenDate(DateUtils.dateToString(alarmReportEntity.getCreatedDate()));
+        if (alarmReportEntity.getStatus() != null) {
+            alarmReportType.setStatus(AlarmStatusType.valueOf(alarmReportEntity.getStatus()));
+        }
+        alarmReportType.setUpdated(DateUtils.dateToString(alarmReportEntity.getUpdated()));
+        alarmReportType.setUpdatedBy(alarmReportEntity.getUpdatedBy());
+        alarmReportType.setRecipient(alarmReportEntity.getRecipient());
+        alarmReportType.setPluginType(alarmReportEntity.getPluginType());
+
+        // Raw movement
+        if (alarmReportEntity.getRawMovement() != null) {
+            RawMovementType rawMovement = new RawMovementType();
+            rawMovement.setGuid(alarmReportEntity.getRawMovement().getGuid());
+            rawMovement.setConnectId(alarmReportEntity.getRawMovement().getConnectId());
+            if (alarmReportEntity.getRawMovement().getComChannelType() != null) {
+                rawMovement.setComChannelType(MovementComChannelType.valueOf(alarmReportEntity.getRawMovement().getComChannelType()));
             }
-            alarmReportType.setUpdated(DateUtils.dateToString(alarmReportEntity.getUpdated()));
-            alarmReportType.setUpdatedBy(alarmReportEntity.getUpdatedBy());
-            alarmReportType.setRecipient(alarmReportEntity.getRecipient());
-            alarmReportType.setPluginType(alarmReportEntity.getPluginType());
+            if (alarmReportEntity.getRawMovement().getMovementType() != null) {
+                rawMovement.setMovementType(MovementTypeType.valueOf(alarmReportEntity.getRawMovement().getMovementType()));
+            }
+            rawMovement.setReportedSpeed(alarmReportEntity.getRawMovement().getReportedSpeed());
+            rawMovement.setReportedCourse(alarmReportEntity.getRawMovement().getReportedCourse());
+            if (alarmReportEntity.getRawMovement().getSource() != null) {
+                rawMovement.setSource(MovementSourceType.valueOf(alarmReportEntity.getRawMovement().getSource()));
+            }
+            rawMovement.setStatus(alarmReportEntity.getRawMovement().getStatus());
+            if (alarmReportEntity.getRawMovement().getPositionTime() != null) {
+                rawMovement.setPositionTime(alarmReportEntity.getRawMovement().getPositionTime());
+            }
 
-            // Raw movement
-            if (alarmReportEntity.getRawMovement() != null) {
-                RawMovementType rawMovement = new RawMovementType();
-                rawMovement.setGuid(alarmReportEntity.getRawMovement().getGuid());
-                rawMovement.setConnectId(alarmReportEntity.getRawMovement().getConnectId());
-                if (alarmReportEntity.getRawMovement().getComChannelType() != null) {
-                    rawMovement.setComChannelType(MovementComChannelType.valueOf(alarmReportEntity.getRawMovement().getComChannelType()));
+            rawMovement.setAssetName(alarmReportEntity.getRawMovement().getAssetName());
+            rawMovement.setFlagState(alarmReportEntity.getRawMovement().getFlagState());
+            rawMovement.setExternalMarking(alarmReportEntity.getRawMovement().getExternalMarking());
+
+            // Raw movement - activity
+            if (alarmReportEntity.getRawMovement().getActivity() != null) {
+                MovementActivityType activity = new MovementActivityType();
+                activity.setCallback(alarmReportEntity.getRawMovement().getActivity().getCallback());
+                activity.setMessageId(alarmReportEntity.getRawMovement().getActivity().getMessageId());
+                if (alarmReportEntity.getRawMovement().getActivity().getMessageType() != null) {
+                    activity.setMessageType(MovementActivityTypeType.valueOf(alarmReportEntity.getRawMovement().getActivity().getMessageType()));
                 }
-                if (alarmReportEntity.getRawMovement().getMovementType() != null) {
-                    rawMovement.setMovementType(MovementTypeType.valueOf(alarmReportEntity.getRawMovement().getMovementType()));
-                }
-                rawMovement.setReportedSpeed(alarmReportEntity.getRawMovement().getReportedSpeed());
-                rawMovement.setReportedCourse(alarmReportEntity.getRawMovement().getReportedCourse());
-                if (alarmReportEntity.getRawMovement().getSource() != null) {
-                    rawMovement.setSource(MovementSourceType.valueOf(alarmReportEntity.getRawMovement().getSource()));
-                }
-                rawMovement.setStatus(alarmReportEntity.getRawMovement().getStatus());
-                if (alarmReportEntity.getRawMovement().getPositionTime() != null) {
-                    rawMovement.setPositionTime(alarmReportEntity.getRawMovement().getPositionTime());
-                }
-
-                rawMovement.setAssetName(alarmReportEntity.getRawMovement().getAssetName());
-                rawMovement.setFlagState(alarmReportEntity.getRawMovement().getFlagState());
-                rawMovement.setExternalMarking(alarmReportEntity.getRawMovement().getExternalMarking());
-
-                // Raw movement - activity
-                if (alarmReportEntity.getRawMovement().getActivity() != null) {
-                    MovementActivityType activity = new MovementActivityType();
-                    activity.setCallback(alarmReportEntity.getRawMovement().getActivity().getCallback());
-                    activity.setMessageId(alarmReportEntity.getRawMovement().getActivity().getMessageId());
-                    if (alarmReportEntity.getRawMovement().getActivity().getMessageType() != null) {
-                        activity.setMessageType(MovementActivityTypeType.valueOf(alarmReportEntity.getRawMovement().getActivity().getMessageType()));
-                    }
-                    rawMovement.setActivity(activity);
-                } else {
-                    LOG.warn("Activity missing for Raw Movement Entity '{}'", alarmReportEntity.getRawMovement().getGuid());
-                }
-
-                // Raw movement - asset
-                if (alarmReportEntity.getRawMovement().getAsset() != null) {
-                    Asset asset = alarmReportEntity.getRawMovement().getAsset();
-                    if (asset != null) {
-                        AssetId assetId = new AssetId();
-                        if (asset.getAssetType() != null) {
-                            assetId.setAssetType(AssetType.valueOf(asset.getAssetType()));
-                        }
-                        List<AssetIdList> assetIdLists = new ArrayList<>();
-
-                        List<eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList> assetIdListArray = alarmReportEntity.getRawMovement().getAsset()
-                                .getAssetIdList();
-                        for (eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList assetIdList : assetIdListArray) {
-                            AssetIdList assetIdListRaw = new AssetIdList();
-                            assetIdListRaw.setValue(assetIdList.getValue());
-                            if (assetIdList.getType() != null) {
-                                assetIdListRaw.setIdType(AssetIdType.valueOf(assetIdList.getType()));
-                            }
-                            assetIdLists.add(assetIdListRaw);
-                        }
-                        assetId.getAssetIdList().addAll(assetIdLists);
-                        rawMovement.setAssetId(assetId);
-                    }
-                } else {
-                    LOG.warn("AssetId missing for Raw Movement Entity '{}'", alarmReportEntity.getRawMovement().getGuid());
-                }
-
-                // Raw movement - position
-                if (alarmReportEntity.getRawMovement().getPosition() != null) {
-                    MovementPoint position = new MovementPoint();
-                    position.setAltitude(alarmReportEntity.getRawMovement().getPosition().getAltitude());
-                    position.setLatitude(alarmReportEntity.getRawMovement().getPosition().getLatitude());
-                    position.setLongitude(alarmReportEntity.getRawMovement().getPosition().getLongitude());
-                    rawMovement.setPosition(position);
-                } else {
-                    LOG.warn("Position missing for Raw Movement Entity '{}'", alarmReportEntity.getRawMovement().getGuid());
-                }
-
-                // Raw movement - mobile terminal
-                if (alarmReportEntity.getRawMovement().getMobileTerminal() != null) {
-                    MobileTerminalType mobileTerminalIdRaw = new MobileTerminalType();
-                    mobileTerminalIdRaw.setConnectId(alarmReportEntity.getRawMovement().getMobileTerminal().getConnectId());
-                    mobileTerminalIdRaw.setGuid(alarmReportEntity.getRawMovement().getMobileTerminal().getGuid());
-
-                    ArrayList<IdList> idLists = new ArrayList<>();
-                    List<MobileTerminalId> mobileTerminalIds = alarmReportEntity.getRawMovement().getMobileTerminal().getMobileTerminalId();
-                    for (MobileTerminalId mobileTerminalId : mobileTerminalIds) {
-                        IdList idList = new IdList();
-                        if (mobileTerminalId.getType() != null) {
-                            idList.setType(IdType.valueOf(mobileTerminalId.getType()));
-                        }
-                        idList.setValue(mobileTerminalId.getValue());
-                        idLists.add(idList);
-                    }
-                    mobileTerminalIdRaw.getMobileTerminalIdList().addAll(idLists);
-                    rawMovement.setMobileTerminal(mobileTerminalIdRaw);
-                } else {
-                    LOG.warn("Mobile Terminal missing for Raw Movement Entity '{}'", alarmReportEntity.getRawMovement().getGuid());
-                }
-
-                // Add Movement
-                alarmReportType.setRawMovement(rawMovement);
+                rawMovement.setActivity(activity);
             } else {
-                LOG.warn("Raw Movement missing for Alarm Report Entity '{}'", alarmReportEntity.getGuid());
+                LOG.warn("Activity missing for Raw Movement Entity '{}'", alarmReportEntity.getRawMovement().getGuid());
             }
 
-            // Alarm items
-            List<AlarmItem> alarmItems = alarmReportEntity.getAlarmItemList();
-            for (AlarmItem alarmItem : alarmItems) {
-                AlarmItemType alarmItemType = new AlarmItemType();
-                alarmItemType.setGuid(alarmItem.getGuid());
-                alarmItemType.setRuleGuid(alarmItem.getRuleGuid());
-                alarmItemType.setRuleName(alarmItem.getRuleName());
+            // Raw movement - asset
+            if (alarmReportEntity.getRawMovement().getAsset() != null) {
+                Asset asset = alarmReportEntity.getRawMovement().getAsset();
+                if (asset != null) {
+                    AssetId assetId = new AssetId();
+                    if (asset.getAssetType() != null) {
+                        assetId.setAssetType(AssetType.valueOf(asset.getAssetType()));
+                    }
+                    List<AssetIdList> assetIdLists = new ArrayList<>();
 
-                alarmReportType.getAlarmItem().add(alarmItemType);
+                    List<eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList> assetIdListArray = alarmReportEntity.getRawMovement().getAsset()
+                            .getAssetIdList();
+                    for (eu.europa.ec.fisheries.uvms.movementrules.service.entity.AssetIdList assetIdList : assetIdListArray) {
+                        AssetIdList assetIdListRaw = new AssetIdList();
+                        assetIdListRaw.setValue(assetIdList.getValue());
+                        if (assetIdList.getType() != null) {
+                            assetIdListRaw.setIdType(AssetIdType.valueOf(assetIdList.getType()));
+                        }
+                        assetIdLists.add(assetIdListRaw);
+                    }
+                    assetId.getAssetIdList().addAll(assetIdLists);
+                    rawMovement.setAssetId(assetId);
+                }
+            } else {
+                LOG.warn("AssetId missing for Raw Movement Entity '{}'", alarmReportEntity.getRawMovement().getGuid());
             }
 
-            return alarmReportType;
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping to model. ] {}", e.getMessage());
-            throw new DaoMappingException("[ Error when mapping to model. ]", e);
+            // Raw movement - position
+            if (alarmReportEntity.getRawMovement().getPosition() != null) {
+                MovementPoint position = new MovementPoint();
+                position.setAltitude(alarmReportEntity.getRawMovement().getPosition().getAltitude());
+                position.setLatitude(alarmReportEntity.getRawMovement().getPosition().getLatitude());
+                position.setLongitude(alarmReportEntity.getRawMovement().getPosition().getLongitude());
+                rawMovement.setPosition(position);
+            } else {
+                LOG.warn("Position missing for Raw Movement Entity '{}'", alarmReportEntity.getRawMovement().getGuid());
+            }
+
+            // Raw movement - mobile terminal
+            if (alarmReportEntity.getRawMovement().getMobileTerminal() != null) {
+                MobileTerminalType mobileTerminalIdRaw = new MobileTerminalType();
+                mobileTerminalIdRaw.setConnectId(alarmReportEntity.getRawMovement().getMobileTerminal().getConnectId());
+                mobileTerminalIdRaw.setGuid(alarmReportEntity.getRawMovement().getMobileTerminal().getGuid());
+
+                ArrayList<IdList> idLists = new ArrayList<>();
+                List<MobileTerminalId> mobileTerminalIds = alarmReportEntity.getRawMovement().getMobileTerminal().getMobileTerminalId();
+                for (MobileTerminalId mobileTerminalId : mobileTerminalIds) {
+                    IdList idList = new IdList();
+                    if (mobileTerminalId.getType() != null) {
+                        idList.setType(IdType.valueOf(mobileTerminalId.getType()));
+                    }
+                    idList.setValue(mobileTerminalId.getValue());
+                    idLists.add(idList);
+                }
+                mobileTerminalIdRaw.getMobileTerminalIdList().addAll(idLists);
+                rawMovement.setMobileTerminal(mobileTerminalIdRaw);
+            } else {
+                LOG.warn("Mobile Terminal missing for Raw Movement Entity '{}'", alarmReportEntity.getRawMovement().getGuid());
+            }
+
+            // Add Movement
+            alarmReportType.setRawMovement(rawMovement);
+        } else {
+            LOG.warn("Raw Movement missing for Alarm Report Entity '{}'", alarmReportEntity.getGuid());
         }
+
+        // Alarm items
+        List<AlarmItem> alarmItems = alarmReportEntity.getAlarmItemList();
+        for (AlarmItem alarmItem : alarmItems) {
+            AlarmItemType alarmItemType = new AlarmItemType();
+            alarmItemType.setGuid(alarmItem.getGuid());
+            alarmItemType.setRuleGuid(alarmItem.getRuleGuid());
+            alarmItemType.setRuleName(alarmItem.getRuleName());
+
+            alarmReportType.getAlarmItem().add(alarmItemType);
+        }
+
+        return alarmReportType;
+
     }
 
-    public static AlarmReport toAlarmReportEntity(AlarmReport alarmReportEntity, AlarmReportType alarmReportType) throws DaoMappingException {
-        try {
-            // Base
-            alarmReportEntity.setAssetGuid(alarmReportType.getAssetGuid());
-            alarmReportEntity.setCreatedDate(DateUtils.stringToDate(alarmReportType.getOpenDate()));
-            if (alarmReportType.getStatus() != null) {
-                alarmReportEntity.setStatus(alarmReportType.getStatus().name());
-            }
-            alarmReportEntity.setUpdated(DateUtils.stringToDate(alarmReportType.getUpdated()));
-            alarmReportEntity.setUpdatedBy(alarmReportType.getUpdatedBy());
-            alarmReportEntity.setUpdated(new Date());
-            alarmReportEntity.setUpdatedBy(alarmReportType.getUpdatedBy());
-            alarmReportEntity.setRecipient(alarmReportType.getRecipient());
-            alarmReportEntity.setPluginType(alarmReportType.getPluginType());
-
-            alarmReportEntity.setGuid(alarmReportType.getGuid());
-            //added to save isInactivePosition, hopefully this is enough
-            if(alarmReportType.getRawMovement() != null) {
-                alarmReportEntity.setRawMovement(toRawMovementEntity(alarmReportType.getRawMovement()));
-                alarmReportEntity.getRawMovement().setActive(!alarmReportType.isInactivatePosition());
-            }
-
-            return alarmReportEntity;
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping to entity. ] {}", e.getMessage());
-            throw new DaoMappingException("[ Error when mapping to entity. ]", e);
+    public static AlarmReport toAlarmReportEntity(AlarmReport alarmReportEntity, AlarmReportType alarmReportType) {
+        // Base
+        alarmReportEntity.setAssetGuid(alarmReportType.getAssetGuid());
+        alarmReportEntity.setCreatedDate(DateUtils.stringToDate(alarmReportType.getOpenDate()));
+        if (alarmReportType.getStatus() != null) {
+            alarmReportEntity.setStatus(alarmReportType.getStatus().name());
         }
+        alarmReportEntity.setUpdated(DateUtils.stringToDate(alarmReportType.getUpdated()));
+        alarmReportEntity.setUpdatedBy(alarmReportType.getUpdatedBy());
+        alarmReportEntity.setUpdated(new Date());
+        alarmReportEntity.setUpdatedBy(alarmReportType.getUpdatedBy());
+        alarmReportEntity.setRecipient(alarmReportType.getRecipient());
+        alarmReportEntity.setPluginType(alarmReportType.getPluginType());
+
+        alarmReportEntity.setGuid(alarmReportType.getGuid());
+        //added to save isInactivePosition, hopefully this is enough
+        if(alarmReportType.getRawMovement() != null) {
+            alarmReportEntity.setRawMovement(toRawMovementEntity(alarmReportType.getRawMovement()));
+            alarmReportEntity.getRawMovement().setActive(!alarmReportType.isInactivatePosition());
+        }
+
+        return alarmReportEntity;
+
     }
 
-    public static AlarmItem toAlarmItemEntity(AlarmItemType alarmItemType) throws DaoMappingException {
-        try {
-            AlarmItem alarmItem = new AlarmItem();
-            alarmItem.setRuleGuid(alarmItemType.getRuleGuid());
-            alarmItem.setRuleName(alarmItemType.getRuleName());
-            alarmItem.setGuid(alarmItemType.getGuid());
-            alarmItem.setUpdated(new Date());
-            alarmItem.setUpdatedBy("UVMS");
+    public static AlarmItem toAlarmItemEntity(AlarmItemType alarmItemType) {
+        AlarmItem alarmItem = new AlarmItem();
+        alarmItem.setRuleGuid(alarmItemType.getRuleGuid());
+        alarmItem.setRuleName(alarmItemType.getRuleName());
+        alarmItem.setGuid(alarmItemType.getGuid());
+        alarmItem.setUpdated(new Date());
+        alarmItem.setUpdatedBy("UVMS");
 
-            return alarmItem;
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping to entity. ] {}", e.getMessage());
-            throw new DaoMappingException("[ Error when mapping to entity. ]", e);
-        }
+        return alarmItem;
     }
 
     public static RawMovement toRawMovementEntity(RawMovementType rawMovementType) {
@@ -352,12 +338,12 @@ public class AlarmMapper {
         return rawMovementEntity;
     }
 
-    public static AlarmReport toAlarmReportEntity(AlarmReportType alarmReportType) throws DaoMappingException {
+    public static AlarmReport toAlarmReportEntity(AlarmReportType alarmReportType) {
         AlarmReport alarmReportEntity = new AlarmReport();
         return toAlarmReportEntity(alarmReportEntity, alarmReportType);
     }
 
-    public static AlarmReportType toAlarmReportType(AlarmReport alarmReportEntity) throws DaoMappingException {
+    public static AlarmReportType toAlarmReportType(AlarmReport alarmReportEntity) {
         AlarmReportType alarmReportType = new AlarmReportType();
         return toAlarmReportType(alarmReportType, alarmReportEntity);
     }

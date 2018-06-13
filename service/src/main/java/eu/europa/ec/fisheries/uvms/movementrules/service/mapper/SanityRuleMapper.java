@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SanityRuleType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 
 public class SanityRuleMapper {
     
@@ -27,52 +26,42 @@ public class SanityRuleMapper {
 
     private SanityRuleMapper() {}
 
-    public static SanityRuleType toSanityRuleType(SanityRuleType sanityRuleType, SanityRule sanityRuleEntity) throws DaoMappingException {
-        try {
-            sanityRuleType.setName(sanityRuleEntity.getName());
-            sanityRuleType.setGuid(sanityRuleEntity.getGuid());
-            sanityRuleType.setExpression(sanityRuleEntity.getExpression());
-            sanityRuleType.setDescription(sanityRuleEntity.getDescription());
-            sanityRuleType.setUpdated(DateUtils.dateToString(sanityRuleEntity.getUpdated()));
-            sanityRuleType.setUpdatedBy(sanityRuleEntity.getUpdatedBy());
+    public static SanityRuleType toSanityRuleType(SanityRuleType sanityRuleType, SanityRule sanityRuleEntity) {
+        sanityRuleType.setName(sanityRuleEntity.getName());
+        sanityRuleType.setGuid(sanityRuleEntity.getGuid());
+        sanityRuleType.setExpression(sanityRuleEntity.getExpression());
+        sanityRuleType.setDescription(sanityRuleEntity.getDescription());
+        sanityRuleType.setUpdated(DateUtils.dateToString(sanityRuleEntity.getUpdated()));
+        sanityRuleType.setUpdatedBy(sanityRuleEntity.getUpdatedBy());
 
-            return sanityRuleType;
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping sanity to model. ] {}", e.getMessage());
-            throw new DaoMappingException("[ Error when mapping sanity to model. ]", e);
-        }
+        return sanityRuleType;
     }
 
-    public static SanityRule toSanityRuleEntity(SanityRule sanityRuleEntity, SanityRuleType sanityRuleType) throws DaoMappingException {
-        try {
-            Date now = new Date();
+    public static SanityRule toSanityRuleEntity(SanityRule sanityRuleEntity, SanityRuleType sanityRuleType) {
+        Date now = new Date();
 
-            // Base
-            sanityRuleEntity.setName(sanityRuleType.getName());
-            sanityRuleEntity.setGuid(sanityRuleType.getGuid());
-            sanityRuleEntity.setExpression(sanityRuleType.getExpression());
-            sanityRuleEntity.setDescription(sanityRuleType.getDescription());
-            sanityRuleEntity.setUpdated(now);
-            sanityRuleEntity.setUpdatedBy(sanityRuleType.getUpdatedBy());
+        // Base
+        sanityRuleEntity.setName(sanityRuleType.getName());
+        sanityRuleEntity.setGuid(sanityRuleType.getGuid());
+        sanityRuleEntity.setExpression(sanityRuleType.getExpression());
+        sanityRuleEntity.setDescription(sanityRuleType.getDescription());
+        sanityRuleEntity.setUpdated(now);
+        sanityRuleEntity.setUpdatedBy(sanityRuleType.getUpdatedBy());
 
-            return sanityRuleEntity;
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping sanity to entity. ] {}", e.getMessage());
-            throw new DaoMappingException("[ Error when mapping sanity to entity. ]", e);
-        }
+        return sanityRuleEntity;
     }
 
-    public static SanityRule toSanityRuleEntity(SanityRuleType sanityRuleType) throws DaoMappingException {
+    public static SanityRule toSanityRuleEntity(SanityRuleType sanityRuleType) {
         SanityRule sanityRuleEntity = new SanityRule();
         return toSanityRuleEntity(sanityRuleEntity, sanityRuleType);
     }
 
-    public static SanityRuleType toSanityRuleType(SanityRule sanityRuleEntity) throws DaoMappingException {
+    public static SanityRuleType toSanityRuleType(SanityRule sanityRuleEntity) {
         SanityRuleType sanityRuleType = new SanityRuleType();
         return toSanityRuleType(sanityRuleType, sanityRuleEntity);
     }
     
-    public static List<SanityRuleType> toSanityRuleTypeList(List<SanityRule> sanityRules) throws DaoMappingException {
+    public static List<SanityRuleType> toSanityRuleTypeList(List<SanityRule> sanityRules) {
         List<SanityRuleType> sanityRuleTypes = new ArrayList<>();
         for (SanityRule sanityRule : sanityRules) {
             sanityRuleTypes.add(toSanityRuleType(sanityRule));

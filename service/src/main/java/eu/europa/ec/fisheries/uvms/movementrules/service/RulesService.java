@@ -31,10 +31,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 
 @Local
@@ -47,9 +44,9 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMarshallException, ModelMarshallException, MessageException;
+    CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, RulesModelMarshallException, ModelMarshallException, MessageException;
 
-    CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException, DaoException, DaoMappingException;
+    CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) throws RulesServiceException, RulesFaultException;
 
     /**
      * Lists (all) custom rules
@@ -59,7 +56,7 @@ public interface RulesService {
      */
 //    List<CustomRuleType> getCustomRuleList() throws RulesServiceException;
 
-    CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, DaoException, RulesModelMapperException;
+    CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, RulesFaultException, AccessDeniedException, RulesModelMapperException;
 
     /**
      * Lists alarms by query
@@ -67,7 +64,7 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, RulesModelException, DaoMappingException, DaoException;
+    GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, RulesModelException;
 
     /**
      * Lists tickets by query
@@ -75,11 +72,11 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, RulesFaultException, SearchMapperException, DaoException, DaoMappingException;
+    GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, RulesFaultException;
 
-    GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException, DaoException, DaoMappingException;
+    GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException;
 
-    long countTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException, DaoException;
+    long countTicketsByMovements(List<String> movements) throws RulesServiceException, RulesFaultException;
 
     /**
      * Update a ticket status
@@ -103,9 +100,8 @@ public interface RulesService {
      * @param customRuleType
      * @throws AccessDeniedException 
      * @throws RulesServiceException
-     * @throws DaoException 
      */
-    CustomRule updateCustomRule(CustomRule customRuleType, String featureName, String applicationName) throws ModelMarshallException, RulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException, DaoException;
+    CustomRule updateCustomRule(CustomRule customRuleType, String featureName, String applicationName) throws ModelMarshallException, RulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException;
 
     /**
      * Update an object
@@ -113,7 +109,7 @@ public interface RulesService {
      * @param oldCustomRule
      * @throws RulesServiceException
      */
-    CustomRule updateCustomRule(CustomRule oldCustomRule) throws DaoException;
+    CustomRule updateCustomRule(CustomRule oldCustomRule);
 
     /**
      * Creates an error report
@@ -143,20 +139,20 @@ public interface RulesService {
      */
     CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException, RulesModelMapperException, RulesFaultException;
 
-    AlarmReport updateAlarmStatus(AlarmReport ticket) throws RulesServiceException, RulesFaultException, DaoException;
+    AlarmReport updateAlarmStatus(AlarmReport ticket) throws RulesServiceException, RulesFaultException;
 
     List<PreviousReport> getPreviousMovementReports();
 
     void timerRuleTriggered(String ruleName, PreviousReport previousReport);
 
-    String reprocessAlarm(List<String> alarms, String username) throws RulesServiceException, RulesModelException, DaoMappingException, DaoException;
+    String reprocessAlarm(List<String> alarms, String username) throws RulesServiceException, RulesModelException;
 
     /**
      * @param guid the GUID of an alarm
      * @return an alarm
      * @throws RulesServiceException if unsuccessful
      */
-    AlarmReport getAlarmReportByGuid(String guid) throws RulesServiceException, RulesFaultException, DaoException;
+    AlarmReport getAlarmReportByGuid(String guid) throws RulesServiceException, RulesFaultException;
 
     /**
      * @param guid the GUID of a ticket
@@ -165,9 +161,9 @@ public interface RulesService {
      */
     Ticket getTicketByGuid(String guid) throws RulesServiceException;
 
-    List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, RulesFaultException, DaoMappingException, DaoException, SearchMapperException;
+    List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) throws RulesServiceException, RulesFaultException;
 
     long getNumberOfAssetsNotSending() throws RulesServiceException, RulesFaultException;
 
-    GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) throws RulesServiceException, DaoException, DaoMappingException;
+    GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) throws RulesServiceException;
 }

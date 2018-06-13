@@ -26,9 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DaoBeanTest {
@@ -45,7 +43,7 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testCreateCustomRule() throws DaoException {
+    public void testCreateCustomRule() {
         CustomRule customRule = new CustomRule();
 
         dao.createCustomRule(customRule);
@@ -53,7 +51,7 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testGetCustomRuleByGuid() throws DaoException {
+    public void testGetCustomRuleByGuid() {
         String guid = "sdfsadfsdsagsd";
         CustomRule entity = new CustomRule();
         entity.setGuid(guid);
@@ -70,7 +68,7 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testUpdateCustomRule() throws DaoException {
+    public void testUpdateCustomRule() {
         Long id = 11L;
 
         CustomRule myEntity = new CustomRule();
@@ -87,12 +85,12 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testDeleteCustomRule() throws DaoException {
+    public void testDeleteCustomRule() {
         // em.remove(arg0);
     }
 
     @Test
-    public void testGetCustomRuleList() throws DaoException {
+    public void testGetCustomRuleList() {
         TypedQuery<CustomRule> query = mock(TypedQuery.class);
         when(em.createNamedQuery(CustomRule.LIST_CUSTOM_RULES_BY_USER, CustomRule.class)).thenReturn(query);
 

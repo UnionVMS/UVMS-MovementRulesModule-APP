@@ -70,7 +70,7 @@ public class RulesModuleResponseMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static GetTicketsAndRulesByMovementsResponse mapToGetTicketsAndRulesByMovementsFromResponse(TextMessage message) throws RulesModelMarshallException, RulesModelMapperException, JMSException, RulesFaultException {
+    public static GetTicketsAndRulesByMovementsResponse mapToGetTicketsAndRulesByMovementsFromResponse(TextMessage message) throws RulesModelMapperException, JMSException, RulesFaultException {
         validateResponse(message, message.getJMSCorrelationID());
         GetTicketsAndRulesByMovementsResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetTicketsAndRulesByMovementsResponse.class);
         return response;
