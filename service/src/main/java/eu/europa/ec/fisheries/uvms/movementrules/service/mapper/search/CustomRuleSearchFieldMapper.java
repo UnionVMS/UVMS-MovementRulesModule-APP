@@ -20,8 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 
 public class CustomRuleSearchFieldMapper {
 
@@ -327,8 +325,8 @@ public class CustomRuleSearchFieldMapper {
             try {
                 CustomRuleSearchField field = mapCriteria(criteria.getKey());
                 searchFields.add(new CustomRuleSearchValue(field, criteria.getValue()));
-            } catch (SearchMapperException ex) {
-                LOG.debug("[ Error when mapping to search field... continuing with other criteria ]");
+            } catch (IllegalArgumentException ex) {
+                LOG.debug("[ Error with criteria {} when mapping to search field... continuing with other criteria ]" , criteria);
             }
         }
 
@@ -343,7 +341,7 @@ public class CustomRuleSearchFieldMapper {
      * @return
      * @throws SearchMapperException
      */
-    private static CustomRuleSearchField mapCriteria(CustomRuleSearchKey key) throws SearchMapperException {
+    private static CustomRuleSearchField mapCriteria(CustomRuleSearchKey key) {
         switch (key) {
             case NAME:
                 return CustomRuleSearchField.NAME;
@@ -358,7 +356,7 @@ public class CustomRuleSearchFieldMapper {
             case TICKET_ACTION_USER:
                 return CustomRuleSearchField.TICKET_ACTION_USER;
             default:
-                throw new SearchMapperException("No field found: " + key.name());
+                throw new IllegalArgumentException("No field found: " + key.name());
         }
     }
 

@@ -20,7 +20,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 
 public class CheckRulesChangesTask implements Runnable {
@@ -75,7 +74,7 @@ public class CheckRulesChangesTask implements Runnable {
                 LOG.debug("Clear outdated custom rules");
                 rulesValidator.updateCustomRules();
             }
-        } catch (RulesServiceException | DaoException | MovementRulesModelException e) {
+        } catch (RulesServiceException | MovementRulesModelException e) {
             LOG.error("[ Error when getting sanity rules ]");
             // TODO: Throw exception???
         }

@@ -20,10 +20,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFac
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.DaoMappingException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException;
 
 @Local
 public interface ValidationService {
@@ -33,7 +30,7 @@ public interface ValidationService {
 
     List<SanityRule> getSanityRules() throws RulesServiceException, MovementRulesFaultException;
 
-    CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, MovementRulesFaultException, DaoMappingException, SearchMapperException, DaoException;
+    CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, MovementRulesFaultException;
 
     // Triggered by rule engine
     void customRuleTriggered(String ruleName, String ruleGuid, MovementFact fact, String actions);
@@ -51,5 +48,5 @@ public interface ValidationService {
      * @return number of open tickets
      * @throws RulesServiceException if unsuccessful
      */
-    long getNumberOfOpenTickets(String userName) throws RulesServiceException, MovementRulesFaultException, DaoException;
+    long getNumberOfOpenTickets(String userName) throws RulesServiceException, MovementRulesFaultException;
 }

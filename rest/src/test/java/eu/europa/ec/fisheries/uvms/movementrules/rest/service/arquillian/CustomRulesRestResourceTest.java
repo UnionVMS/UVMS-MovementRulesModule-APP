@@ -207,7 +207,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     @Test
     public void findCustomRuleByInvalidGuid() throws Exception {
         String response = getWebTarget().path("/customrules/" + "invalidCustomRule").request(MediaType.APPLICATION_JSON).get(String.class);
-        Assert.assertEquals(521, getReturnCode(response));
+        Assert.assertEquals(500, getReturnCode(response));
     }
 
     @Test
