@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetAlarmListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
@@ -69,7 +70,12 @@ public class AlarmRestResource {
     public ResponseDto<AlarmListResponseDto> getAlarmList(AlarmQuery query) {
         LOG.info("Get alarm list invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.getAlarmList(query), ResponseCode.OK);
+            AlarmListResponseDto alarmList = rulesService.getAlarmList(query);
+            GetAlarmListByQueryResponse response = new GetAlarmListByQueryResponse();
+            response.getAlarms().addAll(alarmList.getAlarmList());
+            response.setTotalNumberOfPages(alarmList.getTotalNumberOfPages());
+            response.setCurrentPage(alarmList.getCurrentPage());
+            return new ResponseDto(response, ResponseCode.OK);
         } catch (Exception  e) {
             LOG.error("[ Error when getting alarm list by query. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);

@@ -23,6 +23,7 @@ import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.MobileTerminalType;
@@ -38,6 +39,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Activity;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmItem;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Asset;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.MobileTerminal;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.MobileTerminalId;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Position;
@@ -348,4 +350,11 @@ public class AlarmMapper {
         return toAlarmReportType(alarmReportType, alarmReportEntity);
     }
 
+    public static List<AlarmReportType> toAlarmReportTypeList(List<AlarmReport> alarmReports) {
+        List<AlarmReportType> alarmReportTypes = new ArrayList<>();
+        for (AlarmReport alarmReport : alarmReports) {
+            alarmReportTypes.add(toAlarmReportType(alarmReport));
+        }
+        return alarmReportTypes;
+    }
 }

@@ -76,6 +76,17 @@
         </dependency>
     </dependencies>
 
+	<!-- Used by arquillian -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>movement-rules-service</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
     <build>
         <finalName>${project.name}-${project.version}</finalName>
         <plugins>

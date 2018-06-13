@@ -13,11 +13,11 @@ package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import java.util.List;
 import javax.ejb.Local;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
@@ -30,7 +30,7 @@ public interface ValidationService {
 
     List<SanityRule> getSanityRules() throws RulesServiceException, MovementRulesFaultException;
 
-    GetCustomRuleListByQueryResponse getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, MovementRulesFaultException;
+    CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, MovementRulesFaultException;
 
     // Triggered by rule engine
     void customRuleTriggered(String ruleName, String ruleGuid, MovementFact fact, String actions);

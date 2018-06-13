@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import org.jboss.arquillian.junit.Arquillian;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
@@ -19,7 +18,6 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetAlarmListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
@@ -27,6 +25,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 
@@ -263,8 +262,8 @@ public class RulesValidatorTest extends TransactionalTests {
         dateCriteria.setKey(AlarmSearchKey.FROM_DATE);
         dateCriteria.setValue(RulesUtil.dateToString(fromDate));
         query.getAlarmSearchCriteria().add(dateCriteria);
-        GetAlarmListByQueryResponse alarmList = rulesService.getAlarmList(query);
-        List<AlarmReportType> alarms = alarmList.getAlarms();
+        AlarmListResponseDto alarmList = rulesService.getAlarmList(query);
+        List<AlarmReportType> alarms = alarmList.getAlarmList();
         assertThat(alarms.size(), is(1));
     }
     

@@ -13,21 +13,21 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
 import java.io.Serializable;
 import java.util.List;
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 public class TicketListResponseDto implements Serializable {
 
     private static final long serialVersionUID = 1;
 
-    private List<TicketType> ticketList;
+    private List<Ticket> ticketList;
     private int totalNumberOfPages;
     private int currentPage;
 
-    public List<TicketType> getTicketList() {
+    public List<Ticket> getTicketList() {
         return ticketList;
     }
 
-    public void setTicketList(List<TicketType> ticketList) {
+    public void setTicketList(List<Ticket> ticketList) {
         this.ticketList = ticketList;
     }
 

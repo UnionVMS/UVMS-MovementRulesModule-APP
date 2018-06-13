@@ -68,7 +68,7 @@ public class JMSHelper {
             Queue responseQueue = session.createQueue(queue);
 
             MessageConsumer consumer = session.createConsumer(responseQueue);
-            while (consumer.receiveNoWait() != null);
+            while (consumer.receive(1l) != null);
         } finally {
             connection.close();
         }

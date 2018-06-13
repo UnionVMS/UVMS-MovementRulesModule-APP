@@ -24,6 +24,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
@@ -33,6 +35,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
@@ -65,7 +68,12 @@ public class TicketRestResource {
     public ResponseDto<TicketListResponseDto> getTicketList(@PathParam("loggedInUser") String loggedInUser, TicketQuery query) {
         LOG.info("Get tickets list invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.getTicketList(loggedInUser, query), ResponseCode.OK);
+            TicketListResponseDto ticketList = rulesService.getTicketList(loggedInUser, query);
+            GetTicketListByQueryResponse response = new GetTicketListByQueryResponse();
+            response.setCurrentPage(ticketList.getCurrentPage());
+            response.setTotalNumberOfPages(ticketList.getTotalNumberOfPages());
+            response.getTickets().addAll(TicketMapper.listToTicketType(ticketList.getTicketList()));
+            return new ResponseDto(response, ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ERROR] Error when getting ticket list by query ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
@@ -85,10 +93,13 @@ public class TicketRestResource {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/listByMovements")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto<TicketListResponseDto> getTicketsByMovements(List<String> movements) {
+    public ResponseDto getTicketsByMovements(List<String> movements) {
         LOG.info("Get tickets by movements invoked in rest layer");
         try {
-            return new ResponseDto(rulesService.getTicketsByMovements(movements), ResponseCode.OK);
+            List<Ticket> tickets = rulesService.getTicketsByMovements(movements);
+            GetTicketListByMovementsResponse response = new GetTicketListByMovementsResponse();
+            response.getTickets().addAll(TicketMapper.listToTicketType(tickets));
+            return new ResponseDto(response, ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when getting ticket list by movements. ] {} ", ex);
             return ErrorHandler.getFault(ex);

@@ -15,9 +15,6 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 import javax.ejb.Local;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetAlarmListByQueryResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
@@ -27,6 +24,8 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFa
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -64,7 +63,7 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    GetAlarmListByQueryResponse getAlarmList(AlarmQuery query) throws RulesServiceException, MovementRulesModelException;
+    AlarmListResponseDto getAlarmList(AlarmQuery query) throws RulesServiceException, MovementRulesModelException;
 
     /**
      * Lists tickets by query
@@ -72,9 +71,9 @@ public interface RulesService {
      * @return
      * @throws RulesServiceException
      */
-    GetTicketListByQueryResponse getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, MovementRulesFaultException;
+    TicketListResponseDto getTicketList(String loggedInUser, TicketQuery query) throws RulesServiceException, MovementRulesFaultException;
 
-    GetTicketListByMovementsResponse getTicketsByMovements(List<String> movements) throws RulesServiceException, MovementRulesFaultException;
+    List<Ticket> getTicketsByMovements(List<String> movements) throws RulesServiceException, MovementRulesFaultException;
 
     long countTicketsByMovements(List<String> movements) throws RulesServiceException, MovementRulesFaultException;
 
