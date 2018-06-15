@@ -276,7 +276,7 @@ public class RulesDao {
         return em.merge(report);
     }
 
-    public long getNumberOfTicketsByRuleGuid(String ruleGuid){
+    public long getNumberOfTicketsWithAssetNotSending(String ruleGuid){
         TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_ASSETS_NOT_SENDING, Long.class);
         query.setParameter("ruleGuid", ruleGuid);
         return query.getSingleResult();

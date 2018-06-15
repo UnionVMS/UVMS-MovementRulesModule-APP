@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
@@ -265,6 +266,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
         rulesDao.removeTicketAfterTests(ticket1);
         rulesDao.removeTicketAfterTests(ticket2);
+        rulesDao.removeCustomRuleAfterTests(customRule);
     }
 
     @Test
@@ -301,7 +303,20 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         Long ticketList = deserializeResponseDto(response, Long.class);
         assertEquals(0 , ticketList.intValue());
 
+        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(getCompleteNewCustomRule());
+        customRule.setGuid(UUID.randomUUID().toString());
+        customRule.setAvailability(AvailabilityType.GLOBAL);
+        customRule.setUpdatedBy("TestUser");
+        RuleSubscription ruleSubscription = new RuleSubscription();
+        ruleSubscription.setType(SubscriptionTypeType.TICKET);
+        ruleSubscription.setCustomRule(customRule);
+        ruleSubscription.setOwner("TestUser");
+        customRule.getRuleSubscriptionList().add(ruleSubscription);
+        customRule = rulesDao.createCustomRule(customRule);
+
         Ticket ticket = getCompleteTicket();
+        ticket.setRuleGuid(customRule.getGuid());
+        ticket.setUpdatedBy("TestUser");
         response = getWebTarget()
                 .path("/tickets/countopen/" + ticket.getUpdatedBy())
                 .request(MediaType.APPLICATION_JSON)
@@ -322,6 +337,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         assertEquals(numberOfTicketsB4 + 1 , ticketList.intValue());
 
         rulesDao.removeTicketAfterTests(ticket);
+        rulesDao.removeCustomRuleAfterTests(customRule);
 
 
     }
@@ -334,7 +350,22 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .get(String.class);
 
         Long ticketList = deserializeResponseDto(response, Long.class);
-        assertThat(ticketList, is(0L));
+        assertNotNull(ticketList);
+        int numberOfTicketsB4 = ticketList.intValue();
+
+        Ticket ticket = getCompleteTicket();
+        ticket.setRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
+        rulesDao.createTicket(ticket);
+
+        response = getWebTarget()
+                .path("/tickets/countAssetsNotSending")    //no tickets in the db
+                .request(MediaType.APPLICATION_JSON)
+                .get(String.class);
+
+        ticketList = deserializeResponseDto(response, Long.class);
+        assertEquals(numberOfTicketsB4 +1 , ticketList.intValue());
+
+        rulesDao.removeTicketAfterTests(ticket);
     }
 
     

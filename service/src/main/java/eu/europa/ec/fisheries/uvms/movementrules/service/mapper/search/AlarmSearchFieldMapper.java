@@ -91,7 +91,6 @@ public class AlarmSearchFieldMapper {
      * @param criteriaList
      * @param dynamic
      * @return
-     * @throws SearchMapperException
      */
     private static String createSearchSql(List<AlarmSearchValue> criteriaList, boolean dynamic) {
 
@@ -135,7 +134,6 @@ public class AlarmSearchFieldMapper {
      *
      * @param criteria
      * @param builder
-     * @throws SearchMapperException
      */
     private static void createCriteria(List<AlarmSearchValue> criteria, AlarmSearchField field, StringBuilder builder) {
         if (criteria.size() == 1) {
@@ -230,7 +228,6 @@ public class AlarmSearchFieldMapper {
      *
      * @param entry
      * @return
-     * @throws SearchMapperException
      */
     private static String addParameters(AlarmSearchValue entry) {
         StringBuilder builder = new StringBuilder();
@@ -309,7 +306,6 @@ public class AlarmSearchFieldMapper {
      *
      * @param criteriaList
      * @return
-     * @throws DaoMappingException
      */
     public static List<AlarmSearchValue> mapSearchField(List<AlarmListCriteria> criteriaList) {
 
@@ -322,11 +318,12 @@ public class AlarmSearchFieldMapper {
         for (AlarmListCriteria criteria : criteriaList) {
             try {
                 AlarmSearchField field = mapCriteria(criteria.getKey());
-                if(field.equals(AlarmSearchField.FROM_DATE) || field.equals(AlarmSearchField.TO_DATE)){
-                    searchFields.add(new AlarmSearchValue(field, DateUtils.stringToUTC(criteria.getValue())));
-                }else {
-                    searchFields.add(new AlarmSearchValue(field, criteria.getValue()));
-                }
+                //Apperently this is needed if we are running an oracle DB. We are not.
+                //if(field.equals(AlarmSearchField.FROM_DATE) || field.equals(AlarmSearchField.TO_DATE)){
+                //    searchFields.add(new AlarmSearchValue(field, DateUtils.stringToUTC(criteria.getValue())));
+                //}else {
+                searchFields.add(new AlarmSearchValue(field, criteria.getValue()));
+                //}
             } catch (IllegalArgumentException ex) {
                 LOG.debug("[ Error whit criteria {} when mapping to search field... continuing with other criteria ]", criteria);
             }
@@ -341,7 +338,6 @@ public class AlarmSearchFieldMapper {
      *
      * @param key
      * @return
-     * @throws SearchMapperException
      */
     private static AlarmSearchField mapCriteria(AlarmSearchKey key) {
         switch (key) {
