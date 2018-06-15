@@ -9,7 +9,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
         <artifactId>movement-rules</artifactId>
-        <version>0.9.1-SNAPSHOT</version>
+        <version>0.9.2-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -100,7 +100,7 @@
                     <plugin>
                         <groupId>org.wildfly.plugins</groupId>
                         <artifactId>wildfly-maven-plugin</artifactId>
-                        <version>1.0.2.Final</version>
+                        <version>1.2.1.Final</version>
                         <configuration>
                             <filename>${project.build.finalName}.${project.packaging}</filename>
                             <targetDir>${project.build.directory}</targetDir>

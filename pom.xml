@@ -9,7 +9,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
     <artifactId>movement-rules</artifactId>
-    <version>0.9.1-SNAPSHOT</version>
+    <version>0.9.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -29,7 +29,7 @@
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
-        <docker.dev.version>3.25.1-SNAPSHOT</docker.dev.version>
+        <docker.dev.version>3.25.1</docker.dev.version>
     </properties>
 
     <dependencyManagement>
