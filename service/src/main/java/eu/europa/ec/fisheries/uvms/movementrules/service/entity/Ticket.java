@@ -16,6 +16,7 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -98,6 +99,8 @@ public class Ticket implements Serializable {
     @Column(name = "ticket_upuser")
     @NotNull
     private String updatedBy;   //exists in Type, same name
+
+    //TicketType has a variable called comment that is not present in this class
 
     @PrePersist
     public void prePersist() {
@@ -217,5 +220,5 @@ public class Ticket implements Serializable {
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
     }
-    
+
 }

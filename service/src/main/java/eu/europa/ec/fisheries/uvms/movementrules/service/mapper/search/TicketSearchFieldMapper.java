@@ -303,7 +303,6 @@ public class TicketSearchFieldMapper {
      *
      * @param criteriaList
      * @return
-     * @throws DaoMappingException
      */
     public static List<TicketSearchValue> mapSearchField(List<TicketListCriteria> criteriaList) {
 
@@ -317,11 +316,13 @@ public class TicketSearchFieldMapper {
             try {
                 TicketSearchField field = mapCriteria(criteria.getKey());
                 // Oracle cannot handle time zone in String
-                if(field.equals(TicketSearchField.FROM_DATE) || field.equals(TicketSearchField.TO_DATE)){
-                    searchFields.add(new TicketSearchValue(field, DateUtils.stringToUTC(criteria.getValue())));
-                }else {
-                    searchFields.add(new TicketSearchValue(field, criteria.getValue()));
-                }
+                // we are not using Oracle
+                //if(field.equals(TicketSearchField.FROM_DATE) || field.equals(TicketSearchField.TO_DATE)){
+                    //searchFields.add(new TicketSearchValue(field, DateUtils.stringToUTC(criteria.getValue())));
+                //    searchFields.add(new TicketSearchValue(field, criteria.getValue()));
+                //}else {
+                searchFields.add(new TicketSearchValue(field, criteria.getValue()));
+                //}
             } catch (IllegalArgumentException ex) {
                 LOG.debug("[ Error with criteria {} when mapping to search field... continuing with other criteria ]", criteria);
             }
@@ -336,7 +337,6 @@ public class TicketSearchFieldMapper {
      *
      * @param key
      * @return
-     * @throws SearchMapperException
      */
     private static TicketSearchField mapCriteria(TicketSearchKey key) {
         switch (key) {
