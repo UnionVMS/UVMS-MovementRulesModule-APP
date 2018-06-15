@@ -16,7 +16,6 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;

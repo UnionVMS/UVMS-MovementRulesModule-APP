@@ -100,7 +100,6 @@ public class AlarmRestResource {
             AlarmReportType response = AlarmMapper.toAlarmReportType(rulesService.updateAlarmStatus(AlarmMapper.toAlarmReportEntity(alarmReportType)));
             return new ResponseDto(response, ResponseCode.OK);
         } catch (Exception e) {
-           // e.printStackTrace();
             LOG.error("[ Error when updating Alarm. ] {} ", e.getMessage());
             return ErrorHandler.getFault(e);
         }
