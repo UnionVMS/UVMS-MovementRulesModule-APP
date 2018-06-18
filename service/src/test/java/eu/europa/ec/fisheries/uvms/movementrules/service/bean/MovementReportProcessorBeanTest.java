@@ -77,6 +77,19 @@ public class MovementReportProcessorBeanTest extends TransactionalTests {
         List<PreviousReport> previousReportsAfter = rulesService.getPreviousMovementReports();
         assertThat(previousReportsAfter.size(), is(previousReportsBefore.size()));
     }
+    
+    @Test
+    public void setMovementReportReceivedPreviousReportShouldBeCreatedWithoutAssetIdListTest() throws Exception {
+        RawMovementType rawMovement = getBasicRawMovementType();
+        
+        List<PreviousReport> previousReportsBefore = rulesService.getPreviousMovementReports();
+        
+        rawMovement.setAssetId(null);
+        movementReport.setMovementReportReceived(rawMovement, "NAF", "TEST");
+        
+        List<PreviousReport> previousReportsAfter = rulesService.getPreviousMovementReports();
+        assertThat(previousReportsAfter.size(), is(previousReportsBefore.size() + 1));
+    }
 
     private RawMovementType getBasicRawMovementType() {
         RawMovementType movement = new RawMovementType();

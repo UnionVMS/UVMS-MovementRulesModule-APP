@@ -8,8 +8,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import javax.inject.Inject;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.shrinkwrap.spi.ArchiveFormatAssociable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
@@ -357,6 +359,130 @@ public class RulesValidatorTest extends TransactionalTests {
         assertThat(ticketsAfter, is(ticketsBefore + 1));
         
         assertCustomRuleWasTriggered(createdCustomRule.getGuid(), positionTime);
+    }
+    
+    @Test
+    public void evaluateMovementFactTriggerAreaRuleTest() throws Exception {
+        Date timestamp = getTimestamp();
+        String areaCode = "SWE";
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.AREA.value());
+        segment.setSubCriteria(SubCriteriaType.AREA_CODE.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(areaCode);
+        segment.setEndOperator("");
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        
+        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        fact.getAreaCodes().add(areaCode);
+        rulesValidator.evaluate(fact);
+        
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+        
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
+    }
+    
+    @Test
+    public void evaluateMovementFactTriggerAreaEntryRuleTest() throws Exception {
+        Date timestamp = getTimestamp();
+        String areaCode = "SWE";
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.AREA.value());
+        segment.setSubCriteria(SubCriteriaType.AREA_CODE_ENT.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(areaCode);
+        segment.setEndOperator("");
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        
+        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        fact.getEntAreaCodes().add(areaCode);
+        rulesValidator.evaluate(fact);
+        
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+        
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
+    }
+    
+    @Test
+    public void evaluateMovementFactTriggerAreaExitRuleTest() throws Exception {
+        Date timestamp = getTimestamp();
+        String areaCode = "SWE";
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.AREA.value());
+        segment.setSubCriteria(SubCriteriaType.AREA_CODE_EXT.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(areaCode);
+        segment.setEndOperator("");
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        
+        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        fact.getExtAreaCodes().add(areaCode);
+        rulesValidator.evaluate(fact);
+        
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+        
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
+    }
+    
+    @Test
+    public void evaluateMovementFactTriggerMTSerialNumberRuleTest() throws Exception {
+        Date timestamp = getTimestamp();
+        String serialNumber = UUID.randomUUID().toString();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.MOBILE_TERMINAL.value());
+        segment.setSubCriteria(SubCriteriaType.MT_SERIAL_NO.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(serialNumber);
+        segment.setEndOperator("");
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        
+        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        fact.setMobileTerminalSerialNumber(serialNumber);
+        rulesValidator.evaluate(fact);
+        
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+        
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
     }
     
     @Test

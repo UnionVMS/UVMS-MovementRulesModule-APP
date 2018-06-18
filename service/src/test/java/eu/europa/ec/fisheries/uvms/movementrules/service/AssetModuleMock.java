@@ -29,6 +29,7 @@ import eu.europa.ec.fisheries.wsdl.asset.module.GetAssetModuleRequest;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.asset.types.AssetHistoryId;
 import eu.europa.ec.fisheries.wsdl.asset.types.AssetId;
+import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
 import eu.europa.ec.fisheries.wsdl.asset.types.ListAssetResponse;
 
 @MessageDriven(mappedName = "jms/queue/UVMSAssetEvent", activationConfig = {
@@ -79,6 +80,7 @@ public class AssetModuleMock implements MessageListener {
         Asset asset = new Asset();
         asset.setIrcs("IRCS");
         AssetId assetId = new AssetId();
+        assetId.setType(AssetIdType.GUID);
         assetId.setGuid(UUID.randomUUID().toString());
         asset.setAssetId(assetId);
         AssetHistoryId assetHistoryId = new AssetHistoryId();
