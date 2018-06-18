@@ -19,7 +19,6 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +32,12 @@ import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmItemType;
 import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
@@ -67,7 +63,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
@@ -144,7 +139,7 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     @Override
-    public CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) throws RulesServiceException, MovementRulesFaultException {
+    public CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) {
         if (query == null) {
             throw new IllegalArgumentException("Custom rule list query is null");
         }
@@ -485,10 +480,10 @@ public class ValidationServiceBean implements ValidationService {
                 }
             }
 
-            //Ticket ticket = TicketMapper.toTicketEntity(ticketType);
+
             ticket.setTicketCount(1L);
             Ticket createdTicket = rulesDao.createTicket(ticket);
-            //TicketType createdTicket = TicketMapper.toTicketType(tempTicket);
+
 
             ticketEvent.fire(new NotificationMessage("guid", createdTicket.getGuid()));
 

@@ -35,7 +35,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMa
 import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.movementrules.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
 

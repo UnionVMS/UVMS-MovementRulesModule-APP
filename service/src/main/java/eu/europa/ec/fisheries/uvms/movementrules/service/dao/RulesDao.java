@@ -34,6 +34,10 @@ public class RulesDao {
     @PersistenceContext
     private EntityManager em;
 
+    public void flush() {
+        em.flush();
+    }
+
     public CustomRule createCustomRule(CustomRule entity){
         em.persist(entity);
         return entity;
@@ -49,6 +53,14 @@ public class RulesDao {
             throw new NoResultException("[ No custom rule with guid: " + guid + " can be found ]");  //Trying to remove NoEntityFoundException but I still want the error message, so maybe do it this way?
         }
 
+    }
+
+    public void removeCustomRuleAfterTests(CustomRule customRule) {
+        em.remove(em.contains(customRule) ? customRule : em.merge(customRule));
+    }
+
+    public void removeTicketAfterTests(Ticket ticket) {
+        em.remove(em.contains(ticket) ? ticket : em.merge(ticket));
     }
 
     public Ticket getTicketByGuid(String guid){
@@ -145,7 +157,6 @@ public class RulesDao {
 
     public void removeAlarmReportAfterTests(AlarmReport alarmReport) {
         em.remove(em.contains(alarmReport) ? alarmReport : em.merge(alarmReport));
-        //em.remove(alarmReport);
     }
 
     public Ticket createTicket(Ticket ticket) {
@@ -264,7 +275,7 @@ public class RulesDao {
         return em.merge(report);
     }
 
-    public long getNumberOfTicketsByRuleGuid(String ruleGuid){
+    public long getNumberOfTicketsWithAssetNotSending(String ruleGuid){
         TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_ASSETS_NOT_SENDING, Long.class);
         query.setParameter("ruleGuid", ruleGuid);
         return query.getSingleResult();

@@ -99,6 +99,8 @@ public class Ticket implements Serializable {
     @NotNull
     private String updatedBy;   //exists in Type, same name
 
+    //TicketType has a variable called comment that is not present in this class
+
     @PrePersist
     public void prePersist() {
         this.guid = UUID.randomUUID().toString();
@@ -217,5 +219,5 @@ public class Ticket implements Serializable {
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
     }
-    
+
 }

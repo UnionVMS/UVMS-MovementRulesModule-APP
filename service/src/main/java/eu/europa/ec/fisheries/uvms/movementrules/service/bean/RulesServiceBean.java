@@ -515,7 +515,7 @@ public class RulesServiceBean implements RulesService {
 
     @Override
     public long getNumberOfAssetsNotSending() {
-        return rulesDao.getNumberOfTicketsByRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
+        return rulesDao.getNumberOfTicketsWithAssetNotSending(ServiceConstants.ASSET_NOT_SENDING_RULE);
     }
 
     @Override

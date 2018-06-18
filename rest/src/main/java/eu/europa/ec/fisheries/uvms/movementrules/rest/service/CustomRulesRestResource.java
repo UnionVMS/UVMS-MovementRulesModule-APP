@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
 import java.nio.file.AccessDeniedException;
+import java.text.ParseException;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -27,6 +28,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleIntervalType;
@@ -36,7 +39,6 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorTy
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
-import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
@@ -264,9 +266,14 @@ public class CustomRulesRestResource {
             valid = false;
         } else if(customRule.getTimeIntervals()!=null && !customRule.getTimeIntervals().isEmpty()){
             for (CustomRuleIntervalType intervalType : customRule.getTimeIntervals()){
-                if(DateUtil.parseToUTCDate(intervalType.getStart()).after(DateUtil.parseToUTCDate(intervalType.getEnd()))){
-                    valid = false;
-                    break;
+                try {
+                    if(RulesUtil.stringToDate(intervalType.getStart()).after(RulesUtil.stringToDate(intervalType.getEnd()))){
+                        valid = false;
+                        break;
+                    }
+                } catch (ParseException e) {
+                    LOG.error("Error in parsing date, returning non-valid customRule. Errormessage: " + e.getMessage());
+                    return false;
                 }
             }
         }
