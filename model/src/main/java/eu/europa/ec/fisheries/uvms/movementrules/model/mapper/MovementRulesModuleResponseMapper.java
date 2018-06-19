@@ -15,12 +15,7 @@ import java.util.List;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import eu.europa.ec.fisheries.schema.movementrules.common.v1.RulesFault;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.CountTicketsByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
@@ -51,24 +46,6 @@ public class MovementRulesModuleResponseMapper {
         } catch (MovementRulesModelMarshallException e) {
             // All is well
         }
-    }
-
-    public static String mapToGetTicketListByMovementsResponse(List<TicketType> movementList) throws MovementRulesModelMarshallException {
-        GetTicketsByMovementsResponse response = new GetTicketsByMovementsResponse();
-        response.getTickets().addAll(movementList);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
-    }
-
-    public static String mapToCountTicketListByMovementsResponse(long count) throws MovementRulesModelMarshallException {
-        CountTicketsByMovementsResponse response = new CountTicketsByMovementsResponse();
-        response.setCount(count);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
-    }
-
-    public static String mapToGetCustomRuleResponse(CustomRuleType rule) throws MovementRulesModelMarshallException {
-        GetCustomRuleResponse response = new GetCustomRuleResponse();
-        response.setCustomRule(rule);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
     public static GetTicketsAndRulesByMovementsResponse mapToGetTicketsAndRulesByMovementsFromResponse(TextMessage message) throws MovementRulesModelMapperException, JMSException, MovementRulesFaultException {
