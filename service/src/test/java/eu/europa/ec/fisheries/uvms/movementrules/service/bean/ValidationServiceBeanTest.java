@@ -11,8 +11,6 @@ import javax.inject.Inject;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
@@ -25,6 +23,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 
 @RunWith(Arquillian.class)
@@ -85,6 +84,64 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         CustomRuleListCriteria criteria = new CustomRuleListCriteria();
         criteria.setKey(CustomRuleSearchKey.GUID);
         criteria.setValue(createdCustomRule.getGuid());
+        query.getCustomRuleSearchCriteria().add(criteria);
+        
+        CustomRuleListResponseDto customRulesResponse = validationService.getCustomRulesByQuery(query);
+        List<CustomRule> customRules = customRulesResponse.getCustomRuleList();
+        
+        assertThat(customRules.size(), is(1));
+        
+        CustomRule fetchedCustomRule = customRules.get(0);
+        assertThat(fetchedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+        assertThat(fetchedCustomRule.getName(), is(createdCustomRule.getName()));
+        assertThat(fetchedCustomRule.getUpdatedBy(), is(createdCustomRule.getUpdatedBy()));
+    }
+    
+    @Test
+    public void getCustomRuleListByQueryGuidTwoGuidsTest() throws Exception {
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        CustomRule customRule2 = RulesTestHelper.createCompleteCustomRule();
+        CustomRule createdCustomRule2 = rulesService.createCustomRule(customRule2, "", "");
+        
+        
+        CustomRuleQuery query = RulesTestHelper.createBasicCustomRuleQuery();
+        CustomRuleListCriteria criteria = new CustomRuleListCriteria();
+        criteria.setKey(CustomRuleSearchKey.GUID);
+        criteria.setValue(createdCustomRule.getGuid());
+        query.getCustomRuleSearchCriteria().add(criteria);
+        CustomRuleListCriteria criteria2 = new CustomRuleListCriteria();
+        criteria2.setKey(CustomRuleSearchKey.GUID);
+        criteria2.setValue(createdCustomRule2.getGuid());
+        query.getCustomRuleSearchCriteria().add(criteria2);
+
+        
+        CustomRuleListResponseDto customRulesResponse = validationService.getCustomRulesByQuery(query);
+        List<CustomRule> customRules = customRulesResponse.getCustomRuleList();
+        
+        assertThat(customRules.size(), is(2));
+        assertTrue(customRules.stream()
+                .anyMatch(r -> r.getGuid().equals(createdCustomRule.getGuid())));
+        assertTrue(customRules.stream()
+                .anyMatch(r -> r.getGuid().equals(createdCustomRule2.getGuid())));
+    }
+    
+    @Test
+    public void getCustomRuleListByQueryTicketActionUserTest() throws Exception {
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+        String mail = "test@mail.com";
+        RuleAction action = new RuleAction();
+        action.setAction("EMAIL");
+        action.setValue(mail);
+        action.setCustomRule(customRule);
+        customRule.getRuleActionList().add(action);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        CustomRuleQuery query = RulesTestHelper.createBasicCustomRuleQuery();
+        CustomRuleListCriteria criteria = new CustomRuleListCriteria();
+        criteria.setKey(CustomRuleSearchKey.TICKET_ACTION_USER);
+        criteria.setValue(mail);
         query.getCustomRuleSearchCriteria().add(criteria);
         
         CustomRuleListResponseDto customRulesResponse = validationService.getCustomRulesByQuery(query);

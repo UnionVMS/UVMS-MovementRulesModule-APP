@@ -15,6 +15,13 @@ import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.movement.asset.v1.AssetType;
+import eu.europa.ec.fisheries.schema.movement.v1.ClosestLocationType;
+import eu.europa.ec.fisheries.schema.movement.v1.MovementActivityType;
+import eu.europa.ec.fisheries.schema.movement.v1.MovementActivityTypeType;
+import eu.europa.ec.fisheries.schema.movement.v1.MovementMetaData;
+import eu.europa.ec.fisheries.schema.movement.v1.MovementPoint;
+import eu.europa.ec.fisheries.schema.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
@@ -130,7 +137,33 @@ public class RulesTestHelper {
     public static MovementFact createBasicMovementFact() {
         MovementFact movementFact = new MovementFact();
         MovementType movement = new MovementType();
+        MovementPoint movementPoint = new MovementPoint();
+        movementPoint.setLatitude(56d);
+        movementPoint.setLongitude(11d);
+        movement.setPosition(movementPoint);
+        eu.europa.ec.fisheries.schema.movement.asset.v1.AssetId assetId = new eu.europa.ec.fisheries.schema.movement.asset.v1.AssetId();
+        assetId.setIdType(eu.europa.ec.fisheries.schema.movement.asset.v1.AssetIdType.GUID);
+        assetId.setValue(UUID.randomUUID().toString());
+        assetId.setAssetType(AssetType.VESSEL);
+        movement.setAssetId(assetId);
+        MovementMetaData metadata = new MovementMetaData();
+        ClosestLocationType closestCountry = new ClosestLocationType();
+        closestCountry.setCode("SWE");
+        closestCountry.setName("SWE");
+        metadata.setClosestCountry(closestCountry);
+        ClosestLocationType closestPort = new ClosestLocationType();
+        closestPort.setCode("GBG");
+        closestPort.setName("GBG");
+        metadata.setClosestPort(closestPort);
+        movement.setMetaData(metadata);
+        MovementActivityType activityType = new MovementActivityType();
+        activityType.setMessageType(MovementActivityTypeType.COE);
+        activityType.setMessageId("messageId");
+        movement.setActivity(activityType);
+        movement.setSource(MovementSourceType.NAF);
         movementFact.setMovementMovement(movement);
+        movementFact.setLongitude(56d);
+        movementFact.setLatitude(11d);
         return movementFact;
     }
     

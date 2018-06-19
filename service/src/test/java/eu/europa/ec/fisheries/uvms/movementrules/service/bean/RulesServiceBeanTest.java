@@ -3,6 +3,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,8 +13,6 @@ import java.util.List;
 import java.util.UUID;
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,6 +31,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
@@ -39,6 +39,7 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
@@ -52,7 +53,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 
 
 @RunWith(Arquillian.class)
@@ -193,8 +193,34 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule);
         assertThat(updatedCustomRule.getDescription(), is(newDescription));
         assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+        assertThat(updatedCustomRule.getRuleSegmentList().size(), is(createdCustomRule.getRuleSegmentList().size()));
     }
-   
+
+    @Test
+    public void updateCustomRuleCheckRuleSegmentTest() throws Exception {
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+        customRule.getRuleSegmentList().clear();
+        RuleSegment areaRule = new RuleSegment();
+        areaRule.setStartOperator("(");
+        areaRule.setCriteria(CriteriaType.AREA.value());
+        areaRule.setSubCriteria(SubCriteriaType.AREA_CODE.value());
+        areaRule.setCondition(ConditionType.EQ.value());
+        areaRule.setValue("DNK");
+        areaRule.setEndOperator(")");
+        areaRule.setLogicOperator(LogicOperatorType.NONE.value());
+        areaRule.setOrder(0);
+        areaRule.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(areaRule);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        String newDescription = "Updated description";
+        createdCustomRule.setDescription(newDescription);
+        CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule);
+        assertThat(updatedCustomRule.getDescription(), is(newDescription));
+        assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+        assertThat(updatedCustomRule.getRuleSegmentList().size(), is(createdCustomRule.getRuleSegmentList().size()));
+        assertTrue(updatedCustomRule.getRuleSegmentList().get(0).equals(createdCustomRule.getRuleSegmentList().get(0)));
+    }
+    
     @Test
     public void updateCustomRuleWithUsernameTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
@@ -339,7 +365,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
-    public void getTicketListTest() throws Exception {
+    public void getTicketListByGuidTest() throws Exception {
         String user = "Test user";
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         customRule.setUpdatedBy(user);
@@ -353,6 +379,77 @@ public class RulesServiceBeanTest extends TransactionalTests {
         TicketListCriteria criteria = new TicketListCriteria();
         criteria.setKey(TicketSearchKey.TICKET_GUID);
         criteria.setValue(createdTicket.getGuid());
+        query.getTicketSearchCriteria().add(criteria);
+        TicketListResponseDto ticketList = rulesService.getTicketList(user, query);
+        List<Ticket> tickets = ticketList.getTicketList();
+        assertThat(tickets.size(), is(1));
+    }
+    
+    @Test
+    public void getTicketListByGuidTwoTicketsTest() throws Exception {
+        String user = "Test user";
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+        customRule.setUpdatedBy(user);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        Ticket ticket = getBasicTicket();
+        ticket.setRuleGuid(createdCustomRule.getGuid());
+        Ticket createdTicket = rulesDao.createTicket(ticket);
+        
+        Ticket ticket2 = getBasicTicket();
+        ticket2.setRuleGuid(createdCustomRule.getGuid());
+        Ticket createdTicket2 = rulesDao.createTicket(ticket2);
+        
+        TicketQuery query = RulesTestHelper.getBasicTicketQuery();
+        TicketListCriteria criteria = new TicketListCriteria();
+        criteria.setKey(TicketSearchKey.TICKET_GUID);
+        criteria.setValue(createdTicket.getGuid());
+        query.getTicketSearchCriteria().add(criteria);
+        TicketListCriteria criteria2 = new TicketListCriteria();
+        criteria2.setKey(TicketSearchKey.TICKET_GUID);
+        criteria2.setValue(createdTicket2.getGuid());
+        query.getTicketSearchCriteria().add(criteria2);
+        TicketListResponseDto ticketList = rulesService.getTicketList(user, query);
+        List<Ticket> tickets = ticketList.getTicketList();
+        assertThat(tickets.size(), is(2));
+    }
+    
+    @Test
+    public void getTicketListByAssetGuidTest() throws Exception {
+        String user = "Test user";
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+        customRule.setUpdatedBy(user);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        Ticket ticket = getBasicTicket();
+        ticket.setRuleGuid(createdCustomRule.getGuid());
+        Ticket createdTicket = rulesDao.createTicket(ticket);
+        
+        TicketQuery query = RulesTestHelper.getBasicTicketQuery();
+        TicketListCriteria criteria = new TicketListCriteria();
+        criteria.setKey(TicketSearchKey.ASSET_GUID);
+        criteria.setValue(createdTicket.getAssetGuid());
+        query.getTicketSearchCriteria().add(criteria);
+        TicketListResponseDto ticketList = rulesService.getTicketList(user, query);
+        List<Ticket> tickets = ticketList.getTicketList();
+        assertThat(tickets.size(), is(1));
+    }
+    
+    @Test
+    public void getTicketListByRuleGuidTest() throws Exception {
+        String user = "Test user";
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+        customRule.setUpdatedBy(user);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        Ticket ticket = getBasicTicket();
+        ticket.setRuleGuid(createdCustomRule.getGuid());
+        rulesDao.createTicket(ticket);
+        
+        TicketQuery query = RulesTestHelper.getBasicTicketQuery();
+        TicketListCriteria criteria = new TicketListCriteria();
+        criteria.setKey(TicketSearchKey.RULE_GUID);
+        criteria.setValue(createdCustomRule.getGuid());
         query.getTicketSearchCriteria().add(criteria);
         TicketListResponseDto ticketList = rulesService.getTicketList(user, query);
         List<Ticket> tickets = ticketList.getTicketList();
@@ -386,6 +483,31 @@ public class RulesServiceBeanTest extends TransactionalTests {
         
         List<Ticket> ticketsByMovements = rulesService.getTicketsByMovements(Arrays.asList(movementGuid));
         assertThat(ticketsByMovements.size(), is(1));
+    }
+    
+    @Test
+    public void getTicketsAndRulesByMovementsEmptyTest() throws Exception {
+        GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(Arrays.asList(""));
+        List<TicketAndRuleType> ticketsAndRules = response.getTicketsAndRules();
+        assertThat(ticketsAndRules.size(), is(0));
+    }
+    
+    @Test
+    public void getTicketsAndRulesByMovementsTest() throws Exception {
+        String guid = UUID.randomUUID().toString();
+        
+        CustomRule customRule = getCompleteNewCustomRule();
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        
+        Ticket ticket = getBasicTicket();
+        ticket.setRuleGuid(createdCustomRule.getGuid());
+        ticket.setMovementGuid(guid);
+        rulesDao.createTicket(ticket);
+        
+        GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(Arrays.asList(guid));
+        List<TicketAndRuleType> ticketsAndRules = response.getTicketsAndRules();
+        assertThat(ticketsAndRules.size(), is(1));
+        assertThat(ticketsAndRules.get(0).getRule().getGuid(), is(createdCustomRule.getGuid()));
     }
 
     @Test
