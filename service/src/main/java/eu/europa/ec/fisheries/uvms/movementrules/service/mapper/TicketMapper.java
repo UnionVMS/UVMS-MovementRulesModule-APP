@@ -23,8 +23,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 public class TicketMapper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TicketMapper.class);
-
     private TicketMapper() {}
     
     public static TicketType toTicketType(TicketType ticketType, Ticket ticketEntity) {

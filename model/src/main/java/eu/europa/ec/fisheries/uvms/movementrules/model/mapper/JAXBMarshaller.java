@@ -99,27 +99,4 @@ public class JAXBMarshaller {
             throw new MovementRulesModelMarshallException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
         }
     }
-
-    public static <R> R unMarshallMessage(String textMessage, Class clazz, Schema schema) throws MovementRulesModelMarshallException {
-        try {
-            JAXBContext jc = JAXBContext.newInstance(clazz);
-            Unmarshaller unmarshaller = jc.createUnmarshaller();
-            if (schema != null){
-                unmarshaller.setSchema(schema);
-            }
-            StringReader sr = new StringReader(textMessage);
-            StreamSource source = new StreamSource(sr);
-            long before = System.currentTimeMillis();
-            R object = (R) unmarshaller.unmarshal(source);
-            LOG.debug("Unmarshalling time: {}", (System.currentTimeMillis() - before));
-            return object;
-        } catch (JAXBException ex) {
-            throw new MovementRulesModelMarshallException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
-        }
-    }
-
-    public static <R> R unMarshallMessage(String textMessage, Class clazz) throws MovementRulesModelMarshallException {
-        return unMarshallMessage(textMessage, clazz, null);
-    }
-
 }
