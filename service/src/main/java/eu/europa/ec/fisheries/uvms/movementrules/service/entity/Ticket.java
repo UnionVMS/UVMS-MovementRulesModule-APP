@@ -44,6 +44,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 })
 public class Ticket implements Serializable {
 
+    private static final long serialVersionUID = -2423644165824696757L;
+    
     public static final String FIND_TICKET_BY_GUID = "Ticket.findByGuid";
     public static final String FIND_TICKET_BY_ASSET_AND_RULE = "Ticket.findByAssetGuid";
     public static final String FIND_TICKETS_BY_MOVEMENTS = "Ticket.findByMovementGuids";

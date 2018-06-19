@@ -11,9 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
-import eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,11 +27,14 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
+import eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType;
 
 //@formatter:off
 @Entity
@@ -97,7 +97,8 @@ public class AlarmReport implements Serializable {
     @OneToMany(mappedBy = "alarmReport", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<AlarmItem> alarmItemList;  //exists in Type, same name
 
-    public AlarmReport() {
+    @PrePersist
+    public void prePersist() {
         this.guid = UUID.randomUUID().toString();
     }
 
@@ -187,7 +188,7 @@ public class AlarmReport implements Serializable {
 
     public List<AlarmItem> getAlarmItemList() {
         if (alarmItemList == null) {
-            alarmItemList = new ArrayList<AlarmItem>();
+            alarmItemList = new ArrayList<>();
         }
         return alarmItemList;
     }

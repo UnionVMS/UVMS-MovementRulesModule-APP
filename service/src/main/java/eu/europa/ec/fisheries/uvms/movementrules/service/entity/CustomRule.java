@@ -11,10 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
-
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,11 +27,13 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 
 //@formatter:off
 @Entity
@@ -113,7 +117,8 @@ public class CustomRule implements Serializable {
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Interval> intervals;           //exists in Type as timeIntervals
 
-    public CustomRule() {
+    @PrePersist
+    public void prePersist() {
         this.guid = UUID.randomUUID().toString();
     }
 
@@ -226,7 +231,7 @@ public class CustomRule implements Serializable {
     // @XmlTransient
     public List<RuleSegment> getRuleSegmentList() {
         if (ruleSegmentList == null) {
-            ruleSegmentList = new ArrayList<RuleSegment>();
+            ruleSegmentList = new ArrayList<>();
         }
         return ruleSegmentList;
     }
@@ -238,7 +243,7 @@ public class CustomRule implements Serializable {
     // @XmlTransient
     public List<RuleAction> getRuleActionList() {
         if (ruleActionList == null) {
-            ruleActionList = new ArrayList<RuleAction>();
+            ruleActionList = new ArrayList<>();
         }
         return ruleActionList;
     }
@@ -249,7 +254,7 @@ public class CustomRule implements Serializable {
 
     public List<Interval> getIntervals() {
         if (intervals == null) {
-            intervals = new ArrayList<Interval>();
+            intervals = new ArrayList<>();
         }
         return intervals;
     }

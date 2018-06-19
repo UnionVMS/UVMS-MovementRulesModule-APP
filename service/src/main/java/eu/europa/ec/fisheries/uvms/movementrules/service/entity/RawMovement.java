@@ -92,7 +92,7 @@ public class RawMovement implements Serializable {
 
 
     @JoinColumn(name = "rawmove_alarmrep_id", referencedColumnName = "alarmrep_id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     private AlarmReport alarmReport;    //does not exist in type
 
     @OneToOne(mappedBy = "rawMovement", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
