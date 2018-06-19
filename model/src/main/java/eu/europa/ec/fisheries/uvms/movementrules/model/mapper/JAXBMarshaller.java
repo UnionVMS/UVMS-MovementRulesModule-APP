@@ -11,6 +11,10 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.model.mapper;
 
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBContext;
@@ -18,11 +22,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
@@ -99,27 +98,4 @@ public class JAXBMarshaller {
             throw new MovementRulesModelMarshallException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
         }
     }
-
-    public static <R> R unMarshallMessage(String textMessage, Class clazz, Schema schema) throws MovementRulesModelMarshallException {
-        try {
-            JAXBContext jc = JAXBContext.newInstance(clazz);
-            Unmarshaller unmarshaller = jc.createUnmarshaller();
-            if (schema != null){
-                unmarshaller.setSchema(schema);
-            }
-            StringReader sr = new StringReader(textMessage);
-            StreamSource source = new StreamSource(sr);
-            long before = System.currentTimeMillis();
-            R object = (R) unmarshaller.unmarshal(source);
-            LOG.debug("Unmarshalling time: {}", (System.currentTimeMillis() - before));
-            return object;
-        } catch (JAXBException ex) {
-            throw new MovementRulesModelMarshallException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
-        }
-    }
-
-    public static <R> R unMarshallMessage(String textMessage, Class clazz) throws MovementRulesModelMarshallException {
-        return unMarshallMessage(textMessage, clazz, null);
-    }
-
 }

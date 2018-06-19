@@ -12,18 +12,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SanityRuleType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 
 public class SanityRuleMapper {
     
-    private static final Logger LOG = LoggerFactory.getLogger(SanityRuleMapper.class);
-
     private SanityRuleMapper() {}
 
     public static SanityRuleType toSanityRuleType(SanityRuleType sanityRuleType, SanityRule sanityRuleEntity) {
@@ -35,25 +30,6 @@ public class SanityRuleMapper {
         sanityRuleType.setUpdatedBy(sanityRuleEntity.getUpdatedBy());
 
         return sanityRuleType;
-    }
-
-    public static SanityRule toSanityRuleEntity(SanityRule sanityRuleEntity, SanityRuleType sanityRuleType) {
-        Date now = new Date();
-
-        // Base
-        sanityRuleEntity.setName(sanityRuleType.getName());
-        sanityRuleEntity.setGuid(sanityRuleType.getGuid());
-        sanityRuleEntity.setExpression(sanityRuleType.getExpression());
-        sanityRuleEntity.setDescription(sanityRuleType.getDescription());
-        sanityRuleEntity.setUpdated(now);
-        sanityRuleEntity.setUpdatedBy(sanityRuleType.getUpdatedBy());
-
-        return sanityRuleEntity;
-    }
-
-    public static SanityRule toSanityRuleEntity(SanityRuleType sanityRuleType) {
-        SanityRule sanityRuleEntity = new SanityRule();
-        return toSanityRuleEntity(sanityRuleEntity, sanityRuleType);
     }
 
     public static SanityRuleType toSanityRuleType(SanityRule sanityRuleEntity) {

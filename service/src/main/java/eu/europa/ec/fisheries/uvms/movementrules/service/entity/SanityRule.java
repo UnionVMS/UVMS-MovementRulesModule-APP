@@ -68,9 +68,6 @@ public class SanityRule implements Serializable {
     @NotNull
     private String updatedBy;   //exists in Type, same name
 
-    public SanityRule() {
-    }
-
     public Long getId() {
         return id;
     }
