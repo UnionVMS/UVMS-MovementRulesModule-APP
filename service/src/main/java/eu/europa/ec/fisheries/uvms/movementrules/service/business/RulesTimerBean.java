@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.DependsOn;
+import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
@@ -34,16 +35,16 @@ public class RulesTimerBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(RulesTimerBean.class);
 
-    @Inject
+    @EJB
     private RulesService rulesService;
 
-    @Inject
+    @EJB
     private ValidationService validationService;
 
-    @Inject
+    @EJB
     private RulesValidator rulesValidator;
     
-    @Inject
+    @EJB
     private ParameterService parameterService;
 
     private ScheduledFuture<?> comm;
