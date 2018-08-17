@@ -11,11 +11,9 @@ import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.shrinkwrap.spi.ArchiveFormatAssociable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
@@ -28,6 +26,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 
@@ -265,7 +264,7 @@ public class RulesValidatorTest extends TransactionalTests {
         dateCriteria.setValue(RulesUtil.dateToString(fromDate));
         query.getAlarmSearchCriteria().add(dateCriteria);
         AlarmListResponseDto alarmList = rulesService.getAlarmList(query);
-        List<AlarmReportType> alarms = alarmList.getAlarmList();
+        List<AlarmReport> alarms = alarmList.getAlarmList();
         assertThat(alarms.size(), is(1));
     }
     

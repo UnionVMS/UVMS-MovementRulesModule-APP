@@ -339,7 +339,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         query.getAlarmSearchCriteria().add(criteria);
         
         AlarmListResponseDto alarmList = rulesService.getAlarmList(query);
-        List<AlarmReportType> alarms = alarmList.getAlarmList();
+        List<AlarmReport> alarms = alarmList.getAlarmList();
         
         assertThat(alarms.size(), is(1));
         assertThat(alarms.get(0).getGuid(), is(createdAlarmReport.getGuid()));
@@ -780,6 +780,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     
     private RawMovement getBasicRawMovement() {
         RawMovement rawMovement = new RawMovement();
+        rawMovement.setActive(true);
         rawMovement.setUpdated(new Date());
         rawMovement.setUpdatedBy("Test");
         return rawMovement;
