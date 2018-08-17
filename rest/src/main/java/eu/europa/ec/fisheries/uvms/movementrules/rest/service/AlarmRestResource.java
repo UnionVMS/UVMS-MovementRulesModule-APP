@@ -72,7 +72,7 @@ public class AlarmRestResource {
         try {
             AlarmListResponseDto alarmList = rulesService.getAlarmList(query);
             GetAlarmListByQueryResponse response = new GetAlarmListByQueryResponse();
-            response.getAlarms().addAll(alarmList.getAlarmList());
+            response.getAlarms().addAll(AlarmMapper.toAlarmReportTypeList(alarmList.getAlarmList()));
             response.setTotalNumberOfPages(alarmList.getTotalNumberOfPages());
             response.setCurrentPage(alarmList.getCurrentPage());
             return new ResponseDto(response, ResponseCode.OK);

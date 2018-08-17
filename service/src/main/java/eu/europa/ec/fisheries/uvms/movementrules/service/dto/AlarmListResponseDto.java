@@ -13,21 +13,21 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
 import java.io.Serializable;
 import java.util.List;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 
 public class AlarmListResponseDto implements Serializable {
 
     private static final long serialVersionUID = 1;
 
-    private List<AlarmReportType> alarmList;
+    private List<AlarmReport> alarmList;
     private int totalNumberOfPages;
     private int currentPage;
 
-    public List<AlarmReportType> getAlarmList() {
+    public List<AlarmReport> getAlarmList() {
         return alarmList;
     }
 
-    public void setAlarmList(List<AlarmReportType> alarmList) {
+    public void setAlarmList(List<AlarmReport> alarmList) {
         this.alarmList = alarmList;
     }
 

@@ -200,11 +200,6 @@ public class AlarmMapper {
         alarmReportEntity.setPluginType(alarmReportType.getPluginType());
 
         alarmReportEntity.setGuid(alarmReportType.getGuid());
-        //added to save isInactivePosition, hopefully this is enough
-        if(alarmReportType.getRawMovement() != null) {
-            alarmReportEntity.setRawMovement(toRawMovementEntity(alarmReportType.getRawMovement()));
-            alarmReportEntity.getRawMovement().setActive(!alarmReportType.isInactivatePosition());
-        }
 
         return alarmReportEntity;
 

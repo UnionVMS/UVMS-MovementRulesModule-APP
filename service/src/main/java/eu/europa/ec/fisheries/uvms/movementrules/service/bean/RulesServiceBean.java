@@ -379,7 +379,7 @@ public class RulesServiceBean implements RulesService {
         AlarmListResponseDto response = new AlarmListResponseDto();
         response.setTotalNumberOfPages(numberOfPages);
         response.setCurrentPage(query.getPagination().getPage());
-        response.setAlarmList(AlarmMapper.toAlarmReportTypeList(alarmEntityList));
+        response.setAlarmList(alarmEntityList);
 
         return response;
     }
@@ -613,18 +613,18 @@ public class RulesServiceBean implements RulesService {
         AlarmQuery query = mapToOpenAlarmQuery(alarmGuids);
         AlarmListResponseDto alarms = getAlarmList(query);
 
-        for (AlarmReportType alarm : alarms.getAlarmList()) {
+        for (AlarmReport alarm : alarms.getAlarmList()) {
             // Cannot reprocess without a movement (i.e. "Asset not sending" alarm)
             if (alarm.getRawMovement() == null) {
                 continue;
             }
 
             // Mark the alarm as REPROCESSED before reprocessing. That will create a new alarm (if still wrong) with the items remaining.
-            alarm.setStatus(AlarmStatusType.REPROCESSED);
-            //its this, not change updateAlarmStatus or change the DTO, I think that this is the best of a bad lot
-            alarm = AlarmMapper.toAlarmReportType(updateAlarmStatus(AlarmMapper.toAlarmReportEntity(alarm)));
+            alarm.setStatus(AlarmStatusType.REPROCESSED.value());
+            alarm = updateAlarmStatus(alarm);
             auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, alarm.getGuid(), null, username);
-            RawMovementType rawMovementType = alarm.getRawMovement();
+            AlarmReportType alarmType = AlarmMapper.toAlarmReportType(alarm);
+            RawMovementType rawMovementType = alarmType.getRawMovement();
             // TODO: Use better type (some variation of PluginType...)
             String pluginType = alarm.getPluginType();
             movementReportBean.setMovementReportReceived(rawMovementType, pluginType, username);
