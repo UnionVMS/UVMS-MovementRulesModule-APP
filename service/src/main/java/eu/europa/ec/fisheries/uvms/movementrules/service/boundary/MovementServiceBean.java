@@ -34,9 +34,9 @@ import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementDuplicateExc
 import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementFaultException;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.movementrules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MovementBaseTypeMapper;
 
 @Stateless

@@ -24,9 +24,9 @@ import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelValidationExc
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.movementrules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;

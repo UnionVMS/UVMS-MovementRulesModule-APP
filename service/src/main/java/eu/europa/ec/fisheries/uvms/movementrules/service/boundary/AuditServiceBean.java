@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
 import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 

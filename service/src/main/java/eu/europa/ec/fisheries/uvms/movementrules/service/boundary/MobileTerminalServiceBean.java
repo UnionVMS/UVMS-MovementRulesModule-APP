@@ -31,9 +31,9 @@ import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminal
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalUnmarshallException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.mapper.MobileTerminalModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.mapper.MobileTerminalModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.movementrules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 
 @Stateless
 public class MobileTerminalServiceBean {

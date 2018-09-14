@@ -74,6 +74,10 @@
             <version>5.14.5</version>           
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
+            <artifactId>movement-rules-service</artifactId>
+        </dependency>
     </dependencies>
 
 	<!-- Used by arquillian -->
