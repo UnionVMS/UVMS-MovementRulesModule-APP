@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleResponseMapper;
@@ -44,15 +43,9 @@ public class RulesEventServiceBean{
         return pingResponse;
     }
 
-    public void setMovementReportReceived(SetMovementReportRequest request) {
-        try {
-            if (request.getMethod() != RulesModuleMethod.SET_MOVEMENT_REPORT) {
-                LOG.error("[ERROR] Error, Set Movement Report invoked but it is not the intended method, caller is trying : {}", request.getMethod().name());
-            }
+    public void setMovementReportReceived(SetMovementReportRequest request) throws RulesServiceException {
+
             movementReportBean.setMovementReportReceived(request.getRequest(), request.getType().name(), request.getUsername());
-        } catch (RulesServiceException e) {
-            LOG.error("[ERROR] Error when creating movement {}", e.getMessage());
-        }
     }
 
     public String getTicketsAndRulesByMovementsEvent(GetTicketsAndRulesByMovementsRequest request) throws Exception {
