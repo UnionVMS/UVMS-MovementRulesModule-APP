@@ -22,6 +22,10 @@ public class RulesServiceException extends Exception {
         super(message);
     }
 
+    public RulesServiceException(Throwable e) {
+        super(e);
+    }
+
     public RulesServiceException(String message, Throwable cause) {
         super(message, cause);
     }

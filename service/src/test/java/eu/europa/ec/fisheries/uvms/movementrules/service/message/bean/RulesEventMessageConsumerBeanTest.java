@@ -45,7 +45,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         PingRequest request = new PingRequest();
         request.setMethod(RulesModuleMethod.PING);
         String requestString = JAXBMarshaller.marshallJaxBObjectToString(request);
-        String correlationId = jmsHelper.sendMessageToRules(requestString);
+        String correlationId = jmsHelper.sendMessageToRules(requestString, RulesModuleMethod.PING.value());
         Message message = jmsHelper.listenForResponse(correlationId);
         assertThat(message, is(notNullValue()));
         
@@ -57,7 +57,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
     public void setMovementReportTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
-        String correlationId = jmsHelper.sendMessageToRules(request);
+        String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
@@ -71,7 +71,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
     public void setMovementReportCreateTwoPositionsTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
-        String correlationId = jmsHelper.sendMessageToRules(request);
+        String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
@@ -81,7 +81,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         
         RawMovementType movement2 = TestHelper.createBasicMovement();
         request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement2, "testUser");
-        correlationId = jmsHelper.sendMessageToRules(request);
+        correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse2 = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
@@ -95,7 +95,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         RawMovementType movement = TestHelper.createBasicMovement();
         movement.getPosition().setLatitude(null);
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
-        String correlationId = jmsHelper.sendMessageToRules(request);
+        String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
@@ -109,7 +109,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         calendar.add(Calendar.HOUR, 1);
         movement.setPositionTime(calendar.getTime());
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
-        String correlationId = jmsHelper.sendMessageToRules(request);
+        String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);

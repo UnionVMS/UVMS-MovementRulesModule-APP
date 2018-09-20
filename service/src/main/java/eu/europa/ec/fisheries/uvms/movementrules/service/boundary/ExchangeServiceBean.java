@@ -17,6 +17,9 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
@@ -63,7 +66,7 @@ public class ExchangeServiceBean {
 
         try {
             String exchangeResponseText = ExchangeMovementMapper.mapToProcessedMovementResponse(setReportMovementType, movementRef, username);
-            producer.sendDataSourceMessage(exchangeResponseText, DataSourceQueue.EXCHANGE);
+            producer.sendDataSourceMessage(exchangeResponseText, DataSourceQueue.EXCHANGE, ServiceConstants.METHOD, ExchangeModuleMethod.PROCESSED_MOVEMENT.value());
         } catch (ExchangeModelMapperException e) {
             LOG.error("Could not send processed movement to Exchange", e);
         }
@@ -73,19 +76,19 @@ public class ExchangeServiceBean {
         ArrayList<PluginType> types = new ArrayList<>();
         types.add(pluginType);
         String serviceListRequest = ExchangeModuleRequestMapper.createGetServiceListRequest(types);
-        String serviceListRequestId = producer.sendDataSourceMessage(serviceListRequest, DataSourceQueue.EXCHANGE);
+        String serviceListRequestId = producer.sendDataSourceMessage(serviceListRequest, DataSourceQueue.EXCHANGE, ServiceConstants.METHOD, ExchangeModuleMethod.LIST_SERVICES.value());
         TextMessage serviceListResponse = consumer.getMessage(serviceListRequestId, TextMessage.class);
         return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromModuleResponse(serviceListResponse, serviceListRequestId);
     }
     
     public void sendReportToPlugin(ServiceResponseType service, PluginType pluginType, String ruleName, String endpoint, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementFact fact) throws ExchangeModelMapperException, MessageException {
         String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin(service.getServiceClassName(), pluginType, new Date(), ruleName, endpoint, exchangeMovement, recipientInfoList, fact.getAssetName(), fact.getIrcs(), fact.getMmsiNo(), fact.getExternalMarking(), fact.getFlagState());
-        String messageId = producer.sendDataSourceMessage(exchangeRequest, DataSourceQueue.EXCHANGE);
+        String messageId = producer.sendDataSourceMessage(exchangeRequest, DataSourceQueue.EXCHANGE, ServiceConstants.METHOD, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
         consumer.getMessage(messageId, TextMessage.class);
     }
     
     public void sendEmail(ServiceResponseType service, EmailType email, String ruleName) throws ExchangeModelMapperException, MessageException {
         String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(service.getServiceClassName(), email, ruleName);
-        producer.sendDataSourceMessage(request, DataSourceQueue.EXCHANGE);
+        producer.sendDataSourceMessage(request, DataSourceQueue.EXCHANGE, ServiceConstants.METHOD, ExchangeModuleMethod.SET_COMMAND.value());
     }
 }

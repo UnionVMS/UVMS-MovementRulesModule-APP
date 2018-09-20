@@ -22,6 +22,7 @@ import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.*;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesEventServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,25 +46,14 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModul
 public class RulesEventMessageConsumerBean implements MessageListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(RulesEventMessageConsumerBean.class);
-    private static final String METHOD = "METHOD";
 
-    @Inject
-    @SetMovementReportReceivedEvent
-    private Event<EventMessage> setMovementReportRecievedEvent;
 
     @Inject
     private RulesEventServiceBean rulesEventServiceBean;
 
-    @Inject
-    @GetTicketsAndRulesByMovementsEvent
-    private Event<EventMessage> getTicketsAndRulesByMovementsEvent;
 
     @Inject
     private RulesMessageProducer rulesProducer;
-
-    @Inject
-    @PingReceivedEvent
-    private Event<EventMessage> pingReceivedEvent;
 
     @Inject
     @ErrorEvent
@@ -78,7 +68,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
         TextMessage textMessage = (TextMessage) message;
         MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         try {
-            RulesModuleMethod method = RulesModuleMethod.fromValue(textMessage.getStringProperty(METHOD));
+            RulesModuleMethod method = RulesModuleMethod.fromValue(textMessage.getStringProperty(ServiceConstants.METHOD));
             if (method == null) {
                 throw new NullPointerException("[ Request method is null ]");
             }
@@ -102,7 +92,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
 
         } catch (Exception /*NullPointerException | MovementRulesModelMarshallException | MessageException*/ e) {
             LOG.error("[ Error when receiving message in rules: {}]", e);
-            errorEvent.fire(new EventMessage(textMessage, MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules:" + e.getMessage())));
+            errorEvent.fire(new EventMessage(textMessage, MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules:" + e)));
         } finally {
             MDC.remove("clientName");
         }

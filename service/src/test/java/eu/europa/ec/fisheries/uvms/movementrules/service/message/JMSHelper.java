@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.message;
 
 import javax.jms.*;
 
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 
@@ -24,7 +25,7 @@ public class JMSHelper {
 
     private ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
-    public String sendMessageToRules(String text) throws Exception {
+    public String sendMessageToRules(String text, String requestType) throws Exception {
         Connection connection = connectionFactory.createConnection();
         try {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -34,6 +35,7 @@ public class JMSHelper {
             TextMessage message = session.createTextMessage();
             message.setJMSReplyTo(responseQueue);
             message.setText(text);
+            message.setStringProperty(ServiceConstants.METHOD, requestType);
 
             session.createProducer(assetQueue).send(message);
 

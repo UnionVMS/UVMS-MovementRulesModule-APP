@@ -15,6 +15,9 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.wsdl.asset.module.AssetModuleMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
@@ -67,7 +70,7 @@ public class AssetServiceBean {
         query.setPagination(pagination);
 
         String getAssetRequest = AssetModuleRequestMapper.createAssetListModuleRequest(query);
-        String getAssetMessageId = producer.sendDataSourceMessage(getAssetRequest, DataSourceQueue.ASSET);
+        String getAssetMessageId = producer.sendDataSourceMessage(getAssetRequest, DataSourceQueue.ASSET, ServiceConstants.METHOD, AssetModuleMethod.ASSET_LIST.value());
         TextMessage getAssetResponse = consumer.getMessage(getAssetMessageId, TextMessage.class);
 
         List<Asset> resultList = AssetModuleResponseMapper.mapToAssetListFromResponse(getAssetResponse, getAssetMessageId);
@@ -141,7 +144,7 @@ public class AssetServiceBean {
     
     private Asset getAsset(AssetIdType type, String value) throws AssetModelMapperException, MessageException {
         String getAssetListRequest = AssetModuleRequestMapper.createGetAssetModuleRequest(value, type);
-        String getAssetMessageId = producer.sendDataSourceMessage(getAssetListRequest, DataSourceQueue.ASSET);
+        String getAssetMessageId = producer.sendDataSourceMessage(getAssetListRequest, DataSourceQueue.ASSET, ServiceConstants.METHOD, AssetModuleMethod.GET_ASSET.value());
         TextMessage getAssetResponse = consumer.getMessage(getAssetMessageId, TextMessage.class);
 
         return AssetModuleResponseMapper.mapToAssetFromResponse(getAssetResponse, getAssetMessageId);
@@ -153,7 +156,7 @@ public class AssetServiceBean {
         List<AssetGroup> assetGroups = null;
         try {
             String getAssetRequest = AssetModuleRequestMapper.createAssetGroupListByAssetGuidRequest(assetGuid);
-            String getAssetMessageId = producer.sendDataSourceMessage(getAssetRequest, DataSourceQueue.ASSET);
+            String getAssetMessageId = producer.sendDataSourceMessage(getAssetRequest, DataSourceQueue.ASSET, ServiceConstants.METHOD, AssetModuleMethod.ASSET_GROUP_LIST_BY_ASSET_GUID.value());
             TextMessage getAssetResponse = consumer.getMessage(getAssetMessageId, TextMessage.class);
 
             assetGroups = AssetModuleResponseMapper.mapToAssetGroupListFromResponse(getAssetResponse, getAssetMessageId);

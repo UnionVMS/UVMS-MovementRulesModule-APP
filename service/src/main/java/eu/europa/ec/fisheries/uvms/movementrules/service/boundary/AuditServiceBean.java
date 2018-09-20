@@ -13,6 +13,9 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+
+import eu.europa.ec.fisheries.schema.audit.source.v1.AuditDataSourceMethod;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
@@ -34,7 +37,7 @@ public class AuditServiceBean {
     public void sendAuditMessage(AuditObjectTypeEnum type, AuditOperationEnum operation, String affectedObject, String comment, String username) {
         try {
             String message = AuditLogMapper.mapToAuditLog(type.getValue(), operation.getValue(), affectedObject, comment, username);
-            producer.sendDataSourceMessage(message, DataSourceQueue.AUDIT);
+            producer.sendDataSourceMessage(message, DataSourceQueue.AUDIT, ServiceConstants.METHOD, AuditDataSourceMethod.CREATE.value());
         } catch (AuditModelMarshallException | MessageException e) {
             LOG.error("[ERROR] Error when sending message to Audit. ] {}", e.getMessage());
         }

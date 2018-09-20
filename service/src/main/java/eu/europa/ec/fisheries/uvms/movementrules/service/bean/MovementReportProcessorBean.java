@@ -129,7 +129,7 @@ public class MovementReportProcessorBean {
                 exchangeService.sendBackToExchange(null, rawMovement, MovementRefTypeType.ALARM, username);
             }
         } catch (MessageException | MobileTerminalModelMapperException | MobileTerminalUnmarshallException | JMSException | AssetModelMapperException | ExecutionException e) {
-            throw new RulesServiceException(e.getMessage());
+            throw new RulesServiceException(e);
         }
     }
 

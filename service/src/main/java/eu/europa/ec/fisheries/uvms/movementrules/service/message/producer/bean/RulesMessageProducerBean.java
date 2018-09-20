@@ -18,6 +18,8 @@ import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
 import javax.jms.JMSException;
 import javax.jms.Queue;
+
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
@@ -61,12 +63,13 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String sendDataSourceMessage(String text, DataSourceQueue queue) throws MessageException  {
+    public String  sendDataSourceMessage(String text, DataSourceQueue queue, String propertieKey, String propertieValue) throws MessageException  {
         LOG.debug("Sending message to {}", queue.name());
         try {
             Queue destination = getDestinationQueue(queue);
             if(destination != null){
-                return sendMessageToSpecificQueue(text, destination, rulesResponseQueue);
+                return sendMessageWithPropertieToSpecificQueue(text, destination, rulesResponseQueue, propertieKey, propertieValue);
+                //return sendMessageToSpecificQueue(text, destination, rulesResponseQueue);
             }
             return null;
         } catch (Exception e) {
@@ -79,7 +82,7 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendConfigMessage(String text) throws ConfigMessageException {
         try {
-            return sendDataSourceMessage(text, DataSourceQueue.CONFIG);
+            return sendDataSourceMessage(text, DataSourceQueue.CONFIG, ServiceConstants.METHOD, "");
         } catch (MessageException  e) {
             LOG.error("[ Error when sending config message. ] {}", e.getMessage());
             throw new ConfigMessageException("[ Error when sending config message. ]");

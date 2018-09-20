@@ -18,6 +18,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.schema.movement.module.v1.MovementModuleMethod;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movement.module.v1.CreateMovementResponse;
@@ -60,7 +63,7 @@ public class MovementServiceBean {
             MovementBaseType movementBaseType = MovementBaseTypeMapper.mapRawMovementFact(rawMovement);
             movementBaseType.setConnectId(connectId);
             String createMovementRequest = MovementModuleRequestMapper.mapToCreateMovementRequest(movementBaseType, username);
-            String messageId = producer.sendDataSourceMessage(createMovementRequest, DataSourceQueue.MOVEMENT);
+            String messageId = producer.sendDataSourceMessage(createMovementRequest, DataSourceQueue.MOVEMENT, ServiceConstants.METHOD, MovementModuleMethod.CREATE.value());
             TextMessage movementResponse = consumer.getMessage(messageId, TextMessage.class, 10000L);
             CreateMovementResponse createMovementResponse = MovementModuleResponseMapper.mapToCreateMovementResponseFromMovementResponse(movementResponse);
             createdMovement = createMovementResponse.getMovement();
@@ -94,7 +97,7 @@ public class MovementServiceBean {
 
         try {
             String request = MovementModuleRequestMapper.mapToGetMovementMapByQueryRequest(query);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOVEMENT);
+            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOVEMENT, ServiceConstants.METHOD, MovementModuleMethod.MOVEMENT_MAP.value());
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 
             List<MovementMapResponseType> result = MovementModuleResponseMapper.mapToMovementMapResponse(response);

@@ -24,12 +24,11 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.EventService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 
 @Stateless
-public class RulesEventServiceBean implements EventService {
+public class RulesEventServiceBean{
 
     private static final Logger LOG = LoggerFactory.getLogger(RulesEventServiceBean.class);
 
@@ -39,14 +38,12 @@ public class RulesEventServiceBean implements EventService {
     @Inject
     private MovementReportProcessorBean movementReportBean;
 
-    @Override
     public PingResponse pingReceived() {
         PingResponse pingResponse = new PingResponse();
         pingResponse.setResponse("pong");
         return pingResponse;
     }
 
-    @Override
     public void setMovementReportReceived(SetMovementReportRequest request) {
         try {
             if (request.getMethod() != RulesModuleMethod.SET_MOVEMENT_REPORT) {
@@ -58,7 +55,6 @@ public class RulesEventServiceBean implements EventService {
         }
     }
 
-    @Override
     public String getTicketsAndRulesByMovementsEvent(GetTicketsAndRulesByMovementsRequest request) throws Exception {
         try {
             GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());

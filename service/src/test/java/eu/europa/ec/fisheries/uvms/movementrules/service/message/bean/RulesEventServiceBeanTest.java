@@ -32,7 +32,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.carrier.E
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 
-@RunWith(PowerMockRunner.class)
+//@RunWith(PowerMockRunner.class)
 public class RulesEventServiceBeanTest {
 
     //TODO: Move the important parts of this into a proper JMS testing class

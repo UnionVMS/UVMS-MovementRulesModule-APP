@@ -492,8 +492,8 @@ public class ValidationServiceBean implements ValidationService {
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, createdTicket.getUpdatedBy());
         } catch (Exception e) { //TODO: figure out if we are to have this kind of exception handling here and if we are to catch everything
-            LOG.error("[ Failed to create ticket! ] {}", e.getMessage());
-            LOG.error("[ERROR] Error when creating ticket {}", e.getMessage());
+            LOG.error("[ Failed to create ticket! ] {}", e);
+            LOG.error("[ERROR] Error when creating ticket {}", e);
         }
     }
 
