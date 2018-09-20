@@ -23,7 +23,6 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.*;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesEventServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -49,7 +48,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
 
     @Inject
     private RulesMessageProducer rulesProducer;
-    
+
 
     @Override
     public void onMessage(Message message) {
@@ -82,7 +81,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                     break;
             }
 
-        } catch (Exception /*NullPointerException | MovementRulesModelMarshallException | MessageException*/ e) {
+        } catch (Exception e) {
             LOG.error("[ Error when receiving message in rules: {}]", e);
             rulesProducer.sendModuleErrorResponseMessage(MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules:" + e), textMessage);
         } finally {

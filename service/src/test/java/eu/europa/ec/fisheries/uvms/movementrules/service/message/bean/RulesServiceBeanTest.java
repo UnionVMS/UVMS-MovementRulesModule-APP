@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,21 +73,21 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRule output = null;
         try {
             output = rulesService.createCustomRule(input, "test", "test");
-            Assert.assertTrue(false);
+            fail();
         }catch (AccessDeniedException e){
             Assert.assertTrue(true);
         }
 
         try {
             output = rulesService.createCustomRule(input, "test", null);
-            Assert.assertTrue(false);
+            fail();
         }catch (AccessDeniedException e){
             Assert.assertTrue(true);
         }
 
         try {
             output = rulesService.createCustomRule(input, null, "test");
-            Assert.assertTrue(false);
+            fail();
         }catch (AccessDeniedException e){
             Assert.assertTrue(true);
         }
@@ -116,7 +118,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void getCustomRuleByDummyGuidTest() throws Exception{   //a get with proper input exists among the rest tests
         try {
             rulesService.getCustomRuleByGuid("dummyGuid");
-            Assert.assertTrue(false);
+            fail();
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -132,7 +134,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         //not enough rights
         try {
             rulesService.updateCustomRule(input, "test", "test");
-            Assert.assertTrue(false);
+            fail();
         }catch (AccessDeniedException e){
             Assert.assertTrue(true);
         }
@@ -141,7 +143,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         //no guid
         try{
             rulesService.updateCustomRule(input, "test", "test");
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -149,14 +151,14 @@ public class RulesServiceBeanTest extends TransactionalTests {
         //null as input, funnily enough they die at different places......
         try{
             rulesService.updateCustomRule(null);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateCustomRule(null, "test", "test");
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -170,14 +172,14 @@ public class RulesServiceBeanTest extends TransactionalTests {
         try{
 
             rulesService.updateCustomRule(input, "test", "test");
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateCustomRule(input);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -235,7 +237,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void deleteCustomRuleWithNullGuidTest() throws Exception {          //a test with proper exectuion exists among the rest tests
         try {
             rulesService.deleteCustomRule(null, "testUser", "testFeature", "testApp");
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -245,7 +247,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void deleteCustomRuleWithDummyGuidTest() throws Exception {
         try {
             rulesService.deleteCustomRule("dummyGuid", "testUser", "testFeature", "testApp");
-            Assert.assertTrue(false);
+            fail();
         } catch (EJBTransactionRolledbackException e) {
             Assert.assertTrue(true);
         }
@@ -255,7 +257,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void updateSubscriptionNegativeTests() throws Exception{
         try{
             rulesService.updateSubscription(null, "testUser");
-            Assert.assertTrue(false);
+            fail();
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -268,14 +270,14 @@ public class RulesServiceBeanTest extends TransactionalTests {
         //incomplete subscriptionType
         try{
             rulesService.updateSubscription(input, "testUser");
-            Assert.assertTrue(false);
+            fail();
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
         subscriptionType.setType(SubscriptionTypeType.TICKET);
         try{
             rulesService.updateSubscription(input, "testUser");
-            Assert.assertTrue(false);
+            fail();
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -283,7 +285,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
 
         try{
             rulesService.updateSubscription(input, "testUser"); //no rule Guid
-            Assert.assertTrue(false);
+            fail();
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -294,7 +296,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
 
         try{
             rulesService.updateSubscription(input, "testUser"); //non-existant rule guid
-            Assert.assertTrue(false);
+            fail();
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -348,7 +350,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void getTicketListNegativeTest() throws Exception {   //a test with proper input is among the rest tests
         try {
             rulesService.getTicketList(null, null);   //missing query
-            Assert.assertTrue(false);
+            fail();
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -357,7 +359,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
 
         try {
             rulesService.getTicketList(null, input);    //missing pagination
-            Assert.assertTrue(false);
+            fail();
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -459,7 +461,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void getTicketsByMovementsNegativeTest() throws Exception{ //a test with proper input is among the rest tests
         try{
             rulesService.getTicketsByMovements(null);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -467,7 +469,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
 
         try{
             rulesService.getTicketsByMovements(input);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -513,7 +515,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void countTicketsByMovementNegativeTest() throws Exception { //a test with proper input is among the rest tests
         try{
             rulesService.getTicketsByMovements(null);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -522,7 +524,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
 
         try{
             rulesService.getTicketsByMovements(input);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -543,7 +545,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void updateTicketStatusNegativeTest() throws Exception {     //a test with proper input is among the rest tests
         try{
             rulesService.updateTicketStatus(null);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -551,7 +553,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         Ticket input = new Ticket();
         try{
             rulesService.updateTicketStatus(input);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -573,21 +575,21 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void updateTicketStatusByQueryNegativeTest() throws Exception{   //a test with proper input is among the rest tests
         try{
             rulesService.updateTicketStatusByQuery(null, null, null);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateTicketStatusByQuery("test user", null, null);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
 
         try{
             rulesService.updateTicketStatusByQuery("test user", null, TicketStatusType.OPEN);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -595,7 +597,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         input.getTicketSearchCriteria().add(new TicketListCriteria());
         try{
             rulesService.updateTicketStatusByQuery("test user", input, TicketStatusType.OPEN);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -631,7 +633,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         AlarmReport input = new AlarmReport();
         try{
             rulesService.updateAlarmStatus(input);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -653,7 +655,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void updateTicketCountNegativeTest() throws Exception {     //a test with proper input is among the rest tests
         try{
             rulesService.updateTicketCount(null);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
@@ -661,7 +663,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         Ticket input = new Ticket();
         try{
             rulesService.updateTicketCount(input);
-            Assert.assertTrue(false);
+            fail();
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
