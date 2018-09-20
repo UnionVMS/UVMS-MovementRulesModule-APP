@@ -14,7 +14,6 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 import java.util.UUID;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -24,16 +23,12 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.*;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesEventServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.GetTicketsAndRulesByMovementsEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.PingReceivedEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.SetMovementReportReceivedEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleResponseMapper;
@@ -54,10 +49,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
 
     @Inject
     private RulesMessageProducer rulesProducer;
-
-    @Inject
-    @ErrorEvent
-    private Event<EventMessage> errorEvent;
+    
 
     @Override
     public void onMessage(Message message) {
@@ -86,13 +78,13 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                     break;
                  default:
                     LOG.error("[ Request method '{}' is not implemented ]", method.name());
-                    errorEvent.fire(new EventMessage(textMessage, MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Method not implemented:" + method.name())));
+                     rulesProducer.sendModuleErrorResponseMessage(MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Method not implemented:" + method.name()), textMessage);
                     break;
             }
 
         } catch (Exception /*NullPointerException | MovementRulesModelMarshallException | MessageException*/ e) {
             LOG.error("[ Error when receiving message in rules: {}]", e);
-            errorEvent.fire(new EventMessage(textMessage, MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules:" + e)));
+            rulesProducer.sendModuleErrorResponseMessage(MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules:" + e), textMessage);
         } finally {
             MDC.remove("clientName");
         }

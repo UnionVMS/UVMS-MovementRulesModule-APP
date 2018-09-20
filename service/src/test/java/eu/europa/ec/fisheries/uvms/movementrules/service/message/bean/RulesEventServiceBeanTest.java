@@ -28,7 +28,6 @@ import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 

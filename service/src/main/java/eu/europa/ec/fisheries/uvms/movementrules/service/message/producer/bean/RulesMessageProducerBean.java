@@ -15,10 +15,11 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Observes;
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.schema.movementrules.common.v1.RulesFault;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +30,6 @@ import eu.europa.ec.fisheries.uvms.commons.message.impl.JMSUtils;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
@@ -89,12 +88,13 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
         }
     }
 
+
     @Override
-    public void sendModuleErrorResponseMessage(@Observes @ErrorEvent EventMessage message) {
+    public void sendModuleErrorResponseMessage(RulesFault fault, TextMessage message) {
         try {
-            LOG.debug("Sending error message back from Rules module to recipient on JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
-            String data = JAXBMarshaller.marshallJaxBObjectToString(message.getFault());
-            this.sendResponseMessageToSender(message.getJmsMessage(), data, "Rules");
+            LOG.debug("Sending error message back from Rules module to recipient on JMS Queue with correlationID: {} ", message.getJMSMessageID());
+            String data = JAXBMarshaller.marshallJaxBObjectToString(fault);
+            this.sendResponseMessageToSender(message, data, "Rules");
         } catch (MovementRulesModelMarshallException | JMSException | MessageException e) {
             LOG.error("Error when returning Error message to recipient");
         }
