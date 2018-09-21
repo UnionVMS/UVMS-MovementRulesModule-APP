@@ -63,7 +63,7 @@ public class MobileTerminalServiceBean {
         query.setPagination(pagination);
 
         String request = MobileTerminalModuleRequestMapper.createMobileTerminalListRequest(query);
-        String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOBILE_TERMINAL, ServiceConstants.METHOD, MobileTerminalModuleMethod.LIST_MOBILE_TERMINALS.value());
+        String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOBILE_TERMINAL, MobileTerminalModuleMethod.LIST_MOBILE_TERMINALS.value());
 
         TextMessage getMobileTerminalResponse = consumer.getMessage(messageId, TextMessage.class);
 
@@ -143,7 +143,7 @@ public class MobileTerminalServiceBean {
         query.setPagination(pagination);
 
         String getMobileTerminalListRequest = MobileTerminalModuleRequestMapper.createMobileTerminalListRequest(query);
-        String getMobileTerminalMessageId = producer.sendDataSourceMessage(getMobileTerminalListRequest, DataSourceQueue.MOBILE_TERMINAL, ServiceConstants.METHOD, MobileTerminalModuleMethod.LIST_MOBILE_TERMINALS.value());
+        String getMobileTerminalMessageId = producer.sendDataSourceMessage(getMobileTerminalListRequest, DataSourceQueue.MOBILE_TERMINAL, MobileTerminalModuleMethod.LIST_MOBILE_TERMINALS.value());
         TextMessage getMobileTerminalResponse = consumer.getMessage(getMobileTerminalMessageId, TextMessage.class);
 
         List<MobileTerminalType> resultList = MobileTerminalModuleResponseMapper.mapToMobileTerminalListResponse(getMobileTerminalResponse);

@@ -59,7 +59,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
         TextMessage textMessage = (TextMessage) message;
         MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         try {
-            RulesModuleMethod method = RulesModuleMethod.fromValue(textMessage.getStringProperty(ServiceConstants.METHOD));
+            RulesModuleMethod method = RulesModuleMethod.fromValue(textMessage.getStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY));
             if (method == null) {
                 throw new NullPointerException("[ Request method is null ]");
             }

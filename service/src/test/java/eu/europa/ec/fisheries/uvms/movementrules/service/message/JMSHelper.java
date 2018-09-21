@@ -13,7 +13,6 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.message;
 
 import javax.jms.*;
 
-import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 
@@ -35,7 +34,7 @@ public class JMSHelper {
             TextMessage message = session.createTextMessage();
             message.setJMSReplyTo(responseQueue);
             message.setText(text);
-            message.setStringProperty(ServiceConstants.METHOD, requestType);
+            message.setStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY, requestType);
 
             session.createProducer(assetQueue).send(message);
 

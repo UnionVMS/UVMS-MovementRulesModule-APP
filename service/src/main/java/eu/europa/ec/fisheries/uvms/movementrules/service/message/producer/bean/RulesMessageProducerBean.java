@@ -62,12 +62,12 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String  sendDataSourceMessage(String text, DataSourceQueue queue, String propertyKey, String propertyValue) throws MessageException  {
+    public String  sendDataSourceMessage(String text, DataSourceQueue queue, String function) throws MessageException  {
         LOG.debug("Sending message to {}", queue.name());
         try {
             Queue destination = getDestinationQueue(queue);
             if(destination != null){
-                return sendMessageWithPropertieToSpecificQueue(text, destination, rulesResponseQueue, propertyKey, propertyValue);
+                return sendMessageToSpecificQueueWithFunction(text, destination, rulesResponseQueue, function);
 
             }
             return null;
@@ -81,7 +81,7 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendConfigMessage(String text) throws ConfigMessageException {
         try {
-            return sendDataSourceMessage(text, DataSourceQueue.CONFIG, ServiceConstants.METHOD, "");
+            return sendDataSourceMessage(text, DataSourceQueue.CONFIG, "");
         } catch (MessageException  e) {
             LOG.error("[ Error when sending config message. ] {}", e.getMessage());
             throw new ConfigMessageException("[ Error when sending config message. ]");
