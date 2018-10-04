@@ -63,8 +63,8 @@ public class MovementServiceBean {
             MovementBaseType movementBaseType = MovementBaseTypeMapper.mapRawMovementFact(rawMovement);
             movementBaseType.setConnectId(connectId);
             String createMovementRequest = MovementModuleRequestMapper.mapToCreateMovementRequest(movementBaseType, username);
-            String messageId = producer.sendDataSourceMessage(createMovementRequest, DataSourceQueue.MOVEMENT, MovementModuleMethod.CREATE.value());
-            TextMessage movementResponse = consumer.getMessage(messageId, TextMessage.class, 10000L);
+            String messageId = producer.sendDataSourceMessage(createMovementRequest, DataSourceQueue.MOVEMENT, MovementModuleMethod.CREATE.value(), connectId);
+            TextMessage movementResponse = consumer.getMessage(messageId, TextMessage.class, 30000L);
             CreateMovementResponse createMovementResponse = MovementModuleResponseMapper.mapToCreateMovementResponseFromMovementResponse(movementResponse);
             createdMovement = createMovementResponse.getMovement();
         } catch (JMSException | MovementFaultException | ModelMapperException | MessageException e) {
@@ -97,7 +97,7 @@ public class MovementServiceBean {
 
         try {
             String request = MovementModuleRequestMapper.mapToGetMovementMapByQueryRequest(query);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOVEMENT, MovementModuleMethod.MOVEMENT_MAP.value());
+            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOVEMENT, MovementModuleMethod.MOVEMENT_MAP.value(), "");  //Might not need grouping here
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 
             List<MovementMapResponseType> result = MovementModuleResponseMapper.mapToMovementMapResponse(response);

@@ -37,7 +37,7 @@ public class AuditServiceBean {
     public void sendAuditMessage(AuditObjectTypeEnum type, AuditOperationEnum operation, String affectedObject, String comment, String username) {
         try {
             String message = AuditLogMapper.mapToAuditLog(type.getValue(), operation.getValue(), affectedObject, comment, username);
-            producer.sendDataSourceMessage(message, DataSourceQueue.AUDIT, AuditDataSourceMethod.CREATE.value());
+            producer.sendDataSourceMessage(message, DataSourceQueue.AUDIT, AuditDataSourceMethod.CREATE.value(), "");
         } catch (AuditModelMarshallException | MessageException e) {
             LOG.error("[ERROR] Error when sending message to Audit. ] {}", e.getMessage());
         }

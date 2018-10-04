@@ -54,7 +54,7 @@ public class UserServiceBean {
         String userRequest;
         try {
             userRequest = UserModuleRequestMapper.mapToGetUserContextRequest(contextId);
-            String messageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER, UserModuleMethod.GET_USER_CONTEXT.value());
+            String messageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER, UserModuleMethod.GET_USER_CONTEXT.value(), "");
             LOG.debug("JMS message with ID: {} is sent to USM.", messageId);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 
@@ -86,14 +86,14 @@ public class UserServiceBean {
     
     public GetContactDetailResponse getContactDetails(String username) throws ModelMarshallException, MessageException, MovementRulesModelMarshallException {
         String userRequest = UserModuleRequestMapper.mapToGetContactDetailsRequest(username);
-        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER, UserModuleMethod.GET_CONTACT_DETAILS.value());
+        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER, UserModuleMethod.GET_CONTACT_DETAILS.value(), "");
         TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
         return JAXBMarshaller.unmarshallTextMessage(userMessage, GetContactDetailResponse.class);
     }
     
     public FindOrganisationsResponse findOrganisation(String nationIsoName) throws ModelMarshallException, MessageException, MovementRulesModelMarshallException {
         String userRequest = UserModuleRequestMapper.mapToFindOrganisationsRequest(nationIsoName);
-        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER, UserModuleMethod.FIND_ORGANISATIONS.value());
+        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER, UserModuleMethod.FIND_ORGANISATIONS.value(), "");
         TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
         return JAXBMarshaller.unmarshallTextMessage(userMessage, FindOrganisationsResponse.class);
     }
