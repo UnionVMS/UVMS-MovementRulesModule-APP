@@ -37,7 +37,6 @@ import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperExcepti
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalModelMapperException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalUnmarshallException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AssetServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ConfigServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
@@ -130,7 +129,7 @@ public class MovementReportProcessorBean {
                 exchangeService.sendBackToExchange(null, rawMovement, MovementRefTypeType.ALARM, username);
             }
         } catch (MessageException | MobileTerminalModelMapperException | MobileTerminalUnmarshallException | JMSException | AssetModelMapperException | ExecutionException e) {
-            throw new RulesServiceException(e.getMessage());
+            throw new RulesServiceException(e);
         }
     }
 
@@ -176,7 +175,7 @@ public class MovementReportProcessorBean {
         FutureTask<Long> timeDiffAndPersistMovementTask = new FutureTask<>(new Callable<Long>() {
             @Override
             public Long call() {
-                return timeDiffAndPersistMovement(rawMovement.getSource(), assetGuid, assetFlagState, positionTime);
+                return timeDiffAndPersistPreviousReport(rawMovement.getSource(), assetGuid, assetFlagState, positionTime);
             }
         });
         executor.execute(timeDiffAndPersistMovementTask);
@@ -246,7 +245,7 @@ public class MovementReportProcessorBean {
         }
     }
 
-    private Long timeDiffAndPersistMovement(MovementSourceType movementSource, String assetGuid, String assetFlagState, Date positionTime) {
+    private Long timeDiffAndPersistPreviousReport(MovementSourceType movementSource, String assetGuid, String assetFlagState, Date positionTime) {
         Date auditTimestamp = new Date();
 
         // This needs to be done before persisting last report

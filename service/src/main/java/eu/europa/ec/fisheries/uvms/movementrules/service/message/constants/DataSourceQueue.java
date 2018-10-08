@@ -9,25 +9,10 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.service.exception;
+package eu.europa.ec.fisheries.uvms.movementrules.service.message.constants;
 
-public class RulesServiceException extends Exception {
+public enum DataSourceQueue {
 
-    private static final long serialVersionUID = 6673120871816451002L;
-
-    public RulesServiceException() {
-    }
-
-    public RulesServiceException(String message) {
-        super(message);
-    }
-
-    public RulesServiceException(Throwable e) {
-        super(e);
-    }
-
-    public RulesServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    INTERNAL, MOVEMENT, CONFIG, ASSET, MOBILE_TERMINAL, EXCHANGE, USER, AUDIT;
 
 }
