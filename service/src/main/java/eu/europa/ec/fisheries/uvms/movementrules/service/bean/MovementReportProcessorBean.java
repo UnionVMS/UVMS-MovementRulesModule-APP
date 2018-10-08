@@ -175,7 +175,7 @@ public class MovementReportProcessorBean {
         FutureTask<Long> timeDiffAndPersistMovementTask = new FutureTask<>(new Callable<Long>() {
             @Override
             public Long call() {
-                return timeDiffAndPersistMovement(rawMovement.getSource(), assetGuid, assetFlagState, positionTime);
+                return timeDiffAndPersistPreviousReport(rawMovement.getSource(), assetGuid, assetFlagState, positionTime);
             }
         });
         executor.execute(timeDiffAndPersistMovementTask);
@@ -245,7 +245,7 @@ public class MovementReportProcessorBean {
         }
     }
 
-    private Long timeDiffAndPersistMovement(MovementSourceType movementSource, String assetGuid, String assetFlagState, Date positionTime) {
+    private Long timeDiffAndPersistPreviousReport(MovementSourceType movementSource, String assetGuid, String assetFlagState, Date positionTime) {
         Date auditTimestamp = new Date();
 
         // This needs to be done before persisting last report

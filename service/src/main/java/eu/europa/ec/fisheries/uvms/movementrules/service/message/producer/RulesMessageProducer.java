@@ -21,7 +21,9 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataS
 @Local
 public interface RulesMessageProducer {
 
-    String sendDataSourceMessage(String text, DataSourceQueue queue, String function) throws MessageException;
+    String sendDataSourceMessage(String text, DataSourceQueue queue, String function, String grouping) throws MessageException;
+
+    String sendResponseMessageForTest(String text, String requestType);
 
     void sendModuleResponseMessage(TextMessage message, String text) throws MessageException;
 

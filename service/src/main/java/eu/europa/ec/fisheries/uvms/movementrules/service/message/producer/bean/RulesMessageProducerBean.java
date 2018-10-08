@@ -15,9 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.TextMessage;
+import javax.jms.*;
 
 import eu.europa.ec.fisheries.schema.movementrules.common.v1.RulesFault;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
@@ -60,14 +58,41 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
         auditQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_AUDIT_EVENT);
     }
 
+
+    private static final String MOVEMENTRULES_QUEUE = "UVMSMovementRulesEvent";
+    private static final String RESPONSE_QUEUE = "IntegrationTestsResponseQueue";
+    public String sendResponseMessageForTest(String text, String requestType) {
+        try {
+            Connection connection = this.getConnectionFactory().createConnection();
+
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue responseQueue = session.createQueue(RESPONSE_QUEUE);
+            Queue assetQueue = session.createQueue(RESPONSE_QUEUE);
+
+            TextMessage message = session.createTextMessage();
+            message.setJMSReplyTo(responseQueue);
+            message.setText(text);
+            message.setStringProperty("FUNCTION", requestType);
+
+            session.createProducer(assetQueue).send(message);
+            connection.close();
+
+            return message.getJMSMessageID();
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        } finally {
+
+        }
+    }
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String  sendDataSourceMessage(String text, DataSourceQueue queue, String function) throws MessageException  {
+    public String  sendDataSourceMessage(String text, DataSourceQueue queue, String function, String grouping) throws MessageException  {
         LOG.debug("Sending message to {}", queue.name());
         try {
             Queue destination = getDestinationQueue(queue);
             if(destination != null){
-                return sendMessageToSpecificQueueWithFunction(text, destination, rulesResponseQueue, function);
+                return sendMessageToSpecificQueueWithFunction(text, destination, rulesResponseQueue, function, grouping);
 
             }
             return null;
@@ -81,7 +106,7 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendConfigMessage(String text) throws ConfigMessageException {
         try {
-            return sendDataSourceMessage(text, DataSourceQueue.CONFIG, "");
+            return sendDataSourceMessage(text, DataSourceQueue.CONFIG, "", "");
         } catch (MessageException  e) {
             LOG.error("[ Error when sending config message. ] {}", e.getMessage());
             throw new ConfigMessageException("[ Error when sending config message. ]");
