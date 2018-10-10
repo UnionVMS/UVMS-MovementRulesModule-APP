@@ -69,7 +69,7 @@ public class ExchangeServiceBean {
             producer.sendDataSourceMessage(exchangeResponseText, DataSourceQueue.EXCHANGE, ExchangeModuleMethod.PROCESSED_MOVEMENT.value(), "");
 
             //this is here to make rules respond on the test queue as well as to exchange, dont use unless you are running performance tests from docker.
-            producer.sendResponseMessageForTest(exchangeResponseText, username);
+            //producer.sendResponseMessageForTest(exchangeResponseText, username);
         } catch (ExchangeModelMapperException e) {
             LOG.error("Could not send processed movement to Exchange", e);
         }
