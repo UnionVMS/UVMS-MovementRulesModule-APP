@@ -28,7 +28,7 @@ public class MovementFactMapper {
     
     private MovementFactMapper() {}
     
-    public static MovementFact mapMovementFact(MovementType movement, MobileTerminalType mobileTerminal, Asset asset, String comChannelType, List<AssetGroup> assetGroups, Long timeDiffInSeconds, Integer numberOfReportsLast24Hours, String channelGuid, List<String> vicinityOf) {
+    public static MovementFact mapMovementFact(MovementType movement, MobileTerminalType mobileTerminalXXX, Asset assetXXX, String comChannelType, List<AssetGroup> assetGroups, Long timeDiffInSeconds, Integer numberOfReportsLast24Hours, String channelGuid, List<String> vicinityOf) {
         if (movement == null) {
             throw new IllegalArgumentException("Movement was null, asset: " + asset + ", mobileTerminal: " + mobileTerminal);
         }

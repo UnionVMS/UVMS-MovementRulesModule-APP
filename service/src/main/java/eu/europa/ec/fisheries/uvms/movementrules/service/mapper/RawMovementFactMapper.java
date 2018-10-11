@@ -24,7 +24,7 @@ public class RawMovementFactMapper {
     
     private RawMovementFactMapper() {}
     
-    public static RawMovementFact mapRawMovementFact(RawMovementType rawMovement, MobileTerminalType mobileTerminal, Asset asset, String pluginType) {
+    public static RawMovementFact mapRawMovementFact(RawMovementType rawMovement, MobileTerminalType mobileTerminalXXX, Asset assetXXX, String pluginType) {
         RawMovementFact fact = new RawMovementFact();
         fact.setRawMovementType(rawMovement);
         fact.setOk(true);

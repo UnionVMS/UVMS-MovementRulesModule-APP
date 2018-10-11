@@ -21,6 +21,10 @@ import java.util.concurrent.FutureTask;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.JMSException;
+
+import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentRequest;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
@@ -77,39 +81,33 @@ public class MovementReportProcessorBean {
     
     @Inject
     private RulesValidator rulesValidator;
-    
+
     @Inject
     private RulesDao rulesDao;
-    
+
+    @Inject
+    private AssetClient assetClient;
+
+
     public void setMovementReportReceived(final RawMovementType rawMovement, String pluginType, String username) throws RulesServiceException {
         try {
             Date auditTimestamp = new Date();
             Date auditTotalTimestamp = new Date();
 
-            Asset asset = null;
 
-            // Get Mobile Terminal if it exists
-            MobileTerminalType mobileTerminal = mobileTerminalService.getMobileTerminalByRawMovement(rawMovement);
-            auditTimestamp = auditLog("Time to fetch from Mobile Terminal Module:", auditTimestamp);
 
-            // Get Asset
-            if (mobileTerminal != null) {
-                String connectId = mobileTerminal.getConnectId();
-                if (connectId != null) {
-                    asset = assetService.getAssetByConnectId(connectId);
-                }
-            } else {
-                asset = assetService.getAssetByCfrIrcs(rawMovement.getAssetId());
-                if (isPluginTypeWithoutMobileTerminal(rawMovement.getPluginType()) && asset != null) {
-                    mobileTerminal = mobileTerminalService.findMobileTerminalByAsset(asset.getAssetId().getGuid());
-                    rawMovement.setMobileTerminal(MobileTerminalMapper.mapMobileTerminal(mobileTerminal));
-                }
+
+
+            // HÄR GÖRS ANROPET   AssetClient
+
+            AssetMTEnrichmentRequest request = new AssetMTEnrichmentRequest();
+            AssetMTEnrichmentResponse response = null;
+            try {
+                response = assetClient.collectAssetMT(request);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            if (rawMovement.getAssetId() == null && asset != null) {
-                AssetId assetId = AssetAssetIdMapper.mapAssetToAssetId(asset);
-                rawMovement.setAssetId(assetId);
-            }
-            auditTimestamp = auditLog("Time to fetch from Asset Module:", auditTimestamp);
+
 
             RawMovementFact rawMovementFact = RawMovementFactMapper.mapRawMovementFact(rawMovement, mobileTerminal, asset, pluginType);
             LOG.debug("rawMovementFact:{}", rawMovementFact);
@@ -133,26 +131,8 @@ public class MovementReportProcessorBean {
         }
     }
 
-    private boolean isPluginTypeWithoutMobileTerminal(String pluginType) {
-        if (pluginType == null) {
-            return true;
-        }
-        try {
-            PluginType type = PluginType.valueOf(pluginType);
-            switch (type) {
-                case MANUAL:
-                case NAF:
-                case OTHER:
-                    return true;
-                default:
-                    return false;
-            }
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
 
-    private MovementFact collectMovementData(MobileTerminalType mobileTerminal, Asset asset, final RawMovementType rawMovement, final String username) throws ExecutionException, RulesServiceException {
+    private MovementFact collectMovementData(MobileTerminalType mobileTerminalXXX, Asset assetXXX, final RawMovementType rawMovement, final String username) throws ExecutionException, RulesServiceException {
         int threadNum = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadNum);
         Integer numberOfReportsLast24Hours;
