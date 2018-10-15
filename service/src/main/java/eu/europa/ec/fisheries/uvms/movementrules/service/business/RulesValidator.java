@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.ConcurrencyManagement;
@@ -130,6 +131,150 @@ public class RulesValidator {
 
             ksession.insert(fact);
             ksession.fireAllRules();
+        }
+    }
+
+    public void evaluateSanityWODrools(RawMovementFact fact) throws RulesServiceException {
+        if(fact.getPositionTime() == null){  //Time missing
+            LOG.info("\t==> Executing RULE 'Sanity rule 1 - Time missing'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Time missing", fact);
+        }
+
+        if(fact.getLatitude() == null){  //Lat missing
+            LOG.info("\t==> Executing RULE 'Sanity rule 2 - Lat missing'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Lat missing", fact);
+        }
+
+        if(fact.getLongitude() == null){  //Long missing
+            LOG.info("\t==> Executing RULE 'Sanity rule 3 - Long missing'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Long missing", fact);
+        }
+
+        if((fact.getMobileTerminalConnectId() == null || fact.getMobileTerminalConnectId().isEmpty()) && fact.getPluginType().equals("SATELLITE_RECEIVER")){  //Transponder not found
+            LOG.info("\t==> Executing RULE 'Sanity rule 4 - Transponder not found'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Transponder not found", fact);
+        }
+
+        if(fact.getAssetGuid() == null || fact.getAssetGuid().isEmpty()){  //Asset not found
+            LOG.info("\t==> Executing RULE 'Sanity rule 5 - Asset not found'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Asset not found", fact);
+        }
+
+        if((fact.getMobileTerminalMemberNumber() == null || fact.getMobileTerminalMemberNumber().isEmpty()) && fact.getPluginType().equals("SATELLITE_RECEIVER") && fact.getMobileTerminalType().equals("INMARSAT_C")){  //Mem No. missing
+            LOG.info("\t==> Executing RULE 'Sanity rule 6 - Mem No. missing'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Mem No. missing", fact);
+        }
+
+        if((fact.getMobileTerminalDnid() == null || fact.getMobileTerminalDnid().isEmpty()) && fact.getPluginType().equals("SATELLITE_RECEIVER") && fact.getMobileTerminalType().equals("INMARSAT_C")){  //DNID missing
+            LOG.info("\t==> Executing RULE 'Sanity rule 7 - DNID missing'");
+            fact.setOk(false);
+            validationService.createAlarmReport("DNID missing", fact);
+        }
+
+        if((fact.getMobileTerminalSerialNumber() == null || fact.getMobileTerminalSerialNumber().isEmpty()) && fact.getPluginType().equals("SATELLITE_RECEIVER") && fact.getMobileTerminalType().equals("IRIDIUM")){  //Serial No. missing
+            LOG.info("\t==> Executing RULE 'Sanity rule 8 - Serial No. missing'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Serial No. missing", fact);
+        }
+
+        if(fact.getComChannelType() == null || fact.getComChannelType().isEmpty()){  //ComChannel Type missing
+            LOG.info("\t==> Executing RULE 'Sanity rule 9 - ComChannel Type missing'");
+            fact.setOk(false);
+            validationService.createAlarmReport("ComChannel Type missing", fact);
+        }
+
+        if(((fact.getCfr() == null || fact.getCfr().isEmpty()) && (fact.getIrcs() == null || fact.getIrcs().isEmpty())) && (fact.getPluginType().equals("FLUX") || fact.getComChannelType().equals("MANUAL"))){  //CFR and IRCS missing
+            LOG.info("\t==> Executing RULE 'Sanity rule 10 - CFR and IRCS missing'");
+            fact.setOk(false);
+            validationService.createAlarmReport("CFR and IRCS missing", fact);
+        }
+
+        if(fact.getPluginType() == null || fact.getPluginType().isEmpty()){  //Plugin Type missing
+            LOG.info("\t==> Executing RULE 'Sanity rule 11 - Plugin Type missing'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Plugin Type missing", fact);
+        }
+
+        if(fact.getPositionTime() != null && fact.getPositionTime().after(new Date())){  //Time in the future
+            LOG.info("\t==> Executing RULE 'Sanity rule 12 - Time in the future'" + "[" + fact.getPositionTime() + " > " + new Date() + "]");
+            fact.setOk(false);
+            validationService.createAlarmReport("Time in future", fact);
+        }
+
+        if(fact.getStatusCode() == null || fact.getStatusCode().isEmpty()){  //statusCode must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - statusCode must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - statusCode must exist", fact);
+        }
+
+        if(fact.getReportedSpeed() == null){  //reportedSpeed must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - reportedSpeed must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - reportedSpeed must exist", fact);
+        }
+
+        if(fact.getReportedCourse() == null){  //reportedCourse must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - reportedCourse must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - reportedCourse must exist", fact);
+        }
+
+        if(fact.getMovementType() == null || fact.getMovementType().isEmpty()){  //movementType must
+            LOG.info("\t==> Executing RULE 'Sanity check - movementType must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - movementType must exist", fact);
+        }
+
+        if(fact.getSource() == null || fact.getSource().isEmpty()){  //source must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - source must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - source must exist", fact);
+        }
+
+        if(fact.getActivityCallback() == null || fact.getActivityCallback().isEmpty()){  //activityCallback must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - activityCallback must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - activityCallback must exist", fact);
+        }
+
+        if(fact.getActivityMessageId() == null || fact.getActivityMessageId().isEmpty()){  //activityMessageId must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - activityMessageId must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - activityMessageId must exist", fact);
+        }
+
+        if(fact.getActivityMessageType() == null || fact.getActivityMessageType().isEmpty()){  //activityMessageType must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - activityMessageType must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - activityMessageType must exist", fact);
+        }
+
+
+        /*   no such thing as asset type in rawMovementFact
+        //  fact : RawMovementFact((assetType == null) && (pluginType == "FLUX" || comChannelType == "MANUAL"))
+        if(fact.ass() == null){  //assetType must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - assetType must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - assetType must exist", fact);
+        }*/
+
+        if(fact.getAltitude() == null){  //Altitude must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - altitude must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - altitude must exist", fact);
+        }
+
+        //so, we check to se if we have a movement guid b4 we have sent anything to movement.......   Only works bc the mapper sets a random guid........
+        if(fact.getMovementGuid() == null || fact.getMovementGuid().isEmpty()){  //movementGuid must exist
+            LOG.info("\t==> Executing RULE 'Sanity check - movementGuid must exist'");
+            fact.setOk(false);
+            validationService.createAlarmReport("Sanity check - movementGuid must exist", fact);
         }
     }
 
