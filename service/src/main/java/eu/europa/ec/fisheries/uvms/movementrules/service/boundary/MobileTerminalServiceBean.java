@@ -16,6 +16,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.schema.mobileterminal.module.v1.MobileTerminalModuleMethod;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ListCriteria;
@@ -31,9 +34,9 @@ import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminal
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalUnmarshallException;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.mapper.MobileTerminalModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.mapper.MobileTerminalModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.movementrules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 
 @Stateless
 public class MobileTerminalServiceBean {
@@ -60,7 +63,7 @@ public class MobileTerminalServiceBean {
         query.setPagination(pagination);
 
         String request = MobileTerminalModuleRequestMapper.createMobileTerminalListRequest(query);
-        String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOBILE_TERMINAL);
+        String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOBILE_TERMINAL, MobileTerminalModuleMethod.LIST_MOBILE_TERMINALS.value(), "");
 
         TextMessage getMobileTerminalResponse = consumer.getMessage(messageId, TextMessage.class);
 
@@ -140,7 +143,7 @@ public class MobileTerminalServiceBean {
         query.setPagination(pagination);
 
         String getMobileTerminalListRequest = MobileTerminalModuleRequestMapper.createMobileTerminalListRequest(query);
-        String getMobileTerminalMessageId = producer.sendDataSourceMessage(getMobileTerminalListRequest, DataSourceQueue.MOBILE_TERMINAL);
+        String getMobileTerminalMessageId = producer.sendDataSourceMessage(getMobileTerminalListRequest, DataSourceQueue.MOBILE_TERMINAL, MobileTerminalModuleMethod.LIST_MOBILE_TERMINALS.value(), "");
         TextMessage getMobileTerminalResponse = consumer.getMessage(getMobileTerminalMessageId, TextMessage.class);
 
         List<MobileTerminalType> resultList = MobileTerminalModuleResponseMapper.mapToMobileTerminalListResponse(getMobileTerminalResponse);

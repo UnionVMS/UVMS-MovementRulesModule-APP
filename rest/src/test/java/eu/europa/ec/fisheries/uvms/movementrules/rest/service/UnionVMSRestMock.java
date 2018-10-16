@@ -1,3 +1,5 @@
+package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
+
 /*
 ﻿Developed with the contribution of the European Commission - Directorate General for Maritime Affairs and Fisheries
 © European Union, 2015-2016.
@@ -9,25 +11,10 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.service.exception;
 
-public class RulesServiceException extends Exception {
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
 
-    private static final long serialVersionUID = 6673120871816451002L;
-
-    public RulesServiceException() {
-    }
-
-    public RulesServiceException(String message) {
-        super(message);
-    }
-
-    public RulesServiceException(Throwable e) {
-        super(e);
-    }
-
-    public RulesServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
+@ApplicationPath("")
+public class UnionVMSRestMock extends Application {
 }

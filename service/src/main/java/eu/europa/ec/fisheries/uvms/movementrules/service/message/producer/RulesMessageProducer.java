@@ -9,25 +9,23 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.service.exception;
+package eu.europa.ec.fisheries.uvms.movementrules.service.message.producer;
 
-public class RulesServiceException extends Exception {
+import javax.ejb.Local;
+import javax.jms.TextMessage;
 
-    private static final long serialVersionUID = 6673120871816451002L;
+import eu.europa.ec.fisheries.schema.movementrules.common.v1.RulesFault;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
 
-    public RulesServiceException() {
-    }
+@Local
+public interface RulesMessageProducer {
 
-    public RulesServiceException(String message) {
-        super(message);
-    }
+    String sendDataSourceMessage(String text, DataSourceQueue queue, String function, String grouping) throws MessageException;
 
-    public RulesServiceException(Throwable e) {
-        super(e);
-    }
+    String sendResponseMessageForTest(String text, String requestType);
 
-    public RulesServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    void sendModuleResponseMessage(TextMessage message, String text) throws MessageException;
 
+    void sendModuleErrorResponseMessage(RulesFault fault, TextMessage message);
 }

@@ -18,6 +18,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.schema.movement.module.v1.MovementModuleMethod;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movement.module.v1.CreateMovementResponse;
@@ -34,9 +37,9 @@ import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementDuplicateExc
 import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementFaultException;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.movementrules.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MovementBaseTypeMapper;
 
 @Stateless
@@ -60,8 +63,8 @@ public class MovementServiceBean {
             MovementBaseType movementBaseType = MovementBaseTypeMapper.mapRawMovementFact(rawMovement);
             movementBaseType.setConnectId(connectId);
             String createMovementRequest = MovementModuleRequestMapper.mapToCreateMovementRequest(movementBaseType, username);
-            String messageId = producer.sendDataSourceMessage(createMovementRequest, DataSourceQueue.MOVEMENT);
-            TextMessage movementResponse = consumer.getMessage(messageId, TextMessage.class, 10000L);
+            String messageId = producer.sendDataSourceMessage(createMovementRequest, DataSourceQueue.MOVEMENT, MovementModuleMethod.CREATE.value(), connectId);
+            TextMessage movementResponse = consumer.getMessage(messageId, TextMessage.class, 30000L);
             CreateMovementResponse createMovementResponse = MovementModuleResponseMapper.mapToCreateMovementResponseFromMovementResponse(movementResponse);
             createdMovement = createMovementResponse.getMovement();
         } catch (JMSException | MovementFaultException | ModelMapperException | MessageException e) {
@@ -94,7 +97,7 @@ public class MovementServiceBean {
 
         try {
             String request = MovementModuleRequestMapper.mapToGetMovementMapByQueryRequest(query);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOVEMENT);
+            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOVEMENT, MovementModuleMethod.MOVEMENT_MAP.value(), "");  //Might not need grouping here
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 
             List<MovementMapResponseType> result = MovementModuleResponseMapper.mapToMovementMapResponse(response);
