@@ -106,7 +106,6 @@ public class MovementReportProcessorBean {
                 response = assetClient.collectAssetMT(request);
             } catch (Exception e) {
                 LOG.error(e.toString(),e);
-                return;
             }
 
 

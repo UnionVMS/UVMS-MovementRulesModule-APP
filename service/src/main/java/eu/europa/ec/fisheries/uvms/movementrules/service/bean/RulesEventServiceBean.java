@@ -48,11 +48,10 @@ public class RulesEventServiceBean{
             movementReportBean.setMovementReportReceived(request.getRequest(), request.getType().name(), request.getUsername());
     }
 
-    public String getTicketsAndRulesByMovementsEvent(GetTicketsAndRulesByMovementsRequest request) throws Exception {
+    public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovementsEvent(GetTicketsAndRulesByMovementsRequest request) throws Exception {
         try {
-            GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());
-            return MovementRulesModuleResponseMapper.getTicketsAndRulesByMovementsResponse(response.getTicketsAndRules());
-        } catch (MovementRulesModelMapperException | RulesServiceException e) {
+            return rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());
+        } catch (RulesServiceException e) {
             LOG.error("[ERROR] Error when fetching tickets and rules by movements {}", e);
             throw new Exception("[ERROR] Error when fetching tickets and rules by movements", e);   //TODO: Make this throw something sane, if at all
         }

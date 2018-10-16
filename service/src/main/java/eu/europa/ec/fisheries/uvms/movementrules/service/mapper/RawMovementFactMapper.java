@@ -109,15 +109,17 @@ public class RawMovementFactMapper {
         }
 
 
-        // From Mobile Terminal
-        fact.setMobileTerminalConnectId(assetMTEnrichmentResponse.getMobileTerminalConnectId() == null ? null : assetMTEnrichmentResponse.getMobileTerminalConnectId().toString());
-        fact.setMobileTerminalType(assetMTEnrichmentResponse.getMobileTerminalType() == null ? null : assetMTEnrichmentResponse.getMobileTerminalType());
 
-        // From Asset
+        if(assetMTEnrichmentResponse != null) {
+            // From Mobile Terminal
+            fact.setMobileTerminalConnectId(assetMTEnrichmentResponse.getMobileTerminalConnectId() == null ? null : assetMTEnrichmentResponse.getMobileTerminalConnectId().toString());
+            fact.setMobileTerminalType(assetMTEnrichmentResponse.getMobileTerminalType() == null ? null : assetMTEnrichmentResponse.getMobileTerminalType());
 
 
-        fact.setAssetGuid(assetMTEnrichmentResponse.getAssetUUID() == null ? null : assetMTEnrichmentResponse.getAssetUUID().toString());
-        fact.setAssetName(assetMTEnrichmentResponse.getAssetName() == null ? null : assetMTEnrichmentResponse.getAssetName());
+            // From Asset
+            fact.setAssetGuid(assetMTEnrichmentResponse.getAssetUUID() == null ? null : assetMTEnrichmentResponse.getAssetUUID().toString());
+            fact.setAssetName(assetMTEnrichmentResponse.getAssetName() == null ? null : assetMTEnrichmentResponse.getAssetName());
+        }
 
         return fact;
     }
