@@ -11,6 +11,7 @@ import javax.jms.TextMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.JMSHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.TestHelper;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
@@ -41,6 +42,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void pingTest() throws Exception {
         PingRequest request = new PingRequest();
         request.setMethod(RulesModuleMethod.PING);
@@ -54,6 +56,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
     }
     
     @Test
+@OperateOnDeployment("normal")
     public void setMovementReportTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
@@ -68,6 +71,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void setMovementReportCreateTwoPositionsTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
@@ -91,6 +95,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void setMovementReportNullLatitudeShouldTriggerSanityRuleTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         movement.getPosition().setLatitude(null);
@@ -103,6 +108,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void setMovementReportFutureDateShouldTriggerSanityRuleTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

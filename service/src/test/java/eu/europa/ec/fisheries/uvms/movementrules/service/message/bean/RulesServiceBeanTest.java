@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
+
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
@@ -66,6 +68,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     RulesDao rulesDao;
     
     @Test
+@OperateOnDeployment("normal")
     public void createCustomRuleTest() throws Exception{
         CustomRule input = getCompleteNewCustomRule();
         input.setAvailability(AvailabilityType.GLOBAL.value());
@@ -99,6 +102,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void createCustomRuleWithIntervalTest() throws Exception {
         CustomRule customRule = getCompleteNewCustomRule();
         Interval interval = new Interval();
@@ -115,6 +119,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void getCustomRuleByDummyGuidTest() throws Exception{   //a get with proper input exists among the rest tests
         try {
             rulesService.getCustomRuleByGuid("dummyGuid");
@@ -126,6 +131,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void updateDummyCustomRuleTest() throws Exception{      //an update with proper input/execution exists among the rest tests
         CustomRule input = getCompleteNewCustomRule();
         input.setAvailability(AvailabilityType.GLOBAL.value());
@@ -186,6 +192,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void updateCustomRuleTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
@@ -198,6 +205,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void updateCustomRuleCheckRuleSegmentTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         customRule.getRuleSegmentList().clear();
@@ -223,6 +231,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void updateCustomRuleWithUsernameTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
@@ -234,6 +243,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void deleteCustomRuleWithNullGuidTest() throws Exception {          //a test with proper exectuion exists among the rest tests
         try {
             rulesService.deleteCustomRule(null, "testUser", "testFeature", "testApp");
@@ -244,6 +254,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void deleteCustomRuleWithDummyGuidTest() throws Exception {
         try {
             rulesService.deleteCustomRule("dummyGuid", "testUser", "testFeature", "testApp");
@@ -254,6 +265,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void updateSubscriptionNegativeTests() throws Exception{
         try{
             rulesService.updateSubscription(null, "testUser");
@@ -304,6 +316,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void updateSubscriptionTest() throws Exception{
         UpdateSubscriptionType input = new UpdateSubscriptionType();
         SubscriptionType subscriptionType = new SubscriptionType();
@@ -329,6 +342,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void getAlarmListTest() throws Exception {
         AlarmReport alarmReport = getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
@@ -347,6 +361,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void getTicketListNegativeTest() throws Exception {   //a test with proper input is among the rest tests
         try {
             rulesService.getTicketList(null, null);   //missing query
@@ -366,6 +381,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getTicketListByGuidTest() throws Exception {
         String user = "Test user";
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
@@ -387,6 +403,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getTicketListByGuidTwoTicketsTest() throws Exception {
         String user = "Test user";
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
@@ -416,6 +433,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getTicketListByAssetGuidTest() throws Exception {
         String user = "Test user";
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
@@ -437,6 +455,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getTicketListByRuleGuidTest() throws Exception {
         String user = "Test user";
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
@@ -458,6 +477,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void getTicketsByMovementsNegativeTest() throws Exception{ //a test with proper input is among the rest tests
         try{
             rulesService.getTicketsByMovements(null);
@@ -476,6 +496,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getTicketsByMovementsTest() throws Exception {
         Ticket ticket = getBasicTicket();
         String movementGuid = UUID.randomUUID().toString();
@@ -487,6 +508,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getTicketsAndRulesByMovementsEmptyTest() throws Exception {
         GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(Arrays.asList(""));
         List<TicketAndRuleType> ticketsAndRules = response.getTicketsAndRules();
@@ -494,6 +516,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getTicketsAndRulesByMovementsTest() throws Exception {
         String guid = UUID.randomUUID().toString();
         
@@ -512,6 +535,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void countTicketsByMovementNegativeTest() throws Exception { //a test with proper input is among the rest tests
         try{
             rulesService.getTicketsByMovements(null);
@@ -531,6 +555,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void countTicketsByMovementTest() throws Exception {
         Ticket ticket = getBasicTicket();
         String movementGuid = UUID.randomUUID().toString();
@@ -542,6 +567,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void updateTicketStatusNegativeTest() throws Exception {     //a test with proper input is among the rest tests
         try{
             rulesService.updateTicketStatus(null);
@@ -560,6 +586,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void updateTicketStatusTest() throws Exception {
         Ticket ticket = getBasicTicket();
         Ticket createdTicket = rulesDao.createTicket(ticket);
@@ -572,6 +599,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void updateTicketStatusByQueryNegativeTest() throws Exception{   //a test with proper input is among the rest tests
         try{
             rulesService.updateTicketStatusByQuery(null, null, null);
@@ -604,6 +632,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void updateTicketStatusByQueryTest() throws Exception {
         String user = "Test user";
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
@@ -629,6 +658,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void updateAlarmStatusNegativeTest() throws Exception{ //a test with proper input is among the rest tests
         AlarmReport input = new AlarmReport();
         try{
@@ -640,6 +670,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void updateAlarmStatusTest() throws Exception {
         AlarmReport alarmReport = getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
@@ -652,6 +683,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void updateTicketCountNegativeTest() throws Exception {     //a test with proper input is among the rest tests
         try{
             rulesService.updateTicketCount(null);
@@ -670,6 +702,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void reprocessAlarmTest() throws Exception {
         AlarmReport alarm1 = getBasicAlarmReport();
         alarm1.setRawMovement(getBasicRawMovement());

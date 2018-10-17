@@ -8,6 +8,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
+
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +38,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     RulesService rulesService;
     
     @Test
+@OperateOnDeployment("normal")
     public void getCustomRulesByUserTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
@@ -45,6 +48,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getRunnableCustomRulesTest() throws Exception {
         List<CustomRule> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
@@ -55,6 +59,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getRunnableCustomRulesInactivateRuleTest() throws Exception {
         List<CustomRule> runnableCustomRulesBefore = validationService.getRunnableCustomRules();
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
@@ -70,12 +75,14 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getSanityRulesTest() throws Exception {
         List<SanityRule> sanityRules = validationService.getSanityRules();
         assertTrue(sanityRules.size() > 0);
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getCustomRuleListByQueryGuidTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
@@ -98,6 +105,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getCustomRuleListByQueryGuidTwoGuidsTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
@@ -128,6 +136,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getCustomRuleListByQueryTicketActionUserTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         String mail = "test@mail.com";
@@ -156,6 +165,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void getCustomRuleListByQueryUserTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
@@ -176,6 +186,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void customRuleTriggeredLastTriggeredDateShouldBeSetTest() throws Exception {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.MILLISECOND, 0);
@@ -196,6 +207,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void customRuleTriggeredNewTicketShouldBeCreatedTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
@@ -210,6 +222,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void customRuleTriggeredSendToNAFTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
@@ -224,6 +237,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void createAlarmReportNewAlarmReportShouldBeCreatedTest() throws Exception {
         long alarmReportsBefore = validationService.getNumberOfOpenAlarmReports();
         

@@ -2,12 +2,14 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
+
 import java.util.Date;
 import java.util.List;
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
 
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.MovementReportProcessorBean;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,60 +37,67 @@ public class MovementReportProcessorBeanTest extends TransactionalTests {
 
     @Inject
     RulesService rulesService;
-    
+
     @Test(expected = EJBTransactionRolledbackException.class)
+    @OperateOnDeployment("normal")
     public void setMovementReportReceivedNullInputTest() throws Exception {
         movementReport.setMovementReportReceived(null, null, null);
     }
-    
+
     @Test
+    @OperateOnDeployment("normal")
     public void setMovementReportReceivedPreviousReportShouldBeCreatedTest() throws Exception {
         RawMovementType rawMovement = getBasicRawMovementType();
-        
+
         List<PreviousReport> previousReportsBefore = rulesService.getPreviousMovementReports();
-        
+
+        //Thread.sleep(5*60*1000);
+
         movementReport.setMovementReportReceived(rawMovement, "NAF", "TEST");
-        
+
         List<PreviousReport> previousReportsAfter = rulesService.getPreviousMovementReports();
         assertThat(previousReportsAfter.size(), is(previousReportsBefore.size() + 1));
     }
-    
+
     @Test
+    @OperateOnDeployment("normal")
     public void setMovementReportReceivedPreviousReportShouldBeCreatedWithoutMTTest() throws Exception {
         RawMovementType rawMovement = getBasicRawMovementType();
-        
+
         List<PreviousReport> previousReportsBefore = rulesService.getPreviousMovementReports();
-        
+
         rawMovement.setMobileTerminal(null);
         rawMovement.setPluginType("NAF");
         movementReport.setMovementReportReceived(rawMovement, "NAF", "TEST");
-        
+
         List<PreviousReport> previousReportsAfter = rulesService.getPreviousMovementReports();
         assertThat(previousReportsAfter.size(), is(previousReportsBefore.size() + 1));
     }
-    
+
     @Test
+    @OperateOnDeployment("normal")
     public void setMovementReportReceivedTriggerSanityRuleTest() throws Exception {
         RawMovementType rawMovement = getBasicRawMovementType();
-        
+
         List<PreviousReport> previousReportsBefore = rulesService.getPreviousMovementReports();
-        
+
         rawMovement.getPosition().setLatitude(null);
         movementReport.setMovementReportReceived(rawMovement, "NAF", "TEST");
-        
+
         List<PreviousReport> previousReportsAfter = rulesService.getPreviousMovementReports();
         assertThat(previousReportsAfter.size(), is(previousReportsBefore.size()));
     }
-    
+
     @Test
+    @OperateOnDeployment("normal")
     public void setMovementReportReceivedPreviousReportShouldBeCreatedWithoutAssetIdListTest() throws Exception {
         RawMovementType rawMovement = getBasicRawMovementType();
-        
+
         List<PreviousReport> previousReportsBefore = rulesService.getPreviousMovementReports();
-        
+
         rawMovement.setAssetId(null);
         movementReport.setMovementReportReceived(rawMovement, "NAF", "TEST");
-        
+
         List<PreviousReport> previousReportsAfter = rulesService.getPreviousMovementReports();
         assertThat(previousReportsAfter.size(), is(previousReportsBefore.size() + 1));
     }

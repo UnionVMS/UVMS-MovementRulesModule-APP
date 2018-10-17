@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
+
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +49,7 @@ public class RulesValidatorTest extends TransactionalTests {
      */
     
     @Test
+@OperateOnDeployment("normal")
     public void triggerLatitudeMustExistRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -62,6 +65,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerLongitudeMustExistRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -77,6 +81,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerTransponderNotFoundRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -93,6 +98,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerAssetNotFoundRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -108,6 +114,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerMemberNoMissingRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -125,6 +132,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerDNIDMissingRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -142,6 +150,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerSerialNoMissingRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -159,6 +168,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerComChannelTypeMissingRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -174,6 +184,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerCfrAndIrcsMissingRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -190,6 +201,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerBothCfrAndIrcsMissingRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -207,6 +219,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerPluginTypeMissingRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -222,6 +235,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void triggerFutureDateRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -239,6 +253,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void triggerTimeMissingRule() throws Exception {
         Date timestamp = getTimestamp();
         long ticketsBefore = validationService.getNumberOfOpenAlarmReports();
@@ -273,6 +288,7 @@ public class RulesValidatorTest extends TransactionalTests {
      */
     
     @Test
+@OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerFlagStateRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String flagstate = "SWE";
@@ -304,6 +320,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void evaluateMovementFactDontTriggerFlagStateRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String flagstate = "SWE";
@@ -331,6 +348,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerPositionTimeRuleTest() throws Exception {
         Date positionTime = getTimestamp();
 
@@ -361,6 +379,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerAreaRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String areaCode = "SWE";
@@ -392,6 +411,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerAreaEntryRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String areaCode = "SWE";
@@ -423,6 +443,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerAreaExitRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String areaCode = "SWE";
@@ -454,6 +475,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerMTSerialNumberRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String serialNumber = UUID.randomUUID().toString();
@@ -485,6 +507,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerFlagStateAndAreaRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String flagstate = "SWE";

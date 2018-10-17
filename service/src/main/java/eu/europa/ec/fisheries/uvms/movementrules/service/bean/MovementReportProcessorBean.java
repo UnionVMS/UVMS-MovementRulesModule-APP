@@ -11,44 +11,20 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
+import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
+import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdType;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentRequest;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelAttribute;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelType;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalType;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalModelMapperException;
-import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalUnmarshallException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AssetServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ConfigServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
-import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.MobileTerminalServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.MovementServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
@@ -56,24 +32,23 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AssetAssetIdMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MobileTerminalMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MovementFactMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.RawMovementFactMapper;
-import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
-import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.*;
 
 @Stateless
 public class MovementReportProcessorBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(MovementReportProcessorBean.class);
-    
-    @Inject
-    private AssetServiceBean assetService;
-    
-    @Inject
-    private MobileTerminalServiceBean mobileTerminalService;
-    
+
     @Inject
     private ExchangeServiceBean exchangeService;
     
@@ -91,6 +66,8 @@ public class MovementReportProcessorBean {
 
     @Inject
     private AssetClient assetClient;
+
+
 
 
     public void setMovementReportReceived(final RawMovementType rawMovement, String pluginType, String username) throws RulesServiceException {
@@ -138,67 +115,64 @@ public class MovementReportProcessorBean {
         if(rawMovement == null){
             return null;
         }
-        if(rawMovement.getAssetId() == null){
-            return null;
-        }
-        if(rawMovement.getAssetId().getAssetIdList() == null){
-            return null;
-        }
-        if(rawMovement.getMobileTerminal() == null){
-            return null;
-        }
-        if(rawMovement.getMobileTerminal().getMobileTerminalIdList() == null){
-            return null;
-        }
 
         // OBS OBS OBS
         // missing in AssetId
         // GFCM, UVI, ACCAT  = > belg req
 
         AssetMTEnrichmentRequest req = new AssetMTEnrichmentRequest();
-        List<AssetIdList> assetIdList = rawMovement.getAssetId().getAssetIdList();
-        for(AssetIdList assetId : assetIdList){
-            String value = assetId.getValue();
-            AssetIdType assetIdType = assetId.getIdType();
-            switch (assetIdType){
-                case ID :
-                case GUID :
-                    UUID wrkUUID = UUID.fromString(value);
-                    req.setIdValue(wrkUUID);
-                    break;
-                case CFR :
-                    req.setCfrValue(value);
-                    break;
-                case IRCS :
-                    req.setIrcsValue(value);
-                    break;
-                case IMO :
-                    req.setImoValue(value);
-                    break;
-                case MMSI :
-                    req.setMmsiValue(value);
-                    break;
+
+        if(rawMovement.getAssetId() != null){
+
+            List<AssetIdList> assetIdList = rawMovement.getAssetId().getAssetIdList();
+            for(AssetIdList assetId : assetIdList){
+                String value = assetId.getValue();
+                AssetIdType assetIdType = assetId.getIdType();
+                switch (assetIdType){
+                    case ID :
+                    case GUID :
+                        UUID wrkUUID = UUID.fromString(value);
+                        req.setIdValue(wrkUUID);
+                        break;
+                    case CFR :
+                        req.setCfrValue(value);
+                        break;
+                    case IRCS :
+                        req.setIrcsValue(value);
+                        break;
+                    case IMO :
+                        req.setImoValue(value);
+                        break;
+                    case MMSI :
+                        req.setMmsiValue(value);
+                        break;
+                }
             }
+
         }
 
-        eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.MobileTerminalType mobileTerminal = rawMovement.getMobileTerminal();
-        List<IdList> mobileTeminalIdList = mobileTerminal.getMobileTerminalIdList();
-        for(IdList mobTermId : mobileTeminalIdList){
-            String value = mobTermId.getValue();
-            IdType idType = mobTermId.getType();
-            switch (idType){
-                case SERIAL_NUMBER :
-                    req.setSerialNumberValue(value);
-                    break;
-                case LES :
-                    req.setLesValue(value);
-                    break;
-                case DNID :
-                    req.setDnidValue(value);
-                    break;
-                case MEMBER_NUMBER :
-                    req.setMemberNumberValue(value);
-                    break;
+
+        if(rawMovement.getMobileTerminal() != null){
+
+            eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.MobileTerminalType mobileTerminal = rawMovement.getMobileTerminal();
+            List<IdList> mobileTeminalIdList = mobileTerminal.getMobileTerminalIdList();
+            for(IdList mobTermId : mobileTeminalIdList){
+                String value = mobTermId.getValue();
+                IdType idType = mobTermId.getType();
+                switch (idType){
+                    case SERIAL_NUMBER :
+                        req.setSerialNumberValue(value);
+                        break;
+                    case LES :
+                        req.setLesValue(value);
+                        break;
+                    case DNID :
+                        req.setDnidValue(value);
+                        break;
+                    case MEMBER_NUMBER :
+                        req.setMemberNumberValue(value);
+                        break;
+                }
             }
         }
 

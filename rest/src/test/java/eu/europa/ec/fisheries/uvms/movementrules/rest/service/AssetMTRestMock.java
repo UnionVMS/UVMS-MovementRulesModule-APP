@@ -81,9 +81,9 @@ public class AssetMTRestMock {
     private AssetMTEnrichmentResponse enrichementHelper(AssetMTEnrichmentResponse resp, Asset asset) {
         Map<String, String> assetId = createAssetId(asset);
         resp.setAssetId(assetId);
-        resp.setAssetUUID(UUID.fromString(asset.getAssetId().getGuid()));
+        resp.setAssetUUID(asset.getAssetId().getGuid());
         resp.setAssetName(asset.getName());
-        resp.setAssetHistoryId(UUID.fromString(asset.getEventHistory().getEventId()));
+        resp.setAssetHistoryId(asset.getEventHistory().getEventId());
         resp.setFlagstate(asset.getCountryCode());  //same as flag state?
         resp.setExternalMarking(asset.getExternalMarking());
         resp.setGearType(asset.getGearType());
@@ -103,9 +103,9 @@ public class AssetMTRestMock {
         String channelGuid = getChannelGuid(mobTerm, req);
         resp.setChannelGuid(channelGuid);
         if (mobTerm.getConnectId() != null) {
-            UUID connectidUUID = null;
+            String connectidUUID = null;
             try {
-                connectidUUID = UUID.fromString(mobTerm.getConnectId());
+                connectidUUID = mobTerm.getConnectId();
             } catch (IllegalArgumentException e) {
                 connectidUUID = null;
             }

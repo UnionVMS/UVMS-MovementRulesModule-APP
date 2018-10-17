@@ -50,7 +50,7 @@ public class MovementFactMapper {
 
         // ROOT
         if (response.getAssetGroupList() != null) {
-            for (UUID assetGroup : response.getAssetGroupList()) {
+            for (String assetGroup : response.getAssetGroupList()) {
                 fact.getAssetGroups().add(assetGroup.toString());
             }
         }
@@ -92,7 +92,7 @@ public class MovementFactMapper {
         String cfr = response.getCfr();
         String ircs = response.getIrcs();
         String assetName = response.getAssetName();
-        UUID assetId = response.getAssetUUID();
+        UUID assetId = response.getAssetUUID() == null ? null : UUID.fromString(response.getAssetUUID());
         String assetStatus = response.getAssetStatus();
         String mmsiNo = response.getMmsi();
 
