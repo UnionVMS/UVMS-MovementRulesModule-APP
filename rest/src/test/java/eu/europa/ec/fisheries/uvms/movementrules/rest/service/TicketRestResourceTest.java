@@ -43,7 +43,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     public void getTicketListTest() throws Exception {
-        TicketQuery query = getBasicTicketQuery();
+        TicketQuery query = RulesTestHelper.getBasicTicketQuery();
         TicketListCriteria criteria = new TicketListCriteria();
         criteria.setKey(TicketSearchKey.RULE_NAME);
         criteria.setValue("Test Name");
@@ -61,7 +61,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         Ticket ticket = getCompleteTicket();
 
 
-        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(getCompleteNewCustomRule());
+        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
         customRule.setGuid(UUID.randomUUID().toString());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("testUser");
@@ -233,7 +233,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         tlc.setKey(TicketSearchKey.FROM_DATE);
         tlc.setValue(RulesUtil.dateToString(now));
 
-        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(getCompleteNewCustomRule());
+        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
         customRule.setGuid(UUID.randomUUID().toString());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("vms_admin_com");
@@ -303,7 +303,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         Long ticketList = deserializeResponseDto(response, Long.class);
         assertEquals(0 , ticketList.intValue());
 
-        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(getCompleteNewCustomRule());
+        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
         customRule.setGuid(UUID.randomUUID().toString());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("TestUser");
@@ -338,8 +338,6 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
         rulesDao.removeTicketAfterTests(ticket);
         rulesDao.removeCustomRuleAfterTests(customRule);
-
-
     }
 
     @Test
@@ -368,18 +366,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         rulesDao.removeTicketAfterTests(ticket);
     }
 
-    
-    
-    private static TicketQuery getBasicTicketQuery() {
-        TicketQuery query = new TicketQuery();
-        ListPagination pagination = new ListPagination();
-        pagination.setPage(1);
-        pagination.setListSize(100);
-        query.setPagination(pagination);
-        return query;
-    }
-
-    ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
     private int getReturnCode(String responsDto) throws Exception{
         return objectMapper.readValue(responsDto, ObjectNode.class).get("code").asInt();
     }
@@ -390,7 +377,6 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         JsonNode jsonNode = node.get("data");
         return objectMapper.readValue(objectMapper.writeValueAsString(jsonNode), clazz);
     }
-
 
     private Ticket getCompleteTicket() {
         Ticket ticket = new Ticket();
@@ -409,47 +395,5 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
         return ticket;
     }
-    private CustomRuleType getCompleteNewCustomRule(){
-        CustomRuleType customRule = new CustomRuleType();
 
-        customRule.setName("Flag SWE && area DNK => Send to DNK" + " (" + System.currentTimeMillis() + ")");
-        customRule.setAvailability(AvailabilityType.PRIVATE);
-        customRule.setUpdatedBy("vms_admin_com");
-        customRule.setActive(true);
-        customRule.setArchived(false);
-
-        // If flagstate = SWE
-        CustomRuleSegmentType flagStateRule = new CustomRuleSegmentType();
-        flagStateRule.setStartOperator("(");
-        flagStateRule.setCriteria(CriteriaType.ASSET);
-        flagStateRule.setSubCriteria(SubCriteriaType.FLAG_STATE);
-        flagStateRule.setCondition(ConditionType.EQ);
-        flagStateRule.setValue("SWE");
-        flagStateRule.setEndOperator(")");
-        flagStateRule.setLogicBoolOperator(LogicOperatorType.AND);
-        flagStateRule.setOrder("0");
-        customRule.getDefinitions().add(flagStateRule);
-
-        // and area = DNK
-        CustomRuleSegmentType areaRule = new CustomRuleSegmentType();
-        areaRule.setStartOperator("(");
-        areaRule.setCriteria(CriteriaType.AREA);
-        areaRule.setSubCriteria(SubCriteriaType.AREA_CODE);
-        areaRule.setCondition(ConditionType.EQ);
-        areaRule.setValue("DNK");
-        areaRule.setEndOperator(")");
-        areaRule.setLogicBoolOperator(LogicOperatorType.NONE);
-        areaRule.setOrder("1");
-        customRule.getDefinitions().add(areaRule);
-
-        // then send to FLUX DNK
-        CustomRuleActionType action = new CustomRuleActionType();
-        action.setAction(ActionType.SEND_TO_FLUX);
-        action.setValue("FLUX DNK");
-        action.setOrder("0");
-
-        customRule.getActions().add(action);
-
-        return customRule;
-    }
 }

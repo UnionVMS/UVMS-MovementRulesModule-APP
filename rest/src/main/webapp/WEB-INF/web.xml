@@ -53,6 +53,10 @@
 	</filter>
 	<filter-mapping>
 		<filter-name>AuthenticationFilter</filter-name>
-		<url-pattern>/rest/*</url-pattern>
+		<url-pattern>/rest/alarms/*</url-pattern>
+		<url-pattern>/rest/config/*</url-pattern>
+		<url-pattern>/rest/customrules/*</url-pattern>
+		<url-pattern>/rest/sanityrules/*</url-pattern>
+		<url-pattern>/rest/tickets/*</url-pattern>
 	</filter-mapping>
 </web-app>

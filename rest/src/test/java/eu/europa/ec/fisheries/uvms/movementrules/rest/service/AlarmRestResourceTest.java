@@ -1,49 +1,43 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.UUID;
-import javax.inject.Inject;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
-import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
+import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetAlarmListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.BuildRulesRestDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
+import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import java.util.Collections;
+import java.util.Date;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.*;
 
 //@RunAsClient
 @RunWith(Arquillian.class)
 public class AlarmRestResourceTest extends BuildRulesRestDeployment {
-
 
     @Inject
     RulesDao rulesDao;
 
     @Test
     public void getAlarmListTest() throws Exception {
-        AlarmQuery basicAlarmQuery = getBasicAlarmQuery();
+        AlarmQuery basicAlarmQuery = RulesTestHelper.getBasicAlarmQuery();
         AlarmListCriteria criteria = new AlarmListCriteria();
         criteria.setKey(AlarmSearchKey.RULE_GUID);
         criteria.setValue("TEST_GUID");
@@ -59,7 +53,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
 
         int prevNumberOfReports = alarmList.getAlarms().size();
 
-        AlarmReport alarmReport = getBasicAlarmReport();
+        AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
         criteria.setKey(AlarmSearchKey.ALARM_GUID);
         criteria.setValue(createdAlarmReport.getGuid());
@@ -87,10 +81,9 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         assertEquals(500, getReturnCode(response));
     }
 
-
     @Test
     public void updateAlarmStatusTest() throws Exception {
-        AlarmReport alarmReport = getBasicAlarmReport();
+        AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
 
 
@@ -108,7 +101,6 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         assertEquals(AlarmStatusType.REJECTED, output.getStatus());
 
         rulesDao.removeAlarmReportAfterTests(createdAlarmReport);
-
     }
 
     @Test
@@ -121,13 +113,9 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         assertEquals(500, getReturnCode(response));
     }
 
-
-
-
-
     @Test
     public void getAlarmReportByGuidTest() throws Exception {
-        AlarmReport alarmReport = getBasicAlarmReport();
+        AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
 
         String response = getWebTarget()
@@ -152,18 +140,17 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         assertEquals(500, getReturnCode(response));
     }
     
-    
     @Test
     public void reprocessAlarmTest() throws Exception {
         String response = getWebTarget()
                 .path("alarms/reprocess")
                 .request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(Arrays.asList("NULL_GUID")), String.class);
+                .post(Entity.json(Collections.singletonList("NULL_GUID")), String.class);
         
         String responseString = deserializeResponseDto(response, String.class);
         assertThat(responseString, is("OK"));
 
-        AlarmReport alarmReport = getBasicAlarmReport();
+        AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
         RawMovement rawMovement = new RawMovement();
         rawMovement.setUpdated(new Date());
         rawMovement.setUpdatedBy("Test User");
@@ -175,7 +162,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("alarms/reprocess")
                 .request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(Arrays.asList(createdAlarmReport.getGuid())), String.class);
+                .post(Entity.json(Collections.singletonList(createdAlarmReport.getGuid())), String.class);
 
         responseString = deserializeResponseDto(response, String.class);
         assertThat(responseString, is("OK"));
@@ -189,10 +176,8 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         assertNotNull(responseAlarmReportType);
         assertEquals(AlarmStatusType.REPROCESSED, responseAlarmReportType.getStatus());
 
-
         rulesDao.removeAlarmReportAfterTests(createdAlarmReport);
     }
-    
     
     @Test
     public void getNumberOfOpenAlarmReportsTest() throws Exception {
@@ -206,7 +191,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
 
         int prevNumberOfReports = openAlarmReports;
 
-        AlarmReport alarmReport = getBasicAlarmReport();
+        AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
 
         //hmm, is it a good idea to have tests that depend on there not being crap in teh DB?
@@ -218,7 +203,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         openAlarmReports = deserializeResponseDto(response, Integer.class);
         assertThat(openAlarmReports, is(prevNumberOfReports + 1 ));
 
-        AlarmReport alarmReport2 = getBasicAlarmReport();
+        AlarmReport alarmReport2 = RulesTestHelper.getBasicAlarmReport();
         AlarmReport createdAlarmReport2 = rulesDao.createAlarmReport(alarmReport2);
 
         response = getWebTarget()
@@ -232,27 +217,8 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         rulesDao.removeAlarmReportAfterTests(createdAlarmReport);
         rulesDao.removeAlarmReportAfterTests(createdAlarmReport2);
     }
-    
-    private static AlarmQuery getBasicAlarmQuery() {
-        AlarmQuery query = new AlarmQuery();
-        query.setDynamic(true);
-        ListPagination pagination = new ListPagination();
-        pagination.setPage(1);
-        pagination.setListSize(100);
-        query.setPagination(pagination);
-        return query;
-    }
 
-    private AlarmReport getBasicAlarmReport() {
-        AlarmReport alarmReport = new AlarmReport();
-        alarmReport.setAssetGuid(UUID.randomUUID().toString());
-        alarmReport.setStatus(AlarmStatusType.OPEN.value());
-        alarmReport.setUpdated(new Date());
-        alarmReport.setUpdatedBy("Test user");
-        return alarmReport;
-    }
-
-    ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
     private int getReturnCode(String responsDto) throws Exception{
         return objectMapper.readValue(responsDto, ObjectNode.class).get("code").asInt();
     }
@@ -263,4 +229,5 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
         JsonNode jsonNode = node.get("data");
         return objectMapper.readValue(objectMapper.writeValueAsString(jsonNode), clazz);
     }
+
 }
