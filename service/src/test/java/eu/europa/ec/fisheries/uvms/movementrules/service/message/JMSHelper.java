@@ -29,14 +29,14 @@ public class JMSHelper {
         try {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Queue responseQueue = session.createQueue(RESPONSE_QUEUE);
-            Queue assetQueue = session.createQueue(MOVEMENTRULES_QUEUE);
+            Queue movementRulesEventQueue = session.createQueue(MOVEMENTRULES_QUEUE);
 
             TextMessage message = session.createTextMessage();
             message.setJMSReplyTo(responseQueue);
             message.setText(text);
             message.setStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY, requestType);
 
-            session.createProducer(assetQueue).send(message);
+            session.createProducer(movementRulesEventQueue).send(message);
 
             return message.getJMSMessageID();
         } finally {

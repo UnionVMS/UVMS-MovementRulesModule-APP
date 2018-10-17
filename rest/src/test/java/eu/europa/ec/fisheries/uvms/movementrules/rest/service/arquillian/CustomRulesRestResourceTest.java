@@ -6,6 +6,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
@@ -27,7 +28,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
     public void createAndDeleteCustomRuleTest() throws Exception{
-        CustomRuleType customRule = getCompleteNewCustomRule();
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(200, getReturnCode(response));
@@ -42,14 +43,14 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
     @Test
     public void createAndDeleteTwoCustomRules() throws Exception{
-        CustomRuleType customRule = getCompleteNewCustomRule();
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(200, getReturnCode(response));
         CustomRuleType returnCrt = deserializeResponseDto(response, CustomRuleType.class);
         Assert.assertNotNull(returnCrt.getGuid());
 
-        CustomRuleType customRule2 = getCompleteNewCustomRule();
+        CustomRuleType customRule2 = RulesTestHelper.getCompleteNewCustomRule();
 
         String response2 = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule2), String.class);
         Assert.assertEquals(200, getReturnCode(response2));
@@ -88,7 +89,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         Assert.assertEquals(511, getReturnCode(response));
 
 
-        customRule = getCompleteNewCustomRule();
+        customRule = RulesTestHelper.getCompleteNewCustomRule();
         CustomRuleSegmentType crst = customRule.getDefinitions().get(0);
         crst.setLogicBoolOperator(LogicOperatorType.NONE);
         response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
@@ -125,7 +126,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
     public void createChangeSubscriptionAndDeleteCustomRule() throws Exception {
-        CustomRuleType customRule = getCompleteNewCustomRule();
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(200, getReturnCode(response));
@@ -156,7 +157,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
     public void createUpdateAndDeleteCustomRule() throws Exception{
-        CustomRuleType customRule = getCompleteNewCustomRule();
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(200, getReturnCode(response));
@@ -177,14 +178,14 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
     public void updateInvalidCustomRule() throws Exception {
-        CustomRuleType customRule = getCompleteNewCustomRule();
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).put(Entity.json(customRule), String.class);
         Assert.assertEquals(500, getReturnCode(response));
     }
 
     @Test
     public void createFindByGuidAndDeleteCustomRule() throws Exception{
-        CustomRuleType customRule = getCompleteNewCustomRule();
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(200, getReturnCode(response));
@@ -212,7 +213,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
     public void createFindByUserNameAndDelete() throws Exception{
-        CustomRuleType customRule = getCompleteNewCustomRule();
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
         customRule.setDescription("Test description");
         customRule.setUpdatedBy("vms_admin_com_createFindByUserNameAndDelete");
 
@@ -238,7 +239,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
     public void createFindByQueryAndDelete() throws Exception {
-        CustomRuleType customRule = getCompleteNewCustomRule();
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(200, getReturnCode(response));
@@ -274,7 +275,6 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         Assert.assertEquals(500, getReturnCode(response));
     }
 
-
     private static <T> T deserializeResponseDto(String responseDto, Class<T> clazz) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode node = objectMapper.readValue(responseDto, ObjectNode.class);
@@ -286,47 +286,4 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
          return OBJECT_MAPPER.readValue(responsDto, ObjectNode.class).get("code").asInt();
     }
 
-    private CustomRuleType getCompleteNewCustomRule(){
-        CustomRuleType customRule = new CustomRuleType();
-
-        customRule.setName("Flag SWE && area DNK => Send to DNK" + " (" + System.currentTimeMillis() + ")");
-        customRule.setAvailability(AvailabilityType.PRIVATE);
-        customRule.setUpdatedBy("vms_admin_com");
-        customRule.setActive(true);
-        customRule.setArchived(false);
-
-        // If flagstate = SWE
-        CustomRuleSegmentType flagStateRule = new CustomRuleSegmentType();
-        flagStateRule.setStartOperator("(");
-        flagStateRule.setCriteria(CriteriaType.ASSET);
-        flagStateRule.setSubCriteria(SubCriteriaType.FLAG_STATE);
-        flagStateRule.setCondition(ConditionType.EQ);
-        flagStateRule.setValue("SWE");
-        flagStateRule.setEndOperator(")");
-        flagStateRule.setLogicBoolOperator(LogicOperatorType.AND);
-        flagStateRule.setOrder("0");
-        customRule.getDefinitions().add(flagStateRule);
-
-        // and area = DNK
-        CustomRuleSegmentType areaRule = new CustomRuleSegmentType();
-        areaRule.setStartOperator("(");
-        areaRule.setCriteria(CriteriaType.AREA);
-        areaRule.setSubCriteria(SubCriteriaType.AREA_CODE);
-        areaRule.setCondition(ConditionType.EQ);
-        areaRule.setValue("DNK");
-        areaRule.setEndOperator(")");
-        areaRule.setLogicBoolOperator(LogicOperatorType.NONE);
-        areaRule.setOrder("1");
-        customRule.getDefinitions().add(areaRule);
-
-        // then send to FLUX DNK
-        CustomRuleActionType action = new CustomRuleActionType();
-        action.setAction(ActionType.SEND_TO_FLUX);
-        action.setValue("FLUX DNK");
-        action.setOrder("0");
-
-        customRule.getActions().add(action);
-
-        return customRule;
-    }
 }
