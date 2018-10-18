@@ -3,6 +3,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class ConfigResourcesTest extends TransactionalTests {
 
     @Test
+    @OperateOnDeployment("normal")
     public void getConfigTest() throws Exception{
 
         String response = getWebTarget()
@@ -41,6 +43,7 @@ public class ConfigResourcesTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getAlarmStatusesTest() throws Exception {
         String response = getWebTarget()
                 .path("config/alarmstatus")
@@ -52,6 +55,7 @@ public class ConfigResourcesTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getTicketStatusesTest() throws Exception{
         String response = getWebTarget()
                 .path("config/ticketstatus")

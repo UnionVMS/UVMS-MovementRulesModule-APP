@@ -18,6 +18,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +43,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     RulesDao rulesDao;
 
     @Test
+    @OperateOnDeployment("normal")
     public void getTicketListTest() throws Exception {
         TicketQuery query = RulesTestHelper.getBasicTicketQuery();
         TicketListCriteria criteria = new TicketListCriteria();
@@ -91,6 +93,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void negativeGetTicketListTest() throws Exception{
         String response = getWebTarget()
                 .path("tickets/list/" + "testUser")
@@ -101,6 +104,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
     
     @Test
+    @OperateOnDeployment("normal")
     public void getTicketsByMovementsTest() throws Exception {
         String response = getWebTarget()
                 .path("tickets/listByMovements")
@@ -135,6 +139,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void countTicketsByMovementsTest() throws Exception {
         String response = getWebTarget()
                 .path("tickets/countByMovements")
@@ -169,6 +174,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
     
     @Test
+    @OperateOnDeployment("normal")
     public void negativeUpdateTicketStatusTest() throws Exception{ //there are no tickets to update so this one will result in an internal server error
         TicketType ticketType = new TicketType();
         ticketType.setGuid("TestGuid");
@@ -184,6 +190,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void updateTicketStatusTest() throws Exception{
         Ticket ticket = getCompleteTicket();
         ticket.setStatus(TicketStatusType.OPEN);
@@ -204,6 +211,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
     
     @Test
+    @OperateOnDeployment("normal")
     public void updateTicketStatusByQueryTest() throws Exception {
         TicketQuery ticketQuery = new TicketQuery();
         TicketListCriteria tlc = new TicketListCriteria();
@@ -270,6 +278,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getTicketByGuid() throws Exception {
         String response = getWebTarget()
                 .path("tickets/" + "TestGuid")    //no tickets in the db
@@ -294,6 +303,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getNumberOfOpenTicketReportsTest() throws Exception{
         String response = getWebTarget()
                 .path("/tickets/countopen/" + "ShouldBeEmpty")    //no tickets in the db
@@ -341,6 +351,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getNumberOfAssetsNotSendingTest() throws Exception{
         String response = getWebTarget()
                 .path("/tickets/countAssetsNotSending")    //no tickets in the db

@@ -1,5 +1,7 @@
-package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
+package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelAttribute;
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelType;
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalId;
@@ -18,11 +20,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-@Path("UnionVMS/asset/rest/internal")
+@Path("/asset/rest/internal")
 @Stateless
 public class AssetMTRestMock {
+
+    ObjectMapper MAPPER = new ObjectMapper();
+
+
+
+
+
 
 
     @POST
@@ -31,35 +43,26 @@ public class AssetMTRestMock {
     @Produces(value = {MediaType.APPLICATION_JSON})
     public Response collectAssetMT(AssetMTEnrichmentRequest request) {
 
-        //request.get
-        Asset asset = getBasicAsset();
-        MobileTerminalType mt = getBasicMobileTerminalType();
 
-        AssetMTEnrichmentResponse response = new AssetMTEnrichmentResponse();
-        response = enrichementHelper(response, asset);
-        response = enrichementHelper(request, response, mt);
+        try {
 
-        return Response.ok(response).build();
+            AssetMTEnrichmentResponse response = new AssetMTEnrichmentResponse();
+            Asset asset = getBasicAsset();
+            MobileTerminalType MT = getBasicMobileTerminalType();
+
+            response = enrichementHelper(response, asset);
+            response = enrichementHelper(request, response, MT);
+
+
+            Response r = Response.ok(response).build();
+            return r;
+        }catch (Exception e){
+            System.out.println("Ooooops");
+            return Response.status(500).build();
+        }
     }
 
-
-    private Asset getBasicAsset() {
-        Asset asset = new Asset();
-        asset.setIrcs("IRCS");
-        AssetId assetId = new AssetId();
-        assetId.setType(AssetIdType.GUID);
-        assetId.setGuid(UUID.randomUUID().toString());
-        asset.setAssetId(assetId);
-        AssetHistoryId assetHistoryId = new AssetHistoryId();
-        assetHistoryId.setEventId(UUID.randomUUID().toString());
-        asset.setEventHistory(assetHistoryId);
-        asset.setName("Test Asset");
-        asset.setCountryCode("SWE");
-        return asset;
-    }
-
-
-    private static MobileTerminalType getBasicMobileTerminalType() {
+    private MobileTerminalType getBasicMobileTerminalType() {
         MobileTerminalType mobileTerminal = new MobileTerminalType();
         mobileTerminal.setConnectId(UUID.randomUUID().toString());
         MobileTerminalId mobileTerminalId = new MobileTerminalId();
@@ -78,69 +81,19 @@ public class AssetMTRestMock {
         return mobileTerminal;
     }
 
-    private AssetMTEnrichmentResponse enrichementHelper(AssetMTEnrichmentResponse resp, Asset asset) {
-        Map<String, String> assetId = createAssetId(asset);
-        resp.setAssetId(assetId);
-        resp.setAssetUUID(asset.getAssetId().getGuid());
-        resp.setAssetName(asset.getName());
-        resp.setAssetHistoryId(asset.getEventHistory().getEventId());
-        resp.setFlagstate(asset.getCountryCode());  //same as flag state?
-        resp.setExternalMarking(asset.getExternalMarking());
-        resp.setGearType(asset.getGearType());
-        resp.setCfr(asset.getCfr());
-        resp.setIrcs(asset.getIrcs());
-        resp.setMmsi(asset.getMmsiNo());
-
-        // resp.setAssetStatus(asset.get);
-
-
-        return resp;
-    }
-
-    private AssetMTEnrichmentResponse enrichementHelper(AssetMTEnrichmentRequest req, AssetMTEnrichmentResponse resp, MobileTerminalType mobTerm) {
-
-        // here we put into response data about mobiletreminal / channels etc etc
-        String channelGuid = getChannelGuid(mobTerm, req);
-        resp.setChannelGuid(channelGuid);
-        if (mobTerm.getConnectId() != null) {
-            String connectidUUID = null;
-            try {
-                connectidUUID = mobTerm.getConnectId();
-            } catch (IllegalArgumentException e) {
-                connectidUUID = null;
-            }
-            resp.setMobileTerminalConnectId(connectidUUID);
-        }
-        resp.setMobileTerminalType(mobTerm.getType());
-        if(mobTerm.getMobileTerminalId() != null) {
-            resp.setMobileTerminalGuid(mobTerm.getMobileTerminalId().getGuid());
-        }
-        resp.setMobileTerminalIsInactive(mobTerm.isInactive());
-
-        if(mobTerm.getChannels() != null){
-            List<ComChannelType> channelTypes = mobTerm.getChannels();
-            for(ComChannelType channelType : channelTypes){
-                if(!channelType.getGuid().equals(channelGuid)){
-                    continue;
-                }
-                List<ComChannelAttribute> attributes = channelType.getAttributes();
-                for(ComChannelAttribute attr : attributes){
-                    String type = attr.getType();
-                    String val = attr.getValue();
-                    if (DNID.equals(type)) {
-                        resp.setDNID(val);
-                    }
-                    if (MEMBER_NUMBER.equals(type)) {
-                        resp.setMemberNumber(val);
-                    }
-                    if (SERIAL_NUMBER.equals(type)) {
-                        resp.setSerialNumber(val);
-                    }
-                }
-            }
-        }
-
-        return resp;
+    private Asset getBasicAsset() {
+        Asset asset = new Asset();
+        asset.setIrcs("IRCS");
+        AssetId assetId = new AssetId();
+        assetId.setType(AssetIdType.GUID);
+        assetId.setGuid(UUID.randomUUID().toString());
+        asset.setAssetId(assetId);
+        AssetHistoryId assetHistoryId = new AssetHistoryId();
+        assetHistoryId.setEventId(UUID.randomUUID().toString());
+        asset.setEventHistory(assetHistoryId);
+        asset.setName("Test Asset");
+        asset.setCountryCode("SWE");
+        return asset;
     }
 
     private static final String DNID = "DNID";
@@ -153,8 +106,25 @@ public class AssetMTRestMock {
     private static final String GFCM = "GFCM";
     private static final String UVI = "UVI";
     private static final String ICCAT = "ICCAT";
-    public static final String SERIAL_NUMBER = "SERIAL_NUMBER";
 
+    private AssetMTEnrichmentResponse enrichementHelper(AssetMTEnrichmentResponse resp, Asset asset) {
+        Map<String, String> assetId = createAssetId(asset);
+        resp.setAssetId(assetId);
+        resp.setAssetUUID(asset.getAssetId() == null ? null : asset.getAssetId().getGuid());
+        resp.setAssetName(asset.getName());
+        resp.setAssetHistoryId(asset.getEventHistory() == null ? null : asset.getEventHistory().getEventId());
+        resp.setFlagstate(asset.getCountryCode());
+        resp.setExternalMarking(asset.getExternalMarking());
+        resp.setGearType(asset.getGearType());
+        resp.setCfr(asset.getCfr());
+        resp.setIrcs(asset.getIrcs());
+        resp.setMmsi(asset.getMmsiNo());
+
+        // resp.setAssetStatus(asset.get);
+
+
+        return resp;
+    }
 
     private Map<String, String> createAssetId(Asset asset) {
         Map<String, String> assetId = new HashMap<>();
@@ -184,6 +154,46 @@ public class AssetMTRestMock {
             assetId.put(ICCAT, asset.getIccat());
         }
         return assetId;
+    }
+
+    private AssetMTEnrichmentResponse enrichementHelper(AssetMTEnrichmentRequest req, AssetMTEnrichmentResponse resp, MobileTerminalType mobTerm) {
+
+        // here we put into response data about mobiletreminal / channels etc etc
+        String channelGuid = getChannelGuid(mobTerm, req);
+        resp.setChannelGuid(channelGuid);
+        if (mobTerm.getConnectId() != null) {
+            UUID connectidUUID = null;
+            try {
+                connectidUUID = UUID.fromString(mobTerm.getConnectId());
+            } catch (IllegalArgumentException e) {
+                connectidUUID = null;
+            }
+            resp.setMobileTerminalConnectId(connectidUUID == null ? null : connectidUUID.toString());
+        }
+        resp.setMobileTerminalType(mobTerm.getType());
+        if(mobTerm.getMobileTerminalId() != null) {
+            resp.setMobileTerminalGuid(mobTerm.getMobileTerminalId().getGuid());
+        }
+        resp.setMobileTerminalIsInactive(mobTerm.isInactive());
+
+        if(mobTerm.getChannels() != null){
+            List<ComChannelType> channelTypes = mobTerm.getChannels();
+            for(ComChannelType channelType : channelTypes){
+
+                List<ComChannelAttribute> attributes = channelType.getAttributes();
+                for(ComChannelAttribute attr : attributes){
+                    String type = attr.getType();
+                    String val = attr.getValue();
+                    if (DNID.equals(type)) {
+                        resp.setDNID(val);
+                    }
+                    if (MEMBER_NUMBER.equals(type)) {
+                        resp.setMemberNumber(val);
+                    }
+                }
+            }
+        }
+        return resp;
     }
 
     private String getChannelGuid(MobileTerminalType mobileTerminal, AssetMTEnrichmentRequest request) {

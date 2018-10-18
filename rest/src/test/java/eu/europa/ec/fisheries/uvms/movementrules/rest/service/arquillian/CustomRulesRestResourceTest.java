@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
+    @OperateOnDeployment("normal")
     public void createAndDeleteCustomRuleTest() throws Exception{
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
@@ -42,6 +44,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
     }
     @Test
+    @OperateOnDeployment("normal")
     public void createAndDeleteTwoCustomRules() throws Exception{
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
@@ -65,6 +68,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void createInvalidCustomRule() throws Exception{
         CustomRuleType customRule = new CustomRuleType();
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
@@ -125,6 +129,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void createChangeSubscriptionAndDeleteCustomRule() throws Exception {
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
@@ -150,12 +155,14 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void changeInvalidSubscription() throws Exception {
         String response = getWebTarget().path("/customrules/subscription").request(MediaType.APPLICATION_JSON).post(Entity.json(new UpdateSubscriptionType()), String.class);
         Assert.assertEquals(500, getReturnCode(response));
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void createUpdateAndDeleteCustomRule() throws Exception{
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
@@ -177,6 +184,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void updateInvalidCustomRule() throws Exception {
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
         String response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).put(Entity.json(customRule), String.class);
@@ -184,6 +192,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void createFindByGuidAndDeleteCustomRule() throws Exception{
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
@@ -206,12 +215,14 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void findCustomRuleByInvalidGuid() throws Exception {
         String response = getWebTarget().path("/customrules/" + "invalidCustomRule").request(MediaType.APPLICATION_JSON).get(String.class);
         Assert.assertEquals(500, getReturnCode(response));
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void createFindByUserNameAndDelete() throws Exception{
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
         customRule.setDescription("Test description");
@@ -238,6 +249,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void createFindByQueryAndDelete() throws Exception {
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
@@ -270,6 +282,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void findCustomRuleByInvalidQuery() throws Exception {
         String response = getWebTarget().path("/customrules/listByQuery").request(MediaType.APPLICATION_JSON).post(Entity.json(new CustomRuleQuery()), String.class);
         Assert.assertEquals(500, getReturnCode(response));

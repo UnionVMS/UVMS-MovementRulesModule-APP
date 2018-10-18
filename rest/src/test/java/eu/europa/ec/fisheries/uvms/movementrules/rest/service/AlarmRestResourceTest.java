@@ -37,6 +37,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     RulesDao rulesDao;
 
     @Test
+    @OperateOnDeployment("normal")
     public void getAlarmListTest() throws Exception {
         AlarmQuery basicAlarmQuery = RulesTestHelper.getBasicAlarmQuery();
         AlarmListCriteria criteria = new AlarmListCriteria();
@@ -73,6 +74,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void negativeGetAlarmListTest() throws Exception{
         String response = getWebTarget()
                 .path("alarms/list")
@@ -83,6 +85,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void updateAlarmStatusTest() throws Exception {
         AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
@@ -105,6 +108,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void negativeUpdateAlarmStatusTest() throws Exception {
         String response = getWebTarget()
                 .path("alarms")
@@ -115,6 +119,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getAlarmReportByGuidTest() throws Exception {
         AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
@@ -132,6 +137,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void negativeGetAlarmReportByGuidTest() throws Exception{
         String response = getWebTarget()
                 .path("alarms/" + "test guid")
@@ -182,6 +188,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
     
     @Test
+    @OperateOnDeployment("normal")
     public void getNumberOfOpenAlarmReportsTest() throws Exception {
         String response = getWebTarget()
                 .path("alarms/countopen")

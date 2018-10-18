@@ -2,6 +2,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
 import java.util.List;
 import javax.ws.rs.core.MediaType;
+
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
@@ -15,12 +17,14 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SanityRuleType;
 public class SanityRulesRestResourceTest extends TransactionalTests {
 
     @Test
+    @OperateOnDeployment("normal")
     public void worldsBestTestTest(){
         Assert.assertTrue(true);
     }
 
     @Test
     //@RunAsClient
+    @OperateOnDeployment("normal")
     public void getSanityRulesTest() throws Exception{
         String response = getWebTarget().path("/sanityrules/listAll").request(MediaType.APPLICATION_JSON).get(String.class);
 
