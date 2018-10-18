@@ -24,15 +24,17 @@ public class JMSHelper {
 
     private ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
-    public String sendMessageToRules(String text, String requestType) throws Exception {
+    public String sendMessageToRules(String text, String requestType, boolean useReplyTo) throws Exception {
         Connection connection = connectionFactory.createConnection();
         try {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Queue responseQueue = session.createQueue(RESPONSE_QUEUE);
             Queue movementRulesEventQueue = session.createQueue(MOVEMENTRULES_QUEUE);
 
             TextMessage message = session.createTextMessage();
-            message.setJMSReplyTo(responseQueue);
+            if(useReplyTo) {
+                Queue responseQueue = session.createQueue(RESPONSE_QUEUE);
+                message.setJMSReplyTo(responseQueue);
+            }
             message.setText(text);
             message.setStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY, requestType);
 
