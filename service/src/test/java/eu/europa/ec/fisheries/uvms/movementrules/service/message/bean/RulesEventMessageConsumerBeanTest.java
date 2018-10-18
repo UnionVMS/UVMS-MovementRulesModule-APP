@@ -62,6 +62,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
+        Thread.sleep(2000);
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
 
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
