@@ -42,7 +42,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         jmsHelper.clearQueue(MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME);
     }
 
-    @Test
+    /*@Test
     @OperateOnDeployment("normal")
     public void pingTest() throws Exception {
         final String RESPONSE_QUEUE = "RulesTestQueue";
@@ -108,7 +108,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         assertThat(movementResponse.getMovementRefType().getType(), is(MovementRefTypeType.ALARM));
     }
-
+*/
     @Test
     @OperateOnDeployment("normal")
     public void setMovementReportFutureDateShouldTriggerSanityRuleTest() throws Exception {
