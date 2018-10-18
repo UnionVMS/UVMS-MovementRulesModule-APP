@@ -3,6 +3,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+
 import java.util.Calendar;
 import java.util.TimeZone;
 import javax.jms.Message;
@@ -40,9 +41,9 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         jmsHelper.clearQueue(MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         jmsHelper.clearQueue(MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME);
     }
-    
+
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment("normal")
     public void pingTest() throws Exception {
         PingRequest request = new PingRequest();
         request.setMethod(RulesModuleMethod.PING);
@@ -50,65 +51,65 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         String correlationId = jmsHelper.sendMessageToRules(requestString, RulesModuleMethod.PING.value());
         Message message = jmsHelper.listenForResponse(correlationId);
         assertThat(message, is(notNullValue()));
-        
+
         PingResponse pingResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) message, PingResponse.class);
         assertThat(pingResponse.getResponse(), is("pong"));
     }
-    
+
     @Test
-@OperateOnDeployment("normal")
+    @OperateOnDeployment("normal")
     public void setMovementReportTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-        
+
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         assertThat(movementResponse.getMovementRefType().getType(), is(MovementRefTypeType.MOVEMENT));
-        
-        MovementBaseType returnedMovement = movementResponse.getOrgRequest().getMovement();        
+
+        MovementBaseType returnedMovement = movementResponse.getOrgRequest().getMovement();
         assertThat(returnedMovement.getAssetId().getAssetIdList().get(0).getValue(), is(movement.getAssetId().getAssetIdList().get(0).getValue()));
     }
-    
+
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment("normal")
     public void setMovementReportCreateTwoPositionsTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-        
+
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         MovementBaseType returnedMovement = movementResponse.getOrgRequest().getMovement();
-        
+
         assertThat(returnedMovement.getAssetId().getAssetIdList().get(0).getValue(), is(movement.getAssetId().getAssetIdList().get(0).getValue()));
-        
+
         RawMovementType movement2 = TestHelper.createBasicMovement();
         request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement2, "testUser");
         correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-        
+
         ProcessedMovementResponse movementResponse2 = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         MovementBaseType returnedMovement2 = movementResponse2.getOrgRequest().getMovement();
-        
+
         assertThat(returnedMovement2.getAssetId().getAssetIdList().get(0).getValue(), is(movement2.getAssetId().getAssetIdList().get(0).getValue()));
     }
-    
+
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment("normal")
     public void setMovementReportNullLatitudeShouldTriggerSanityRuleTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         movement.getPosition().setLatitude(null);
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-        
+
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         assertThat(movementResponse.getMovementRefType().getType(), is(MovementRefTypeType.ALARM));
     }
-    
+
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment("normal")
     public void setMovementReportFutureDateShouldTriggerSanityRuleTest() throws Exception {
         RawMovementType movement = TestHelper.createBasicMovement();
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -117,7 +118,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
         String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value());
         Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-        
+
         ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
         assertThat(movementResponse.getMovementRefType().getType(), is(MovementRefTypeType.ALARM));
     }
