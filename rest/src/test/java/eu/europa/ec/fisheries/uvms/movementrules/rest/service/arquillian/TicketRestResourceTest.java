@@ -91,6 +91,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void negativeGetTicketListTest() throws Exception{
         String response = getWebTarget()
                 .path("tickets/list/" + "testUser")
@@ -101,6 +102,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
     
     @Test
+    @OperateOnDeployment("normal")
     public void getTicketsByMovementsTest() throws Exception {
         String response = getWebTarget()
                 .path("tickets/listByMovements")
@@ -135,6 +137,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void countTicketsByMovementsTest() throws Exception {
         String response = getWebTarget()
                 .path("tickets/countByMovements")
@@ -169,6 +172,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
     
     @Test
+    @OperateOnDeployment("normal")
     public void negativeUpdateTicketStatusTest() throws Exception{ //there are no tickets to update so this one will result in an internal server error
         TicketType ticketType = new TicketType();
         ticketType.setGuid("TestGuid");
@@ -181,6 +185,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void updateTicketStatusTest() throws Exception{
         Ticket ticket = RulesTestHelper.getCompleteTicket();
         ticket.setStatus(TicketStatusType.OPEN);
@@ -200,6 +205,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
     
     @Test
+    @OperateOnDeployment("normal")
     public void updateTicketStatusByQueryTest() throws Exception {
         TicketQuery ticketQuery = new TicketQuery();
         TicketListCriteria tlc = new TicketListCriteria();
@@ -266,6 +272,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getTicketByGuid() throws Exception {
         String response = getWebTarget()
                 .path("tickets/" + "TestGuid")    //no tickets in the db
@@ -290,6 +297,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getNumberOfOpenTicketReportsTest() throws Exception{
         String response = getWebTarget()
                 .path("/tickets/countopen/" + "ShouldBeEmpty")    //no tickets in the db
@@ -337,6 +345,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getNumberOfAssetsNotSendingTest() throws Exception{
         String response = getWebTarget()
                 .path("/tickets/countAssetsNotSending")    //no tickets in the db
