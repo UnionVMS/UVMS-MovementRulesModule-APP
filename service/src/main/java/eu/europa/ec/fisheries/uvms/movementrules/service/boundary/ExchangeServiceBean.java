@@ -70,7 +70,7 @@ public class ExchangeServiceBean {
 
             //this is here to make rules respond on the test queue as well as to exchange, dont use unless you are running performance tests from docker.
             //producer.sendResponseMessageForTest(exchangeResponseText, username);
-        } catch (ExchangeModelMapperException e) {
+        } catch (Exception e) {
             LOG.error("Could not send processed movement to Exchange", e);
         }
     }

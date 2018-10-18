@@ -95,6 +95,7 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
                 return sendMessageToSpecificQueueWithFunction(text, destination, rulesResponseQueue, function, grouping);
 
             }
+            LOG.error("Silent throw");
             return null;
         } catch (Exception e) {
             LOG.error("[ Error when sending message. ] {}", e.getMessage());
