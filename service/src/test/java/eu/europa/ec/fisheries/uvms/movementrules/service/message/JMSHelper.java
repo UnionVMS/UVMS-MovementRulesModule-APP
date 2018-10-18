@@ -20,21 +20,19 @@ public class JMSHelper {
 
     private static final long TIMEOUT = 20000;
     private static final String MOVEMENTRULES_QUEUE = MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME;
-    private static final String RESPONSE_QUEUE = "RulesTestQueue";
+//    private static final String RESPONSE_QUEUE = "RulesTestQueue";
 
     private ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
-    public String sendMessageToRules(String text, String requestType, boolean useReplyTo) throws Exception {
+    public String sendMessageToRules(String text, String requestType, String resQueue) throws Exception {
         Connection connection = connectionFactory.createConnection();
         try {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue responseQueue = session.createQueue(resQueue);
             Queue movementRulesEventQueue = session.createQueue(MOVEMENTRULES_QUEUE);
 
             TextMessage message = session.createTextMessage();
-            if(useReplyTo) {
-                Queue responseQueue = session.createQueue(RESPONSE_QUEUE);
-                message.setJMSReplyTo(responseQueue);
-            }
+            message.setJMSReplyTo(responseQueue);
             message.setText(text);
             message.setStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY, requestType);
 
@@ -46,9 +44,9 @@ public class JMSHelper {
         }
     }
 
-    public Message listenForResponse(String correlationId) throws Exception {
-        return listenForResponseOnQueue(correlationId, RESPONSE_QUEUE);
-    }
+//    public Message listenForResponse(String correlationId) throws Exception {
+//        return listenForResponseOnQueue(correlationId, RESPONSE_QUEUE);
+//    }
     
     public Message listenForResponseOnQueue(String correlationId, String queue) throws Exception {
         Connection connection = connectionFactory.createConnection();
