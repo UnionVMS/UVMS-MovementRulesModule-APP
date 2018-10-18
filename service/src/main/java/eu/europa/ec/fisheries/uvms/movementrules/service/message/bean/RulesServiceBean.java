@@ -428,10 +428,10 @@ public class RulesServiceBean implements RulesService {
     }
 
     @Override
-    public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movements) {
+    public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movementGuidList) {
         List<TicketAndRuleType> ticketsAndRules = new ArrayList<>();
         // TODO: This can be done more efficiently with some join stuff
-        List<Ticket> tickets = rulesDao.getTicketsByMovements(movements);
+        List<Ticket> tickets = rulesDao.getTicketsByMovements(movementGuidList);
         for (Ticket ticket : tickets) {
             CustomRule rule = rulesDao.getCustomRuleByGuid(ticket.getRuleGuid());
             TicketType ticketType = TicketMapper.toTicketType(ticket);
