@@ -30,6 +30,8 @@ public abstract class BuildRulesServiceDeployment {
         
         testWar.addAsResource("persistence-integration.xml", "META-INF/persistence.xml");
 
+        testWar.deleteClass(ExchangeModuleMock.class);
+
         return testWar;
     }
 
