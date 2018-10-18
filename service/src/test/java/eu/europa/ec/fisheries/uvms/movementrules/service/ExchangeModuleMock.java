@@ -54,6 +54,7 @@ public class ExchangeModuleMock implements MessageListener {
                     messageProducer.sendModuleResponseMessage((TextMessage) message, response);
                     break;
                 default:
+                    LOG.error("Message received in ExchangeMock!");
                     break;
             }
         } catch (Exception e) {
