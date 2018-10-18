@@ -10,6 +10,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +32,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
     private RulesDao rulesDao;
 
     @Test
+    @OperateOnDeployment("normal")
     public void getTicketsAndRulesByMovementsEventTest() throws Exception {
 
         final List<String> movementGuidList = new ArrayList<>();

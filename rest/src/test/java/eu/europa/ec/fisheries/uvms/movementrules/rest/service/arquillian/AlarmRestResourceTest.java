@@ -14,6 +14,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     RulesDao rulesDao;
 
     @Test
+    @OperateOnDeployment("normal")
     public void getAlarmListTest() throws Exception {
         AlarmQuery basicAlarmQuery = RulesTestHelper.getBasicAlarmQuery();
         AlarmListCriteria criteria = new AlarmListCriteria();
@@ -72,6 +74,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void negativeGetAlarmListTest() throws Exception{
         String response = getWebTarget()
                 .path("alarms/list")
@@ -82,6 +85,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void updateAlarmStatusTest() throws Exception {
         AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
@@ -104,6 +108,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void negativeUpdateAlarmStatusTest() throws Exception {
         String response = getWebTarget()
                 .path("alarms")
@@ -114,6 +119,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void getAlarmReportByGuidTest() throws Exception {
         AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
         AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
@@ -131,6 +137,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
 
     @Test
+    @OperateOnDeployment("normal")
     public void negativeGetAlarmReportByGuidTest() throws Exception{
         String response = getWebTarget()
                 .path("alarms/" + "test guid")
@@ -141,6 +148,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
     
     @Test
+    @OperateOnDeployment("normal")
     public void reprocessAlarmTest() throws Exception {
         String response = getWebTarget()
                 .path("alarms/reprocess")
@@ -180,6 +188,7 @@ public class AlarmRestResourceTest extends BuildRulesRestDeployment {
     }
     
     @Test
+    @OperateOnDeployment("normal")
     public void getNumberOfOpenAlarmReportsTest() throws Exception {
         String response = getWebTarget()
                 .path("alarms/countopen")
