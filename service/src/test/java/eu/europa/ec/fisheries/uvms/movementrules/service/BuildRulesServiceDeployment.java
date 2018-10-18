@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import eu.europa.ec.fisheries.uvms.movementrules.service.config.MovementRulesConfigHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.bean.RulesEventMessageConsumerBean;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -38,19 +39,13 @@ public abstract class BuildRulesServiceDeployment {
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "UnionVMS.war");
 
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
-                .importRuntimeAndTestDependencies()
                 .resolve("eu.europa.ec.fisheries.uvms.asset:asset-model","eu.europa.ec.fisheries.uvms.asset:asset-client")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
-        testWar.addAsResource(new File("src/main/resources/templates/CustomRulesTemplate.drt"),"/templates/CustomRulesTemplate.drt");
-        testWar.addAsResource(new File("src/main/resources/templates/SanityRulesTemplate.drt"),"/templates/SanityRulesTemplate.drt");
 
         testWar.addClass(UnionVMSRestMock.class);
         testWar.addClass(AssetMTRestMock.class);
-
-        testWar.addAsResource("persistence-integration.xml", "META-INF/persistence.xml");
-        testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.movementrules.service");
 
 
         return testWar;
