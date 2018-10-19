@@ -43,6 +43,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
 
     @Before
     public void clearExchangeQueue() throws Exception {
+        //System.out.println("clearing queues");
         jmsHelper.clearQueue(MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         jmsHelper.clearQueue(MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME);
     }
@@ -62,7 +63,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         assertThat(pingResponse.getResponse(), is("pong"));
     }
 
-    /*
+    private ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
     @Test
     @OperateOnDeployment("normal")
     public void jmsSanityCheck() throws Exception{
@@ -98,7 +99,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         Message message = jmsHelper.listenForResponseOnQueue(corr, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         assertNotNull(message);
     }
-*/
+
 
 
     @Test
