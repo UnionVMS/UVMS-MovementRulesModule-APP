@@ -96,7 +96,8 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
 
             }
             LOG.error("Silent throw");
-            return null;
+            //return null;
+            throw new RuntimeException("Got no Queue");
         } catch (Exception e) {
             LOG.error("[ Error when sending message. ] {}", e);
             throw new MessageException("[ Error when sending message. ]", e);

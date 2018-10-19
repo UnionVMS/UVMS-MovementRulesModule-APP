@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -15,6 +16,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeploy
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.JMSHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.TestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -61,13 +63,13 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         assertThat(pingResponse.getResponse(), is("pong"));
     }
 
-    @Inject
-    RulesMessageProducerBean rulesMessageProducerBean;
+    //@Inject
+    private RulesMessageProducer producer = new RulesMessageProducerBean();
 
     @Test
     @OperateOnDeployment("normal")
     public void jmsSanityCheck() throws Exception{
-        String corr = rulesMessageProducerBean.sendDataSourceMessage("test text", DataSourceQueue.EXCHANGE, "PROCESSED_MOVEMENT", "Test boat");
+        String corr = producer.sendDataSourceMessage("test text", DataSourceQueue.EXCHANGE, "PROCESSED_MOVEMENT", "Test boat");
 
         Message message = jmsHelper.listenForResponseOnQueue(corr, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         assertNotNull(message);
