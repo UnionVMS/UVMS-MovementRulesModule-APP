@@ -63,17 +63,20 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         assertThat(pingResponse.getResponse(), is("pong"));
     }
 
-    //@Inject
-    private RulesMessageProducer producer = new RulesMessageProducerBean();
+    /*@Inject
+    private RulesMessageProducer producer;
 
     @Test
     @OperateOnDeployment("normal")
     public void jmsSanityCheck() throws Exception{
+        System.out.println("Now");
+        Thread.sleep(5 * 60 * 1000);
         String corr = producer.sendDataSourceMessage("test text", DataSourceQueue.EXCHANGE, "PROCESSED_MOVEMENT", "Test boat");
+
 
         Message message = jmsHelper.listenForResponseOnQueue(corr, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         assertNotNull(message);
-    }
+    }*/
 
 
     @Test
