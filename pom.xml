@@ -4,7 +4,7 @@
     <parent>
         <groupId>fish.focus.uvms.maven</groupId>
         <artifactId>uvms-pom</artifactId>
-        <version>1.20</version>
+        <version>1.19</version>
     </parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
@@ -29,7 +29,7 @@
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
-        <docker.dev.version>3.27.3.w14</docker.dev.version>
+        <docker.dev.version>3.27.1</docker.dev.version>
     </properties>
 
     <dependencyManagement>
