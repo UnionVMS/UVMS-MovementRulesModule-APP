@@ -15,6 +15,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeploy
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.JMSHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.TestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.ExchangeProducerBean;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -61,11 +62,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         assertThat(pingResponse.getResponse(), is("pong"));
     }
 
-    @Inject
-    private RulesMessageProducer producer;
-
-    private ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-
+    /*
     @Test
     @OperateOnDeployment("normal")
     public void jmsSanityCheck() throws Exception{
@@ -101,6 +98,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         Message message = jmsHelper.listenForResponseOnQueue(corr, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         assertNotNull(message);
     }
+*/
 
 
     @Test
