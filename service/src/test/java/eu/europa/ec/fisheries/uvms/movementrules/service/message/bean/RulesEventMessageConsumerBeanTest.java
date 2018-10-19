@@ -7,18 +7,15 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Calendar;
 import java.util.TimeZone;
-import javax.ejb.EJB;
 import javax.inject.Inject;
-import javax.jms.Message;
-import javax.jms.TextMessage;
+import javax.jms.*;
 
+import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.JMSHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.TestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.ExchangeProducerBean;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
@@ -63,20 +60,47 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         PingResponse pingResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) message, PingResponse.class);
         assertThat(pingResponse.getResponse(), is("pong"));
     }
-/*
+
     @Inject
-    private ExchangeProducerBean producer;
+    private RulesMessageProducer producer;
+
+    private ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
     @Test
     @OperateOnDeployment("normal")
     public void jmsSanityCheck() throws Exception{
-        System.out.println("Now");
-        Thread.sleep(5 * 60 * 1000);
-        String corr = producer.sendModuleMessage("test text", "PROCESSED_MOVEMENT");
+        //System.out.println("Now");
+        //Thread.sleep(5 * 60 * 1000);
+        //String corr = producer.sendDataSourceMessage("test text", DataSourceQueue.EXCHANGE, "PROCESSED_MOVEMENT", "Test boat");
+
+        Connection connection = null;
+        Session session = null;
+        javax.jms.MessageProducer producer = null;
+        String corr;
+
+        connection = connectionFactory.createConnection();
+        try {
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue responseQueue = session.createQueue("Test Queue");
+            Queue exchangeEventQueue = session.createQueue(MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
+
+            TextMessage message = session.createTextMessage();
+            message.setJMSReplyTo(responseQueue);
+            message.setText("test text");
+            message.setStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY, "PROCESSED_MOVEMENT");
+            MappedDiagnosticContext.addThreadMappedDiagnosticContextToMessageProperties(message);
+
+            session.createProducer(exchangeEventQueue).send(message);
+
+            corr = message.getJMSMessageID();
+        } finally {
+            connection.close();
+        }
+
 
         Message message = jmsHelper.listenForResponseOnQueue(corr, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         assertNotNull(message);
-    }*/
+    }
 
 
     @Test
