@@ -27,8 +27,6 @@ public abstract class BuildRulesServiceDeployment {
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
-        Arrays.stream(files).sorted((f1, f2) -> f1.getName().compareTo(f2.getName())).forEach(f -> LOG.info(f.getName()));
-        
         testWar.addAsResource(new File("src/main/resources/templates/CustomRulesTemplate.drt"),"/templates/CustomRulesTemplate.drt");
         testWar.addAsResource(new File("src/main/resources/templates/SanityRulesTemplate.drt"),"/templates/SanityRulesTemplate.drt");
 

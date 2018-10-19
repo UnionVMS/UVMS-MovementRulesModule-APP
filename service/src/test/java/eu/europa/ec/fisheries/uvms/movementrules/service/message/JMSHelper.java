@@ -19,8 +19,6 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 public class JMSHelper {
 
     private static final long TIMEOUT = 20000;
-    private static final String MOVEMENTRULES_QUEUE = MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME;
-//    private static final String RESPONSE_QUEUE = "RulesTestQueue";
 
     private ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
@@ -29,7 +27,7 @@ public class JMSHelper {
         try {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Queue responseQueue = session.createQueue(resQueue);
-            Queue movementRulesEventQueue = session.createQueue(MOVEMENTRULES_QUEUE);
+            Queue movementRulesEventQueue = session.createQueue(MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME);
 
             TextMessage message = session.createTextMessage();
             message.setJMSReplyTo(responseQueue);
@@ -44,10 +42,6 @@ public class JMSHelper {
         }
     }
 
-//    public Message listenForResponse(String correlationId) throws Exception {
-//        return listenForResponseOnQueue(correlationId, RESPONSE_QUEUE);
-//    }
-    
     public Message listenForResponseOnQueue(String correlationId, String queue) throws Exception {
         Connection connection = connectionFactory.createConnection();
         try {
@@ -63,13 +57,15 @@ public class JMSHelper {
 
     public void clearQueue(String queue) throws Exception {
         Connection connection = connectionFactory.createConnection();
+        MessageConsumer consumer;
         try {
-            connection.start();
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Queue responseQueue = session.createQueue(queue);
-
-            MessageConsumer consumer = session.createConsumer(responseQueue);
-            while (consumer.receive(1l) != null);
+            do {
+                connection.start();
+                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                Queue responseQueue = session.createQueue(queue);
+                consumer = session.createConsumer(responseQueue);
+            }
+            while (consumer.receive(1L) != null);
         } finally {
             connection.close();
         }
