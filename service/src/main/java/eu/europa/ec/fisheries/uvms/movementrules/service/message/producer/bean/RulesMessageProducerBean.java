@@ -87,7 +87,7 @@ public class RulesMessageProducerBean extends AbstractProducer implements RulesM
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String  sendDataSourceMessage(String text, DataSourceQueue queue, String function, String grouping) throws MessageException  {
+    public String  sendDataSourceMessage(String text, DataSourceQueue queue) throws MessageException  {
         return sendDataSourceMessage(text, queue, null, null);
     }
     

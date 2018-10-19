@@ -29,5 +29,5 @@ public interface RulesMessageProducer {
 
     void sendModuleErrorResponseMessage(RulesFault fault, TextMessage message);
 
-    String sendDataSourceMessage(String text, DataSourceQueue queue, String function, String grouping) throws MessageException;
+    String sendDataSourceMessage(String text, DataSourceQueue queue) throws MessageException;
 }
