@@ -17,6 +17,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.message.JMSHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.TestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.ExchangeProducerBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -62,17 +63,16 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         PingResponse pingResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) message, PingResponse.class);
         assertThat(pingResponse.getResponse(), is("pong"));
     }
-
-    /*@Inject
-    private RulesMessageProducer producer;
+/*
+    @Inject
+    private ExchangeProducerBean producer;
 
     @Test
     @OperateOnDeployment("normal")
     public void jmsSanityCheck() throws Exception{
         System.out.println("Now");
         Thread.sleep(5 * 60 * 1000);
-        String corr = producer.sendDataSourceMessage("test text", DataSourceQueue.EXCHANGE, "PROCESSED_MOVEMENT", "Test boat");
-
+        String corr = producer.sendModuleMessage("test text", "PROCESSED_MOVEMENT");
 
         Message message = jmsHelper.listenForResponseOnQueue(corr, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         assertNotNull(message);
