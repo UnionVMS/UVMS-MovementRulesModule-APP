@@ -5,6 +5,7 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
 
 import javax.ejb.Stateless;
+import javax.transaction.Transactional;
 
 @Stateless
 public class ExchangeProducerBean extends AbstractProducer {
@@ -14,6 +15,7 @@ public class ExchangeProducerBean extends AbstractProducer {
         return MessageConstants.QUEUE_EXCHANGE_EVENT;
     }
 
+    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public String sendModuleMessage(String text, String function) throws MessageException {
         return this.sendMessageToSpecificQueueWithFunction(text, getDestination(), null, function, null);
     }
