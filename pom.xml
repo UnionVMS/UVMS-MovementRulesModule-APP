@@ -29,7 +29,7 @@
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
-        <docker.dev.version>3.27.1</docker.dev.version>
+        <docker.dev.version>3.25.1</docker.dev.version>
     </properties>
 
     <dependencyManagement>
