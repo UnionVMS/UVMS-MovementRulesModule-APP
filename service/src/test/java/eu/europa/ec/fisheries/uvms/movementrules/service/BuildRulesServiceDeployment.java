@@ -8,12 +8,16 @@ import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.File;
+import java.util.Arrays;
 
 @ArquillianSuiteDeployment
 public abstract class BuildRulesServiceDeployment {
 
+    final static Logger LOG = LoggerFactory.getLogger(BuildRulesServiceDeployment.class);
+    
     @Deployment(name = "normal", order = 2)
     public static Archive<?> createDeployment() {
 
@@ -23,6 +27,8 @@ public abstract class BuildRulesServiceDeployment {
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
+        Arrays.stream(files).sorted((f1, f2) -> f1.getName().compareTo(f2.getName())).forEach(f -> LOG.info(f.getName()));
+        
         testWar.addAsResource(new File("src/main/resources/templates/CustomRulesTemplate.drt"),"/templates/CustomRulesTemplate.drt");
         testWar.addAsResource(new File("src/main/resources/templates/SanityRulesTemplate.drt"),"/templates/SanityRulesTemplate.drt");
 
