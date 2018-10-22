@@ -56,16 +56,18 @@ public class JMSHelper {
     }
 
     public void clearQueue(String queue) throws Exception {
+        //System.out.println("clearing queue:" + queue);
         Connection connection = connectionFactory.createConnection();
         MessageConsumer consumer;
         try {
-            do {
-                connection.start();
-                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                Queue responseQueue = session.createQueue(queue);
-                consumer = session.createConsumer(responseQueue);
+            connection.start();
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue responseQueue = session.createQueue(queue);
+            consumer = session.createConsumer(responseQueue);
+
+            while (consumer.receive(2L) != null){
+                //System.out.println("ate a message");
             }
-            while (consumer.receive(1L) != null);
         } finally {
             connection.close();
         }
