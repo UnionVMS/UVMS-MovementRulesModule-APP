@@ -53,7 +53,7 @@ public abstract class BuildRulesRestDeployment {
     @Deployment(name = "uvms", order = 1)
     public static Archive<?> createAssetRestMock() {
 
-        WebArchive testWar = ShrinkWrap.create(WebArchive.class, "UnionVMS.war");
+        WebArchive testWar = ShrinkWrap.create(WebArchive.class, "unionvms.war");
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
                 .resolve("eu.europa.ec.fisheries.uvms.asset:asset-model","eu.europa.ec.fisheries.uvms.asset:asset-client")
                 .withTransitivity().asFile();
