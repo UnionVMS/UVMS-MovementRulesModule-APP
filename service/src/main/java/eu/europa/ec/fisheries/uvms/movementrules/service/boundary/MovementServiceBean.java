@@ -14,17 +14,20 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.JMSException;
+import javax.jms.Queue;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.movement.module.v1.MovementModuleMethod;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.MovementProducerBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movement.module.v1.CreateMovementResponse;
-import eu.europa.ec.fisheries.schema.movement.module.v1.MovementModuleMethod;
 import eu.europa.ec.fisheries.schema.movement.search.v1.MovementMapResponseType;
 import eu.europa.ec.fisheries.schema.movement.search.v1.MovementQuery;
 import eu.europa.ec.fisheries.schema.movement.search.v1.RangeCriteria;
@@ -38,9 +41,7 @@ import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementDuplicateExc
 import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementFaultException;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MovementBaseTypeMapper;
 
 @Stateless
@@ -55,7 +56,10 @@ public class MovementServiceBean {
     private RulesResponseConsumer consumer;
 
     @Inject
-    private RulesMessageProducer producer;
+    private MovementProducerBean movementProducerBean;
+
+    @Resource(mappedName = "java:/" + MessageConstants.QUEUE_MOVEMENTRULES)
+    private Queue responseQueue;
     
     public MovementType sendToMovement(String connectId, RawMovementType rawMovement, String username) {
         LOG.info("Send the validated raw position to Movement..");
@@ -64,7 +68,7 @@ public class MovementServiceBean {
             MovementBaseType movementBaseType = MovementBaseTypeMapper.mapRawMovementFact(rawMovement);
             movementBaseType.setConnectId(connectId);
             String createMovementRequest = MovementModuleRequestMapper.mapToCreateMovementRequest(movementBaseType, username);
-            String messageId = producer.sendDataSourceMessage(createMovementRequest, DataSourceQueue.MOVEMENT, MovementModuleMethod.CREATE.value(), connectId);
+            String messageId = movementProducerBean.sendModuleMessage(createMovementRequest, responseQueue, MovementModuleMethod.CREATE.value(), connectId);
             TextMessage movementResponse = consumer.getMessage(messageId, TextMessage.class, 30000L);
             CreateMovementResponse createMovementResponse = MovementModuleResponseMapper.mapToCreateMovementResponseFromMovementResponse(movementResponse);
             createdMovement = createMovementResponse.getMovement();
@@ -98,7 +102,7 @@ public class MovementServiceBean {
 
         try {
             String request = MovementModuleRequestMapper.mapToGetMovementMapByQueryRequest(query);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.MOVEMENT, MovementModuleMethod.MOVEMENT_MAP.value(), "");  //Might not need grouping here
+            String messageId = movementProducerBean.sendModuleMessage(request, responseQueue, MovementModuleMethod.MOVEMENT_MAP.value(), "");  //Might not need grouping here
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 
             List<MovementMapResponseType> result = MovementModuleResponseMapper.mapToMovementMapResponse(response);

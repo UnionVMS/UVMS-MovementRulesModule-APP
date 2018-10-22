@@ -9,11 +9,11 @@ import javax.jms.Destination;
 import javax.transaction.Transactional;
 
 @Stateless
-public class ExchangeProducerBean extends AbstractProducer {
+public class UserProducerBean extends AbstractProducer {
 
     @Override
     public String getDestinationName() {
-        return MessageConstants.QUEUE_EXCHANGE_EVENT;
+        return MessageConstants.QUEUE_USM;
     }
 
     @Transactional(value = Transactional.TxType.REQUIRES_NEW)
@@ -22,8 +22,7 @@ public class ExchangeProducerBean extends AbstractProducer {
     }
 
     @Transactional(value = Transactional.TxType.REQUIRES_NEW)
-    public String sendModuleMessage(String text, Destination replyTo, String function) throws MessageException {
-        return this.sendMessageToSpecificQueueWithFunction(text, getDestination(), replyTo, function, "");
+    public String sendModuleMessage(String text, Destination replyTo, String function, String grouping) throws MessageException {
+        return this.sendMessageToSpecificQueueWithFunction(text, getDestination(), replyTo, function, grouping);
     }
-
 }

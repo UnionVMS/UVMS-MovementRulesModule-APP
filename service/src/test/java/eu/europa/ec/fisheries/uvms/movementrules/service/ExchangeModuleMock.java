@@ -18,15 +18,13 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
-import com.fasterxml.jackson.databind.PropertyName;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 
 @MessageDriven(mappedName = "jms/queue/UVMSExchangeEvent", activationConfig = {
@@ -41,7 +39,7 @@ public class ExchangeModuleMock implements MessageListener {
     final static Logger LOG = LoggerFactory.getLogger(ExchangeModuleMock.class);
     
     @Inject
-    RulesMessageProducer messageProducer;
+    RulesMessageProducerBean messageProducer;
     
     @Override
     public void onMessage(Message message) {

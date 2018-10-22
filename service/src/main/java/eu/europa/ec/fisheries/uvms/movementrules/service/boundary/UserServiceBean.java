@@ -11,18 +11,19 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.jms.Queue;
 import javax.jms.TextMessage;
 
-import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.UserProducerBean;
 import eu.europa.ec.fisheries.wsdl.user.module.UserModuleMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
@@ -43,7 +44,10 @@ public class UserServiceBean {
     private RulesResponseConsumer consumer;
 
     @Inject
-    private RulesMessageProducer producer;
+    private UserProducerBean producer;
+
+    @Resource(mappedName = "java:/" + MessageConstants.QUEUE_MOVEMENTRULES)
+    private Queue responseQueue;
     
     public UserContext getFullUserContext(String remoteUser, String applicationName) throws RulesServiceException, MovementRulesModelMarshallException {
         LOG.debug("Request getFullUserContext({}, {})", remoteUser, applicationName);
@@ -54,7 +58,7 @@ public class UserServiceBean {
         String userRequest;
         try {
             userRequest = UserModuleRequestMapper.mapToGetUserContextRequest(contextId);
-            String messageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER, UserModuleMethod.GET_USER_CONTEXT.value(), "");
+            String messageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.GET_USER_CONTEXT.value(), "");
             LOG.debug("JMS message with ID: {} is sent to USM.", messageId);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 
@@ -86,14 +90,14 @@ public class UserServiceBean {
     
     public GetContactDetailResponse getContactDetails(String username) throws ModelMarshallException, MessageException, MovementRulesModelMarshallException {
         String userRequest = UserModuleRequestMapper.mapToGetContactDetailsRequest(username);
-        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER, UserModuleMethod.GET_CONTACT_DETAILS.value(), "");
+        String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.GET_CONTACT_DETAILS.value(), "");
         TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
         return JAXBMarshaller.unmarshallTextMessage(userMessage, GetContactDetailResponse.class);
     }
     
     public FindOrganisationsResponse findOrganisation(String nationIsoName) throws ModelMarshallException, MessageException, MovementRulesModelMarshallException {
         String userRequest = UserModuleRequestMapper.mapToFindOrganisationsRequest(nationIsoName);
-        String userMessageId = producer.sendDataSourceMessage(userRequest, DataSourceQueue.USER, UserModuleMethod.FIND_ORGANISATIONS.value(), "");
+        String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.FIND_ORGANISATIONS.value(), "");
         TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
         return JAXBMarshaller.unmarshallTextMessage(userMessage, FindOrganisationsResponse.class);
     }

@@ -27,7 +27,7 @@ import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalId;
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalType;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.mapper.MobileTerminalModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 
 @MessageDriven(mappedName = "jms/queue/UVMSMobileTerminalEvent", activationConfig = {
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"), 
@@ -36,7 +36,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesM
 public class MobileTerminalModuleMock implements MessageListener {
     
     @Inject
-    RulesMessageProducer messageProducer;
+    RulesMessageProducerBean messageProducer;
 
     @Override
     public void onMessage(Message message) {

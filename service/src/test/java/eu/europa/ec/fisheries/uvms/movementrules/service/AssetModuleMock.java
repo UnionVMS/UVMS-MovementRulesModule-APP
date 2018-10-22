@@ -20,8 +20,8 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
 import eu.europa.ec.fisheries.wsdl.asset.module.AssetModuleMethod;
 import eu.europa.ec.fisheries.wsdl.asset.module.AssetModuleRequest;
@@ -39,7 +39,7 @@ import eu.europa.ec.fisheries.wsdl.asset.types.ListAssetResponse;
 public class AssetModuleMock implements MessageListener {
     
     @Inject
-    RulesMessageProducer messageProducer;
+    RulesMessageProducerBean messageProducer;
 
     @Override
     public void onMessage(Message message) {
