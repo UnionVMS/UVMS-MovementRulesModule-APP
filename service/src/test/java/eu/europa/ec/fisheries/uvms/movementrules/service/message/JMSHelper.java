@@ -65,7 +65,7 @@ public class JMSHelper {
             Queue responseQueue = session.createQueue(queue);
             consumer = session.createConsumer(responseQueue);
 
-            while (consumer.receive(2L) != null){
+            while (consumer.receive(5L) != null){
                 //System.out.println("ate a message");
             }
         } finally {
