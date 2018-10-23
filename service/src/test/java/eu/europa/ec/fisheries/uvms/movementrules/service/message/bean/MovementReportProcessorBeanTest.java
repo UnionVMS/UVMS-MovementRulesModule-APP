@@ -9,6 +9,7 @@ import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
 
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.MovementReportProcessorBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -38,7 +39,7 @@ public class MovementReportProcessorBeanTest extends TransactionalTests {
     @Inject
     RulesService rulesService;
 
-    @Test(expected = EJBTransactionRolledbackException.class)
+    @Test(expected = RulesServiceException.class)
     @OperateOnDeployment("normal")
     public void setMovementReportReceivedNullInputTest() throws Exception {
         movementReport.setMovementReportReceived(null, null, null);
