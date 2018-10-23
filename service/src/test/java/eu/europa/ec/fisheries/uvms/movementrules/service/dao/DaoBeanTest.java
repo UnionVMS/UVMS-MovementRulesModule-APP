@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +45,7 @@ public class DaoBeanTest {
     }
 
     @Test
+@OperateOnDeployment("normal")
     public void testCreateCustomRule() {
         CustomRule customRule = new CustomRule();
 
@@ -51,6 +54,7 @@ public class DaoBeanTest {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void testGetCustomRuleByGuid() {
         String guid = "sdfsadfsdsagsd";
         CustomRule entity = new CustomRule();
@@ -68,6 +72,7 @@ public class DaoBeanTest {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void testUpdateCustomRule() {
         Long id = 11L;
 
@@ -85,11 +90,13 @@ public class DaoBeanTest {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void testDeleteCustomRule() {
         // em.remove(arg0);
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void testGetCustomRuleList() {
         TypedQuery<CustomRule> query = mock(TypedQuery.class);
         when(em.createNamedQuery(CustomRule.LIST_CUSTOM_RULES_BY_USER, CustomRule.class)).thenReturn(query);

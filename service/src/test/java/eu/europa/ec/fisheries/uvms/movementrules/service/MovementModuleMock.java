@@ -26,7 +26,7 @@ import eu.europa.ec.fisheries.schema.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 
 @MessageDriven(mappedName = "jms/queue/UVMSMovementEvent", activationConfig = {
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"), 
@@ -35,7 +35,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessagePr
 public class MovementModuleMock implements MessageListener {
     
     @Inject
-    RulesMessageProducer messageProducer;
+    RulesMessageProducerBean messageProducer;
 
     @Override
     public void onMessage(Message message) {
@@ -64,7 +64,7 @@ public class MovementModuleMock implements MessageListener {
         }
     }
     
-    private static MovementType toMovementType(MovementBaseType movement) {
+    private MovementType toMovementType(MovementBaseType movement) {
         MovementType movementType = new MovementType();
         movementType.setGuid(UUID.randomUUID().toString());
         movementType.setConnectId(movementType.getConnectId());

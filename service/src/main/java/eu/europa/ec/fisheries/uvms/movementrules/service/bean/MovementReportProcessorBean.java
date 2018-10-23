@@ -11,37 +11,20 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelAttribute;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelType;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
 import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList;
+import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
+import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentRequest;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalModelMapperException;
-import eu.europa.ec.fisheries.uvms.mobileterminal.model.exception.MobileTerminalUnmarshallException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AssetServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ConfigServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
-import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.MobileTerminalServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.MovementServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
@@ -49,70 +32,56 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AssetAssetIdMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MobileTerminalMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.MovementFactMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.RawMovementFactMapper;
-import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
-import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.*;
 
 @Stateless
 public class MovementReportProcessorBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(MovementReportProcessorBean.class);
-    
-    @Inject
-    private AssetServiceBean assetService;
-    
-    @Inject
-    private MobileTerminalServiceBean mobileTerminalService;
-    
+
     @Inject
     private ExchangeServiceBean exchangeService;
-    
+
     @Inject
     private MovementServiceBean movementService;
-    
+
     @Inject
     private ConfigServiceBean configService;
-    
+
     @Inject
     private RulesValidator rulesValidator;
-    
+
     @Inject
     private RulesDao rulesDao;
-    
+
+    @Inject
+    private AssetClient assetClient;
+
+
+
+
     public void setMovementReportReceived(final RawMovementType rawMovement, String pluginType, String username) throws RulesServiceException {
         try {
             Date auditTimestamp = new Date();
             Date auditTotalTimestamp = new Date();
 
-            Asset asset = null;
+            // the Rest Call
 
-            // Get Mobile Terminal if it exists
-            MobileTerminalType mobileTerminal = mobileTerminalService.getMobileTerminalByRawMovement(rawMovement);
-            auditTimestamp = auditLog("Time to fetch from Mobile Terminal Module:", auditTimestamp);
+            AssetMTEnrichmentRequest request = createRequest(rawMovement, pluginType,  username);
+            AssetMTEnrichmentResponse response = assetClient.collectAssetMT(request);
 
-            // Get Asset
-            if (mobileTerminal != null) {
-                String connectId = mobileTerminal.getConnectId();
-                if (connectId != null) {
-                    asset = assetService.getAssetByConnectId(connectId);
-                }
-            } else {
-                asset = assetService.getAssetByCfrIrcs(rawMovement.getAssetId());
-                if (isPluginTypeWithoutMobileTerminal(rawMovement.getPluginType()) && asset != null) {
-                    mobileTerminal = mobileTerminalService.findMobileTerminalByAsset(asset.getAssetId().getGuid());
-                    rawMovement.setMobileTerminal(MobileTerminalMapper.mapMobileTerminal(mobileTerminal));
-                }
-            }
-            if (rawMovement.getAssetId() == null && asset != null) {
-                AssetId assetId = AssetAssetIdMapper.mapAssetToAssetId(asset);
-                rawMovement.setAssetId(assetId);
-            }
-            auditTimestamp = auditLog("Time to fetch from Asset Module:", auditTimestamp);
 
-            RawMovementFact rawMovementFact = RawMovementFactMapper.mapRawMovementFact(rawMovement, mobileTerminal, asset, pluginType);
+            RawMovementFact rawMovementFact = RawMovementFactMapper.mapRawMovementFact(rawMovement, response, pluginType);
             LOG.debug("rawMovementFact:{}", rawMovementFact);
 
             //added a loooong series of if statements that does the same thing, check the rulesValidator
@@ -120,7 +89,7 @@ public class MovementReportProcessorBean {
             auditLog("Time to validate sanity:", auditTimestamp);
 
             if (rawMovementFact.isOk()) {
-                MovementFact movementFact = collectMovementData(mobileTerminal, asset, rawMovement, username);
+                MovementFact movementFact = collectMovementData(response, rawMovement, username);
                 LOG.info("[INFO] Validating movement from Movement Module");
                 rulesValidator.evaluate(movementFact);
                 auditLog("Rules total time:", auditTotalTimestamp);
@@ -130,41 +99,102 @@ public class MovementReportProcessorBean {
                 // Tell Exchange that the report caused an alarm
                 exchangeService.sendBackToExchange(null, rawMovement, MovementRefTypeType.ALARM, username);
             }
-        } catch (MessageException | MobileTerminalModelMapperException | MobileTerminalUnmarshallException | JMSException | AssetModelMapperException | ExecutionException e) {
-            throw new RulesServiceException(e.getMessage());
+        } catch (Exception e) {
+            LOG.error("setMovementReportReceived failed", e);
+            throw new RulesServiceException(e);
         }
     }
 
-    private boolean isPluginTypeWithoutMobileTerminal(String pluginType) {
-        if (pluginType == null) {
-            return true;
+
+    private AssetMTEnrichmentRequest createRequest(RawMovementType rawMovement, String pluginType, String username){
+
+        if(rawMovement == null){
+            return null;
         }
-        try {
-            PluginType type = PluginType.valueOf(pluginType);
-            switch (type) {
-                case MANUAL:
-                case NAF:
-                case OTHER:
-                    return true;
-                default:
-                    return false;
+
+        // OBS OBS OBS
+        // missing in AssetId
+        // GFCM, UVI, ACCAT  = > belg req
+
+        AssetMTEnrichmentRequest req = new AssetMTEnrichmentRequest();
+
+        if(rawMovement.getAssetId() != null){
+
+            List<AssetIdList> assetIdList = rawMovement.getAssetId().getAssetIdList();
+            for(AssetIdList assetId : assetIdList){
+                String value = assetId.getValue();
+                AssetIdType assetIdType = assetId.getIdType();
+                switch (assetIdType){
+                    case ID :
+                    case GUID :
+                        UUID wrkUUID = UUID.fromString(value);
+                        req.setIdValue(wrkUUID);
+                        break;
+                    case CFR :
+                        req.setCfrValue(value);
+                        break;
+                    case IRCS :
+                        req.setIrcsValue(value);
+                        break;
+                    case IMO :
+                        req.setImoValue(value);
+                        break;
+                    case MMSI :
+                        req.setMmsiValue(value);
+                        break;
+                }
             }
-        } catch (IllegalArgumentException e) {
-            return false;
+
         }
+
+
+        if(rawMovement.getMobileTerminal() != null){
+
+            eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.MobileTerminalType mobileTerminal = rawMovement.getMobileTerminal();
+            List<IdList> mobileTeminalIdList = mobileTerminal.getMobileTerminalIdList();
+            for(IdList mobTermId : mobileTeminalIdList){
+                String value = mobTermId.getValue();
+                IdType idType = mobTermId.getType();
+                switch (idType){
+                    case SERIAL_NUMBER :
+                        req.setSerialNumberValue(value);
+                        break;
+                    case LES :
+                        req.setLesValue(value);
+                        break;
+                    case DNID :
+                        req.setDnidValue(value);
+                        break;
+                    case MEMBER_NUMBER :
+                        req.setMemberNumberValue(value);
+                        break;
+                }
+            }
+        }
+
+        if(rawMovement.getSource() != null) {
+            req.setTranspondertypeValue(rawMovement.getSource().value());
+        }
+        if(pluginType != null) {
+            req.setPluginType(pluginType);
+        }
+        if(username != null) {
+            req.setUser(username);
+        }
+        return req;
     }
 
-    private MovementFact collectMovementData(MobileTerminalType mobileTerminal, Asset asset, final RawMovementType rawMovement, final String username) throws ExecutionException, RulesServiceException {
+    private MovementFact collectMovementData(AssetMTEnrichmentResponse response, final RawMovementType rawMovement, final String username) throws ExecutionException, RulesServiceException {
         int threadNum = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadNum);
         Integer numberOfReportsLast24Hours;
         final String assetGuid;
         final String assetHistGuid;
         final String assetFlagState;
-        if (asset != null && asset.getAssetId() != null && asset.getEventHistory() != null) {
-            assetGuid = asset.getAssetId().getGuid();
-            assetHistGuid = asset.getEventHistory().getEventId();
-            assetFlagState = asset.getCountryCode();
+        if (response.getAssetUUID() != null && response.getAssetHistoryId() != null) {
+            assetGuid = response.getAssetUUID();
+            assetHistGuid = response.getAssetHistoryId();
+            assetFlagState = response.getFlagstate();
         } else {
             LOG.warn("[WARN] Asset was null for {} ", rawMovement.getAssetId());
             assetGuid = null;
@@ -177,7 +207,7 @@ public class MovementReportProcessorBean {
         FutureTask<Long> timeDiffAndPersistMovementTask = new FutureTask<>(new Callable<Long>() {
             @Override
             public Long call() {
-                return timeDiffAndPersistMovement(rawMovement.getSource(), assetGuid, assetFlagState, positionTime);
+                return timeDiffAndPersistPreviousReport(rawMovement.getSource(), assetGuid, assetFlagState, positionTime);
             }
         });
         executor.execute(timeDiffAndPersistMovementTask);
@@ -198,14 +228,6 @@ public class MovementReportProcessorBean {
         });
         executor.execute(sendToMovementTask);
 
-        FutureTask<List<AssetGroup>> assetGroupTask = new FutureTask<>(new Callable<List<AssetGroup>>() {
-            @Override
-            public List<AssetGroup> call() {
-                return assetService.getAssetGroup(assetGuid);
-            }
-        });
-        executor.execute(assetGroupTask);
-
         FutureTask<List<String>> vicinityOfTask = new FutureTask<>(new Callable<List<String>>() {
             @Override
             public List<String> call() {
@@ -215,10 +237,7 @@ public class MovementReportProcessorBean {
         executor.execute(vicinityOfTask);
 
         // Get channel guid
-        String channelGuid = "";
-        if (mobileTerminal != null) {
-            channelGuid = getChannelGuid(mobileTerminal, rawMovement);
-        }
+        String channelGuid = response.getChannelGuid();
 
         // Get channel type
         String comChannelType = null;
@@ -230,13 +249,12 @@ public class MovementReportProcessorBean {
         try {
             Date auditParallelTimestamp = new Date();
             Long timeDiffInSeconds = timeDiffAndPersistMovementTask.get();
-            List<AssetGroup> assetGroups = assetGroupTask.get();
             numberOfReportsLast24Hours = numberOfReportsLast24HoursTask.get();
             MovementType createdMovement = sendToMovementTask.get();
             List<String> vicinityOf = vicinityOfTask.get();
             auditLog("Total time for parallel tasks:", auditParallelTimestamp);
 
-            MovementFact movementFact = MovementFactMapper.mapMovementFact(createdMovement, mobileTerminal, asset, comChannelType, assetGroups, timeDiffInSeconds, numberOfReportsLast24Hours, channelGuid, vicinityOf);
+            MovementFact movementFact = MovementFactMapper.mapMovementFact(createdMovement, response, comChannelType,  timeDiffInSeconds, numberOfReportsLast24Hours, channelGuid, vicinityOf);
             LOG.debug("movementFact:{}", movementFact);
 
             executor.shutdown();
@@ -247,7 +265,7 @@ public class MovementReportProcessorBean {
         }
     }
 
-    private Long timeDiffAndPersistMovement(MovementSourceType movementSource, String assetGuid, String assetFlagState, Date positionTime) {
+    private Long timeDiffAndPersistPreviousReport(MovementSourceType movementSource, String assetGuid, String assetFlagState, Date positionTime) {
         Date auditTimestamp = new Date();
 
         // This needs to be done before persisting last report
@@ -293,62 +311,6 @@ public class MovementReportProcessorBean {
         rulesDao.updatePreviousReport(entity);
     }
 
-    // TODO: Implement for IRIDIUM as well (if needed)
-    private String getChannelGuid(MobileTerminalType mobileTerminal, RawMovementType rawMovement) {
-        String dnid = "";
-        String memberNumber = "";
-        String channelGuid = "";
-
-        List<IdList> ids = rawMovement.getMobileTerminal().getMobileTerminalIdList();
-
-        for (IdList id : ids) {
-            switch (id.getType()) {
-                case DNID:
-                    if (id.getValue() != null) {
-                        dnid = id.getValue();
-                    }
-                    break;
-                case MEMBER_NUMBER:
-                    if (id.getValue() != null) {
-                        memberNumber = id.getValue();
-                    }
-                    break;
-                case SERIAL_NUMBER:
-                    // IRIDIUM
-                case LES:
-                default:
-                    LOG.error("[ERROR] Unhandled Mobile Terminal id: {} ]", id.getType());
-                    break;
-            }
-        }
-
-        // Get the channel guid
-        boolean correctDnid = false;
-        boolean correctMemberNumber = false;
-        List<ComChannelType> channels = mobileTerminal.getChannels();
-        for (ComChannelType channel : channels) {
-
-            List<ComChannelAttribute> attributes = channel.getAttributes();
-
-            for (ComChannelAttribute attribute : attributes) {
-                String type = attribute.getType();
-                String value = attribute.getValue();
-
-                if ("DNID".equals(type)) {
-                    correctDnid = value.equals(dnid);
-                }
-                if ("MEMBER_NUMBER".equals(type)) {
-                    correctMemberNumber = value.equals(memberNumber);
-                }
-            }
-
-            if (correctDnid && correctMemberNumber) {
-                channelGuid = channel.getGuid();
-            }
-        }
-
-        return channelGuid;
-    }
 
     private Date auditLog(String msg, Date lastTimestamp) {
         Date newTimestamp = new Date();

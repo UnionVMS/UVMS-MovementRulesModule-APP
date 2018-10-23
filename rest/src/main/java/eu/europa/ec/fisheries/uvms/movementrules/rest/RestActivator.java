@@ -15,14 +15,11 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.constants.RestConstants;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.AlarmRestResource;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.ConfigResource;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.CustomRulesRestResource;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.SanityRulesRestResource;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.TicketRestResource;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeatureFilter;
 
 @ApplicationPath(RestConstants.MODULE_REST)
@@ -40,6 +37,7 @@ public class RestActivator extends Application {
         set.add(ConfigResource.class);
         set.add(UnionVMSFeatureFilter.class);
         set.add(SanityRulesRestResource.class);
+        set.add(InternalRestResources.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 

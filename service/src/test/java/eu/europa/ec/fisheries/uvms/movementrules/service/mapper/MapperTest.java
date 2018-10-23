@@ -14,6 +14,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import java.util.List;
+
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +48,7 @@ public class MapperTest {
     }
 
     @Test
+@OperateOnDeployment ("normal")
     public void testEntityToModel() throws Exception {
         Integer id = 1;
         CustomRule entity = MockData.getCustomRuleEntity(id);
@@ -139,6 +142,7 @@ public class MapperTest {
     }
 
     @Test
+@OperateOnDeployment("normal")
     public void testModelToEntity()  {
         Integer id = 1;
         CustomRuleType model = MockData.getModel(id);
@@ -161,6 +165,7 @@ public class MapperTest {
 
     // TODO:
     @Test
+@OperateOnDeployment ("normal")
     public void testEntityAndModelToEntity() {
         int id = 1;
         CustomRule entity = MockData.getCustomRuleEntity(id);
@@ -173,6 +178,7 @@ public class MapperTest {
 
     // TODO:
     @Test
+@OperateOnDeployment ("normal")
     public void testEntityAndModelToModel() {
         int id = 1;
         CustomRule entity = MockData.getCustomRuleEntity(id);

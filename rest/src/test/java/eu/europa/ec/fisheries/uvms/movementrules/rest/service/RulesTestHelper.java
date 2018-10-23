@@ -11,20 +11,27 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
+import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 import java.util.Date;
 import java.util.Random;
@@ -109,5 +116,83 @@ public class RulesTestHelper {
                 .limit(length)
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
+    }
+
+    public static CustomRuleType getCompleteNewCustomRule(){
+        CustomRuleType customRule = new CustomRuleType();
+
+        customRule.setName("Flag SWE && area DNK => Send to DNK" + " (" + System.currentTimeMillis() + ")");
+        customRule.setAvailability(AvailabilityType.PRIVATE);
+        customRule.setUpdatedBy("vms_admin_com");
+        customRule.setActive(true);
+        customRule.setArchived(false);
+
+        // If flagstate = SWE
+        CustomRuleSegmentType flagStateRule = new CustomRuleSegmentType();
+        flagStateRule.setStartOperator("(");
+        flagStateRule.setCriteria(CriteriaType.ASSET);
+        flagStateRule.setSubCriteria(SubCriteriaType.FLAG_STATE);
+        flagStateRule.setCondition(ConditionType.EQ);
+        flagStateRule.setValue("SWE");
+        flagStateRule.setEndOperator(")");
+        flagStateRule.setLogicBoolOperator(LogicOperatorType.AND);
+        flagStateRule.setOrder("0");
+        customRule.getDefinitions().add(flagStateRule);
+
+        // and area = DNK
+        CustomRuleSegmentType areaRule = new CustomRuleSegmentType();
+        areaRule.setStartOperator("(");
+        areaRule.setCriteria(CriteriaType.AREA);
+        areaRule.setSubCriteria(SubCriteriaType.AREA_CODE);
+        areaRule.setCondition(ConditionType.EQ);
+        areaRule.setValue("DNK");
+        areaRule.setEndOperator(")");
+        areaRule.setLogicBoolOperator(LogicOperatorType.NONE);
+        areaRule.setOrder("1");
+        customRule.getDefinitions().add(areaRule);
+
+        // then send to FLUX DNK
+        CustomRuleActionType action = new CustomRuleActionType();
+        action.setAction(ActionType.SEND_TO_FLUX);
+        action.setValue("FLUX DNK");
+        action.setOrder("0");
+
+        customRule.getActions().add(action);
+
+        return customRule;
+    }
+
+    public static AlarmReport getBasicAlarmReport() {
+        AlarmReport alarmReport = new AlarmReport();
+        alarmReport.setAssetGuid(UUID.randomUUID().toString());
+        alarmReport.setStatus(AlarmStatusType.OPEN.value());
+        alarmReport.setUpdated(new Date());
+        alarmReport.setUpdatedBy("Test user");
+        return alarmReport;
+    }
+
+    public static Ticket getCompleteTicket() {
+        Ticket ticket = new Ticket();
+        ticket.setUpdated(new Date());
+        ticket.setCreatedDate(new Date());
+        ticket.setStatus(TicketStatusType.OPEN);
+        ticket.setUpdatedBy("test user");
+        ticket.setRuleGuid("tmp rule guid");
+        ticket.setAssetGuid("tmp asset guid");
+        ticket.setMovementGuid("tmp movement guid");
+        ticket.setRuleName("tmp rule name");
+        ticket.setTicketCount(1L);
+        ticket.setChannelGuid("tmp channel guid");
+        ticket.setMobileTerminalGuid(" tmp mobile terminal guid");
+        ticket.setRecipient("tmp recipient");
+
+        return ticket;
+    }
+
+    public static <T> T deserializeResponseDto(String responseDto, Class<T> clazz) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode node = objectMapper.readValue(responseDto, ObjectNode.class);
+        JsonNode jsonNode = node.get("data");
+        return objectMapper.readValue(objectMapper.writeValueAsString(jsonNode), clazz);
     }
 }

@@ -23,6 +23,7 @@ import eu.europa.ec.fisheries.schema.movement.v1.MovementMetaData;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementPoint;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
+import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
@@ -39,6 +40,7 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
@@ -176,7 +178,16 @@ public class RulesTestHelper {
         query.setPagination(pagination);
         return query;
     }
-    
+
+    public static AlarmReport getBasicAlarmReport() {
+        AlarmReport alarmReport = new AlarmReport();
+        alarmReport.setAssetGuid(UUID.randomUUID().toString());
+        alarmReport.setStatus(AlarmStatusType.OPEN.value());
+        alarmReport.setUpdated(new Date());
+        alarmReport.setUpdatedBy("Test user");
+        return alarmReport;
+    }
+
     public static TicketQuery getBasicTicketQuery() {
         TicketQuery query = new TicketQuery();
         ListPagination pagination = new ListPagination();

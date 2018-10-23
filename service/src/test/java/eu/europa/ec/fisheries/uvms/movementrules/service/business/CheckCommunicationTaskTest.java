@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.UUID;
 import javax.inject.Inject;
+
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +45,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void runTaskWithValidReport() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         rulesDao.updatePreviousReport(previousReport);
@@ -56,6 +59,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment("normal")
     public void runWithThresholdPassed() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         previousReport.setPositionTime(new Date(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
@@ -71,6 +75,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void runTwiceWithThresholdPassed() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         previousReport.setPositionTime(new Date(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
@@ -88,6 +93,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void updateThresholdPassed() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         previousReport.setPositionTime(new Date(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
@@ -111,6 +117,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void checkPreviousReportUpdateTimeUpdated() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         previousReport.setPositionTime(new Date(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
@@ -125,6 +132,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void runTaskWith30MinSteps() throws Exception {
         long thirtyMinsInMs = ONE_HOUR_IN_MILLISECONDS / 2;
         PreviousReport previousReport = getBasicPreviousReport();
@@ -209,6 +217,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
+@OperateOnDeployment ("normal")
     public void runTaskWith30MinStepsWithPastPositionTime() throws Exception {
         long thirtyMinsInMs = ONE_HOUR_IN_MILLISECONDS / 2;
         PreviousReport previousReport = getBasicPreviousReport();

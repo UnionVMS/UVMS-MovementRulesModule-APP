@@ -13,18 +13,21 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import java.util.List;
 import java.util.UUID;
+
 import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalType;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentResponse;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 
 public class RawMovementFactMapper {
-    
-    private RawMovementFactMapper() {}
-    
-    public static RawMovementFact mapRawMovementFact(RawMovementType rawMovement, MobileTerminalType mobileTerminal, Asset asset, String pluginType) {
+
+    private RawMovementFactMapper() {
+    }
+
+    public static RawMovementFact mapRawMovementFact(RawMovementType rawMovement, AssetMTEnrichmentResponse assetMTEnrichmentResponse, String pluginType) {
         RawMovementFact fact = new RawMovementFact();
         fact.setRawMovementType(rawMovement);
         fact.setOk(true);
@@ -89,7 +92,7 @@ public class RawMovementFactMapper {
         if (rawMovement.getMobileTerminal() != null) {
             List<IdList> mobileTerminalIds = rawMovement.getMobileTerminal().getMobileTerminalIdList();
             for (IdList mobileTerminalId : mobileTerminalIds) {
-                switch(mobileTerminalId.getType()) {
+                switch (mobileTerminalId.getType()) {
                     case DNID:
                         fact.setMobileTerminalDnid(mobileTerminalId.getValue());
                         break;
@@ -106,16 +109,12 @@ public class RawMovementFactMapper {
         }
 
         // From Mobile Terminal
-        if (mobileTerminal != null) {
-            fact.setMobileTerminalConnectId(mobileTerminal.getConnectId());
-            fact.setMobileTerminalType(mobileTerminal.getType());
-        }
+        fact.setMobileTerminalConnectId(assetMTEnrichmentResponse.getMobileTerminalConnectId());
+        fact.setMobileTerminalType(assetMTEnrichmentResponse.getMobileTerminalType());
 
         // From Asset
-        if (asset != null) {
-            fact.setAssetGuid(asset.getAssetId().getGuid());
-            fact.setAssetName(asset.getName());
-        }
+        fact.setAssetGuid(assetMTEnrichmentResponse.getAssetUUID());
+        fact.setAssetName(assetMTEnrichmentResponse.getAssetName());
 
         return fact;
     }

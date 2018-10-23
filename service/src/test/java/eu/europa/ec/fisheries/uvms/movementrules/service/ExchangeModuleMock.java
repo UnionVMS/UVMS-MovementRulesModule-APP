@@ -17,24 +17,29 @@ import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 
 @MessageDriven(mappedName = "jms/queue/UVMSExchangeEvent", activationConfig = {
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"),
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "UVMSExchangeEvent")})
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "UVMSExchangeEvent"),
+        @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = MessageConstants.JMS_FUNCTION_PROPERTY + " NOT IN ( 'PROCESSED_MOVEMENT' ) AND JMSCorrelationID IS NULL")})
+
+
 public class ExchangeModuleMock implements MessageListener {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeModuleMock.class);
     
     @Inject
-    RulesMessageProducer messageProducer;
+    RulesMessageProducerBean messageProducer;
     
     @Override
     public void onMessage(Message message) {
@@ -47,6 +52,7 @@ public class ExchangeModuleMock implements MessageListener {
                     messageProducer.sendModuleResponseMessage((TextMessage) message, response);
                     break;
                 default:
+                    LOG.error("Message received in ExchangeMock!");
                     break;
             }
         } catch (Exception e) {

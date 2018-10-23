@@ -12,25 +12,23 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import java.util.List;
+import java.util.UUID;
 
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelAttribute;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelType;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalAttribute;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementMetaDataAreaType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementTypeType;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentResponse;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
-import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
-import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 
 public class MovementFactMapper {
-    
-    private MovementFactMapper() {}
-    
-    public static MovementFact mapMovementFact(MovementType movement, MobileTerminalType mobileTerminal, Asset asset, String comChannelType, List<AssetGroup> assetGroups, Long timeDiffInSeconds, Integer numberOfReportsLast24Hours, String channelGuid, List<String> vicinityOf) {
+
+
+    private MovementFactMapper() {
+    }
+
+    public static MovementFact mapMovementFact(MovementType movement, AssetMTEnrichmentResponse response, String comChannelType, Long timeDiffInSeconds, Integer numberOfReportsLast24Hours, String channelGuid, List<String> vicinityOf) {
         if (movement == null) {
-            throw new IllegalArgumentException("Movement was null, asset: " + asset + ", mobileTerminal: " + mobileTerminal);
+            throw new IllegalArgumentException("Movement was null, asset: " + response.getAssetUUID() );
         }
         MovementFact fact = new MovementFact();
 
@@ -40,8 +38,10 @@ public class MovementFactMapper {
         fact.setMovementGuid(movement.getGuid());
 
         // ROOT
-        for (AssetGroup assetGroup : assetGroups) {
-            fact.getAssetGroups().add(assetGroup.getGuid());
+        if (response.getAssetGroupList() != null) {
+            for (String assetGroup : response.getAssetGroupList()) {
+                fact.getAssetGroups().add(assetGroup);
+            }
         }
 
         // ACTIVITY
@@ -75,42 +75,44 @@ public class MovementFactMapper {
         }
 
         // ASSET
-        if (asset != null) {
-            fact.setAssetIdGearType(asset.getGearType());
-            fact.setExternalMarking(asset.getExternalMarking());
-            fact.setFlagState(asset.getCountryCode());
-            fact.setCfr(asset.getCfr());
-            fact.setIrcs(asset.getIrcs());
-            fact.setAssetName(asset.getName());
-            fact.setAssetGuid(asset.getAssetId().getGuid());
-            fact.setAssetStatus(asset.isActive() ? "ACTIVE":"INACTIVE");
-            fact.setMmsiNo(asset.getMmsiNo());
+        String gearType = response.getGearType();
+        String externalMarking = response.getExternalMarking();
+        String countryCode = response.getFlagstate();
+        String cfr = response.getCfr();
+        String ircs = response.getIrcs();
+        String assetName = response.getAssetName();
+        UUID assetId = response.getAssetUUID() == null ? null : UUID.fromString(response.getAssetUUID());
+        String assetStatus = response.getAssetStatus();
+        String mmsiNo = response.getMmsi();
+
+        // ASSET
+        if (response.getAssetUUID() != null && !response.getAssetUUID().isEmpty()) {
+            fact.setAssetIdGearType(gearType);
+            fact.setExternalMarking(externalMarking);
+            fact.setFlagState(countryCode);
+            fact.setCfr(cfr);
+            fact.setIrcs(ircs);
+            fact.setAssetName(assetName);
+            fact.setAssetGuid(assetId.toString());
+            fact.setAssetStatus(assetStatus);
+            fact.setMmsiNo(mmsiNo);
         }
 
+        String mobileTerminalGuid = response.getMobileTerminalGuid();
+        String mobileTerminalType = response.getMobileTerminalType();
+        String dnid = response.getDNID();
+        String memberNumber = response.getMemberNumber();
+        String serialNumber = response.getSerialNumber();
+        Boolean  mobileTerminalIsInactive = response.getMobileTerminalIsInactive();
         // MOBILE_TERMINAL
-        if (mobileTerminal != null) {
-            fact.setMobileTerminalGuid(mobileTerminal.getMobileTerminalId().getGuid());
+        if (response.getMobileTerminalGuid() != null && !response.getMobileTerminalGuid().isEmpty()) {
+            fact.setMobileTerminalGuid(mobileTerminalGuid);
             fact.setComChannelType(comChannelType);
-            fact.setMobileTerminalType(mobileTerminal.getType());
-            List<ComChannelType> channels = mobileTerminal.getChannels();
-            for (ComChannelType channel : channels) {
-                List<ComChannelAttribute> chanAttributes = channel.getAttributes();
-                for (ComChannelAttribute chanAttribute : chanAttributes) {
-                    if (chanAttribute.getType().equals("DNID")) {
-                        fact.setMobileTerminalDnid(chanAttribute.getValue());
-                    }
-                    if (chanAttribute.getType().equals("MEMBER_NUMBER")) {
-                        fact.setMobileTerminalMemberNumber(chanAttribute.getValue());
-                    }
-                }
-            }
-            List<MobileTerminalAttribute> attributes = mobileTerminal.getAttributes();
-            for (MobileTerminalAttribute attribute : attributes) {
-                if (attribute.getType().equals("SERIAL_NUMBER")) {
-                    fact.setMobileTerminalSerialNumber(attribute.getValue());
-                }
-            }
-            fact.setMobileTerminalStatus(mobileTerminal.isInactive() ? "INACTIVE":"ACTIVE");
+            fact.setMobileTerminalType(mobileTerminalType);
+            fact.setMobileTerminalDnid(dnid);
+            fact.setMobileTerminalMemberNumber(memberNumber);
+            fact.setMobileTerminalSerialNumber(serialNumber);
+            fact.setMobileTerminalStatus(mobileTerminalIsInactive  ? "INACTIVE" : "ACTIVE");
         }
 
         // POSITION
