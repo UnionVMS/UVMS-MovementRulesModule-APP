@@ -23,7 +23,7 @@ import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.movement.module.v1.MovementModuleMethod;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementModelException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.MovementProducerBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +36,6 @@ import eu.europa.ec.fisheries.schema.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movement.model.exception.ModelMapperException;
-import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementDuplicateException;
-import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementFaultException;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
@@ -72,10 +69,8 @@ public class MovementServiceBean {
             TextMessage movementResponse = consumer.getMessage(messageId, TextMessage.class, 30000L);
             CreateMovementResponse createMovementResponse = MovementModuleResponseMapper.mapToCreateMovementResponseFromMovementResponse(movementResponse);
             createdMovement = createMovementResponse.getMovement();
-        } catch (JMSException | MovementFaultException | ModelMapperException | MessageException e) {
+        } catch (JMSException | MovementModelException | MessageException e) {
             LOG.error("[ERROR] Error when getting movementResponse from Movement , movementResponse from JMS Queue is null..");
-        } catch (MovementDuplicateException e) {
-            LOG.error("[ERROR] Error when getting movementResponse from Movement, tried to create duplicate movement..");
         }
 
         return createdMovement;
