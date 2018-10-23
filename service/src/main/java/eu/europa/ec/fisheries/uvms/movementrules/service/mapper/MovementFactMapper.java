@@ -97,7 +97,7 @@ public class MovementFactMapper {
         String mmsiNo = response.getMmsi();
 
         // ASSET
-        if (response != null) {
+        if (response.getAssetUUID() != null && !response.getAssetUUID().isEmpty()) {
             fact.setAssetIdGearType(gearType);
             fact.setExternalMarking(externalMarking);
             fact.setFlagState(countryCode);
@@ -116,7 +116,7 @@ public class MovementFactMapper {
         String serialNumber = response.getSerialNumber();
         Boolean  mobileTerminalIsInactive = response.getMobileTerminalIsInactive();
         // MOBILE_TERMINAL
-        if (response != null) {
+        if (response.getMobileTerminalGuid() != null && !response.getMobileTerminalGuid().isEmpty()) {
             fact.setMobileTerminalGuid(mobileTerminalGuid);
             fact.setComChannelType(comChannelType);
             fact.setMobileTerminalType(mobileTerminalType);
