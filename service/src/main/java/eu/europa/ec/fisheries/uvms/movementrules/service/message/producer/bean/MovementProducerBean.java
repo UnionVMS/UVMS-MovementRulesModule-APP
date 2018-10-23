@@ -10,11 +10,11 @@ import javax.ejb.TransactionAttributeType;
 import javax.jms.Destination;
 
 @Stateless
-public class ExchangeProducerBean extends AbstractProducer {
+public class MovementProducerBean extends AbstractProducer {
 
     @Override
     public String getDestinationName() {
-        return MessageConstants.QUEUE_EXCHANGE_EVENT;
+        return MessageConstants.QUEUE_MODULE_MOVEMENT;
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -23,8 +23,8 @@ public class ExchangeProducerBean extends AbstractProducer {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String sendModuleMessage(String text, Destination replyTo, String function) throws MessageException {
-        return this.sendMessageToSpecificQueueWithFunction(text, getDestination(), replyTo, function, "");
+    public String sendModuleMessage(String text, Destination replyTo, String function, String grouping) throws MessageException {
+        return this.sendMessageToSpecificQueueWithFunction(text, getDestination(), replyTo, function, grouping);
     }
 
 }

@@ -23,8 +23,8 @@ import eu.europa.ec.fisheries.schema.config.module.v1.ConfigModuleBaseRequest;
 import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
 import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.config.model.mapper.ModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 
 @MessageDriven(mappedName = "jms/queue/UVMSConfigEvent", activationConfig = {
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"),
@@ -33,7 +33,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 public class ConfigServiceMock implements MessageListener {
     
     @Inject
-    RulesMessageProducer messageProducer;
+    RulesMessageProducerBean messageProducer;
     
     @Override
     public void onMessage(Message message) {

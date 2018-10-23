@@ -51,13 +51,13 @@ public class MovementReportProcessorBean {
 
     @Inject
     private ExchangeServiceBean exchangeService;
-    
+
     @Inject
     private MovementServiceBean movementService;
-    
+
     @Inject
     private ConfigServiceBean configService;
-    
+
     @Inject
     private RulesValidator rulesValidator;
 
@@ -188,7 +188,7 @@ public class MovementReportProcessorBean {
         return req;
     }
 
-        private MovementFact collectMovementData(AssetMTEnrichmentResponse response, final RawMovementType rawMovement, final String username) throws ExecutionException, RulesServiceException {
+    private MovementFact collectMovementData(AssetMTEnrichmentResponse response, final RawMovementType rawMovement, final String username) throws ExecutionException, RulesServiceException {
         int threadNum = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadNum);
         Integer numberOfReportsLast24Hours;

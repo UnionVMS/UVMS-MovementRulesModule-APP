@@ -7,15 +7,12 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Calendar;
 import java.util.TimeZone;
-import javax.inject.Inject;
 import javax.jms.*;
 
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.JMSHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.TestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.RulesMessageProducer;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.ExchangeProducerBean;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
