@@ -5,8 +5,9 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.jms.Destination;
-import javax.transaction.Transactional;
 
 @Stateless
 public class AuditProducerBean extends AbstractProducer {
@@ -16,12 +17,12 @@ public class AuditProducerBean extends AbstractProducer {
         return MessageConstants.QUEUE_AUDIT_EVENT;
     }
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendModuleMessage(String text, String function) throws MessageException {
         return this.sendMessageToSpecificQueueWithFunction(text, getDestination(), null, function, null);
     }
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendModuleMessage(String text, Destination replyTo, String function, String grouping) throws MessageException {
         return this.sendMessageToSpecificQueueWithFunction(text, getDestination(), replyTo, function, grouping);
     }

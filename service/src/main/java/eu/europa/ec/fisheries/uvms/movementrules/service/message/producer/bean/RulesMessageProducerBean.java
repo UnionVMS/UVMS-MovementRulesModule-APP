@@ -12,6 +12,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.jms.*;
 
 import eu.europa.ec.fisheries.schema.movementrules.common.v1.RulesFault;
@@ -28,6 +30,7 @@ public class RulesMessageProducerBean extends AbstractProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(RulesMessageProducerBean.class);
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void sendModuleErrorResponseMessage(RulesFault fault, TextMessage message) {
         try {
             LOG.debug("Sending error message back from Rules module to recipient on JMS Queue with correlationID: {} ", message.getJMSMessageID());
