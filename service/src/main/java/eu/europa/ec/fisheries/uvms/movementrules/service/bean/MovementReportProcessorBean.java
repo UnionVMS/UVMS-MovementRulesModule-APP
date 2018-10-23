@@ -78,12 +78,7 @@ public class MovementReportProcessorBean {
             // the Rest Call
 
             AssetMTEnrichmentRequest request = createRequest(rawMovement, pluginType,  username);
-            AssetMTEnrichmentResponse response = null;
-            try {
-                response = assetClient.collectAssetMT(request);
-            } catch (Exception e) {
-                LOG.error(e.toString(),e);
-            }
+            AssetMTEnrichmentResponse response = assetClient.collectAssetMT(request);
 
 
             RawMovementFact rawMovementFact = RawMovementFactMapper.mapRawMovementFact(rawMovement, response, pluginType);
@@ -104,7 +99,8 @@ public class MovementReportProcessorBean {
                 // Tell Exchange that the report caused an alarm
                 exchangeService.sendBackToExchange(null, rawMovement, MovementRefTypeType.ALARM, username);
             }
-        } catch (MessageException  | ExecutionException e) {
+        } catch (Exception e) {
+            LOG.error("setMovementReportReceived failed", e);
             throw new RulesServiceException(e);
         }
     }
@@ -196,8 +192,8 @@ public class MovementReportProcessorBean {
         final String assetHistGuid;
         final String assetFlagState;
         if (response.getAssetUUID() != null && response.getAssetHistoryId() != null) {
-            assetGuid = response.getAssetUUID().toString();
-            assetHistGuid = response.getAssetHistoryId().toString();
+            assetGuid = response.getAssetUUID();
+            assetHistGuid = response.getAssetHistoryId();
             assetFlagState = response.getFlagstate();
         } else {
             LOG.warn("[WARN] Asset was null for {} ", rawMovement.getAssetId());

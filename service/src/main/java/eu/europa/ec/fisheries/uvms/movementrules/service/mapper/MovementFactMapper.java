@@ -14,24 +14,13 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 import java.util.List;
 import java.util.UUID;
 
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelAttribute;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.ComChannelType;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalAttribute;
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementMetaDataAreaType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementTypeType;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentResponse;
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.MovementReportProcessorBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
-import eu.europa.ec.fisheries.wsdl.asset.group.AssetGroup;
-import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MovementFactMapper {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MovementFactMapper.class);
 
 
     private MovementFactMapper() {
@@ -51,7 +40,7 @@ public class MovementFactMapper {
         // ROOT
         if (response.getAssetGroupList() != null) {
             for (String assetGroup : response.getAssetGroupList()) {
-                fact.getAssetGroups().add(assetGroup.toString());
+                fact.getAssetGroups().add(assetGroup);
             }
         }
 
