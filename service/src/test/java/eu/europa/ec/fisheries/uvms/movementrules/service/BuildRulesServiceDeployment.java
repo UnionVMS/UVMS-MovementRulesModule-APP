@@ -1,14 +1,11 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
-import eu.europa.ec.fisheries.uvms.movementrules.service.config.MovementRulesConfigHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.bean.RulesEventMessageConsumerBean;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ArchivePath;
 import org.jboss.shrinkwrap.api.Node;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.ShrinkWrap.*;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.slf4j.Logger;
@@ -38,6 +35,8 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.movementrules.service");
 
         testWar.addAsResource("persistence-integration.xml", "META-INF/persistence.xml");
+
+        testWar.addAsResource("beans.xml", "META-INF/beans.xml");
 
         // dumpContent(testWar, "c:\\temp\\normal.txt");
         return testWar;

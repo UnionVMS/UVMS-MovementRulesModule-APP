@@ -11,6 +11,9 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
@@ -19,10 +22,8 @@ import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentRequest;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentResponse;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ConfigServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.MovementServiceBean;
@@ -39,6 +40,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ContextResolver;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -64,8 +73,8 @@ public class MovementReportProcessorBean {
     @Inject
     private RulesDao rulesDao;
 
-    @Inject
-    private AssetClient assetClient;
+    /*@Inject
+    private AssetClient assetClient;*/
 
 
 
@@ -78,7 +87,8 @@ public class MovementReportProcessorBean {
             // the Rest Call
 
             AssetMTEnrichmentRequest request = createRequest(rawMovement, pluginType,  username);
-            AssetMTEnrichmentResponse response = assetClient.collectAssetMT(request);
+            //AssetMTEnrichmentResponse response = assetClient.collectAssetMT(request);
+            AssetMTEnrichmentResponse response = collectAssetMT(request);
 
 
             RawMovementFact rawMovementFact = RawMovementFactMapper.mapRawMovementFact(rawMovement, response, pluginType);
@@ -105,6 +115,35 @@ public class MovementReportProcessorBean {
         }
     }
 
+
+    public AssetMTEnrichmentResponse collectAssetMT(AssetMTEnrichmentRequest request) throws Exception {
+
+        Client client = ClientBuilder.newClient();
+        client.register(new ContextResolver<ObjectMapper>() {
+            @Override
+            public ObjectMapper getContext(Class<?> type) {
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                return mapper;
+            }
+        });
+        String assetEndpoint = "http://localhost:8080/unionvms/asset/rest/";
+        WebTarget webTarget = client.target(assetEndpoint + "internal/");
+
+        // @formatter:off
+        Response response =  webTarget
+                .path("collectassetmt")
+                .request(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.json(request), Response.class);
+        // @formatter:on
+
+        AssetMTEnrichmentResponse ret = response.readEntity(new GenericType<AssetMTEnrichmentResponse>() {
+        });
+        response.close();
+        return ret;
+    }
 
     private AssetMTEnrichmentRequest createRequest(RawMovementType rawMovement, String pluginType, String username){
 
