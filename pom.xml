@@ -19,8 +19,8 @@
         <exchange.model.version>4.0.23</exchange.model.version>
         <mobileterminal.model.version>4.0.9</mobileterminal.model.version>
         <user.model.version>2.0.9</user.model.version>
-        <asset.model.version>6.0.13</asset.model.version>
-        <asset.client.version>6.0.13</asset.client.version>
+        <asset.model.version>6.0.14</asset.model.version>
+        <asset.client.version>6.0.14</asset.client.version>
         <audit.model.version>4.0.8</audit.model.version>
         <usm4uvms.version>4.0.10</usm4uvms.version>
         <uvms.config.version>4.0.0</uvms.config.version>

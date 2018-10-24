@@ -22,6 +22,7 @@ import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentRequest;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentResponse;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ConfigServiceBean;
@@ -38,6 +39,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.RawMovementFactM
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -73,8 +75,8 @@ public class MovementReportProcessorBean {
     @Inject
     private RulesDao rulesDao;
 
-    /*@Inject
-    private AssetClient assetClient;*/
+    @EJB
+    private AssetClient assetClient;
 
 
 
@@ -87,9 +89,7 @@ public class MovementReportProcessorBean {
             // the Rest Call
 
             AssetMTEnrichmentRequest request = createRequest(rawMovement, pluginType,  username);
-            //AssetMTEnrichmentResponse response = assetClient.collectAssetMT(request);
-            AssetMTEnrichmentResponse response = collectAssetMT(request);
-
+            AssetMTEnrichmentResponse response = assetClient.collectAssetMT(request);
 
             RawMovementFact rawMovementFact = RawMovementFactMapper.mapRawMovementFact(rawMovement, response, pluginType);
             LOG.debug("rawMovementFact:{}", rawMovementFact);
@@ -115,36 +115,6 @@ public class MovementReportProcessorBean {
         }
     }
 
-
-    public AssetMTEnrichmentResponse collectAssetMT(AssetMTEnrichmentRequest request) throws Exception {
-
-        Client client = ClientBuilder.newClient();
-        client.register(new ContextResolver<ObjectMapper>() {
-            @Override
-            public ObjectMapper getContext(Class<?> type) {
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.registerModule(new JavaTimeModule());
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                return mapper;
-            }
-        });
-        String assetEndpoint = "http://localhost:8080/unionvms/asset/rest/";
-        WebTarget webTarget = client.target(assetEndpoint + "internal/");
-
-        // @formatter:off
-        Response response =  webTarget
-                .path("collectassetmt")
-                .request(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .post(Entity.json(request), Response.class);
-        // @formatter:on
-
-        AssetMTEnrichmentResponse ret = response.readEntity(new GenericType<AssetMTEnrichmentResponse>() {
-        });
-        response.close();
-        client.close();
-        return ret;
-    }
 
     private AssetMTEnrichmentRequest createRequest(RawMovementType rawMovement, String pluginType, String username){
 
