@@ -142,6 +142,7 @@ public class MovementReportProcessorBean {
         AssetMTEnrichmentResponse ret = response.readEntity(new GenericType<AssetMTEnrichmentResponse>() {
         });
         response.close();
+        client.close();
         return ret;
     }
 
