@@ -9,7 +9,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
         <artifactId>movement-rules</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2-SNAPSHOT</version>
     </parent>
 
     <!-- PROPERTIES USED FOR LOGBACK -->
