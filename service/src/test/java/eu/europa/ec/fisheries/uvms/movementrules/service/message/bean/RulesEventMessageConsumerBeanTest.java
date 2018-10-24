@@ -40,7 +40,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
 
     @Before
     public void clearExchangeQueue() throws Exception {
-        //System.out.println("clearing queues");
+
         jmsHelper.clearQueue(MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         jmsHelper.clearQueue(MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME);
     }
@@ -64,9 +64,6 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
     @Test
     @OperateOnDeployment("normal")
     public void jmsSanityCheck() throws Exception{
-        //System.out.println("Now");
-        //Thread.sleep(5 * 60 * 1000);
-        //String corr = producer.sendDataSourceMessage("test text", DataSourceQueue.EXCHANGE, "PROCESSED_MOVEMENT", "Test boat");
 
         Connection connection = null;
         Session session = null;
