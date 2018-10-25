@@ -141,12 +141,6 @@
             <groupId>org.drools</groupId>
             <artifactId>drools-templates</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.9.6</version>
-        </dependency>
         
         <!-- TEST DEPENDENCIES -->
 		<dependency>
