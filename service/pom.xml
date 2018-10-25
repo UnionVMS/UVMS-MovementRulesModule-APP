@@ -141,7 +141,7 @@
             <groupId>org.drools</groupId>
             <artifactId>drools-templates</artifactId>
         </dependency>
-        
+
         <!-- TEST DEPENDENCIES -->
 		<dependency>
             <groupId>fish.focus.uvms.maven</groupId>
@@ -161,6 +161,7 @@
             <version>2.9.4</version>
             <scope>provided</scope>
         </dependency>
+
     </dependencies>
 
     <build>

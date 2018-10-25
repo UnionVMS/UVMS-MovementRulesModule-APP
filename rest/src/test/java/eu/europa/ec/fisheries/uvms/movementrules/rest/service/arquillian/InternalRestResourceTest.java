@@ -1,5 +1,6 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsRequest;
@@ -73,8 +74,9 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
 
         assertNotNull(response);
 
-        GetTicketsAndRulesByMovementsResponse retVal =
-                RulesTestHelper.deserializeResponseDto(response, GetTicketsAndRulesByMovementsResponse.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        GetTicketsAndRulesByMovementsResponse retVal = objectMapper.readValue(response, GetTicketsAndRulesByMovementsResponse.class);
+
         String retrievedMovementGuid = retVal.getTicketsAndRules().get(0).getTicket().getMovementGuid();
         assertEquals(movementGuid, retrievedMovementGuid);
 

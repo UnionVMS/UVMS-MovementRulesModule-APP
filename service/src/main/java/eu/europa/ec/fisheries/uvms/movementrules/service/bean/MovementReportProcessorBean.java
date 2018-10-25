@@ -22,7 +22,6 @@ import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentRequest;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetMTEnrichmentResponse;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ConfigServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.MovementServiceBean;
@@ -37,6 +36,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.RawMovementFactM
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.util.Date;
@@ -64,7 +64,7 @@ public class MovementReportProcessorBean {
     @Inject
     private RulesDao rulesDao;
 
-    @Inject
+    @EJB
     private AssetClient assetClient;
 
 
@@ -79,7 +79,6 @@ public class MovementReportProcessorBean {
 
             AssetMTEnrichmentRequest request = createRequest(rawMovement, pluginType,  username);
             AssetMTEnrichmentResponse response = assetClient.collectAssetMT(request);
-
 
             RawMovementFact rawMovementFact = RawMovementFactMapper.mapRawMovementFact(rawMovement, response, pluginType);
             LOG.debug("rawMovementFact:{}", rawMovementFact);
