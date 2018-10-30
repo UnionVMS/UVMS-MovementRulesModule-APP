@@ -6,6 +6,7 @@ ruleguid
 
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import java.util.Arrays;
 
 global org.slf4j.Logger logger;
@@ -19,6 +20,14 @@ when
 then
    logger.info("\t==> Executing RULE '@{rulename}' (rule guid:'@{ruleguid}') with action(s) '@{action}'");
    validationService.customRuleTriggered("@{rulename}", "@{ruleguid}", $fact, "@{action}");
+end
+
+rule "@{rulename}tmp"
+when
+   $movementDetails : MovementDetails(@{expression})
+then
+   logger.info("\t==> Executing RULE '@{rulename}' (rule guid:'@{ruleguid}') with action(s) '@{action}'");
+   validationService.customRuleTriggered("@{rulename}", "@{ruleguid}", $movementDetails, "@{action}");
 end
 
 end template

@@ -69,6 +69,11 @@
             <version>${movement.model.version}</version>
         </dependency>
         <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.spatial</groupId>
+            <artifactId>spatial-model</artifactId>
+            <version>${spatial.model.version}</version>
+        </dependency>
+        <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
             <artifactId>asset-model</artifactId>
             <version>${asset.model.version}</version>

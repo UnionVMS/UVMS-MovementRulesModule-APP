@@ -31,6 +31,7 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
@@ -130,6 +131,22 @@ public class RulesValidator {
             ksession.setGlobal("logger", LOG);
 
             ksession.insert(fact);
+            ksession.fireAllRules();
+        }
+    }
+    
+    @Lock(LockType.READ)
+    public void evaluate(MovementDetails movementDetails) {
+        if (sanityKcontainer != null) {
+            LOG.info("Verify sanity rules");
+
+            KieSession ksession = sanityKcontainer.newKieSession();
+
+            // Inject beans
+            ksession.setGlobal("validationService", validationService);
+            ksession.setGlobal("logger", LOG);
+
+            ksession.insert(movementDetails);
             ksession.fireAllRules();
         }
     }

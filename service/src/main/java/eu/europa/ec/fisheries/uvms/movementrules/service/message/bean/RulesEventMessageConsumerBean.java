@@ -74,7 +74,9 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                     String pingResponseText = JAXBMarshaller.marshallJaxBObjectToString(pingResponse);
                     rulesProducer.sendModuleResponseMessage(textMessage, pingResponseText);
                     break;
-                 default:
+                case EVALUATE_RULES:
+                    rulesEventServiceBean.evaluateCustomRules(textMessage);
+                default:
                     LOG.error("[ Request method '{}' is not implemented ]", method.name());
                      rulesProducer.sendModuleErrorResponseMessage(MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Method not implemented:" + method.name()), textMessage);
                     break;

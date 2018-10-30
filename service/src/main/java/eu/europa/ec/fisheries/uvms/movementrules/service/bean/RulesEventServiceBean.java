@@ -14,15 +14,18 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 
@@ -36,6 +39,9 @@ public class RulesEventServiceBean{
     
     @Inject
     private MovementReportProcessorBean movementReportBean;
+    
+    @Inject
+    private CustomRulesEvaluator rulesEvaluator;
 
     public PingResponse pingReceived() {
         PingResponse pingResponse = new PingResponse();
@@ -55,5 +61,10 @@ public class RulesEventServiceBean{
             LOG.error("[ERROR] Error when fetching tickets and rules by movements {}", e);
             throw new Exception("[ERROR] Error when fetching tickets and rules by movements", e);   //TODO: Make this throw something sane, if at all
         }
+    }
+
+    public void evaluateCustomRules(TextMessage textMessage) throws JsonbException, JMSException {
+        Jsonb jsonb = JsonbBuilder.create();
+        rulesEvaluator.evaluate(jsonb.fromJson(textMessage.getText(), MovementDetails.class));
     }
 }

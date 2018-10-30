@@ -38,6 +38,7 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
@@ -212,6 +213,73 @@ public class ValidationServiceBean implements ValidationService {
                     break;
                 case SEND_TO_NAF:
                     sendToEndpointNaf(ruleName, fact, value);
+                    auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
+                    break;
+
+                /*
+                case MANUAL_POLL:
+                    LOG.info("NOT IMPLEMENTED!");
+                    break;
+
+                case ON_HOLD:
+                    LOG.info("NOT IMPLEMENTED!");
+                    break;
+                case TOP_BAR_NOTIFICATION:
+                    LOG.info("NOT IMPLEMENTED!");
+                    break;
+                case SMS:
+                    LOG.info("NOT IMPLEMENTED!");
+                    break;
+                    */
+                default:
+                    LOG.info("The action '{}' is not defined", action);
+                    break;
+            }
+        }
+    }
+    
+    // Triggered by rule engine
+    @Override
+    public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails fact, String actions) {
+        LOG.info("Performing actions on triggered user rules, rule: {}", ruleName);
+
+        Date auditTimestamp = new Date();
+
+        // Update last update
+        updateLastTriggered(ruleGuid);
+        auditTimestamp = auditLog("Time to update last triggered:", auditTimestamp);
+
+        // Always create a ticket
+        createTicket(ruleName, ruleGuid, fact);
+        auditTimestamp = auditLog("Time to create ticket:", auditTimestamp);
+
+//        sendMailToSubscribers(ruleGuid, ruleName, fact);
+        auditTimestamp = auditLog("Time to send email to subscribers:", auditTimestamp);
+
+        // Actions list format:
+        // ACTION,VALUE;ACTION,VALUE;
+        // N.B! The .drl rule file gives the string "null" when (for instance)
+        // value is null.
+        String[] parsedActionKeyValueList = actions.split(";");
+        for (String keyValue : parsedActionKeyValueList) {
+            String[] keyValueList = keyValue.split(",");
+            String action = keyValueList[0];
+            String value = "";
+            if (keyValueList.length == 2) {
+                value = keyValueList[1];
+            }
+            switch (ActionType.valueOf(action)) {
+                case EMAIL:
+                    // Value=address.
+//                    sendToEmail(value, ruleName, fact);
+                    auditTimestamp = auditLog("Time to send (action) email:", auditTimestamp);
+                    break;
+                case SEND_TO_FLUX:
+//                    sendToEndpointFlux(ruleName, fact, value);
+                    auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
+                    break;
+                case SEND_TO_NAF:
+//                    sendToEndpointNaf(ruleName, fact, value);
                     auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
                     break;
 
@@ -459,6 +527,45 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     private void createTicket(String ruleName, String ruleGuid, MovementFact fact) {
+        try {
+            Ticket ticket = new Ticket();
+
+            ticket.setAssetGuid(fact.getAssetGuid());
+            ticket.setMobileTerminalGuid(fact.getMobileTerminalGuid());
+            ticket.setChannelGuid(fact.getChannelGuid());
+            ticket.setCreatedDate(new Date());
+            ticket.setUpdated(new Date());
+            ticket.setRuleName(ruleName);
+            ticket.setRuleGuid(ruleGuid);
+            ticket.setStatus(TicketStatusType.OPEN.value());
+            ticket.setUpdatedBy("UVMS");
+            ticket.setMovementGuid(fact.getMovementGuid());
+            //ticket.setGuid(UUID.randomUUID().toString());
+
+            for (int i = 0; i < fact.getAreaTypes().size(); i++) {
+                if ("EEZ".equals(fact.getAreaTypes().get(i))) {
+                    ticket.setRecipient(fact.getAreaCodes().get(i));
+                }
+            }
+
+
+            ticket.setTicketCount(1L);
+            Ticket createdTicket = rulesDao.createTicket(ticket);
+
+
+            ticketEvent.fire(new NotificationMessage("guid", createdTicket.getGuid()));
+
+            // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
+            ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
+
+            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, createdTicket.getUpdatedBy());
+        } catch (Exception e) { //TODO: figure out if we are to have this kind of exception handling here and if we are to catch everything
+            LOG.error("[ Failed to create ticket! ] {}", e);
+            LOG.error("[ERROR] Error when creating ticket {}", e);
+        }
+    }
+    
+    private void createTicket(String ruleName, String ruleGuid, MovementDetails fact) {
         try {
             Ticket ticket = new Ticket();
 

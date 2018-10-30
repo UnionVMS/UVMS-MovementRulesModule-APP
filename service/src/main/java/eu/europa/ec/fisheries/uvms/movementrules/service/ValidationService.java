@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service;
 import java.util.List;
 import javax.ejb.Local;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
@@ -49,4 +50,6 @@ public interface ValidationService {
      * @throws RulesServiceException if unsuccessful
      */
     long getNumberOfOpenTickets(String userName) throws RulesServiceException, MovementRulesFaultException;
+
+    void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails fact, String actions);
 }
