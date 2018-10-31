@@ -50,6 +50,7 @@ public abstract class BuildRulesServiceDeployment {
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
                 .resolve("eu.europa.ec.fisheries.uvms.asset:asset-model",
                         "eu.europa.ec.fisheries.uvms.asset:asset-client",
+                        "eu.europa.ec.fisheries.uvms.spatial:spatial-model",
                         "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
@@ -57,6 +58,7 @@ public abstract class BuildRulesServiceDeployment {
 
         testWar.addClass(UnionVMSRestMock.class);
         testWar.addClass(AssetMTRestMock.class);
+        testWar.addClass(SpatialModuleMock.class);
 
        // dumpContent(testWar, "c:\\temp\\unionvms.txt");
 

@@ -134,22 +134,6 @@ public class RulesValidator {
             ksession.fireAllRules();
         }
     }
-    
-    @Lock(LockType.READ)
-    public void evaluate(MovementDetails movementDetails) {
-        if (sanityKcontainer != null) {
-            LOG.info("Verify sanity rules");
-
-            KieSession ksession = sanityKcontainer.newKieSession();
-
-            // Inject beans
-            ksession.setGlobal("validationService", validationService);
-            ksession.setGlobal("logger", LOG);
-
-            ksession.insert(movementDetails);
-            ksession.fireAllRules();
-        }
-    }
 
     public void evaluateSanityWODrools(RawMovementFact fact) throws RulesServiceException {
         if(fact.getPositionTime() == null){  //Time missing
@@ -297,6 +281,22 @@ public class RulesValidator {
 
     @Lock(LockType.READ)
     public void evaluate(MovementFact fact) {
+        if (customKcontainer != null) {
+            LOG.info("Verify user defined rules");
+
+            KieSession ksession = customKcontainer.newKieSession();
+
+            // Inject beans
+            ksession.setGlobal("validationService", validationService);
+            ksession.setGlobal("logger", LOG);
+
+            ksession.insert(fact);
+            ksession.fireAllRules();
+        }
+    }
+    
+    @Lock(LockType.READ)
+    public void evaluate(MovementDetails fact) {
         if (customKcontainer != null) {
             LOG.info("Verify user defined rules");
 
