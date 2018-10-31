@@ -69,7 +69,7 @@ public class SpatialRestClient {
         SpatialEnrichmentRS enrichmentCurrentPosition = getEnrichment(movementDetails.getLatitude(), movementDetails.getLongitude());
         enrichWithCountryData(enrichmentCurrentPosition.getClosestAreas().getClosestAreas(), AreaType.COUNTRY, movementDetails);
         enrichWithPortData(enrichmentCurrentPosition.getClosestLocations().getClosestLocations(), LocationType.PORT, movementDetails);
-        SpatialEnrichmentRS enrichmentPreviousPosition = getEnrichment(movementDetails.getPreviousLongitude(), movementDetails.getPreviousLongitude());
+        SpatialEnrichmentRS enrichmentPreviousPosition = getEnrichment(movementDetails.getPreviousLatitude(), movementDetails.getPreviousLongitude());
         mapAreasAndAreaTransitions(enrichmentCurrentPosition, enrichmentPreviousPosition, movementDetails);
     }
 
