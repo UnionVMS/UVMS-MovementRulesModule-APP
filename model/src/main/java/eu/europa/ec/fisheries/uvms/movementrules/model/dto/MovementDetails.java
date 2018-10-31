@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
 
 import java.util.Date;
 import java.util.List;
+import javax.json.bind.annotation.JsonbDateFormat;
 
 public class MovementDetails {
 
@@ -54,6 +55,7 @@ public class MovementDetails {
     private Double calculatedSpeed;
     private String movementType; // MovementTypeType
     // TODO use instant
+    @JsonbDateFormat(value = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
     private Date positionTime;
     private Double reportedCourse;
     private Double reportedSpeed;

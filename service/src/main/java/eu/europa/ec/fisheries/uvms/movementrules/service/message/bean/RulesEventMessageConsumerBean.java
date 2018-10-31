@@ -76,6 +76,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                     break;
                 case EVALUATE_RULES:
                     rulesEventServiceBean.evaluateCustomRules(textMessage);
+                    break;
                 default:
                     LOG.error("[ Request method '{}' is not implemented ]", method.name());
                      rulesProducer.sendModuleErrorResponseMessage(MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Method not implemented:" + method.name()), textMessage);
