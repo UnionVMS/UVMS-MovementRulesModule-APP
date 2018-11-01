@@ -64,6 +64,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
@@ -240,7 +241,7 @@ public class ValidationServiceBean implements ValidationService {
     
     // Triggered by rule engine
     @Override
-    public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails fact, String actions) {
+    public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails movementDetails, String actions) {
         LOG.info("Performing actions on triggered user rules, rule: {}", ruleName);
 
         Date auditTimestamp = new Date();
@@ -250,10 +251,10 @@ public class ValidationServiceBean implements ValidationService {
         auditTimestamp = auditLog("Time to update last triggered:", auditTimestamp);
 
         // Always create a ticket
-        createTicket(ruleName, ruleGuid, fact);
+        createTicket(ruleName, ruleGuid, movementDetails);
         auditTimestamp = auditLog("Time to create ticket:", auditTimestamp);
 
-//        sendMailToSubscribers(ruleGuid, ruleName, fact);
+        sendMailToSubscribers(ruleGuid, ruleName, movementDetails);
         auditTimestamp = auditLog("Time to send email to subscribers:", auditTimestamp);
 
         // Actions list format:
@@ -271,15 +272,15 @@ public class ValidationServiceBean implements ValidationService {
             switch (ActionType.valueOf(action)) {
                 case EMAIL:
                     // Value=address.
-//                    sendToEmail(value, ruleName, fact);
+                    sendToEmail(value, ruleName, movementDetails);
                     auditTimestamp = auditLog("Time to send (action) email:", auditTimestamp);
                     break;
                 case SEND_TO_FLUX:
-//                    sendToEndpointFlux(ruleName, fact, value);
+                    sendToEndpointFlux(ruleName, movementDetails, value);
                     auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
                     break;
                 case SEND_TO_NAF:
-//                    sendToEndpointNaf(ruleName, fact, value);
+                    sendToEndpointNaf(ruleName, movementDetails, value);
                     auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
                     break;
 
@@ -331,6 +332,33 @@ public class ValidationServiceBean implements ValidationService {
             }
         }
     }
+    
+    private void sendMailToSubscribers(String ruleGuid, String ruleName, MovementDetails movementDetails) {
+        CustomRule customRule = null;
+        try {
+            customRule = rulesDao.getCustomRuleByGuid(ruleGuid);
+        } catch (Exception e) {
+            LOG.error("[ Failed to fetch rule when sending email to subscribers due to erro when getting CustomRule by GUID! ] {}", e.getMessage());
+            return;
+        }
+
+        List<RuleSubscription> subscriptions = customRule.getRuleSubscriptionList();
+        if (subscriptions != null) {
+            for (RuleSubscription subscription : subscriptions) {
+                if (SubscriptionTypeType.EMAIL.value().equals(subscription.getType())) {
+                    try {
+                        // Find current email address
+                        GetContactDetailResponse userResponse = userService.getContactDetails(subscription.getOwner());
+                        String emailAddress = userResponse.getContactDetails().getEMail();
+                        sendToEmail(emailAddress, ruleName, movementDetails);
+                    } catch (Exception e) {
+                        // If a mail attempt fails, proceed with the rest
+                        LOG.error("Could not send email to user '{}'", subscription.getOwner());
+                    }
+                }
+            }
+        }
+    }
 
     private void updateLastTriggered(String ruleGuid) {
         try {
@@ -367,7 +395,8 @@ public class ValidationServiceBean implements ValidationService {
                     recipientInfoList.add(recipientInfo);
                 }
             }
-            
+
+            // TODO this should be handled in Exchange
             List<ServiceResponseType> pluginList = exchangeService.getPluginList(pluginType);
             if (pluginList != null && !pluginList.isEmpty()) {
                 for (ServiceResponseType service : pluginList) {
@@ -389,13 +418,61 @@ public class ValidationServiceBean implements ValidationService {
         }
         
     }
+    
+    private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String endpoint, PluginType pluginType) {
+        LOG.info("Sending to endpoint '{}'", endpoint);
+
+        try {
+            MovementType exchangeMovement = ExchangeMovementMapper.mapToExchangeMovementType(movementDetails);
+
+            FindOrganisationsResponse userResponse = userService.findOrganisation(endpoint);
+
+            List<RecipientInfoType> recipientInfoList = new ArrayList<>();
+
+            List<Organisation> organisations = userResponse.getOrganisation();
+            for (Organisation organisation : organisations) {
+                List<EndPoint> endPoints = organisation.getEndPoints();
+                for (EndPoint endPoint : endPoints) {
+                    RecipientInfoType recipientInfo = new RecipientInfoType();
+                    recipientInfo.setKey(endPoint.getName());
+                    recipientInfo.setValue(endPoint.getUri());
+                    recipientInfoList.add(recipientInfo);
+                }
+            }
+         
+            // TODO this should be handled in Exchange
+//            List<ServiceResponseType> pluginList = exchangeService.getPluginList(pluginType);
+//            if (pluginList != null && !pluginList.isEmpty()) {
+//                for (ServiceResponseType service : pluginList) {
+//                    if (StatusType.STOPPED.equals(service.getStatus())) {
+//                        LOG.info("Service {} was Stopped, trying the next one, if possible.", service.getName());
+//                        continue;
+//                    }
+            exchangeService.sendReportToPlugin(pluginType, ruleName, endpoint, exchangeMovement, recipientInfoList, movementDetails);
+
+            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, endpoint, "UVMS");
+//                }
+//            }
+        } catch (ExchangeModelMapperException | MessageException | ModelMarshallException | MovementRulesModelMarshallException e) {
+            LOG.error("[ Failed to send to endpoint! ] {}", e.getMessage());
+        }
+        
+    }
 
     private void sendToEndpointFlux(String ruleName, MovementFact fact, String endpoint) {
         sendToEndpoint(ruleName, fact, endpoint, PluginType.FLUX);
     }
+    
+    private void sendToEndpointFlux(String ruleName, MovementDetails movementDetails, String endpoint) {
+        sendToEndpoint(ruleName, movementDetails, endpoint, PluginType.FLUX);
+    }
 
     private void sendToEndpointNaf(String ruleName, MovementFact fact, String endpoint) {
         sendToEndpoint(ruleName, fact, endpoint, PluginType.NAF);
+    }
+    
+    private void sendToEndpointNaf(String ruleName, MovementDetails movementDetails, String endpoint) {
+        sendToEndpoint(ruleName, movementDetails, endpoint, PluginType.NAF);
     }
 
     private void sendToEmail(String emailAddress, String ruleName, MovementFact fact) {
@@ -405,6 +482,35 @@ public class ValidationServiceBean implements ValidationService {
 
         email.setSubject(buildSubject(ruleName));
         email.setBody(buildBody(ruleName, fact));
+        email.setTo(emailAddress);
+
+        try {
+            List<ServiceResponseType> pluginList = exchangeService.getPluginList(PluginType.EMAIL);
+            if (pluginList != null && !pluginList.isEmpty()) {
+                for (ServiceResponseType service : pluginList) {
+                    if (StatusType.STOPPED.equals(service.getStatus())) {
+                        LOG.info("Service {} was Stopped, trying the next one, if possible.", service.getName());
+                        continue;
+                    }
+                    exchangeService.sendEmail(service, email, ruleName);
+
+                    auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_EMAIL, null, emailAddress, "UVMS");
+                    return;
+                }
+            }
+            LOG.info("No plugin of the correct type found. Nothing was sent.");
+        } catch (ExchangeModelMapperException | MessageException e) {
+            LOG.error("Failed to send email! {}", e.getMessage());
+        }
+    }
+    
+    private void sendToEmail(String emailAddress, String ruleName, MovementDetails movementDetails) {
+        LOG.info("Sending email to '{}'", emailAddress);
+
+        EmailType email = new EmailType();
+
+        email.setSubject(buildSubject(ruleName));
+        email.setBody(buildBody(ruleName, movementDetails));
         email.setTo(emailAddress);
 
         try {
@@ -440,31 +546,105 @@ public class ValidationServiceBean implements ValidationService {
         sb.append("<html>")
                 .append(buildSubject(ruleName))
                 .append("<br><br>")
-                .append(buildAssetBodyPart(fact))
+                .append(buildAssetBodyPart(fact.getAssetName(), fact.getIrcs(), fact.getCfr()))
                 .append(buildPositionBodyPart(fact))
                 .append("</html>");
 
         return sb.toString();
     }
+    
+    private String buildBody(String ruleName, MovementDetails movementDetails) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html>")
+                .append(buildSubject(ruleName))
+                .append("<br><br>")
+                .append(buildAssetBodyPart(movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getCfr()))
+                .append(buildPositionBodyPart(movementDetails))
+                .append("</html>");
 
-    private String buildAssetBodyPart(MovementFact fact) {
+        return sb.toString();
+    }
+
+    private String buildAssetBodyPart(String assetName, String ircs, String cfr) {
         StringBuilder assetBuilder = new StringBuilder();
         assetBuilder.append("<b>Asset:</b>")
                 .append("<br>&nbsp;&nbsp;")
                 .append("Name: ")
-                .append(fact.getAssetName())
+                .append(assetName)
                 .append("<br>&nbsp;&nbsp;")
                 .append("IRCS: ")
-                .append(fact.getIrcs())
+                .append(ircs)
                 .append("<br>&nbsp;&nbsp;")
                 .append("CFR: ")
-                .append(fact.getCfr())
+                .append(cfr)
                 .append("<br>");
 
         return assetBuilder.toString();
     }
 
     private String buildPositionBodyPart(MovementFact fact) {
+        StringBuilder positionBuilder = new StringBuilder();
+        positionBuilder.append("<b>Position report:</b>")
+                .append("<br>&nbsp;&nbsp;")
+                .append("Report timestamp: ")
+                .append(fact.getPositionTime())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Longitude: ")
+                .append(fact.getLongitude())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Latitude: ")
+                .append(fact.getLatitude())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Status code: ")
+                .append(fact.getStatusCode())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Reported speed: ")
+                .append(fact.getReportedSpeed())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Reported course: ")
+                .append(fact.getReportedCourse())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Calculated speed: ")
+                .append(fact.getCalculatedSpeed())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Calculated course: ")
+                .append(fact.getCalculatedCourse())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Com channel type: ")
+                .append(fact.getComChannelType())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Segment type: ")
+                .append(fact.getSegmentType())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Source: ")
+                .append(fact.getSource())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Movement type: ")
+                .append(fact.getMovementType())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Activity type: ")
+                .append(fact.getActivityMessageType())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Closest port: ")
+                .append(fact.getClosestPortCode())
+                .append("<br>&nbsp;&nbsp;")
+                .append("Closest country: ")
+                .append(fact.getClosestCountryCode())
+                .append("<br>&nbsp;&nbsp;");
+
+        positionBuilder.append("Areas:");
+        for (int i = 0; i < fact.getAreaCodes().size(); i++) {
+            positionBuilder.append("<br>&nbsp;&nbsp;&nbsp;&nbsp;")
+                    .append(fact.getAreaCodes().get(i))
+                    .append(" (")
+                    .append(fact.getAreaTypes().get(i))
+                    .append(")");
+        }
+
+        return positionBuilder.toString();
+    }
+    
+    private String buildPositionBodyPart(MovementDetails fact) {
         StringBuilder positionBuilder = new StringBuilder();
         positionBuilder.append("<b>Position report:</b>")
                 .append("<br>&nbsp;&nbsp;")

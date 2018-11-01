@@ -1,12 +1,5 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsRequest;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesEventServiceBean;
-import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -14,6 +7,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsRequest;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesEventServiceBean;
 
 @Path("/internal")
 @Stateless
@@ -39,8 +38,8 @@ public class InternalRestResources {
     @Path("/evaluate")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @RequiresFeature(UnionVMSFeature.manageAlarmRules)
-    public void evaluateCustomRules(MovementDetails movementDetails) {
+    public Response evaluateCustomRules(MovementDetails movementDetails) {
         customRuleEvaluator.evaluate(movementDetails);
+        return Response.ok().build();
     }
 }

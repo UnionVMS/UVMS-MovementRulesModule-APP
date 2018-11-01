@@ -55,12 +55,16 @@ public abstract class BuildRulesRestDeployment {
 
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "unionvms.war");
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.asset:asset-model","eu.europa.ec.fisheries.uvms.asset:asset-client" , "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message")
+                .resolve("eu.europa.ec.fisheries.uvms.asset:asset-model",
+                        "eu.europa.ec.fisheries.uvms.asset:asset-client",
+                        "eu.europa.ec.fisheries.uvms.spatial:spatial-model",
+                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
         testWar.addClass(UnionVMSRestMock.class);
         testWar.addClass(AssetMTRestMock.class);
+        testWar.addClass(SpatialModuleMock.class);
         
 
         return testWar;

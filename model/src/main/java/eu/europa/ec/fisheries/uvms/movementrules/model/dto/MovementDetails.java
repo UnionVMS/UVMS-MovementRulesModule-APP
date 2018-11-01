@@ -69,7 +69,7 @@ public class MovementDetails {
     // REPORT
     private List<String> vicinityOf;
     private Integer sumPositionReport;
-
+    
     /*
      * COLLECTED DATA
      */
@@ -85,6 +85,18 @@ public class MovementDetails {
     private String closestCountryCode;
     private String closestPortCode;
 
+    /*
+     * Additional attributes used when sending to plugin
+     * TODO check if these are needed
+     */
+    private Double closestPortDistance;
+    private Double closestCountryDistance;
+    private String connectId;
+    private Double tripNumber;
+    private String wkt;
+    private String internalReferenceNumber;
+    private String assetType;
+    
     public String getMovementGuid() {
         return movementGuid;
     }
@@ -459,5 +471,61 @@ public class MovementDetails {
 
     public void setClosestPortCode(String closestPortCode) {
         this.closestPortCode = closestPortCode;
+    }
+
+    public Double getClosestPortDistance() {
+        return closestPortDistance;
+    }
+
+    public void setClosestPortDistance(Double closestPortDistance) {
+        this.closestPortDistance = closestPortDistance;
+    }
+
+    public Double getClosestCountryDistance() {
+        return closestCountryDistance;
+    }
+
+    public void setClosestCountryDistance(Double closestCountryDistance) {
+        this.closestCountryDistance = closestCountryDistance;
+    }
+
+    public String getConnectId() {
+        return connectId;
+    }
+
+    public void setConnectId(String connectId) {
+        this.connectId = connectId;
+    }
+
+    public Double getTripNumber() {
+        return tripNumber;
+    }
+
+    public void setTripNumber(Double tripNumber) {
+        this.tripNumber = tripNumber;
+    }
+
+    public String getWkt() {
+        return wkt;
+    }
+
+    public void setWkt(String wkt) {
+        this.wkt = wkt;
+    }
+
+    public String getInternalReferenceNumber() {
+        return internalReferenceNumber;
+    }
+
+    public void setInternalReferenceNumber(String internalReferenceNumber) {
+        this.internalReferenceNumber = internalReferenceNumber;
+    }
+
+    public String getAssetType() {
+        return assetType;
+    }
+
+    public void setAssetType(String assetType) {
+        this.assetType = assetType;
     }
 }

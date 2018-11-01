@@ -57,7 +57,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         MovementDetails movementDetails = getMovementDetails();
         movementDetails.setFlagState(flagState);
         
-        CustomRule customRule = getCustomRule();
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
         List<RuleSegment> segments = new ArrayList<>();
         RuleSegment segment = new RuleSegment();
         segment.setCriteria("ASSET");
@@ -84,7 +84,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         movementDetails.setLongitude(1d);
         movementDetails.setLatitude(1d);
         
-        CustomRule customRule = getCustomRule();
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
         List<RuleSegment> segments = new ArrayList<>();
         RuleSegment segment = new RuleSegment();
         segment.setCriteria("AREA");
@@ -111,7 +111,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         movementDetails.setLongitude(1d);
         movementDetails.setLatitude(1d);
         
-        CustomRule customRule = getCustomRule();
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
         List<RuleSegment> segments = new ArrayList<>();
         RuleSegment segment = new RuleSegment();
         segment.setCriteria("AREA");
@@ -141,7 +141,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         movementDetails.setPreviousLatitude(-1d);
         movementDetails.setPreviousLongitude(1d);
         
-        CustomRule customRule = getCustomRule();
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
         List<RuleSegment> segments = new ArrayList<>();
         RuleSegment segment = new RuleSegment();
         segment.setCriteria("AREA");
@@ -171,7 +171,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         movementDetails.setPreviousLatitude(-1d);
         movementDetails.setPreviousLongitude(1d);
         
-        CustomRule customRule = getCustomRule();
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
         List<RuleSegment> segments = new ArrayList<>();
         RuleSegment segment = new RuleSegment();
         segment.setCriteria("AREA");
@@ -201,17 +201,5 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         movementDetails.setAssetGuid(UUID.randomUUID().toString());
         movementDetails.setFlagState("SWE");
         return movementDetails;
-    }
-    
-    private CustomRule getCustomRule() {
-        CustomRule customRule = new CustomRule();
-        customRule.setName("Test rule " + RulesTestHelper.getRandomIntegers(7));
-        customRule.setAvailability(AvailabilityType.PRIVATE);
-        customRule.setDescription("Description");
-        customRule.setActive(true);
-        customRule.setArchived(false);
-        customRule.setUpdated(new Date());
-        customRule.setUpdatedBy("Test");
-        return customRule;
     }
 }

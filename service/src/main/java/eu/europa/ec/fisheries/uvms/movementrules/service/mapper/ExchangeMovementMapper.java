@@ -38,6 +38,7 @@ import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 
 public class ExchangeMovementMapper {
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeMovementMapper.class);
@@ -247,4 +248,73 @@ public class ExchangeMovementMapper {
         }
     }
 
+    public static MovementType mapToExchangeMovementType(MovementDetails movementDetails) {
+        MovementType movement = new MovementType();
+        movement.setGuid(movementDetails.getMovementGuid());
+        movement.setConnectId(movementDetails.getConnectId());
+        movement.setTripNumber(movementDetails.getTripNumber());
+        movement.setCalculatedCourse(movementDetails.getCalculatedCourse());
+        movement.setCalculatedSpeed(movementDetails.getCalculatedSpeed());
+        MovementMetaData metadata = new MovementMetaData();
+        metadata.setClosestCountryCoast(movementDetails.getClosestCountryCode());
+        metadata.setDistanceToCountryCoast(movementDetails.getClosestCountryDistance());
+        metadata.setClosestPort(movementDetails.getClosestPortCode());
+        metadata.setDistanceToClosestPort(movementDetails.getClosestPortDistance());
+        movement.setMetaData(metadata);
+        movement.setWkt(movementDetails.getWkt());
+        MovementActivityType activity = new MovementActivityType();
+        if (movementDetails.getActivityMessageType() != null) {
+            activity.setMessageType(MovementActivityTypeType.fromValue(movementDetails.getActivityMessageType()));
+        }
+        activity.setMessageId(movementDetails.getActivityMessageId());
+        activity.setCallback(movementDetails.getActivityCallback());
+        movement.setActivity(activity);
+        movement.setAssetId(mapAssetId(movementDetails));
+        if (movementDetails.getComChannelType() != null) {
+            movement.setComChannelType(MovementComChannelType.valueOf(movementDetails.getComChannelType()));
+        }
+        movement.setInternalReferenceNumber(movementDetails.getInternalReferenceNumber());
+        if (movementDetails.getMovementType() != null) {
+            movement.setMovementType(MovementTypeType.valueOf(movementDetails.getMovementType()));
+        }
+        MovementPoint position = new MovementPoint();
+        position.setLongitude(movementDetails.getLongitude());
+        position.setLatitude(movementDetails.getLatitude());
+        position.setAltitude(movementDetails.getAltitude());
+        movement.setPosition(position);
+        movement.setPositionTime(movementDetails.getPositionTime());
+        if (movementDetails.getSource() != null) {
+            movement.setSource(MovementSourceType.valueOf(movementDetails.getSource()));
+        }
+        movement.setStatus(movementDetails.getStatusCode());
+        movement.setTripNumber(movementDetails.getTripNumber());
+
+        return movement;
+    }
+
+    private static AssetId mapAssetId(MovementDetails movementDetails) {
+        AssetId assetId = new AssetId();
+        if (movementDetails.getAssetType() != null) {
+            assetId.setAssetType(AssetType.valueOf(movementDetails.getAssetType()));
+        }
+        if (movementDetails.getCfr() != null) {
+            eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList idList = new eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList();
+            idList.setIdType(AssetIdType.CFR);
+            idList.setValue(movementDetails.getCfr());
+            assetId.getAssetIdList().add(idList);
+        }
+        if (movementDetails.getIrcs() != null) {
+            eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList idList = new eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList();
+            idList.setIdType(AssetIdType.IRCS);
+            idList.setValue(movementDetails.getIrcs());
+            assetId.getAssetIdList().add(idList);
+        }
+        if (movementDetails.getMmsi() != null) {
+            eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList idList = new eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList();
+            idList.setIdType(AssetIdType.MMSI);
+            idList.setValue(movementDetails.getMmsi());
+            assetId.getAssetIdList().add(idList);
+        }
+        return assetId;
+    }
 }

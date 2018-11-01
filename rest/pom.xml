@@ -108,6 +108,12 @@
             <version>${asset.client.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.spatial</groupId>
+            <artifactId>spatial-model</artifactId>
+            <version>${spatial.model.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
