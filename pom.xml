@@ -9,7 +9,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
     <artifactId>movement-rules</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -114,7 +114,7 @@
 
     <scm>
         <connection>${scm.connection}</connection>
-        <tag>HEAD</tag>
+        <tag>movement-rules-1.0.3</tag>
     </scm>
     <build>
     <plugins>
