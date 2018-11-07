@@ -26,7 +26,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesMo
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
@@ -56,14 +55,6 @@ public interface RulesService {
 //    List<CustomRuleType> getCustomRuleList() throws RulesServiceException;
 
     CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, MovementRulesFaultException, AccessDeniedException, MovementRulesModelMapperException;
-
-    /**
-     * Lists alarms by query
-     *
-     * @return
-     * @throws RulesServiceException
-     */
-    AlarmListResponseDto getAlarmList(AlarmQuery query) throws RulesServiceException, MovementRulesModelException;
 
     /**
      * Lists tickets by query
@@ -138,20 +129,12 @@ public interface RulesService {
      */
     CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException, MovementRulesModelMapperException, MovementRulesFaultException;
 
-    AlarmReport updateAlarmStatus(AlarmReport ticket) throws RulesServiceException, MovementRulesFaultException;
 
     List<PreviousReport> getPreviousMovementReports();
 
     void timerRuleTriggered(String ruleName, PreviousReport previousReport);
 
-    String reprocessAlarm(List<String> alarms, String username) throws RulesServiceException, MovementRulesModelException;
 
-    /**
-     * @param guid the GUID of an alarm
-     * @return an alarm
-     * @throws RulesServiceException if unsuccessful
-     */
-    AlarmReport getAlarmReportByGuid(String guid) throws RulesServiceException, MovementRulesFaultException;
 
     /**
      * @param guid the GUID of a ticket

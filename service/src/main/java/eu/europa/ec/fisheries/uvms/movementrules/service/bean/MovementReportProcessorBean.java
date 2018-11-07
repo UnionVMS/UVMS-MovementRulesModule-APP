@@ -83,9 +83,6 @@ public class MovementReportProcessorBean {
             RawMovementFact rawMovementFact = RawMovementFactMapper.mapRawMovementFact(rawMovement, response, pluginType);
             LOG.debug("rawMovementFact:{}", rawMovementFact);
 
-            //added a loooong series of if statements that does the same thing, check the rulesValidator
-            rulesValidator.evaluate(rawMovementFact);
-            auditLog("Time to validate sanity:", auditTimestamp);
 
             if (rawMovementFact.isOk()) {
                 MovementFact movementFact = collectMovementData(response, rawMovement, username);

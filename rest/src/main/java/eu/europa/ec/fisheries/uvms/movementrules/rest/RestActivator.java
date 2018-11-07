@@ -32,11 +32,9 @@ public class RestActivator extends Application {
 
     public RestActivator() {
         set.add(CustomRulesRestResource.class);
-        set.add(AlarmRestResource.class);
         set.add(TicketRestResource.class);
         set.add(ConfigResource.class);
         set.add(UnionVMSFeatureFilter.class);
-        set.add(SanityRulesRestResource.class);
         set.add(InternalRestResources.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }

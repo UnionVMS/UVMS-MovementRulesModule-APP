@@ -10,7 +10,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import java.util.Arrays;
 
 global org.slf4j.Logger logger;
-global eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService validationService;
+global eu.europa.ec.fisheries.uvms.movementrules.service.message.bean.ValidationServiceBean validationService;
 
 template "CustomRulesTemplate"
 

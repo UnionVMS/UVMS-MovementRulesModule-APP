@@ -1,6 +1,5 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.*;
@@ -10,7 +9,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.*;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
@@ -307,24 +305,6 @@ public class RulesServiceBeanTest extends TransactionalTests {
         Assert.assertEquals("vms_admin_com", output.getRuleSubscriptionList().get(0).getOwner());
     }
 
-    @Test
-    @OperateOnDeployment ("normal")
-    public void getAlarmListTest() throws Exception {
-        AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
-        AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
-        
-        AlarmQuery query = RulesTestHelper.getBasicAlarmQuery();
-        AlarmListCriteria criteria = new AlarmListCriteria();
-        criteria.setKey(AlarmSearchKey.ALARM_GUID);
-        criteria.setValue(createdAlarmReport.getGuid());
-        query.getAlarmSearchCriteria().add(criteria);
-        
-        AlarmListResponseDto alarmList = rulesService.getAlarmList(query);
-        List<AlarmReport> alarms = alarmList.getAlarmList();
-        
-        assertThat(alarms.size(), is(1));
-        assertThat(alarms.get(0).getGuid(), is(createdAlarmReport.getGuid()));
-    }
 
     @Test
     @OperateOnDeployment ("normal")
@@ -623,30 +603,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         assertThat(fetchedTicket.getGuid(), is(createdTicket.getGuid()));
     }
 
-    @Test
-    @OperateOnDeployment ("normal")
-    public void updateAlarmStatusNegativeTest() throws Exception{ //a test with proper input is among the rest tests
-        AlarmReport input = new AlarmReport();
-        try{
-            rulesService.updateAlarmStatus(input);
-            fail();
-        }catch(EJBTransactionRolledbackException e){
-            Assert.assertTrue(true);
-        }
-    }
-    
-    @Test
-    @OperateOnDeployment ("normal")
-    public void updateAlarmStatusTest() throws Exception {
-        AlarmReport alarmReport = RulesTestHelper.getBasicAlarmReport();
-        AlarmReport createdAlarmReport = rulesDao.createAlarmReport(alarmReport);
-        String newStatus = "New status";
-        createdAlarmReport.setStatus(newStatus);
-        
-        AlarmReport updatedAlarmReport = rulesService.updateAlarmStatus(createdAlarmReport);
-        assertThat(updatedAlarmReport.getStatus(), is(newStatus));
-        assertThat(updatedAlarmReport.getGuid(), is(createdAlarmReport.getGuid()));
-    }
+
 
     @Test
     @OperateOnDeployment ("normal")
@@ -665,25 +622,6 @@ public class RulesServiceBeanTest extends TransactionalTests {
         }catch(EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
         }
-    }
-    
-    @Test
-    @OperateOnDeployment ("normal")
-    public void reprocessAlarmTest() throws Exception {
-        AlarmReport alarm1 = RulesTestHelper.getBasicAlarmReport();
-        alarm1.setRawMovement(getBasicRawMovement());
-        AlarmReport createdAlarm1 = rulesDao.createAlarmReport(alarm1);
-        AlarmReport alarm2 = RulesTestHelper.getBasicAlarmReport();
-        alarm2.setRawMovement(getBasicRawMovement());
-        AlarmReport createdAlarm2 = rulesDao.createAlarmReport(alarm2);
-        
-        String response = rulesService.reprocessAlarm(Arrays.asList(createdAlarm1.getGuid(), createdAlarm2.getGuid()), "Test user");
-        assertThat(response, is("OK"));
-        
-        AlarmReport fetchedAlarm1 = rulesService.getAlarmReportByGuid(createdAlarm1.getGuid());
-        assertThat(fetchedAlarm1.getStatus(), is(AlarmStatusType.REPROCESSED.value()));
-        AlarmReport fetchedAlarm2 = rulesService.getAlarmReportByGuid(createdAlarm1.getGuid());
-        assertThat(fetchedAlarm2.getStatus(), is(AlarmStatusType.REPROCESSED.value()));
     }
 
     //getAlarmReportByGuid and getTicketByGuid have tests among the rest tests

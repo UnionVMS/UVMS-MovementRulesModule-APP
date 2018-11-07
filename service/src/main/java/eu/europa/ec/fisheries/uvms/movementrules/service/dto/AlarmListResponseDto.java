@@ -12,24 +12,15 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
 import java.io.Serializable;
-import java.util.List;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 
 public class AlarmListResponseDto implements Serializable {
 
     private static final long serialVersionUID = 1;
 
-    private List<AlarmReport> alarmList;
     private int totalNumberOfPages;
     private int currentPage;
 
-    public List<AlarmReport> getAlarmList() {
-        return alarmList;
-    }
 
-    public void setAlarmList(List<AlarmReport> alarmList) {
-        this.alarmList = alarmList;
-    }
 
     public int getTotalNumberOfPages() {
         return totalNumberOfPages;

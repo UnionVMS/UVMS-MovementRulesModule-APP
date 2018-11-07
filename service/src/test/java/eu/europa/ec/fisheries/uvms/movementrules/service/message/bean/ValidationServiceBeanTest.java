@@ -21,19 +21,17 @@ import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 
 @RunWith(Arquillian.class)
 public class ValidationServiceBeanTest extends TransactionalTests {
 
     @Inject
-    ValidationService validationService;
+    ValidationServiceBean validationService;
 
     @Inject
     RulesService rulesService;
@@ -75,12 +73,6 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         assertThat(runnableCustomRulesAfterDelete.size(), is(runnableCustomRulesBefore.size()));
     }
 
-    @Test
-    @OperateOnDeployment("normal")
-    public void getSanityRulesTest() throws Exception {
-        List<SanityRule> sanityRules = validationService.getSanityRules();
-        assertTrue(sanityRules.size() > 0);
-    }
 
     @Test
     @OperateOnDeployment("normal")
@@ -237,16 +229,5 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         assertThat(openTicketsAfter, is(openTicketsBefore + 1));
     }
 
-    @Test
-    @OperateOnDeployment("normal")
-    public void createAlarmReportNewAlarmReportShouldBeCreatedTest() throws Exception {
-        long alarmReportsBefore = validationService.getNumberOfOpenAlarmReports();
-
-        RawMovementFact rawMovementFact = RulesTestHelper.createBasicRawMovementFact();
-        validationService.createAlarmReport("Test Rule", rawMovementFact);
-
-        long alarmReportsAfter = validationService.getNumberOfOpenAlarmReports();
-        assertThat(alarmReportsAfter, is(alarmReportsBefore + 1));
-    }
 
 }

@@ -24,15 +24,12 @@ import javax.persistence.NoResultException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.MovementReportProcessorBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
@@ -56,7 +53,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConsta
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
@@ -67,11 +63,8 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.AlarmSearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.AlarmSearchValue;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchValue;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
@@ -346,44 +339,6 @@ public class RulesServiceBean implements RulesService {
 
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     * @throws RulesServiceException
-     */
-    @Override
-    public AlarmListResponseDto getAlarmList(AlarmQuery query) {
-        if (query == null) {
-            throw new IllegalArgumentException("Alarm list query is null");
-        }
-        if (query.getPagination() == null) {
-            throw new IllegalArgumentException("Pagination in alarm list query is null");
-        }
-
-        Integer page = query.getPagination().getPage();
-        Integer listSize = query.getPagination().getListSize();
-
-        List<AlarmSearchValue> searchKeyValues = AlarmSearchFieldMapper.mapSearchField(query.getAlarmSearchCriteria());
-
-        String sql = AlarmSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
-        String countSql = AlarmSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
-
-        Long numberMatches = rulesDao.getAlarmListSearchCount(countSql);
-        List<AlarmReport> alarmEntityList = rulesDao.getAlarmListPaginated(page, listSize, sql);
-
-        int numberOfPages = (int) (numberMatches / listSize);
-        if (numberMatches % listSize != 0) {
-            numberOfPages += 1;
-        }
-
-        AlarmListResponseDto response = new AlarmListResponseDto();
-        response.setTotalNumberOfPages(numberOfPages);
-        response.setCurrentPage(query.getPagination().getPage());
-        response.setAlarmList(alarmEntityList);
-
-        return response;
-    }
 
     @Override
     public TicketListResponseDto getTicketList(String loggedInUser, TicketQuery query) {
@@ -519,29 +474,6 @@ public class RulesServiceBean implements RulesService {
         return rulesDao.getNumberOfTicketsWithAssetNotSending(ServiceConstants.ASSET_NOT_SENDING_RULE);
     }
 
-    @Override
-    public AlarmReport updateAlarmStatus(AlarmReport alarm) {
-        AlarmReport entity = rulesDao.getAlarmReportByGuid(alarm.getGuid());
-        if (entity == null) {
-            throw new IllegalArgumentException("Alarm is null", null);
-        }
-
-        entity.setStatus(alarm.getStatus());
-        entity.setUpdatedBy(alarm.getUpdatedBy());
-        entity.setUpdated(new Date());
-        if (entity.getRawMovement() != null) {
-            entity.getRawMovement().setActive(!alarm.getRawMovement().getActive()); /*isInactivatePosition()*/
-        }
-
-        rulesDao.updateAlarm(entity);
-
-        // Notify long-polling clients of the change
-        alarmReportEvent.fire(new NotificationMessage("guid", entity.getGuid()));
-        // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
-        alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
-        auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, entity.getGuid(), null, alarm.getUpdatedBy());
-        return entity;
-    }
 
     // Triggered by RulesTimerBean
     @Override
@@ -599,65 +531,13 @@ public class RulesServiceBean implements RulesService {
         return ticket;
     }
 
-    @Override
-    public AlarmReport getAlarmReportByGuid(String guid) {
-        return rulesDao.getAlarmReportByGuid(guid);
-    }
 
     @Override
     public Ticket getTicketByGuid(String guid){
         return rulesDao.getTicketByGuid(guid);
     }
 
-    @Override
-    public String reprocessAlarm(List<String> alarmGuids, String username) throws RulesServiceException {
-        AlarmQuery query = mapToOpenAlarmQuery(alarmGuids);
-        AlarmListResponseDto alarms = getAlarmList(query);
 
-        for (AlarmReport alarm : alarms.getAlarmList()) {
-            // Cannot reprocess without a movement (i.e. "Asset not sending" alarm)
-            if (alarm.getRawMovement() == null) {
-                continue;
-            }
-
-            // Mark the alarm as REPROCESSED before reprocessing. That will create a new alarm (if still wrong) with the items remaining.
-            alarm.setStatus(AlarmStatusType.REPROCESSED.value());
-            alarm = updateAlarmStatus(alarm);
-            auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.UPDATE, alarm.getGuid(), null, username);
-            AlarmReportType alarmType = AlarmMapper.toAlarmReportType(alarm);
-            RawMovementType rawMovementType = alarmType.getRawMovement();
-            // TODO: Use better type (some variation of PluginType...)
-            String pluginType = alarm.getPluginType();
-            movementReportBean.setMovementReportReceived(rawMovementType, pluginType, username);
-        }
-        // return RulesDataSourceResponseMapper.mapToAlarmListFromResponse(response, messageId);
-        // TODO: Better
-        return "OK";
-
-    }
-
-    private AlarmQuery mapToOpenAlarmQuery(List<String> alarmGuids) {
-        AlarmQuery query = new AlarmQuery();
-        ListPagination pagination = new ListPagination();
-        pagination.setListSize(alarmGuids.size());
-        pagination.setPage(1);
-        query.setPagination(pagination);
-
-        for (String alarmGuid : alarmGuids) {
-            AlarmListCriteria criteria = new AlarmListCriteria();
-            criteria.setKey(AlarmSearchKey.ALARM_GUID);
-            criteria.setValue(alarmGuid);
-            query.getAlarmSearchCriteria().add(criteria);
-        }
-
-        // We only want open alarms
-        AlarmListCriteria openCrit = new AlarmListCriteria();
-        openCrit.setKey(AlarmSearchKey.STATUS);
-        openCrit.setValue(AlarmStatusType.OPEN.name());
-        query.getAlarmSearchCriteria().add(openCrit);
-        query.setDynamic(true);
-        return query;
-    }
 
     private boolean hasFeature(UserContext userContext, String featureName) {
         for (eu.europa.ec.fisheries.wsdl.user.types.Context c : userContext.getContextSet().getContexts()) {

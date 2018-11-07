@@ -22,7 +22,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AssetStatus;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
@@ -207,23 +206,6 @@ public class ConfigResource {
         return conditions;
     }
 
-    /**
-     * @responseMessage 200 Alarm statuses fetched
-     * @responseMessage 500 No config fetched
-     * @summary Get alarm statuses
-     */
-    @GET
-    @Consumes(value = {MediaType.APPLICATION_JSON})
-    @Produces(value = {MediaType.APPLICATION_JSON})
-    @Path(value = "/alarmstatus")
-    public ResponseDto getAlarmStatuses() {
-        try {
-            return new ResponseDto(AlarmStatusType.values(), ResponseCode.OK);
-        } catch (Exception ex) {
-            LOG.error("[ Error when getting alarm statuses. ] {} ", ex.getMessage());
-            return ErrorHandler.getFault(ex);
-        }
-    }
 
     /**
      * @responseMessage 200 Ticket statuses fetched

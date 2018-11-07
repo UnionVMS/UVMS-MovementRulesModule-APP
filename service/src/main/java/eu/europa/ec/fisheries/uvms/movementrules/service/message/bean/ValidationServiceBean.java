@@ -14,7 +14,6 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -28,9 +27,6 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmItemType;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmReportType;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
@@ -40,30 +36,22 @@ import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmItem;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RawMovement;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.AlarmMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
@@ -74,7 +62,7 @@ import eu.europa.ec.fisheries.wsdl.user.types.EndPoint;
 import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 
 @Stateless
-public class ValidationServiceBean implements ValidationService {
+public class ValidationServiceBean  {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationServiceBean.class);
 
@@ -113,7 +101,6 @@ public class ValidationServiceBean implements ValidationService {
      * @return
      * @throws RulesServiceException
      */
-    @Override
     public List<CustomRule> getCustomRulesByUser(String userName) {
         return rulesDao.getCustomRulesByUser(userName);
     }
@@ -124,7 +111,6 @@ public class ValidationServiceBean implements ValidationService {
      * @return
      * @throws RulesServiceException
      */
-    @Override
     public List<CustomRule> getRunnableCustomRules() {
         return rulesDao.getRunnableCustomRuleList();
     }
@@ -135,12 +121,7 @@ public class ValidationServiceBean implements ValidationService {
      * @return
      * @throws RulesServiceException
      */
-    @Override
-    public List<SanityRule> getSanityRules() {
-        return rulesDao.getSanityRules();
-    }
 
-    @Override
     public CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) {
         if (query == null) {
             throw new IllegalArgumentException("Custom rule list query is null");
@@ -173,7 +154,6 @@ public class ValidationServiceBean implements ValidationService {
     }
 
     // Triggered by rule engine
-    @Override
     public void customRuleTriggered(String ruleName, String ruleGuid, MovementFact fact, String actions) {
         LOG.info("Performing actions on triggered user rules, rule: {}", ruleName);
 
@@ -240,7 +220,6 @@ public class ValidationServiceBean implements ValidationService {
     }
     
     // Triggered by rule engine
-    @Override
     public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails movementDetails, String actions) {
         LOG.info("Performing actions on triggered user rules, rule: {}", ruleName);
 
@@ -784,85 +763,7 @@ public class ValidationServiceBean implements ValidationService {
         }
     }
 
-    // Triggered by rule engine
-    @Override
-    public void createAlarmReport(String ruleName, RawMovementFact fact) {
-        LOG.info("Create alarm invoked in validation service, rule: {}", ruleName);
-        try {
-            // TODO: Decide who sets the guid, Rules or Exchange
-            if (fact.getRawMovementType().getGuid() == null) {
-                fact.getRawMovementType().setGuid(UUID.randomUUID().toString());
-            }
 
-            AlarmReportType alarmReport = new AlarmReportType();
-            alarmReport.setOpenDate(RulesUtil.dateToString(new Date()));
-            alarmReport.setStatus(AlarmStatusType.OPEN);
-            alarmReport.setRawMovement(fact.getRawMovementType());
-            alarmReport.setUpdatedBy("UVMS");
-            alarmReport.setPluginType(fact.getPluginType());
-            alarmReport.setAssetGuid(fact.getAssetGuid());
-            alarmReport.setInactivatePosition(false);
-
-            // TODO: Add sender, recipient and assetGuid
-
-            // Alarm item
-            List<AlarmItemType> alarmItems = new ArrayList<>();
-            AlarmItemType alarmItemType = new AlarmItemType();
-            alarmItemType.setGuid(UUID.randomUUID().toString());
-            alarmItemType.setRuleName(ruleName);
-            alarmItemType.setRuleGuid(ruleName);
-            alarmItems.add(alarmItemType);
-            alarmReport.getAlarmItem().addAll(alarmItems);
-
-            String movementGuid = null;
-            if (alarmReport.getRawMovement() != null) {
-                movementGuid = alarmReport.getRawMovement().getGuid();
-            }
-            AlarmReport alarmReportEntity = rulesDao.getOpenAlarmReportByMovementGuid(movementGuid);
-
-            if (alarmReportEntity == null) {
-                alarmReportEntity = new AlarmReport();
-
-                RawMovement rawMovement = AlarmMapper.toRawMovementEntity(alarmReport.getRawMovement());
-                if (rawMovement != null) {
-                    alarmReportEntity.setRawMovement(rawMovement);
-                    rawMovement.setAlarmReport(alarmReportEntity);
-                }
-            }
-
-            AlarmItem alarmItem = AlarmMapper.toAlarmItemEntity(alarmReport.getAlarmItem().get(0));
-            alarmItem.setAlarmReport(alarmReportEntity);
-            alarmReportEntity.getAlarmItemList().add(alarmItem);
-
-            AlarmReport entity = AlarmMapper.toAlarmReportEntity(alarmReportEntity, alarmReport);
-            if (entity.getRawMovement() != null) {
-                entity.getRawMovement().setActive(!alarmReport.isInactivatePosition());
-            }
-
-            AlarmReport createdReport = rulesDao.createAlarmReport(entity);
-
-            AlarmReportType createdAlarmReport = AlarmMapper.toAlarmReportType(createdReport);
-
-
-            // Notify long-polling clients of the new alarm report
-            alarmReportEvent.fire(new NotificationMessage("guid", createdAlarmReport.getGuid()));
-
-            // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
-            alarmReportCountEvent.fire(new NotificationMessage("alarmCount", null));
-
-            auditService.sendAuditMessage(AuditObjectTypeEnum.ALARM, AuditOperationEnum.CREATE, createdAlarmReport.getGuid(), null, alarmReport.getUpdatedBy());
-        } catch (Exception e) {
-            LOG.error("Failed to create alarm!", e);
-        }
-    }
-
-    @Override
-    public long getNumberOfOpenAlarmReports() {
-        LOG.info("Counting open alarms");
-        return rulesDao.getNumberOfOpenAlarms();
-    }
-
-    @Override
     public long getNumberOfOpenTickets(String userName) {
         LOG.info("Counting open tickets for user: {}", userName);
         List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);

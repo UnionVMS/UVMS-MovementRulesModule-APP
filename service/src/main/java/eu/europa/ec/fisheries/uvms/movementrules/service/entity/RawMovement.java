@@ -91,10 +91,6 @@ public class RawMovement implements Serializable {
     private String externalMarking; //exist in type, same name
 
 
-    @JoinColumn(name = "rawmove_alarmrep_id", referencedColumnName = "alarmrep_id")
-    @OneToOne(fetch = FetchType.LAZY)
-    private AlarmReport alarmReport;    //does not exist in type
-
     @OneToOne(mappedBy = "rawMovement", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Asset asset;                //does not exist in type
 
@@ -201,14 +197,6 @@ public class RawMovement implements Serializable {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
-    }
-
-    public AlarmReport getAlarmReport() {
-        return alarmReport;
-    }
-
-    public void setAlarmReport(AlarmReport alarmReport) {
-        this.alarmReport = alarmReport;
     }
 
     public Asset getAsset() {

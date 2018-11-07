@@ -42,17 +42,6 @@ public class ConfigResourcesTest extends TransactionalTests {
         }
     }
 
-    @Test
-    @OperateOnDeployment("normal")
-    public void getAlarmStatusesTest() throws Exception {
-        String response = getWebTarget()
-                .path("config/alarmstatus")
-                .request(MediaType.APPLICATION_JSON)
-                .get(String.class);
-
-        Object[] o = deserializeResponseDto(response, Object[].class);
-        Assert.assertEquals(3, o.length);
-    }
 
     @Test
     @OperateOnDeployment("normal")

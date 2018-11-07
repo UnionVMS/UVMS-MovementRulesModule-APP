@@ -145,34 +145,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         assertThat(returnedMovement2.getAssetId().getAssetIdList().get(0).getValue(), is(movement2.getAssetId().getAssetIdList().get(0).getValue()));
     }
 
-    @Test
-    @OperateOnDeployment("normal")
-    public void setMovementReportNullLatitudeShouldTriggerSanityRuleTest() throws Exception {
-        RawMovementType movement = TestHelper.createBasicMovement();
-        movement.getPosition().setLatitude(null);
-        String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
-        String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value(), MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
 
-        ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
-        assertThat(movementResponse.getMovementRefType().getType(), is(MovementRefTypeType.ALARM));
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void setMovementReportFutureDateShouldTriggerSanityRuleTest() throws Exception {
-        RawMovementType movement = TestHelper.createBasicMovement();
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.add(Calendar.HOUR, 1);
-        movement.setPositionTime(calendar.getTime());
-        String request = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginType.NAF, movement, "testUser");
-        String correlationId = jmsHelper.sendMessageToRules(request, RulesModuleMethod.SET_MOVEMENT_REPORT.value(), MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-        Message responseMessage = jmsHelper.listenForResponseOnQueue(correlationId, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-
-        ProcessedMovementResponse movementResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) responseMessage, ProcessedMovementResponse.class);
-        assertThat(movementResponse.getMovementRefType().getType(), is(MovementRefTypeType.ALARM));
-    }
-    
     // Sanity test
     @Test
     @OperateOnDeployment("normal")

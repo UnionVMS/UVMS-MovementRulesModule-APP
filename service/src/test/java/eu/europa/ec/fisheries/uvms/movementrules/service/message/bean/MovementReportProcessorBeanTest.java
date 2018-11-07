@@ -75,19 +75,6 @@ public class MovementReportProcessorBeanTest extends TransactionalTests {
         assertThat(previousReportsAfter.size(), is(previousReportsBefore.size() + 1));
     }
 
-    @Test
-    @OperateOnDeployment("normal")
-    public void setMovementReportReceivedTriggerSanityRuleTest() throws Exception {
-        RawMovementType rawMovement = getBasicRawMovementType();
-
-        List<PreviousReport> previousReportsBefore = rulesService.getPreviousMovementReports();
-
-        rawMovement.getPosition().setLatitude(null);
-        movementReport.setMovementReportReceived(rawMovement, "NAF", "TEST");
-
-        List<PreviousReport> previousReportsAfter = rulesService.getPreviousMovementReports();
-        assertThat(previousReportsAfter.size(), is(previousReportsBefore.size()));
-    }
 
     @Test
     @OperateOnDeployment("normal")

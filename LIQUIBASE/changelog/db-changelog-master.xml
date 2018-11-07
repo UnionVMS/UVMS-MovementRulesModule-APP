@@ -11,10 +11,11 @@
 
     <include file="changelog\v0.1\db-changelog-insertInitData_0.1.xml" />
 
-	<include file="changelog\v0.1\insertParameter.xml" />
+    <include file="changelog\v0.1\insertParameter.xml" />
+
+    <include file="changelog\v1.0.3\db-changelog-droptables.xml" />
 
     <!-- testdata, run with parameter -Dliquibase.contexts=test 
     <include file="changelog\v0.1\db-changelog-insertTestData_0.1.xml"/>
     -->
-
 </databaseChangeLog>

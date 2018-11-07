@@ -30,7 +30,6 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addAsLibraries(files);
 
         testWar.addAsResource(new File("src/main/resources/templates/CustomRulesTemplate.drt"), "/templates/CustomRulesTemplate.drt");
-        testWar.addAsResource(new File("src/main/resources/templates/SanityRulesTemplate.drt"), "/templates/SanityRulesTemplate.drt");
 
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.movementrules.service");
 

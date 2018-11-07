@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
@@ -29,7 +28,6 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
@@ -162,14 +160,6 @@ public class RulesTestHelper {
         return customRule;
     }
 
-    public static AlarmReport getBasicAlarmReport() {
-        AlarmReport alarmReport = new AlarmReport();
-        alarmReport.setAssetGuid(UUID.randomUUID().toString());
-        alarmReport.setStatus(AlarmStatusType.OPEN.value());
-        alarmReport.setUpdated(new Date());
-        alarmReport.setUpdatedBy("Test user");
-        return alarmReport;
-    }
 
     public static Ticket getCompleteTicket() {
         Ticket ticket = new Ticket();
