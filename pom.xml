@@ -25,7 +25,7 @@
         <usm4uvms.version>4.0.13</usm4uvms.version>
         <uvms.config.version>4.0.2</uvms.config.version>
         <uvms.common.version>3.0.29</uvms.common.version>
-
+        <javaee.version>8.0</javaee.version>
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
@@ -82,6 +82,7 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
+            <version>${javaee.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
