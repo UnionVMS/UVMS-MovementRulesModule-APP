@@ -104,7 +104,7 @@ public class MovementServiceBean {
         try {
 
             long response = client.target("http://localhost:8080/unionvms/")
-                    .path("movement/rest/internal/countMovementsInTheLastDayForAsset/" + connectId)
+                    .path("movement/rest/internal/countMovementsInDateAndTheDayBeforeForAsset/" + connectId)
                     .queryParam("after", DateUtils.dateToString(thisTime))    //yyyy-MM-dd HH:mm:ss Z
                     .request(MediaType.APPLICATION_JSON)
                     .get(long.class);
