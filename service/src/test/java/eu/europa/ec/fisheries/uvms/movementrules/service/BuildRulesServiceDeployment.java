@@ -57,6 +57,7 @@ public abstract class BuildRulesServiceDeployment {
 
         testWar.addClass(UnionVMSRestMock.class);
         testWar.addClass(AssetMTRestMock.class);
+        testWar.addClass(MovementRestMock.class);
 
        // dumpContent(testWar, "c:\\temp\\unionvms.txt");
 

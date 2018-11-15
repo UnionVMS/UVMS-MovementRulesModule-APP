@@ -14,14 +14,22 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.ext.ContextResolver;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europa.ec.fisheries.schema.movement.module.v1.MovementModuleMethod;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.movement.model.exception.MovementModelException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.MovementProducerBean;
@@ -57,6 +65,19 @@ public class MovementServiceBean {
 
     @Resource(mappedName = "java:/" + MessageConstants.QUEUE_MOVEMENTRULES)
     private Queue responseQueue;
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private Client client = ClientBuilder.newClient();
+
+    @PostConstruct
+    public void init(){
+        client.register(new ContextResolver<ObjectMapper>() {
+            @Override
+            public ObjectMapper getContext(Class<?> type) {
+                return OBJECT_MAPPER;
+            }
+        });
+    }
     
     public MovementType sendToMovement(String connectId, RawMovementType rawMovement, String username) {
         LOG.info("Send the validated raw position to Movement..");
@@ -75,55 +96,25 @@ public class MovementServiceBean {
 
         return createdMovement;
     }
-    
+
+
+
     public Integer numberOfReportsLast24Hours(String connectId, Date thisTime) {
-        LOG.info("[INFO] Fetching number of reports last 24 hours");
-        Integer numberOfMovements = null;
-        MovementQuery query = new MovementQuery();
-
-        // Range
-        RangeCriteria dateRangeCriteria = new RangeCriteria();
-        dateRangeCriteria.setKey(RangeKeyType.DATE);
-        Date twentyFourHoursAgo = new Date(thisTime.getTime() - TWENTYFOUR_HOURS_IN_MILLISEC);
-        dateRangeCriteria.setFrom(twentyFourHoursAgo.toString());
-        dateRangeCriteria.setTo(thisTime.toString());
-        query.getMovementRangeSearchCriteria().add(dateRangeCriteria);
-
-        // Id
-        eu.europa.ec.fisheries.schema.movement.search.v1.ListCriteria idCriteria = new eu.europa.ec.fisheries.schema.movement.search.v1.ListCriteria();
-        idCriteria.setKey(eu.europa.ec.fisheries.schema.movement.search.v1.SearchKey.CONNECT_ID);
-        idCriteria.setValue(connectId);
-        query.getMovementSearchCriteria().add(idCriteria);
 
         try {
-            String request = MovementModuleRequestMapper.mapToGetMovementMapByQueryRequest(query);
-            String messageId = movementProducerBean.sendModuleMessage(request, responseQueue, MovementModuleMethod.MOVEMENT_MAP.value(), "");  //Might not need grouping here
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 
-            List<MovementMapResponseType> result = MovementModuleResponseMapper.mapToMovementMapResponse(response);
+            long response = client.target("http://localhost:8080/unionvms/")
+                    .path("movement/rest/internal/countMovementsInTheLastDayForAsset/" + connectId)
+                    .queryParam("after", DateUtils.dateToString(thisTime))    //yyyy-MM-dd HH:mm:ss Z
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(long.class);
 
-            List<MovementType> movements;
-
-            if (result == null || result.isEmpty()) {
-                LOG.warn("[WARN] Error when fetching sum of previous movement reports : No result found");
-                return null;
-            } else if (result.size() != 1) {
-                LOG.warn("[WARN] Error when fetching sum of previous movement reports: Duplicate assets found ({})", result.size());
-                return null;
-            } else if (!connectId.equals(result.get(0).getKey())) {
-                LOG.warn("[WARN] Error when fetching sum of previous movement reports: Wrong asset found ({})", result.get(0).getKey());
-                return null;
-            } else {
-                movements = result.get(0).getMovements();
-            }
-
-            numberOfMovements = movements != null ? movements.size() : 0;
+            return (int)response;
         } catch (Exception e) {
             // If something goes wrong, continue with the other validation
             LOG.warn("[ERROR] Error when fetching sum of previous movement reports:{} ]", e.getMessage());
+            return null;
         }
-
-        return numberOfMovements;
     }
     
     public List<String> getVicinityOf(RawMovementType rawMovement) {

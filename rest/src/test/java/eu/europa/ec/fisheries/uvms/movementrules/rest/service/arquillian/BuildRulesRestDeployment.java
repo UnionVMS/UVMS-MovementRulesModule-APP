@@ -61,6 +61,7 @@ public abstract class BuildRulesRestDeployment {
 
         testWar.addClass(UnionVMSRestMock.class);
         testWar.addClass(AssetMTRestMock.class);
+        testWar.addClass(MovementRestMock.class);
         
 
         return testWar;
