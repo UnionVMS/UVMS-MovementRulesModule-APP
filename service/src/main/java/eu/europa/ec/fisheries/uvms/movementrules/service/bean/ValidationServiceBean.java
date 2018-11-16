@@ -99,16 +99,6 @@ public class ValidationServiceBean  {
      * @return
      * @throws RulesServiceException
      */
-    public List<CustomRule> getCustomRulesByUser(String userName) {
-        return rulesDao.getCustomRulesByUser(userName);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     * @throws RulesServiceException
-     */
     public List<CustomRule> getRunnableCustomRules() {
         return rulesDao.getRunnableCustomRuleList();
     }

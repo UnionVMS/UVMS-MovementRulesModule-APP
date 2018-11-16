@@ -31,6 +31,7 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleParser;
@@ -47,6 +48,8 @@ public class RulesValidator {
     @Inject
     private ValidationServiceBean validationService;
 
+    @Inject
+    private RulesServiceBean rulesService;
 
     private KieContainer customKcontainer;
 
@@ -60,7 +63,7 @@ public class RulesValidator {
     public void updateCustomRules() {
         LOG.info("Updating custom rules");
             // Fetch custom rules from DB
-            List<CustomRule> customRules = validationService.getRunnableCustomRules();
+            List<CustomRule> customRules = rulesService.getRunnableCustomRules();
             if (customRules != null && !customRules.isEmpty()) {
                 // Add custom rules
                 List<CustomRuleDto> rules = CustomRuleParser.parseRules(customRules);

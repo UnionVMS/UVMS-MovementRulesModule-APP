@@ -28,6 +28,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
@@ -43,6 +44,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTy
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -56,6 +58,8 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent
 import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchFieldMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchValue;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
@@ -144,6 +148,45 @@ public class RulesServiceBean {
             LOG.error("[ERROR] Error when getting CustomRule by GUID ] {}", e.getMessage());
             throw new RulesServiceException(e.getMessage(), e);
         }
+    }
+    
+    public List<CustomRule> getCustomRulesByUser(String userName) {
+        return rulesDao.getCustomRulesByUser(userName);
+    }
+    
+    public List<CustomRule> getRunnableCustomRules() {
+        return rulesDao.getRunnableCustomRuleList();
+    }
+    
+    public CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) {
+        if (query == null) {
+            throw new IllegalArgumentException("Custom rule list query is null");
+        }
+        if (query.getPagination() == null) {
+            throw new IllegalArgumentException("Pagination in custom rule list query is null");
+        }
+
+        Integer page = query.getPagination().getPage();
+        Integer listSize = query.getPagination().getListSize();
+
+        List<CustomRuleSearchValue> searchKeyValues = CustomRuleSearchFieldMapper.mapSearchField(query.getCustomRuleSearchCriteria());
+
+        String sql = CustomRuleSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
+        String countSql = CustomRuleSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
+
+        Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql);
+        List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql);
+        
+        int numberOfPages = (int) (numberMatches / listSize);
+        if (numberMatches % listSize != 0) {
+            numberOfPages += 1;
+        }
+
+        CustomRuleListResponseDto customRuleListByQuery = new CustomRuleListResponseDto();
+        customRuleListByQuery.setTotalNumberOfPages(numberOfPages);
+        customRuleListByQuery.setCurrentPage(query.getPagination().getPage());
+        customRuleListByQuery.setCustomRuleList(customRuleEntityList);
+        return customRuleListByQuery;
     }
 
     public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, MovementRulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException {

@@ -110,7 +110,7 @@ public class CustomRulesRestResource {
     public ResponseDto getCustomRulesByUser(@PathParam(value = "userName") final String userName) {
         LOG.info("Get all custom rules invoked in rest layer");
         try {
-            List<CustomRule> customRulesByUser = validationService.getCustomRulesByUser(userName);
+            List<CustomRule> customRulesByUser = rulesService.getCustomRulesByUser(userName);
             return new ResponseDto(CustomRuleMapper.toCustomRuleTypeList(customRulesByUser), ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when getting all custom rules. ] {} ", ex);
@@ -134,7 +134,7 @@ public class CustomRulesRestResource {
     public ResponseDto getCustomRulesByQuery(CustomRuleQuery query) {
         LOG.info("Get custom rules by query invoked in rest layer");
         try {
-            CustomRuleListResponseDto customRulesListDto = validationService.getCustomRulesByQuery(query);
+            CustomRuleListResponseDto customRulesListDto = rulesService.getCustomRulesByQuery(query);
             GetCustomRuleListByQueryResponse response = new GetCustomRuleListByQueryResponse();
             response.setTotalNumberOfPages(customRulesListDto.getTotalNumberOfPages());
             response.setCurrentPage(customRulesListDto.getCurrentPage());

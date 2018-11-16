@@ -41,7 +41,7 @@ public class CheckRulesChangesTask implements Runnable {
 
     private void clearCustomRules()  {
         LOG.debug("Looking outdated custom rules");
-        List<CustomRule> customRules = validationService.getRunnableCustomRules();
+        List<CustomRule> customRules = rulesService.getRunnableCustomRules();
         boolean updateNeeded = false;
         for (CustomRule rule : customRules) {
             // If there are no time intervals, we do not need to check if the rule should be inactivated.
