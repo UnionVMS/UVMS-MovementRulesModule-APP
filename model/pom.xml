@@ -4,7 +4,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
         <artifactId>movement-rules</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>1.0.5-W14J8</version>
     </parent>
 
     <artifactId>movement-rules-model</artifactId>
@@ -49,7 +49,7 @@
 
     <scm>
         <connection>${scm.connection}</connection>
-        <tag>HEAD</tag>
+        <tag>movement-rules-1.0.5-W14J8</tag>
     </scm>
 
     <profiles>
