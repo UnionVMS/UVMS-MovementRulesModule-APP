@@ -188,7 +188,6 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         assertThat(tickets.size(), CoreMatchers.is(1));
     }
     
-    
     private MovementDetails getMovementDetails() {
         MovementDetails movementDetails = new MovementDetails();
         movementDetails.setMovementGuid(UUID.randomUUID().toString());

@@ -17,6 +17,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
@@ -43,7 +44,7 @@ public class RulesValidatorTest extends TransactionalTests {
      */
     
     @Test
-@OperateOnDeployment ("normal")
+        @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerFlagStateRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String flagstate = "SWE";
@@ -64,7 +65,7 @@ public class RulesValidatorTest extends TransactionalTests {
         
         long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         
-        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
         fact.setFlagState(flagstate);
         rulesValidator.evaluate(fact);
         
@@ -75,7 +76,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void evaluateMovementFactDontTriggerFlagStateRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String flagstate = "SWE";
@@ -94,7 +95,7 @@ public class RulesValidatorTest extends TransactionalTests {
         
         long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         
-        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
         fact.setFlagState("TEST");
         rulesValidator.evaluate(fact);
         
@@ -103,7 +104,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
 
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerPositionTimeRuleTest() throws Exception {
         Date positionTime = getTimestamp();
 
@@ -123,7 +124,7 @@ public class RulesValidatorTest extends TransactionalTests {
         
         long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         
-        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
         fact.setPositionTime(positionTime);
         rulesValidator.evaluate(fact);
         
@@ -134,7 +135,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerAreaRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String areaCode = "SWE";
@@ -155,7 +156,7 @@ public class RulesValidatorTest extends TransactionalTests {
         
         long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         
-        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
         fact.getAreaCodes().add(areaCode);
         rulesValidator.evaluate(fact);
         
@@ -166,7 +167,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerAreaEntryRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String areaCode = "SWE";
@@ -187,7 +188,7 @@ public class RulesValidatorTest extends TransactionalTests {
         
         long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         
-        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
         fact.getEntAreaCodes().add(areaCode);
         rulesValidator.evaluate(fact);
         
@@ -198,7 +199,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerAreaExitRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String areaCode = "SWE";
@@ -219,7 +220,7 @@ public class RulesValidatorTest extends TransactionalTests {
         
         long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         
-        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
         fact.getExtAreaCodes().add(areaCode);
         rulesValidator.evaluate(fact);
         
@@ -230,7 +231,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerMTSerialNumberRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String serialNumber = UUID.randomUUID().toString();
@@ -251,7 +252,7 @@ public class RulesValidatorTest extends TransactionalTests {
         
         long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         
-        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
         fact.setMobileTerminalSerialNumber(serialNumber);
         rulesValidator.evaluate(fact);
         
@@ -262,7 +263,7 @@ public class RulesValidatorTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerFlagStateAndAreaRuleTest() throws Exception {
         Date timestamp = getTimestamp();
         String flagstate = "SWE";
@@ -295,7 +296,7 @@ public class RulesValidatorTest extends TransactionalTests {
         
         long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         
-        MovementFact fact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
         fact.setFlagState(flagstate);
         fact.setAreaCodes(Arrays.asList(area));
         rulesValidator.evaluate(fact);

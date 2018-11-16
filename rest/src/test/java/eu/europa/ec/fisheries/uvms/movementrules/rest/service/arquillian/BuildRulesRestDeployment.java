@@ -4,9 +4,6 @@ import java.io.File;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-
-import eu.europa.ec.fisheries.uvms.movementrules.rest.RestActivator;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UnionVMSRestMock;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -15,6 +12,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UnionVMSRestMock;
 
 @ArquillianSuiteDeployment
 public abstract class BuildRulesRestDeployment {
@@ -55,18 +53,13 @@ public abstract class BuildRulesRestDeployment {
 
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "unionvms.war");
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.asset:asset-model",
-                        "eu.europa.ec.fisheries.uvms.asset:asset-client",
-                        "eu.europa.ec.fisheries.uvms.spatial:spatial-model",
-                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message")
+                .resolve("eu.europa.ec.fisheries.uvms.spatial:spatial-model")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
         testWar.addClass(UnionVMSRestMock.class);
-        testWar.addClass(AssetMTRestMock.class);
         testWar.addClass(SpatialModuleMock.class);
         
-
         return testWar;
     }
 

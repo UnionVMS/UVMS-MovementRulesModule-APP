@@ -12,16 +12,18 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import java.util.Date;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementSourceType;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
+import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
+import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ConfigServiceBean;
-import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.SpatialRestClient;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
+import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 
@@ -32,12 +34,9 @@ public class CustomRulesEvaluator {
     
     @Inject
     private RulesValidator rulesValidator;
-
-    @Inject
-    private ExchangeServiceBean exchangeService;
     
-    @Inject
-    private ConfigServiceBean configService;
+    @EJB
+    private ParameterService parameterService;
     
     @Inject
     private SpatialRestClient spatialClient;
@@ -53,9 +52,6 @@ public class CustomRulesEvaluator {
         spatialClient.populateAreasAndAreaTransitions(movementDetails);
         
         rulesValidator.evaluate(movementDetails);
-        // Tell Exchange that a movement was persisted in Movement
-        // TODO send from movement?
-//        exchangeService.sendBackToExchange(movementFact.getMovementGuid(), rawMovement, MovementRefTypeType.MOVEMENT, username);
     }
   
     private Long timeDiffAndPersistPreviousReport(String movementSource, String assetGuid, String assetFlagState, Date positionTime) {
@@ -65,8 +61,7 @@ public class CustomRulesEvaluator {
         timeDiffInSeconds = timeDiff != null ? timeDiff / 1000 : null;
 
         // We only persist our own last communications that were not from AIS.
-        // TODO check configservice
-        if (configService.isLocalFlagstate(assetFlagState) && !movementSource.equals(MovementSourceType.AIS.value())) {
+        if (isLocalFlagState(assetFlagState) && !movementSource.equals(MovementSourceType.AIS.value())) {
             persistLastCommunication(assetGuid, positionTime);
         }
 
@@ -98,5 +93,15 @@ public class CustomRulesEvaluator {
         entity.setUpdated(new Date());
         entity.setUpdatedBy("UVMS");
         rulesDao.updatePreviousReport(entity);
+    }
+    
+    private boolean isLocalFlagState(String flagState) {
+        try {
+            String localFlagState = parameterService.getStringValue(ParameterKey.LOCAL_FLAGSTATE.getKey());
+            return flagState.equalsIgnoreCase(localFlagState);
+        } catch (ConfigServiceException e) {
+            LOG.error("Could not get local flag state", e);
+            return false;
+        }
     }
 }

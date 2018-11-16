@@ -69,9 +69,6 @@ public class RulesServiceBean {
 
     @Inject
     private RulesValidator rulesValidator;
-    
-    @Inject
-    private MovementReportProcessorBean movementReportBean;
 
     @Inject
     private UserServiceBean userService;

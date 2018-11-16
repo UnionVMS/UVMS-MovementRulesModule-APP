@@ -22,23 +22,17 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.ExchangeProducerBean;
 
@@ -56,29 +50,6 @@ public class ExchangeServiceBean {
     @Resource(mappedName = "java:/" + MessageConstants.QUEUE_MOVEMENTRULES)
     private Queue responseQueue;
 
-    public void sendBackToExchange(String guid, RawMovementType rawMovement, MovementRefTypeType status, String username) throws MessageException {
-        LOG.info("Sending back processed movement ({}) to Exchange", guid);
-
-        // Map response
-        MovementRefType movementRef = new MovementRefType();
-        movementRef.setMovementRefGuid(guid);
-        movementRef.setType(status);
-        movementRef.setAckResponseMessageID(rawMovement.getAckResponseMessageID());
-
-        // Map movement
-        SetReportMovementType setReportMovementType = ExchangeMovementMapper.mapExchangeMovement(rawMovement);
-
-        try {
-            String exchangeResponseText = ExchangeMovementMapper.mapToProcessedMovementResponse(setReportMovementType, movementRef, username);
-            exchangeProducer.sendModuleMessage(exchangeResponseText, ExchangeModuleMethod.PROCESSED_MOVEMENT.value());
-
-            //this is here to make rules respond on the test responseQueue as well as to exchange, dont use unless you are running performance tests from docker.
-            //producer.sendResponseMessageForTest(exchangeResponseText, username);
-        } catch (Exception e) {
-            LOG.error("Could not send processed movement to Exchange", e);
-        }
-    }
-    
     public List<ServiceResponseType> getPluginList(PluginType pluginType) throws ExchangeModelMapperException, MessageException {
         ArrayList<PluginType> types = new ArrayList<>();
         types.add(pluginType);
@@ -89,17 +60,9 @@ public class ExchangeServiceBean {
         return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromModuleResponse(serviceListResponse, serviceListRequestId);
     }
     
-    public void sendReportToPlugin(ServiceResponseType service, PluginType pluginType, String ruleName, String endpoint, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementFact fact) throws ExchangeModelMapperException, MessageException {
-        String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin(service.getServiceClassName(), pluginType, new Date(), ruleName, endpoint, exchangeMovement, recipientInfoList, fact.getAssetName(), fact.getIrcs(), fact.getMmsiNo(), fact.getExternalMarking(), fact.getFlagState());
-        String messageId = exchangeProducer.sendModuleMessage(exchangeRequest, responseQueue, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
-        consumer.getMessage(messageId, TextMessage.class);
-    }
-    
-    // TODO remove ack in exchange
     public void sendReportToPlugin(PluginType pluginType, String ruleName, String endpoint, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws ExchangeModelMapperException, MessageException {
         String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin("", pluginType, new Date(), ruleName, endpoint, exchangeMovement, recipientInfoList, movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getMmsi(), movementDetails.getExternalMarking(), movementDetails.getFlagState());
         exchangeProducer.sendModuleMessage(exchangeRequest, responseQueue, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
-//        consumer.getMessage(messageId, TextMessage.class);
     }
     
     public void sendEmail(ServiceResponseType service, EmailType email, String ruleName) throws ExchangeModelMapperException, MessageException {

@@ -51,18 +51,18 @@ public class UserModuleMock implements MessageListener {
                     ContactDetails contactDetails = new ContactDetails();
                     contactDetails.setOrganisationName("Test Organisation");
                     String response = UserModuleResponseMapper.mapToGetContactDetailsResponse(contactDetails);
-                    messageProducer.sendModuleResponseMessage((TextMessage) message, response);
+                    messageProducer.sendResponseMessageToSender((TextMessage) message, response);
                     break;
                 case GET_USER_CONTEXT:
                     UserContext userContext = new UserContext();
                     userContext.setContextSet(new ContextSet());
                     String contextResponse =  UserModuleResponseMapper.mapToGetUserContextResponse(userContext);
-                    messageProducer.sendModuleResponseMessage((TextMessage) message, contextResponse);
+                    messageProducer.sendResponseMessageToSender((TextMessage) message, contextResponse);
                     break;
                 case FIND_ORGANISATIONS:
                     List<Organisation> organizations = new ArrayList<>();
                     String organisationResponse = UserModuleResponseMapper.mapToFindOrganisationsResponse(organizations);
-                    messageProducer.sendModuleResponseMessage((TextMessage) message, organisationResponse);
+                    messageProducer.sendResponseMessageToSender((TextMessage) message, organisationResponse);
                     break;
                 default:
                     break;

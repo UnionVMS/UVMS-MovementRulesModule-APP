@@ -79,24 +79,6 @@ public class RulesValidator {
                 customKcontainer = null;
             }
     }
-
-
-
-    @Lock(LockType.READ)
-    public void evaluate(MovementFact fact) {
-        if (customKcontainer != null) {
-            LOG.info("Verify user defined rules");
-
-            KieSession ksession = customKcontainer.newKieSession();
-
-            // Inject beans
-            ksession.setGlobal("validationService", validationService);
-            ksession.setGlobal("logger", LOG);
-
-            ksession.insert(fact);
-            ksession.fireAllRules();
-        }
-    }
     
     @Lock(LockType.READ)
     public void evaluate(MovementDetails fact) {

@@ -13,7 +13,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.config;
 
 public enum ParameterKey {
 
-    ASSET_NOT_SENDING_THRESHOLD("ASSET_NOT_SENDING_THRESHOLD");
+    ASSET_NOT_SENDING_THRESHOLD("ASSET_NOT_SENDING_THRESHOLD"),
+    LOCAL_FLAGSTATE("flux_local_nation_code");
 
     private final String key;
 

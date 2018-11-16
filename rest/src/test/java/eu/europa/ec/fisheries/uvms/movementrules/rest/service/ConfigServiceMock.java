@@ -38,11 +38,11 @@ public class ConfigServiceMock implements MessageListener {
     public void onMessage(Message message) {
         try {
             SettingType mockSetting = new SettingType();
-            mockSetting.setKey("Key");
-            mockSetting.setValue("Value");
+            mockSetting.setKey("flux_local_nation_code");
+            mockSetting.setValue("SWE");
             mockSetting.setDescription("From ConfigServiceMock.java");
             String response = ModuleResponseMapper.toPullSettingsResponse(Arrays.asList(mockSetting), PullSettingsStatus.OK);
-            messageProducer.sendModuleResponseMessage((TextMessage) message, response);
+            messageProducer.sendResponseMessageToSender((TextMessage) message, response);
         } catch (ModelMarshallException e) {
 
         } catch (MessageException e){

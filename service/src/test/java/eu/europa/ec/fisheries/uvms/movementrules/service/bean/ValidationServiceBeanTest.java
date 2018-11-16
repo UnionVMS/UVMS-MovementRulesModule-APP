@@ -16,9 +16,9 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCrite
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
@@ -184,7 +184,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
 
-        MovementFact movementFact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
         validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid(), movementFact, "EMAIL,test@test.com");
 
         CustomRule updatedCustomRule = rulesService.getCustomRuleByGuid(createdCustomRule.getGuid());
@@ -203,7 +203,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
 
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
 
-        MovementFact movementFact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
         validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid(), movementFact, "EMAIL,test@test.com");
 
         long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
@@ -218,7 +218,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
 
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
 
-        MovementFact movementFact = RulesTestHelper.createBasicMovementFact();
+        MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
         validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid(), movementFact, "SEND_TO_NAF,SWE");
 
         long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
