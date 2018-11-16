@@ -13,11 +13,10 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import java.util.Date;
 import java.util.List;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.bean.ValidationServiceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 
@@ -27,9 +26,9 @@ public class CheckRulesChangesTask implements Runnable {
 
     ValidationServiceBean validationService;
     RulesValidator rulesValidator;
-    RulesService rulesService;
+    RulesServiceBean rulesService;
 
-    public CheckRulesChangesTask(ValidationServiceBean validationService, RulesValidator rulesValidator, RulesService rulesService) {
+    public CheckRulesChangesTask(ValidationServiceBean validationService, RulesValidator rulesValidator, RulesServiceBean rulesService) {
         this.validationService = validationService;
         this.rulesValidator = rulesValidator;
         this.rulesService = rulesService;
@@ -38,7 +37,6 @@ public class CheckRulesChangesTask implements Runnable {
     @Override
     public void run() {
         clearCustomRules();
-        LOG.debug("Checking for changes in sanity rules");
     }
 
     private void clearCustomRules()  {

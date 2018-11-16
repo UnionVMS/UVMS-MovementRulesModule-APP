@@ -1,36 +1,57 @@
-package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
+package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.*;
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import javax.ejb.EJBTransactionRolledbackException;
+import javax.inject.Inject;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.inject.Inject;
-import java.nio.file.AccessDeniedException;
-import java.util.*;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.*;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleActionType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleSegmentType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 @RunWith(Arquillian.class)
 public class RulesServiceBeanTest extends TransactionalTests {
 
     @Inject
-    private RulesService rulesService;
+    private RulesServiceBean rulesService;
 
     @Inject
     private RulesDao rulesDao;

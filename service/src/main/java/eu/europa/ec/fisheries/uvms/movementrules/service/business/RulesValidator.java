@@ -21,8 +21,6 @@ import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.bean.ValidationServiceBean;
 import org.drools.template.parser.DefaultTemplateContainer;
 import org.drools.template.parser.TemplateContainer;
 import org.drools.template.parser.TemplateDataListener;
@@ -33,6 +31,7 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleParser;
 

@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
+package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
@@ -20,8 +20,6 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.MovementReportProcessorBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
@@ -30,20 +28,14 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
@@ -51,7 +43,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTy
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -72,7 +63,7 @@ import eu.europa.ec.fisheries.wsdl.user.types.Feature;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
 
 @Stateless
-public class RulesServiceBean implements RulesService {
+public class RulesServiceBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(RulesServiceBean.class);
 
@@ -111,14 +102,6 @@ public class RulesServiceBean implements RulesService {
     @TicketCountEvent
     private Event<NotificationMessage> ticketCountEvent;
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param customRule
-     * @throws RulesServiceException
-     * @throws MovementRulesFaultException
-     */
-    @Override
     public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, MovementRulesModelMarshallException, ModelMarshallException, MessageException {
         // Get organisation of user
         String organisationName = userService.getOrganisationName(customRule.getUpdatedBy());
@@ -157,14 +140,6 @@ public class RulesServiceBean implements RulesService {
 
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param guid
-     * @return
-     * @throws RulesServiceException
-     */
-    @Override
     public CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException {
         try {
             return rulesDao.getCustomRuleByGuid(guid);
@@ -174,17 +149,6 @@ public class RulesServiceBean implements RulesService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param oldCustomRule
-     * @throws MessageException 
-     * @throws MovementRulesModelMarshallException 
-     * @throws ModelMarshallException 
-     * @throws AccessDeniedException 
-     * @throws RulesServiceException
-     */
-    @Override
     public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, MovementRulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException {
         // Get organisation of user
         String organisationName = userService.getOrganisationName(oldCustomRule.getUpdatedBy());
@@ -243,13 +207,7 @@ public class RulesServiceBean implements RulesService {
         newEntity = rulesDao.createCustomRule(newEntity);
         return newEntity;
     }
-    /**
-     * {@inheritDoc}
-     *
-     * @param oldCustomRule
-     * @throws RulesServiceException
-     */
-    @Override
+
     public CustomRule updateCustomRule(CustomRule oldCustomRule) {
         CustomRule updatedCustomRule = internalUpdateCustomRule(oldCustomRule);
         auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid(), null, oldCustomRule.getUpdatedBy());
@@ -257,12 +215,6 @@ public class RulesServiceBean implements RulesService {
 
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param updateSubscriptionType
-     */
-    @Override
     public CustomRule updateSubscription(UpdateSubscriptionType updateSubscriptionType, String username) {
         if (updateSubscriptionType == null) {
             throw new IllegalArgumentException("Subscription is null");
@@ -307,13 +259,6 @@ public class RulesServiceBean implements RulesService {
         return customRuleEntity;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param guid
-     * @throws RulesServiceException
-     */
-    @Override
     public CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, MovementRulesModelMapperException {
         LOG.info("[INFO] Deleting custom rule by guid: {}.", guid);
         if (guid == null) {
@@ -339,8 +284,6 @@ public class RulesServiceBean implements RulesService {
 
     }
 
-
-    @Override
     public TicketListResponseDto getTicketList(String loggedInUser, TicketQuery query) {
         if (query == null) {
             throw new IllegalArgumentException("Ticket list query is null");
@@ -370,7 +313,6 @@ public class RulesServiceBean implements RulesService {
         return ticketListDto;
     }
 
-    @Override
     public List<Ticket> getTicketsByMovements(List<String> movements) {
         if (movements == null) {
             throw new IllegalArgumentException("Movements list is null");
@@ -382,7 +324,6 @@ public class RulesServiceBean implements RulesService {
         return rulesDao.getTicketsByMovements(movements);
     }
 
-    @Override
     public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovements(List<String> movementGuidList) {
         List<TicketAndRuleType> ticketsAndRules = new ArrayList<>();
         // TODO: This can be done more efficiently with some join stuff
@@ -402,7 +343,6 @@ public class RulesServiceBean implements RulesService {
         return response;
     }
 
-    @Override
     public long countTicketsByMovements(List<String> movements) {
         if (movements == null) {
             throw new IllegalArgumentException("Movements list is null");
@@ -414,7 +354,6 @@ public class RulesServiceBean implements RulesService {
         return rulesDao.countTicketListByMovements(movements);
     }
 
-    @Override
     public Ticket updateTicketStatus(Ticket ticket) {
         if (ticket == null || ticket.getGuid() == null) {
             throw new IllegalArgumentException("Ticket is null");
@@ -436,7 +375,6 @@ public class RulesServiceBean implements RulesService {
 
     }
 
-    @Override
     public List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) {
         if (loggedInUser == null) {
             throw new IllegalArgumentException("LoggedInUser is null, can not update status");
@@ -469,20 +407,17 @@ public class RulesServiceBean implements RulesService {
 
     }
 
-    @Override
     public long getNumberOfAssetsNotSending() {
         return rulesDao.getNumberOfTicketsWithAssetNotSending(ServiceConstants.ASSET_NOT_SENDING_RULE);
     }
 
 
     // Triggered by RulesTimerBean
-    @Override
     public List<PreviousReport> getPreviousMovementReports() {
         return rulesDao.getPreviousReportList();
     }
 
     // Triggered by timer rule
-    @Override
     public void timerRuleTriggered(String ruleName, PreviousReport previousReport) {
         LOG.info("Timer rule triggered for asset: {}", previousReport.getAssetGuid());
         // Check if ticket already is created for this asset
@@ -516,7 +451,6 @@ public class RulesServiceBean implements RulesService {
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
     }
 
-    @Override
     public Ticket updateTicketCount(Ticket ticket) {
         if (ticket == null || ticket.getGuid() == null) {
             throw new IllegalArgumentException("Ticket is null, can not upate status");
@@ -532,12 +466,9 @@ public class RulesServiceBean implements RulesService {
     }
 
 
-    @Override
     public Ticket getTicketByGuid(String guid){
         return rulesDao.getTicketByGuid(guid);
     }
-
-
 
     private boolean hasFeature(UserContext userContext, String featureName) {
         for (eu.europa.ec.fisheries.wsdl.user.types.Context c : userContext.getContextSet().getContexts()) {

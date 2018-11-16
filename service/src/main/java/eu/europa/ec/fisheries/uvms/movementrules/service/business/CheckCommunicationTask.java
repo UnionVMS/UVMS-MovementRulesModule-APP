@@ -16,7 +16,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -26,10 +26,10 @@ public class CheckCommunicationTask implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckCommunicationTask.class);
 
-    private RulesService rulesService;
+    private RulesServiceBean rulesService;
     private ParameterService parameterService;
 
-    CheckCommunicationTask(RulesService rulesService, ParameterService parameterService) {
+    CheckCommunicationTask(RulesServiceBean rulesService, ParameterService parameterService) {
         this.rulesService = rulesService;
         this.parameterService = parameterService;
     }

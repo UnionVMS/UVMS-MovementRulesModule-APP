@@ -21,12 +21,11 @@ import javax.ejb.DependsOn;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.bean.ValidationServiceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
 
 @Startup
 @Singleton
@@ -36,7 +35,7 @@ public class RulesTimerBean {
     private static final Logger LOG = LoggerFactory.getLogger(RulesTimerBean.class);
 
     @EJB
-    private RulesService rulesService;
+    private RulesServiceBean rulesService;
 
     @EJB
     private ValidationServiceBean validationService;

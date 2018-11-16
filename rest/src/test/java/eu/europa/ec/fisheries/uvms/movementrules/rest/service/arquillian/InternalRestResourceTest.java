@@ -27,7 +27,7 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesB
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
@@ -40,7 +40,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper
 public class InternalRestResourceTest extends BuildRulesRestDeployment {
 
     @Inject
-    private RulesService rulesService;
+    private RulesServiceBean rulesService;
     
     @Inject
     private RulesDao rulesDao;

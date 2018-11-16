@@ -1,20 +1,19 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.bean.ValidationServiceBean;
+import java.util.Date;
+import javax.inject.Inject;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import javax.inject.Inject;
-import java.util.Date;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 
 
 @RunWith(Arquillian.class)
@@ -30,7 +29,7 @@ public class CheckRulesChangesTaskTest extends TransactionalTests {
     RulesValidator rulesValidator;
 
     @Inject
-    RulesService rulesService;
+    RulesServiceBean rulesService;
 
 
     @Test

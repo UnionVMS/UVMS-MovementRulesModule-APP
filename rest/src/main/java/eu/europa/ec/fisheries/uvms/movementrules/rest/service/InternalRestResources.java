@@ -12,14 +12,14 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesB
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesEventServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 
 @Path("/internal")
 @Stateless
 public class InternalRestResources {
 
     @Inject
-    RulesEventServiceBean rulesEventServiceBean;
+    RulesServiceBean rulesService;
     
     @Inject
     private CustomRulesEvaluator customRuleEvaluator;
@@ -30,7 +30,7 @@ public class InternalRestResources {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/tickets-and-rules-by-movement")
     public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovementsEvent(GetTicketsAndRulesByMovementsRequest request) throws Exception {
-        return rulesEventServiceBean.getTicketsAndRulesByMovementsEvent(request);
+        return rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());
     }
     
     

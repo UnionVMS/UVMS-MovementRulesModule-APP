@@ -28,9 +28,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.bean.ValidationServiceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleIntervalType;
@@ -43,7 +40,9 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
@@ -58,7 +57,7 @@ public class CustomRulesRestResource {
 
     private static String UNION_VMS_APPLICATION = "Union-VMS";
     @EJB
-    RulesService rulesService;
+    RulesServiceBean rulesService;
     @EJB
     ValidationServiceBean validationService;
     @Context

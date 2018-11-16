@@ -1,15 +1,10 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
-
+import static org.junit.Assert.assertThat;
 import java.util.Date;
 import java.util.List;
-import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.MovementReportProcessorBean;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -26,9 +21,11 @@ import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementPoint;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.MovementReportProcessorBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 
 @RunWith(Arquillian.class)
 public class MovementReportProcessorBeanTest extends TransactionalTests {
@@ -37,7 +34,7 @@ public class MovementReportProcessorBeanTest extends TransactionalTests {
     MovementReportProcessorBean movementReport;
 
     @Inject
-    RulesService rulesService;
+    RulesServiceBean rulesService;
 
     @Test(expected = RulesServiceException.class)
     @OperateOnDeployment("normal")

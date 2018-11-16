@@ -11,10 +11,6 @@
 	
 	<assembly-descriptor>
 		<interceptor-binding>
-			<ejb-name>RulesEventServiceBean</ejb-name>
-			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
-		</interceptor-binding>
-		<interceptor-binding>
 			<ejb-name>RulesServiceBean</ejb-name>
 			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
 		</interceptor-binding>
@@ -28,6 +24,10 @@
 		</interceptor-binding>
 		<interceptor-binding>
 			<ejb-name>RulesValidator</ejb-name>
+			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
+		</interceptor-binding>
+		<interceptor-binding>
+			<ejb-name>CustomRulesEvaluator</ejb-name>
 			<interceptor-class>net.bull.javamelody.MonitoringInterceptor</interceptor-class>
 		</interceptor-binding>
 	</assembly-descriptor>

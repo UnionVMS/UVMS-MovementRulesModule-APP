@@ -1,15 +1,13 @@
-package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
+package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -18,11 +16,9 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCrite
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
@@ -34,7 +30,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
     ValidationServiceBean validationService;
 
     @Inject
-    RulesService rulesService;
+    RulesServiceBean rulesService;
 
     @Test
     @OperateOnDeployment("normal")

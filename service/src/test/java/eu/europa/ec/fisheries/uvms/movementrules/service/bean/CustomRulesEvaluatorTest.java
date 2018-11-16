@@ -13,9 +13,7 @@ import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
@@ -31,7 +29,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
     private CustomRulesEvaluator customRulesEvaluator;
     
     @Inject
-    private RulesService rulesService;
+    private RulesServiceBean rulesService;
     
     @Inject
     private RulesValidator rulesValidator;

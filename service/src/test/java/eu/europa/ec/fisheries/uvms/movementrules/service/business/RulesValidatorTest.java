@@ -7,27 +7,20 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.bean.ValidationServiceBean;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dto.AlarmListResponseDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 
@@ -41,7 +34,7 @@ public class RulesValidatorTest extends TransactionalTests {
     ValidationServiceBean validationService;
     
     @Inject
-    RulesService rulesService;
+    RulesServiceBean rulesService;
 
 
 
