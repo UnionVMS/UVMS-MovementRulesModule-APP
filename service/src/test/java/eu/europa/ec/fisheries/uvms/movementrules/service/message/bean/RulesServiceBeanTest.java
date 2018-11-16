@@ -701,13 +701,4 @@ public class RulesServiceBeanTest extends TransactionalTests {
         ticket.setUpdatedBy("Test user");
         return ticket;
     }
-    
-    private RawMovement getBasicRawMovement() {
-        RawMovement rawMovement = new RawMovement();
-        rawMovement.setActive(true);
-        rawMovement.setUpdated(new Date());
-        rawMovement.setUpdatedBy("Test");
-        return rawMovement;
-    }
-    
 }
