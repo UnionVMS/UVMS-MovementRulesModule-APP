@@ -28,7 +28,6 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
@@ -41,7 +40,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBea
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
@@ -49,10 +47,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountE
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.wsdl.user.module.FindOrganisationsResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
@@ -92,55 +87,6 @@ public class ValidationServiceBean  {
     @TicketCountEvent
     private Event<NotificationMessage> ticketCountEvent;
 
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     * @throws RulesServiceException
-     */
-    public List<CustomRule> getRunnableCustomRules() {
-        return rulesDao.getRunnableCustomRuleList();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     * @throws RulesServiceException
-     */
-
-    public CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) {
-        if (query == null) {
-            throw new IllegalArgumentException("Custom rule list query is null");
-        }
-        if (query.getPagination() == null) {
-            throw new IllegalArgumentException("Pagination in custom rule list query is null");
-        }
-
-        Integer page = query.getPagination().getPage();
-        Integer listSize = query.getPagination().getListSize();
-
-        List<CustomRuleSearchValue> searchKeyValues = CustomRuleSearchFieldMapper.mapSearchField(query.getCustomRuleSearchCriteria());
-
-        String sql = CustomRuleSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
-        String countSql = CustomRuleSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
-
-        Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql);
-        List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql);
-        
-        int numberOfPages = (int) (numberMatches / listSize);
-        if (numberMatches % listSize != 0) {
-            numberOfPages += 1;
-        }
-
-        CustomRuleListResponseDto customRuleListByQuery = new CustomRuleListResponseDto();
-        customRuleListByQuery.setTotalNumberOfPages(numberOfPages);
-        customRuleListByQuery.setCurrentPage(query.getPagination().getPage());
-        customRuleListByQuery.setCustomRuleList(customRuleEntityList);
-        return customRuleListByQuery;
-    }
-    
     // Triggered by rule engine
     public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails movementDetails, String actions) {
         LOG.info("Performing actions on triggered user rules, rule: {}", ruleName);
