@@ -9,7 +9,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
     <artifactId>movement-rules</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -26,7 +26,7 @@
         <usm4uvms.version>4.0.10</usm4uvms.version>
         <uvms.config.version>4.0.0</uvms.config.version>
         <uvms.common.version>3.0.29</uvms.common.version>
-
+        <javaee.version>8.0</javaee.version>
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
-            <version>8.0</version>
+            <version>${javaee.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -165,7 +165,6 @@
                     <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/mare-snapshots/</url>
                 </snapshotRepository>
             </distributionManagement>
-
             <properties>
                 <scm.connection>
                     scm:git:https://emserveje@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/UVMS-MovementRulesModule.git
