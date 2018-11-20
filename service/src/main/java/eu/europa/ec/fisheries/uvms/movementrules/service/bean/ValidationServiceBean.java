@@ -43,8 +43,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
@@ -74,14 +72,6 @@ public class ValidationServiceBean  {
     @Inject
     @TicketEvent
     private Event<NotificationMessage> ticketEvent;
-
-    @Inject
-    @AlarmReportEvent
-    private Event<NotificationMessage> alarmReportEvent;
-
-    @Inject
-    @AlarmReportCountEvent
-    private Event<NotificationMessage> alarmReportCountEvent;
 
     @Inject
     @TicketCountEvent

@@ -50,8 +50,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
@@ -82,10 +80,6 @@ public class RulesServiceBean {
 
     @Inject
     private AuditServiceBean auditService;
-    
-    @Inject
-    @AlarmReportEvent
-    private Event<NotificationMessage> alarmReportEvent;
 
     @Inject
     @TicketEvent
@@ -94,10 +88,6 @@ public class RulesServiceBean {
     @Inject
     @TicketUpdateEvent
     private Event<NotificationMessage> ticketUpdateEvent;
-
-    @Inject
-    @AlarmReportCountEvent
-    private Event<NotificationMessage> alarmReportCountEvent;
 
     @Inject
     @TicketCountEvent
