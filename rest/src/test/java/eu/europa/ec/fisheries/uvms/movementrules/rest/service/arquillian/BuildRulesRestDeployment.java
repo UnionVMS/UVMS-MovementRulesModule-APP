@@ -1,7 +1,6 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
 import java.io.File;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
@@ -10,8 +9,6 @@ import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UnionVMSRestMock;
 
 @ArquillianSuiteDeployment
@@ -39,12 +36,7 @@ public abstract class BuildRulesRestDeployment {
     }
 
     protected WebTarget getWebTarget() {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        Client client = ClientBuilder.newClient();
-        client.register(new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS));
-        //return client.target("http://localhost:28080/test/rest");
-        return client.target("http://localhost:8080/test/rest");
+        return ClientBuilder.newClient().target("http://localhost:8080/test/rest");
     }
 
 
@@ -59,9 +51,8 @@ public abstract class BuildRulesRestDeployment {
 
         testWar.addClass(UnionVMSRestMock.class);
         testWar.addClass(SpatialModuleMock.class);
+        testWar.addClass(AreaTransitionsDTO.class);
         
         return testWar;
     }
-
-
 }

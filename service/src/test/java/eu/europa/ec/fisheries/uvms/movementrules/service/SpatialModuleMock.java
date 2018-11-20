@@ -14,10 +14,13 @@ package eu.europa.ec.fisheries.uvms.movementrules.service;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Area;
@@ -28,7 +31,6 @@ import eu.europa.ec.fisheries.uvms.spatial.model.schemas.ClosestAreasType;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.ClosestLocationsType;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Location;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.LocationType;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRQ;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRS;
 
 /*
@@ -47,21 +49,44 @@ import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRS;
 @Path("spatial/spatialnonsecure/json")
 @Stateless
 public class SpatialModuleMock {
-
-    @POST
-    @Path("getEnrichment")
+    
+    private Jsonb jsonb = JsonbBuilder.create();
+    
+    @GET
+    @Path("getEnrichmentAndTransitions")
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
-    public Response getEnrichment(SpatialEnrichmentRQ spatialEnrichmentRQ) {
+    public Response getEnrichmentAndTransitions(@QueryParam(value = "firstLongitude") Double firstLongitude, @QueryParam(value = "firstLatitude") Double firstLatitude, @QueryParam(value = "secondLongitude") Double secondLongitude, @QueryParam(value = "secondLatitude") Double secondLatitude) {
+        
+        
+        AreaTransitionsDTO response = new AreaTransitionsDTO();
+        
         SpatialEnrichmentRS spatialEnrichmentRS = new SpatialEnrichmentRS();
-
         populateClosestAreas(spatialEnrichmentRS);
         populateClosestLocations(spatialEnrichmentRS);
-        populateAreas(spatialEnrichmentRS, spatialEnrichmentRQ.getPoint().getLatitude(), spatialEnrichmentRQ.getPoint().getLongitude());
+        AreasByLocationType currentAreas = getAreas(secondLatitude, secondLongitude);
+        spatialEnrichmentRS.setAreasByLocation(currentAreas);
+        response.setSpatialEnrichmentRS(spatialEnrichmentRS);
 
-        return Response.ok(spatialEnrichmentRS).build();
+        response.setEnteredAreas(new ArrayList<>());
+        response.setExitedAreas(new ArrayList<>());
+
+        ArrayList<AreaExtendedIdentifierType> enteredAreas = new ArrayList<>(currentAreas.getAreas());
+        
+        if (firstLatitude != null && firstLongitude != null) {
+            AreasByLocationType previousAreas = getAreas(firstLatitude, firstLongitude);
+            ArrayList<AreaExtendedIdentifierType> exitedAreas = new ArrayList<>(previousAreas.getAreas());
+            exitedAreas.removeAll(currentAreas.getAreas());
+            response.setExitedAreas(exitedAreas);
+            
+            enteredAreas.removeAll(previousAreas.getAreas());
+        }
+        
+        response.setEnteredAreas(enteredAreas);
+        
+        return Response.ok(jsonb.toJson(response)).build();
     }
-    
+
     private void populateClosestAreas(SpatialEnrichmentRS spatialEnrichmentRS) {
         List<Area> closestAreas = new ArrayList<>();
         Area area = new Area();
@@ -88,7 +113,7 @@ public class SpatialModuleMock {
         spatialEnrichmentRS.setClosestLocations(closestLocationsType);
     }
     
-    private void populateAreas(SpatialEnrichmentRS spatialEnrichmentRS, Double latitude, Double longitude) {
+    private AreasByLocationType getAreas(Double latitude, Double longitude) {
         AreasByLocationType areasByLocationType = new AreasByLocationType();
         List<AreaExtendedIdentifierType> areas = new ArrayList<>();
         AreaExtendedIdentifierType area1 = new AreaExtendedIdentifierType();
@@ -105,7 +130,7 @@ public class SpatialModuleMock {
         area2.setName("Europe");
         areas.add(area2);
         areasByLocationType.setAreas(areas);
-        spatialEnrichmentRS.setAreasByLocation(areasByLocationType);
+        return areasByLocationType;
     }
     
     private String getTestAreaSuffix(Double latitude, Double longitude) {

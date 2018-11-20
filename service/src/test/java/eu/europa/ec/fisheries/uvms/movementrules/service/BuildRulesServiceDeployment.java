@@ -47,6 +47,7 @@ public abstract class BuildRulesServiceDeployment {
 
         testWar.addClass(UnionVMSRestMock.class);
         testWar.addClass(SpatialModuleMock.class);
+        testWar.addClass(AreaTransitionsDTO.class);
 
         return testWar;
     }
