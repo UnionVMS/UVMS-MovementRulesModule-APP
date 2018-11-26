@@ -43,8 +43,12 @@ public class SpatialRestClient {
     public void populateAreasAndAreaTransitions(MovementDetails movementDetails) {
         AreaTransitionsDTO enrichmentCurrentPosition = getEnrichmentAndTransitions(movementDetails.getLatitude(), movementDetails.getLongitude(), 
                                                                             movementDetails.getPreviousLatitude(), movementDetails.getPreviousLongitude());
-        enrichWithCountryData(enrichmentCurrentPosition.getSpatialEnrichmentRS().getClosestAreas().getClosestAreas(), AreaType.COUNTRY, movementDetails);
-        enrichWithPortData(enrichmentCurrentPosition.getSpatialEnrichmentRS().getClosestLocations().getClosestLocations(), LocationType.PORT, movementDetails);
+        if (enrichmentCurrentPosition.getSpatialEnrichmentRS().getClosestAreas() != null) {
+            enrichWithCountryData(enrichmentCurrentPosition.getSpatialEnrichmentRS().getClosestAreas().getClosestAreas(), AreaType.COUNTRY, movementDetails);
+        }
+        if (enrichmentCurrentPosition.getSpatialEnrichmentRS().getClosestLocations() != null) {
+            enrichWithPortData(enrichmentCurrentPosition.getSpatialEnrichmentRS().getClosestLocations().getClosestLocations(), LocationType.PORT, movementDetails);
+        }
         mapAreasAndAreaTransitions(enrichmentCurrentPosition, movementDetails);
     }
 
