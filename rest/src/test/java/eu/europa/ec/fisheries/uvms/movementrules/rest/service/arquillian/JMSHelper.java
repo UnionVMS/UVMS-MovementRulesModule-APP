@@ -51,7 +51,7 @@ public class JMSHelper {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             consumer = session.createConsumer(exchangeQueue);
 
-            while (consumer.receive(10L) != null);
+            while (consumer.receive(1000L) != null);
         } finally {
             connection.close();
         }
