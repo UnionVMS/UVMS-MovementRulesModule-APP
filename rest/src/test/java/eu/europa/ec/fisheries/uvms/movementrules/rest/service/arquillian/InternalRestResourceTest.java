@@ -1,36 +1,52 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsRequest;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import javax.inject.Inject;
+import javax.jms.TextMessage;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import javax.inject.Inject;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsRequest;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 
 @RunWith(Arquillian.class)
 public class InternalRestResourceTest extends BuildRulesRestDeployment {
 
     @Inject
+    private RulesServiceBean rulesService;
+    
+    @Inject
     private RulesDao rulesDao;
+    
+    @Inject
+    private JMSHelper jmsHelper;
 
     @Test
     @OperateOnDeployment("normal")
@@ -82,5 +98,67 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
 
         rulesDao.removeTicketAfterTests(ticket);
         rulesDao.removeCustomRuleAfterTests(customRule);
+    }
+    
+    @Test
+    @OperateOnDeployment("normal")
+    public void evaluateAndTriggerRuleSendToPlugin() throws Exception {
+        jmsHelper.clearExchangeQueue();
+        
+        String flagState = "SWE";
+        MovementDetails movementDetails = getMovementDetails();
+        movementDetails.setFlagState(flagState);
+        
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        List<RuleSegment> segments = new ArrayList<>();
+        RuleSegment segment = new RuleSegment();
+        segment.setCriteria("ASSET");
+        segment.setSubCriteria("FLAG_STATE");
+        segment.setCondition("EQ");
+        segment.setValue(flagState);
+        segment.setLogicOperator("NONE");
+        segment.setCustomRule(customRule);
+        segments.add(segment);
+        customRule.setRuleSegmentList(segments);
+        List<RuleAction> actions = new ArrayList<>();
+        RuleAction action = new RuleAction();
+        action.setCustomRule(customRule);
+        action.setAction("SEND_TO_FLUX");
+        action.setValue("DNK");
+        action.setOrder(1);
+        actions.add(action);
+        customRule.setRuleActionList(actions);
+        rulesService.createCustomRule(customRule, "", "");
+        
+        Response response = getWebTarget()
+                .path("internal")
+                .path("evaluate")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(movementDetails));
+        assertThat(response.getStatus(), CoreMatchers.is(Status.OK.getStatusCode()));
+        
+        TextMessage message = (TextMessage) jmsHelper.getMessageFromExchangeQueue();
+        
+        assertThat(message, CoreMatchers.is(CoreMatchers.notNullValue()));
+        
+        SendMovementToPluginRequest sendMovementRequest = JAXBMarshaller.unmarshallTextMessage(message, SendMovementToPluginRequest.class);
+        assertThat(sendMovementRequest, CoreMatchers.is(CoreMatchers.notNullValue()));
+        
+        assertThat(sendMovementRequest.getReport().getMovement().getConnectId(), CoreMatchers.is(movementDetails.getConnectId()));
+        
+        rulesDao.removeCustomRuleAfterTests(customRule);
+    }
+    
+    private MovementDetails getMovementDetails() {
+        MovementDetails movementDetails = new MovementDetails();
+        movementDetails.setMovementGuid(UUID.randomUUID().toString());
+        movementDetails.setConnectId(UUID.randomUUID().toString());
+        movementDetails.setLatitude(11d);
+        movementDetails.setLongitude(56d);
+        movementDetails.setPositionTime(new Date());
+        movementDetails.setSource("INMARSAT_C");
+        movementDetails.setAssetGuid(UUID.randomUUID().toString());
+        movementDetails.setFlagState("SWE");
+        return movementDetails;
     }
 }

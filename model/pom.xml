@@ -17,15 +17,6 @@
         <binding.xml>binding-date.xml</binding.xml>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>${javaee.version}</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
-
     <repositories>
         <repository>
             <id>focus-repo</id>

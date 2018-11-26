@@ -19,11 +19,9 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.SanityRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 @Stateless
@@ -87,10 +85,6 @@ public class RulesDao {
         return query.getResultList();
     }
 
-    public long getNumberOfOpenAlarms() {
-        TypedQuery<Long> query = em.createNamedQuery(AlarmReport.COUNT_OPEN_ALARMS, Long.class);
-        return query.getSingleResult();
-    }
 
     public long getNumberOfOpenTickets(List<String> validRuleGuids){
         try {
@@ -102,16 +96,6 @@ public class RulesDao {
         }
     }
 
-    public AlarmReport getAlarmReportByGuid(String guid) {
-        try {
-            TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_ALARM_BY_GUID, AlarmReport.class);
-            query.setParameter("guid", guid);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            //throw new NoEntityFoundException("[ No custom rule with guid: " + guid + " can be found ]", e);
-            throw new NoResultException("[ No custom rule with guid: " + guid + " can be found ]");  //Trying to remove NoEntityFoundException but I still want the error message, so maybe do it this way?
-        }
-    }
 
     public CustomRule updateCustomRule(CustomRule entity) {
         return em.merge(entity);
@@ -130,19 +114,12 @@ public class RulesDao {
         return em.merge(entity);
     }
 
-    public AlarmReport updateAlarm(AlarmReport entity){
-        return em.merge(entity);
-    }
 
     public List<CustomRule> getRunnableCustomRuleList() {
         TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.GET_RUNNABLE_CUSTOM_RULES, CustomRule.class);
         return query.getResultList();
     }
 
-    public List<SanityRule> getSanityRules() {
-        TypedQuery<SanityRule> query = em.createNamedQuery(SanityRule.FIND_ALL_SANITY_RULES, SanityRule.class);
-        return query.getResultList();
-    }
 
     public List<CustomRule> getCustomRulesByUser(String updatedBy) {
         TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.LIST_CUSTOM_RULES_BY_USER, CustomRule.class);
@@ -150,29 +127,13 @@ public class RulesDao {
         return query.getResultList();
     }
 
-    public AlarmReport createAlarmReport(AlarmReport alarmReport) {
-        em.persist(alarmReport);
-        return alarmReport;
-    }
 
-    public void removeAlarmReportAfterTests(AlarmReport alarmReport) {
-        em.remove(em.contains(alarmReport) ? alarmReport : em.merge(alarmReport));
-    }
 
     public Ticket createTicket(Ticket ticket) {
         em.persist(ticket);
         return ticket;
     }
 
-    public AlarmReport getOpenAlarmReportByMovementGuid(String guid) {
-        try {
-            TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_OPEN_ALARM_REPORT_BY_MOVEMENT_GUID, AlarmReport.class);
-            query.setParameter("movementGuid", guid);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
 
     public Long getCustomRuleListSearchCount(String countSql) {
         LOG.debug("CUSTOM RULE SQL QUERY IN LIST COUNT: {}", countSql);
@@ -197,15 +158,6 @@ public class RulesDao {
         return query.getSingleResult();
     }
 
-    public List<AlarmReport> getAlarmListPaginated(Integer page, Integer listSize, String sql) {
-
-        LOG.debug("ALARM SQL QUERY IN LIST PAGINATED: {}", sql);
-
-        TypedQuery<AlarmReport> query = em.createQuery(sql, AlarmReport.class);
-        query.setFirstResult(listSize * (page - 1));
-        query.setMaxResults(listSize);
-        return query.getResultList();
-    }
 
     public Long getTicketListSearchCount(String countSql) {
         LOG.debug("TICKET SQL QUERY IN LIST COUNT: {}", countSql);
@@ -248,18 +200,6 @@ public class RulesDao {
         }
     }
 
-    // Used by timer to prevent duplicate tickets for passing the reporting
-    // deadline
-    public AlarmReport getAlarmReportByAssetAndRule(String assetGuid, String ruleGuid) {
-        try {
-            TypedQuery<AlarmReport> query = em.createNamedQuery(AlarmReport.FIND_ALARM_REPORT_BY_ASSET_GUID_AND_RULE_GUID, AlarmReport.class);
-            query.setParameter("assetGuid", assetGuid);
-            query.setParameter("ruleGuid", ruleGuid);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
 
     public PreviousReport getPreviousReportByAssetGuid(String assetGuid) {
         try {

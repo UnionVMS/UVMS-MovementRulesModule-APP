@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.longpolling.service;
 
+import java.io.IOException;
 import javax.ejb.EJB;
 import javax.enterprise.event.Observes;
 import javax.json.Json;
@@ -24,17 +25,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.longpolling.constants.LongPollingConstants;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportCountEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AlarmReportEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
 
-@WebServlet(asyncSupported = true, urlPatterns = { LongPollingConstants.ALARM_REPORT_PATH, LongPollingConstants.TICKET_UPDATE_PATH, LongPollingConstants.TICKET_COUNT_PATH, LongPollingConstants.ALARM_REPORT_COUNT_PATH })
+@WebServlet(asyncSupported = true, urlPatterns = { LongPollingConstants.TICKET_UPDATE_PATH, LongPollingConstants.TICKET_COUNT_PATH })
 public class LongPollingHttpServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -59,12 +56,7 @@ public class LongPollingHttpServlet extends HttpServlet {
 
         asyncContexts.add(ctx, req.getServletPath());
     }
-
-    public void observeAlarmCreated(@Observes @AlarmReportEvent NotificationMessage message) throws IOException {
-        String guid = (String) message.getProperties().get(LongPollingConstants.PROPERTY_GUID);
-        completePoll(LongPollingConstants.ALARM_REPORT_PATH, createJsonMessage(guid));
-    }
-
+    
     public void observeTicketUpdate(@Observes @TicketEvent NotificationMessage message) throws IOException {
         String guid = (String) message.getProperties().get(LongPollingConstants.PROPERTY_GUID);
         completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid, LongPollingConstants.ACTION_CREATED));
@@ -73,10 +65,6 @@ public class LongPollingHttpServlet extends HttpServlet {
     public void observeTicketUpdateEvent(@Observes @TicketUpdateEvent NotificationMessage message) throws IOException {
         String guid = (String) message.getProperties().get(LongPollingConstants.PROPERTY_GUID);
         completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid, LongPollingConstants.ACTION_UPDATED));
-    }
-
-    public void observeTicketCount(@Observes @AlarmReportCountEvent NotificationMessage message) throws IOException {
-        completePoll(LongPollingConstants.ALARM_REPORT_COUNT_PATH, createJsonMessageCount(true));
     }
 
     public void observeAlarmReportCount(@Observes @TicketCountEvent NotificationMessage message) throws IOException {

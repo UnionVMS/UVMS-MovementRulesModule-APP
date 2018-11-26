@@ -1,7 +1,6 @@
 <definitions xmlns:module="urn:module.movementrules.schema.fisheries.ec.europa.eu:v1"
              xmlns:customrule="urn:customrule.movementrules.schema.fisheries.ec.europa.eu:v1"
              xmlns:ticket="urn:ticket.movementrules.schema.fisheries.ec.europa.eu:v1"
-             xmlns:alarm="urn:alarm.movementrules.schema.fisheries.ec.europa.eu:v1"
              xmlns:common="urn:common.movementrules.schema.fisheries.ec.europa.eu:v1"
              xmlns:search="urn:search.movementrules.schema.fisheries.ec.europa.eu:v1"
              xmlns:movement="urn:movement.movementrules.schema.fisheries.ec.europa.eu:v1"
@@ -20,7 +19,6 @@
             <xsd:import namespace="urn:common.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="RulesCommon.xsd"/>
             <xsd:import namespace="urn:search.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="RulesSearch.xsd"/>
             <xsd:import namespace="urn:ticket.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Ticket.xsd"/>
-            <xsd:import namespace="urn:alarm.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Alarm.xsd"/>
             <xsd:import namespace="urn:movement.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
             <xsd:import namespace="urn:exchange.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
             <xsd:import namespace="urn:ticketrule.movementrules.schema.fisheries.ec.europa.eu:v1" schemaLocation="TicketAndRule.xsd"/>
@@ -35,6 +33,8 @@
                     <xsd:enumeration value="PING"/>
 
                     <xsd:enumeration value="GET_TICKETS_AND_RULES_BY_MOVEMENTS"/>
+                    
+                    <xsd:enumeration value="EVALUATE_RULES"/>
 				</xsd:restriction>
             </xsd:simpleType>
 
@@ -119,18 +119,7 @@
                     </xsd:complexContent>
                 </xsd:complexType>
             </xsd:element>
-            
-            <!-- Alarms QueryList response -->
-            <xsd:element name="GetAlarmListByQueryResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                    	<xsd:element name="alarms" type="alarm:AlarmReportType" minOccurs="0" maxOccurs="unbounded"/>
-                        <xsd:element name="totalNumberOfPages" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-                        <xsd:element name="currentPage" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
-            
+
             <!-- Tickets QueryList request -->
             <xsd:element name="GetTicketListByQueryRequest">
                 <xsd:complexType>

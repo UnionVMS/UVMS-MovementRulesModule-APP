@@ -5,16 +5,10 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <!-- set DB specific properties, like sysdate vs now() -->
-    <include file="changelog\properties.xml"/>
+    <include file="properties.xml" relativeToChangelogFile="true"/>
 
-    <include file="changelog\v0.1\db-changelog-createTables_0.1.xml" />
-
-    <include file="changelog\v0.1\db-changelog-insertInitData_0.1.xml" />
-
-	<include file="changelog\v0.1\insertParameter.xml" />
-
-    <!-- testdata, run with parameter -Dliquibase.contexts=test 
-    <include file="changelog\v0.1\db-changelog-insertTestData_0.1.xml"/>
-    -->
+    <include file="v0.1\db-changelog-createTables_0.1.xml" relativeToChangelogFile="true"/>
+    
+    <include file="v0.1\insertParameter.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

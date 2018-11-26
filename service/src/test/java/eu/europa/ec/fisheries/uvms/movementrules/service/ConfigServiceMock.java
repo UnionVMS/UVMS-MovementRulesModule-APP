@@ -43,20 +43,11 @@ public class ConfigServiceMock implements MessageListener {
             switch (request.getMethod()) {
                 case PULL:
                     SettingType mockSetting = new SettingType();
-                    mockSetting.setKey("Key");
-                    mockSetting.setValue("Value");
+                    mockSetting.setKey("flux_local_nation_code");
+                    mockSetting.setValue("SWE");
                     mockSetting.setDescription("From ConfigServiceMock.java");
                     String pullResponse = ModuleResponseMapper.toPullSettingsResponse(Arrays.asList(mockSetting), PullSettingsStatus.OK);
                     messageProducer.sendModuleResponseMessage((TextMessage) message, pullResponse);
-                    break;
-                case LIST:
-                    List<SettingType> settings = new ArrayList<>();
-                    SettingType setting = new SettingType();
-                    setting.setKey("asset.default.flagstate");
-                    setting.setValue("SWE");
-                    settings.add(setting);
-                    String listResponse = ModuleResponseMapper.toSettingsListResponse(settings);
-                    messageProducer.sendModuleResponseMessage((TextMessage) message, listResponse);
                     break;
                 default:
                     break;

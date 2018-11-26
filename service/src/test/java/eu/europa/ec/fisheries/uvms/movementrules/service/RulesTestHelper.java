@@ -11,36 +11,24 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.movement.asset.v1.AssetType;
-import eu.europa.ec.fisheries.schema.movement.v1.ClosestLocationType;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementActivityType;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementActivityTypeType;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementMetaData;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementPoint;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementSourceType;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementActivityTypeType;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
@@ -111,62 +99,24 @@ public class RulesTestHelper {
         return query;
     }
     
-    public static RawMovementFact createBasicRawMovementFact() {
-        RawMovementFact rawMovementFact = new RawMovementFact();
-        RawMovementType rawMovementType = new RawMovementType();
-        rawMovementType.setGuid(UUID.randomUUID().toString());
-        AssetId assetId = new AssetId();
-        AssetIdList assetIdList = new AssetIdList();
-        assetIdList.setIdType(AssetIdType.CFR);
-        assetIdList.setValue("CFR" + getRandomIntegers(5));
-        assetId.getAssetIdList().add(assetIdList);
-        rawMovementType.setAssetId(assetId);
-        rawMovementFact.setRawMovementType(rawMovementType);
-        rawMovementFact.setPluginType(PluginType.NAF.value());
-        rawMovementFact.setLatitude(1d);
-        rawMovementFact.setLongitude(1d);
-        rawMovementFact.setAssetGuid(UUID.randomUUID().toString());
-        rawMovementFact.setComChannelType("ComChannelType");
-        rawMovementFact.setPositionTime(new Date());
-        rawMovementFact.setMobileTerminalMemberNumber(getRandomIntegers(5));
-        rawMovementFact.setMobileTerminalDnid(getRandomIntegers(5));
-        rawMovementFact.setMobileTerminalConnectId(UUID.randomUUID().toString());
-        rawMovementFact.setIrcs(getRandomIntegers(7));
-        rawMovementFact.setCfr(getRandomIntegers(7));
-        return rawMovementFact;
-    }
-    
-    public static MovementFact createBasicMovementFact() {
-        MovementFact movementFact = new MovementFact();
-        MovementType movement = new MovementType();
-        MovementPoint movementPoint = new MovementPoint();
-        movementPoint.setLatitude(56d);
-        movementPoint.setLongitude(11d);
-        movement.setPosition(movementPoint);
-        eu.europa.ec.fisheries.schema.movement.asset.v1.AssetId assetId = new eu.europa.ec.fisheries.schema.movement.asset.v1.AssetId();
-        assetId.setIdType(eu.europa.ec.fisheries.schema.movement.asset.v1.AssetIdType.GUID);
-        assetId.setValue(UUID.randomUUID().toString());
-        assetId.setAssetType(AssetType.VESSEL);
-        movement.setAssetId(assetId);
-        MovementMetaData metadata = new MovementMetaData();
-        ClosestLocationType closestCountry = new ClosestLocationType();
-        closestCountry.setCode("SWE");
-        closestCountry.setName("SWE");
-        metadata.setClosestCountry(closestCountry);
-        ClosestLocationType closestPort = new ClosestLocationType();
-        closestPort.setCode("GBG");
-        closestPort.setName("GBG");
-        metadata.setClosestPort(closestPort);
-        movement.setMetaData(metadata);
-        MovementActivityType activityType = new MovementActivityType();
-        activityType.setMessageType(MovementActivityTypeType.COE);
-        activityType.setMessageId("messageId");
-        movement.setActivity(activityType);
-        movement.setSource(MovementSourceType.NAF);
-        movementFact.setMovementMovement(movement);
-        movementFact.setLongitude(56d);
-        movementFact.setLatitude(11d);
-        return movementFact;
+    public static MovementDetails createBasicMovementDetails() {
+        MovementDetails movementDetails = new MovementDetails();
+        movementDetails.setLatitude(56d);
+        movementDetails.setLongitude(11d);
+        movementDetails.setAssetGuid(UUID.randomUUID().toString());
+        movementDetails.setAssetType(AssetType.VESSEL.value());
+        movementDetails.setFlagState("SWE");
+        movementDetails.setClosestCountryCode("SWE");
+        movementDetails.setClosestPortCode("GBG");
+        movementDetails.setAreaCodes(Arrays.asList("DNK"));
+        movementDetails.setActivityMessageType(MovementActivityTypeType.COE.value());
+        movementDetails.setActivityMessageId("messageId");
+        movementDetails.setSource(MovementSourceType.NAF.value());
+        movementDetails.setAreaCodes(new ArrayList<>());
+        movementDetails.setAreaTypes(new ArrayList<>());
+        movementDetails.setEntAreaCodes(new ArrayList<>());
+        movementDetails.setExtAreaCodes(new ArrayList<>());
+        return movementDetails;
     }
     
     public static AlarmQuery getBasicAlarmQuery() {
@@ -179,14 +129,6 @@ public class RulesTestHelper {
         return query;
     }
 
-    public static AlarmReport getBasicAlarmReport() {
-        AlarmReport alarmReport = new AlarmReport();
-        alarmReport.setAssetGuid(UUID.randomUUID().toString());
-        alarmReport.setStatus(AlarmStatusType.OPEN.value());
-        alarmReport.setUpdated(new Date());
-        alarmReport.setUpdatedBy("Test user");
-        return alarmReport;
-    }
 
     public static TicketQuery getBasicTicketQuery() {
         TicketQuery query = new TicketQuery();

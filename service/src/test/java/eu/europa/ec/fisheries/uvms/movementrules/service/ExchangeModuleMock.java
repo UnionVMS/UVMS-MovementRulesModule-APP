@@ -49,7 +49,7 @@ public class ExchangeModuleMock implements MessageListener {
             switch (request.getMethod()) {
                 case LIST_SERVICES:
                     String response = ExchangeModuleResponseMapper.mapServiceListResponse(new ArrayList<ServiceResponseType>());
-                    messageProducer.sendModuleResponseMessage((TextMessage) message, response);
+                    messageProducer.sendResponseMessageToSender((TextMessage) message, response);
                     break;
                 default:
                     LOG.error("Message received in ExchangeMock!");

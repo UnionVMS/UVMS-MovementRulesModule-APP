@@ -28,8 +28,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleIntervalType;
@@ -42,8 +40,9 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesService;
-import eu.europa.ec.fisheries.uvms.movementrules.service.ValidationService;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
@@ -58,9 +57,9 @@ public class CustomRulesRestResource {
 
     private static String UNION_VMS_APPLICATION = "Union-VMS";
     @EJB
-    RulesService rulesService;
+    RulesServiceBean rulesService;
     @EJB
-    ValidationService validationService;
+    ValidationServiceBean validationService;
     @Context
     private ServletContext servletContext;
     @Context
@@ -111,7 +110,7 @@ public class CustomRulesRestResource {
     public ResponseDto getCustomRulesByUser(@PathParam(value = "userName") final String userName) {
         LOG.info("Get all custom rules invoked in rest layer");
         try {
-            List<CustomRule> customRulesByUser = validationService.getCustomRulesByUser(userName);
+            List<CustomRule> customRulesByUser = rulesService.getCustomRulesByUser(userName);
             return new ResponseDto(CustomRuleMapper.toCustomRuleTypeList(customRulesByUser), ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when getting all custom rules. ] {} ", ex);
@@ -135,7 +134,7 @@ public class CustomRulesRestResource {
     public ResponseDto getCustomRulesByQuery(CustomRuleQuery query) {
         LOG.info("Get custom rules by query invoked in rest layer");
         try {
-            CustomRuleListResponseDto customRulesListDto = validationService.getCustomRulesByQuery(query);
+            CustomRuleListResponseDto customRulesListDto = rulesService.getCustomRulesByQuery(query);
             GetCustomRuleListByQueryResponse response = new GetCustomRuleListByQueryResponse();
             response.setTotalNumberOfPages(customRulesListDto.getTotalNumberOfPages());
             response.setCurrentPage(customRulesListDto.getCurrentPage());

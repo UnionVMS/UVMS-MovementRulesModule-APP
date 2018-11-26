@@ -5,36 +5,21 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <include file="\schema\tables\hibernatesequence.xml"/>
+    <include file="..\..\schema\tables\hibernatesequence.xml" relativeToChangelogFile="true"/>
 
-    <include file="\schema\tables\parameter.xml"/>
+    <include file="..\..\schema\tables\parameter.xml" relativeToChangelogFile="true"/>
 
     <!-- CUSTOM RULES -->
-    <include file="\schema\tables\customrule.xml"/>
-    <include file="\schema\tables\rulesegment.xml"/>
-    <include file="\schema\tables\action.xml"/>
-    <include file="\schema\tables\interval.xml"/>
-    <include file="\schema\tables\rulesubscriber.xml"/>
-
-    <!-- SANITY RULES -->
-    <include file="\schema\tables\sanityrule.xml"/>
-
-    <!-- ALARMS -->
-    <include file="\schema\tables\alarmreport.xml"/>
-    <include file="\schema\tables\alarmitem.xml"/>
-    <include file="\schema\tables\rawmovement.xml"/>
-    <include file="\schema\tables\activity.xml"/>
-    <include file="\schema\tables\position.xml"/>
-    <include file="\schema\tables\asset.xml"/>
-    <include file="\schema\tables\mobileterminal.xml"/>
-    <include file="\schema\tables\mobileterminalid.xml"/>
-    <include file="\schema\tables\assetidlist.xml"/>
-
+    <include file="..\..\schema\tables\customrule.xml" relativeToChangelogFile="true"/>
+    <include file="..\..\schema\tables\rulesegment.xml" relativeToChangelogFile="true"/>
+    <include file="..\..\schema\tables\action.xml" relativeToChangelogFile="true"/>
+    <include file="..\..\schema\tables\interval.xml" relativeToChangelogFile="true"/>
+    <include file="..\..\schema\tables\rulesubscriber.xml" relativeToChangelogFile="true"/>
 
     <!-- TICKETS -->
-    <include file="\schema\tables\ticket.xml"/>
+    <include file="..\..\schema\tables\ticket.xml" relativeToChangelogFile="true"/>
 
     <!-- PREVIOUS REPORT -->
-    <include file="\schema\tables\previousreport.xml"/>
+    <include file="..\..\schema\tables\previousreport.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

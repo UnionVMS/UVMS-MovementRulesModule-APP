@@ -11,31 +11,27 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
+import java.util.Date;
+import java.util.Random;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.movement.v1.MovementType;
-import eu.europa.ec.fisheries.schema.movementrules.alarm.v1.AlarmStatusType;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleActionType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleSegmentType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MovementFact;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RawMovementFact;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.AlarmReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-
-import java.util.Date;
-import java.util.Random;
-import java.util.UUID;
 
 public class RulesTestHelper {
 
@@ -58,38 +54,7 @@ public class RulesTestHelper {
         query.setPagination(pagination);
         return query;
     }
-    
-    public static RawMovementFact createBasicRawMovementFact() {
-        RawMovementFact rawMovementFact = new RawMovementFact();
-        RawMovementType rawMovementType = new RawMovementType();
-        rawMovementType.setGuid(UUID.randomUUID().toString());
-        AssetId assetId = new AssetId();
-        AssetIdList assetIdList = new AssetIdList();
-        assetIdList.setIdType(AssetIdType.CFR);
-        assetIdList.setValue("CFR" + getRandomIntegers(5));
-        assetId.getAssetIdList().add(assetIdList);
-        rawMovementType.setAssetId(assetId);
-        rawMovementFact.setRawMovementType(rawMovementType);
-        rawMovementFact.setPluginType(PluginType.NAF.value());
-        rawMovementFact.setLatitude(1d);
-        rawMovementFact.setLongitude(1d);
-        rawMovementFact.setAssetGuid(UUID.randomUUID().toString());
-        rawMovementFact.setComChannelType("ComChannelType");
-        rawMovementFact.setPositionTime(new Date());
-        rawMovementFact.setMobileTerminalMemberNumber(getRandomIntegers(5));
-        rawMovementFact.setMobileTerminalDnid(getRandomIntegers(5));
-        rawMovementFact.setIrcs(getRandomIntegers(7));
-        rawMovementFact.setCfr(getRandomIntegers(7));
-        return rawMovementFact;
-    }
-    
-    public static MovementFact createBasicMovementFact() {
-        MovementFact movementFact = new MovementFact();
-        MovementType movement = new MovementType();
-        movementFact.setMovementMovement(movement);
-        return movementFact;
-    }
-    
+
     public static AlarmQuery getBasicAlarmQuery() {
         AlarmQuery query = new AlarmQuery();
         query.setDynamic(true);
@@ -162,14 +127,6 @@ public class RulesTestHelper {
         return customRule;
     }
 
-    public static AlarmReport getBasicAlarmReport() {
-        AlarmReport alarmReport = new AlarmReport();
-        alarmReport.setAssetGuid(UUID.randomUUID().toString());
-        alarmReport.setStatus(AlarmStatusType.OPEN.value());
-        alarmReport.setUpdated(new Date());
-        alarmReport.setUpdatedBy("Test user");
-        return alarmReport;
-    }
 
     public static Ticket getCompleteTicket() {
         Ticket ticket = new Ticket();

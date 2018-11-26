@@ -64,30 +64,9 @@
             <version>${uvms.config.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.movement</groupId>
-            <artifactId>movement-model</artifactId>
-            <version>${movement.model.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
-            <artifactId>asset-model</artifactId>
-            <version>${asset.model.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
-            <artifactId>asset-client</artifactId>
-            <version>${asset.client.version}</version>
-            <exclusions>
-            	<exclusion>
-            		<groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
-            		<artifactId>uvms-commons-message</artifactId>
-            	</exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.mobileterminal</groupId>
-            <artifactId>mobileterminal-model</artifactId>
-            <version>${mobileterminal.model.version}</version>
+            <groupId>eu.europa.ec.fisheries.uvms.spatial</groupId>
+            <artifactId>spatial-model</artifactId>
+            <version>${spatial.model.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
@@ -103,11 +82,6 @@
             <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
             <artifactId>audit-model</artifactId>
             <version>${audit.model.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.config</groupId>
-            <artifactId>config-model</artifactId>
-            <version>${uvms.config.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
@@ -155,13 +129,6 @@
             <version>5.15.6</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.jaxrs</groupId>
-            <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>2.9.4</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
