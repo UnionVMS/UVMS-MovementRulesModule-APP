@@ -17,6 +17,7 @@ import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,41 +60,8 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         assertThat(pingResponse.getResponse(), is("pong"));
     }
 
-    private ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-    @Test
-    @OperateOnDeployment("normal")
-    public void jmsSanityCheck() throws Exception{
-
-        Connection connection = null;
-        Session session = null;
-        javax.jms.MessageProducer producer = null;
-        String corr;
-
-        connection = connectionFactory.createConnection();
-        try {
-            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Queue responseQueue = session.createQueue("Test Queue");
-            Queue exchangeEventQueue = session.createQueue(MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-
-            TextMessage message = session.createTextMessage();
-            message.setJMSReplyTo(responseQueue);
-            message.setText("test text");
-            message.setStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY, "PROCESSED_MOVEMENT");
-            MappedDiagnosticContext.addThreadMappedDiagnosticContextToMessageProperties(message);
-
-            session.createProducer(exchangeEventQueue).send(message);
-
-            corr = message.getJMSMessageID();
-        } finally {
-            connection.close();
-        }
-
-
-        Message message = jmsHelper.listenForResponseOnQueue(corr, MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-        assertNotNull(message);
-    }
-
     // Sanity test
+    @Ignore
     @Test
     @OperateOnDeployment("normal")
     public void evaluateCustomRulesVoidTest() throws Exception {
