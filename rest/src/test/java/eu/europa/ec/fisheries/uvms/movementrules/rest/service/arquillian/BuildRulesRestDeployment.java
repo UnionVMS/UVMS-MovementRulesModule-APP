@@ -18,14 +18,12 @@ public abstract class BuildRulesRestDeployment {
     public static Archive<?> createDeployment() {
 
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "test.war");
-
-        File[] files = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeAndTestDependencies().resolve()
+        
+        File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
+                .resolve("eu.europa.ec.fisheries.uvms.movement-rules:movement-rules-service",
+                        "eu.europa.ec.fisheries.uvms:usm4uvms")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
-        
-        testWar.addAsLibraries(Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.movement-rules:movement-rules-service")
-                .withTransitivity().asFile());
 
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.movementrules.rest");
 
