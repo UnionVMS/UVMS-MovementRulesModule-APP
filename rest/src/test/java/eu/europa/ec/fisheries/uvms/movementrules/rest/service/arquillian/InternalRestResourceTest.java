@@ -141,6 +141,8 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         
         assertThat(message, CoreMatchers.is(CoreMatchers.notNullValue()));
         
+        System.out.println(message.getText());
+        
         SendMovementToPluginRequest sendMovementRequest = JAXBMarshaller.unmarshallTextMessage(message, SendMovementToPluginRequest.class);
         assertThat(sendMovementRequest, CoreMatchers.is(CoreMatchers.notNullValue()));
         
