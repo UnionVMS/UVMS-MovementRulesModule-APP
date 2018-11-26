@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
+package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +23,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.AreaTransitionsDTO;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Area;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreaExtendedIdentifierType;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreaType;

@@ -9,6 +9,7 @@ import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.SpatialModuleMock;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UnionVMSRestMock;
 
 @ArquillianSuiteDeployment
@@ -27,6 +28,9 @@ public abstract class BuildRulesRestDeployment {
 
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.movementrules.rest");
 
+        testWar.deleteClass(UnionVMSRestMock.class);
+        testWar.deleteClass(SpatialModuleMock.class);
+        
         testWar.delete("/WEB-INF/web.xml");
         testWar.addAsWebInfResource("mock-web.xml", "web.xml");
 
