@@ -2,17 +2,12 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import java.util.Date;
+
+import java.time.Instant;
 import java.util.UUID;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.Session;
 import javax.jms.TextMessage;
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
@@ -26,7 +21,6 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
@@ -69,7 +63,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         movementDetails.setMovementGuid(UUID.randomUUID().toString());
         movementDetails.setLatitude(11d);
         movementDetails.setLongitude(56d);
-        movementDetails.setPositionTime(new Date());
+        movementDetails.setPositionTime(Instant.now());
         movementDetails.setSource("INMARSAT_C");
         movementDetails.setAssetGuid(UUID.randomUUID().toString());
         movementDetails.setFlagState("SWE");

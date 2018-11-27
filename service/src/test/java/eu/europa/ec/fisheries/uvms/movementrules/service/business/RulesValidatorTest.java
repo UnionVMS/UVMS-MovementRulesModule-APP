@@ -4,9 +4,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.UUID;
 import javax.inject.Inject;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
@@ -44,9 +45,9 @@ public class RulesValidatorTest extends TransactionalTests {
      */
     
     @Test
-        @OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerFlagStateRuleTest() throws Exception {
-        Date timestamp = getTimestamp();
+        Instant timestamp = getTimestamp();
         String flagstate = "SWE";
 
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
@@ -78,7 +79,7 @@ public class RulesValidatorTest extends TransactionalTests {
     @Test
     @OperateOnDeployment ("normal")
     public void evaluateMovementFactDontTriggerFlagStateRuleTest() throws Exception {
-        Date timestamp = getTimestamp();
+        Instant timestamp = getTimestamp();
         String flagstate = "SWE";
 
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
@@ -106,7 +107,7 @@ public class RulesValidatorTest extends TransactionalTests {
     @Test
     @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerPositionTimeRuleTest() throws Exception {
-        Date positionTime = getTimestamp();
+        Instant positionTime = getTimestamp();
 
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
         RuleSegment segment = new RuleSegment();
@@ -114,7 +115,7 @@ public class RulesValidatorTest extends TransactionalTests {
         segment.setCriteria(CriteriaType.POSITION.value());
         segment.setSubCriteria(SubCriteriaType.POSITION_REPORT_TIME.value());
         segment.setCondition(ConditionType.EQ.value());
-        segment.setValue(RulesUtil.dateToString(positionTime));
+        segment.setValue(MRDateUtils.dateToString(positionTime));
         segment.setEndOperator("");
         segment.setLogicOperator(LogicOperatorType.NONE.value());
         segment.setOrder(0);
@@ -137,7 +138,7 @@ public class RulesValidatorTest extends TransactionalTests {
     @Test
     @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerAreaRuleTest() throws Exception {
-        Date timestamp = getTimestamp();
+        Instant timestamp = getTimestamp();
         String areaCode = "SWE";
 
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
@@ -169,7 +170,7 @@ public class RulesValidatorTest extends TransactionalTests {
     @Test
     @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerAreaEntryRuleTest() throws Exception {
-        Date timestamp = getTimestamp();
+        Instant timestamp = getTimestamp();
         String areaCode = "SWE";
 
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
@@ -201,7 +202,7 @@ public class RulesValidatorTest extends TransactionalTests {
     @Test
     @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerAreaExitRuleTest() throws Exception {
-        Date timestamp = getTimestamp();
+        Instant timestamp = getTimestamp();
         String areaCode = "SWE";
 
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
@@ -233,7 +234,7 @@ public class RulesValidatorTest extends TransactionalTests {
     @Test
     @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerMTSerialNumberRuleTest() throws Exception {
-        Date timestamp = getTimestamp();
+        Instant timestamp = getTimestamp();
         String serialNumber = UUID.randomUUID().toString();
 
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
@@ -265,7 +266,7 @@ public class RulesValidatorTest extends TransactionalTests {
     @Test
     @OperateOnDeployment ("normal")
     public void evaluateMovementFactTriggerFlagStateAndAreaRuleTest() throws Exception {
-        Date timestamp = getTimestamp();
+        Instant timestamp = getTimestamp();
         String flagstate = "SWE";
         String area = "SWE";
 
@@ -307,16 +308,14 @@ public class RulesValidatorTest extends TransactionalTests {
         assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
     }
     
-    private void assertCustomRuleWasTriggered(String ruleGuid, Date fromDate) throws Exception {
+    private void assertCustomRuleWasTriggered(String ruleGuid, Instant fromDate) throws Exception {
         CustomRule customRule = rulesService.getCustomRuleByGuid(ruleGuid);
         assertThat(customRule.getTriggered(), is(notNullValue()));
-        assertTrue(customRule.getTriggered().after(fromDate)
+        assertTrue(customRule.getTriggered().isAfter(fromDate)
                 || customRule.getTriggered().equals(fromDate));
     }
     
-    private Date getTimestamp() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTime();
+    private Instant getTimestamp() {
+        return Instant.now().truncatedTo(ChronoUnit.SECONDS);
     }
 }

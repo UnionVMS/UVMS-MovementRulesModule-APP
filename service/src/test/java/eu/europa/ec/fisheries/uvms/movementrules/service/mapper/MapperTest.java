@@ -15,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import java.util.List;
 
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.junit.Assert;
 import org.junit.Before;
@@ -61,8 +62,8 @@ public class MapperTest {
         assertSame(entity.getDescription(), result.getDescription());
         assertSame(entity.getGuid(), result.getGuid());
         assertSame(entity.getName(), result.getName());
-        assertEquals(DateUtils.dateToString(entity.getTriggered()), result.getLastTriggered());
-        assertEquals(DateUtils.dateToString(entity.getUpdated()), result.getUpdated());
+        assertEquals(MRDateUtils.dateToString(entity.getTriggered()), result.getLastTriggered());
+        assertEquals(MRDateUtils.dateToString(entity.getUpdated()), result.getUpdated());
         assertSame(entity.getUpdatedBy(), result.getUpdatedBy());
 
         // Rule segments
@@ -109,11 +110,11 @@ public class MapperTest {
         List<CustomRuleIntervalType> intervals = result.getTimeIntervals();
         assertSame(2, intervals.size());
 
-        assertEquals(DateUtils.dateToString(entity.getIntervals().get(0).getStart()), intervals.get(0).getStart());
-        assertEquals(DateUtils.dateToString(entity.getIntervals().get(0).getEnd()), intervals.get(0).getEnd());
+        assertEquals(MRDateUtils.dateToString(entity.getIntervals().get(0).getStart()), intervals.get(0).getStart());
+        assertEquals(MRDateUtils.dateToString(entity.getIntervals().get(0).getEnd()), intervals.get(0).getEnd());
 
-        assertEquals(DateUtils.dateToString(entity.getIntervals().get(1).getStart()), intervals.get(1).getStart());
-        assertEquals(DateUtils.dateToString(entity.getIntervals().get(1).getEnd()), intervals.get(1).getEnd());
+        assertEquals(MRDateUtils.dateToString(entity.getIntervals().get(1).getStart()), intervals.get(1).getStart());
+        assertEquals(MRDateUtils.dateToString(entity.getIntervals().get(1).getEnd()), intervals.get(1).getEnd());
 
         // Actions
         List<CustomRuleActionType> actions = result.getActions();
@@ -153,7 +154,7 @@ public class MapperTest {
         assertSame(model.getAvailability().value(), result.getAvailability());
         assertSame(model.getDescription(), result.getDescription());
         assertSame(model.getName(), result.getName());
-        assertEquals(DateUtils.stringToDate(model.getLastTriggered()), result.getTriggered());
+        assertEquals(MRDateUtils.stringToDate(model.getLastTriggered()), result.getTriggered());
         assertSame(model.getUpdatedBy(), result.getUpdatedBy());
 
         // TODO:

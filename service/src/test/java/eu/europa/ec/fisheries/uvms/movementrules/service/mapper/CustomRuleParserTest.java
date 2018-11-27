@@ -14,6 +14,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
+
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import org.junit.Test;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
@@ -22,7 +24,6 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.CustomRuleDto;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
@@ -77,17 +78,17 @@ public class CustomRuleParserTest {
         // First interval
         Interval interval1 = new Interval();
         String interval1start = "2000-10-01 00:00:00 +0000";
-        interval1.setStart(RulesUtil.stringToDate(interval1start));
+        interval1.setStart(MRDateUtils.stringToDate(interval1start));
         String interval1end = "2000-10-30 00:00:00 +0000";
-        interval1.setEnd(RulesUtil.stringToDate(interval1end));
+        interval1.setEnd(MRDateUtils.stringToDate(interval1end));
         customRule.getIntervals().add(interval1);
 
         // First interval
         Interval interval2 = new Interval();
         String interval2start = "2015-01-01 00:00:00 +0000";
-        interval2.setStart(RulesUtil.stringToDate(interval2start));
+        interval2.setStart(MRDateUtils.stringToDate(interval2start));
         String interval2end = "2016-12-31 00:00:00 +0000";
-        interval2.setEnd(RulesUtil.stringToDate(interval2end));
+        interval2.setEnd(MRDateUtils.stringToDate(interval2end));
         customRule.getIntervals().add(interval2);
 
         // First action
@@ -111,7 +112,7 @@ public class CustomRuleParserTest {
         rawRules.add(customRule);
 
         String expectedRule =
-                "(cfr == \"SWE111111\" || cfr == \"SWE222222\") && mobileTerminalMemberNumber == \"ABC99\" && (RulesUtil.stringToDate(\"" + interval1start + "\") <= positionTime && positionTime <= RulesUtil.stringToDate(\"" + interval1end + "\") || RulesUtil.stringToDate(\"" + interval2start + "\") <= positionTime && positionTime <= RulesUtil.stringToDate(\"" + interval2end + "\"))";
+                "(cfr == \"SWE111111\" || cfr == \"SWE222222\") && mobileTerminalMemberNumber == \"ABC99\" && (MRDateUtils.stringToDate(\"" + interval1start + "\") <= positionTime && positionTime <= MRDateUtils.stringToDate(\"" + interval1end + "\") || MRDateUtils.stringToDate(\"" + interval2start + "\") <= positionTime && positionTime <= MRDateUtils.stringToDate(\"" + interval2end + "\"))";
 
         List<CustomRuleDto> rules = CustomRuleParser.parseRules(rawRules);
         assertEquals(expectedRule, rules.get(0)
@@ -643,7 +644,7 @@ public class CustomRuleParserTest {
         sb.append("calculatedCourse <= \"46\" || ");
         sb.append("calculatedSpeed >= \"10.1\" || ");
         sb.append("movementType == \"POS\" || ");
-        sb.append("positionTime == RulesUtil.stringToDate(\"2000-10-30 01:00:00 +0100\") || ");
+        sb.append("positionTime == MRDateUtils.stringToDate(\"2000-10-30 01:00:00 +0100\") || ");
         sb.append("reportedCourse < \"45\" || ");
         sb.append("reportedSpeed > \"10\" || ");
         sb.append("segmentType != \"GAP\" || ");

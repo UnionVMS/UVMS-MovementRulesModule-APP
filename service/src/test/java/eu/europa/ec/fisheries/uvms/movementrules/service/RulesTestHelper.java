@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -103,6 +104,7 @@ public class RulesTestHelper {
         MovementDetails movementDetails = new MovementDetails();
         movementDetails.setLatitude(56d);
         movementDetails.setLongitude(11d);
+        movementDetails.setPositionTime(Instant.now());
         movementDetails.setAssetGuid(UUID.randomUUID().toString());
         movementDetails.setAssetType(AssetType.VESSEL.value());
         movementDetails.setFlagState("SWE");

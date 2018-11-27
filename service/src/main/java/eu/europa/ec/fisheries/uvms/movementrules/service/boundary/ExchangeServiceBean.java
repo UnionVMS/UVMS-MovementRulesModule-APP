@@ -12,7 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Date;    //Leave be for now
 import java.util.List;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;

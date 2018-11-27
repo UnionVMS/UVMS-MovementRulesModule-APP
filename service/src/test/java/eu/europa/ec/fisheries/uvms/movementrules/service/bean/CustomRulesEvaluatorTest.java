@@ -2,9 +2,10 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -193,7 +194,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         movementDetails.setMovementGuid(UUID.randomUUID().toString());
         movementDetails.setLatitude(11d);
         movementDetails.setLongitude(56d);
-        movementDetails.setPositionTime(new Date());
+        movementDetails.setPositionTime(Instant.now());
         movementDetails.setSource("INMARSAT_C");
         movementDetails.setAssetGuid(UUID.randomUUID().toString());
         movementDetails.setFlagState("SWE");

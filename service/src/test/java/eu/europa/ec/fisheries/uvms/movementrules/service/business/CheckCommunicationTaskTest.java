@@ -5,7 +5,10 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import java.util.Date;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.UUID;
 import javax.inject.Inject;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
@@ -61,7 +64,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
 @OperateOnDeployment("normal")
     public void runWithThresholdPassed() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
-        previousReport.setPositionTime(new Date(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
+        previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
         rulesDao.updatePreviousReport(previousReport);
         
         String assetGuid = previousReport.getAssetGuid();
@@ -77,7 +80,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
 @OperateOnDeployment ("normal")
     public void runTwiceWithThresholdPassed() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
-        previousReport.setPositionTime(new Date(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
+        previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
         rulesDao.updatePreviousReport(previousReport);
         
         String assetGuid = previousReport.getAssetGuid();
@@ -95,7 +98,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
 @OperateOnDeployment ("normal")
     public void updateThresholdPassed() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
-        previousReport.setPositionTime(new Date(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
+        previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
         rulesDao.updatePreviousReport(previousReport);
         
         String assetGuid = previousReport.getAssetGuid();
@@ -104,8 +107,8 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         checkCommunicationTask.run();
         
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
-        previousReport.setPositionTime(new Date(System.currentTimeMillis() - 3*ONE_HOUR_IN_MILLISECONDS));
-        previousReport.setUpdated(new Date(System.currentTimeMillis() - 2*ONE_HOUR_IN_MILLISECONDS));
+        previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - 3*ONE_HOUR_IN_MILLISECONDS));
+        previousReport.setUpdated(Instant.ofEpochMilli(System.currentTimeMillis() - 2*ONE_HOUR_IN_MILLISECONDS));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -119,7 +122,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
 @OperateOnDeployment ("normal")
     public void checkPreviousReportUpdateTimeUpdated() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
-        previousReport.setPositionTime(new Date(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
+        previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
         rulesDao.updatePreviousReport(previousReport);
       
         CheckCommunicationTask checkCommunicationTask = new CheckCommunicationTask(rulesService, parameterService);
@@ -127,7 +130,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
       
         PreviousReport fetchedReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         
-        assertTrue(fetchedReport.getUpdated().after(previousReport.getUpdated()));
+        assertTrue(fetchedReport.getUpdated().isAfter(previousReport.getUpdated()));
     }
     
     @Test
@@ -147,10 +150,10 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         
         // 30 mins
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
-        Date positionTime = previousReport.getPositionTime();
-        Date updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        Instant positionTime = previousReport.getPositionTime();
+        Instant updated = previousReport.getUpdated();
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -162,8 +165,8 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         positionTime = previousReport.getPositionTime();
         updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -176,8 +179,8 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         positionTime = previousReport.getPositionTime();
         updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -190,8 +193,8 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         positionTime = previousReport.getPositionTime();
         updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -204,8 +207,8 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         positionTime = previousReport.getPositionTime();
         updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -220,7 +223,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     public void runTaskWith30MinStepsWithPastPositionTime() throws Exception {
         long thirtyMinsInMs = ONE_HOUR_IN_MILLISECONDS / 2;
         PreviousReport previousReport = getBasicPreviousReport();
-        previousReport.setPositionTime(new Date(System.currentTimeMillis() - thirtyMinsInMs));
+        previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - thirtyMinsInMs));
         rulesDao.updatePreviousReport(previousReport);
         
         String assetGuid = previousReport.getAssetGuid();
@@ -233,10 +236,10 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         
         // 1 hour
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
-        Date positionTime = previousReport.getPositionTime();
-        Date updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        Instant positionTime = previousReport.getPositionTime();
+        Instant updated = previousReport.getUpdated();
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -249,8 +252,8 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         positionTime = previousReport.getPositionTime();
         updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -263,8 +266,8 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         positionTime = previousReport.getPositionTime();
         updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -277,8 +280,8 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         positionTime = previousReport.getPositionTime();
         updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -291,8 +294,8 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         positionTime = previousReport.getPositionTime();
         updated = previousReport.getUpdated();
-        previousReport.setPositionTime(new Date(positionTime.getTime() - thirtyMinsInMs));
-        previousReport.setUpdated(new Date(updated.getTime() - thirtyMinsInMs));
+        previousReport.setPositionTime(positionTime.minus(30, ChronoUnit.MINUTES));
+        previousReport.setUpdated(updated.minus(30, ChronoUnit.MINUTES));
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
@@ -306,9 +309,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     
     private PreviousReport getBasicPreviousReport() {
         PreviousReport previousReport = new PreviousReport();
-        previousReport.setPositionTime(new Date());
+        previousReport.setPositionTime(Instant.now());
         previousReport.setAssetGuid(UUID.randomUUID().toString());
-        previousReport.setUpdated(new Date());
+        previousReport.setUpdated(Instant.now());
         previousReport.setUpdatedBy("UVMS");
         return previousReport;
     }

@@ -11,7 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +42,10 @@ public class CheckCommunicationTask implements Runnable {
             long threshold = getAssetNotSendingThreshold();
             
             for (PreviousReport previousReport : previousReports) {
-                Date positionTime = previousReport.getPositionTime();
-                Date lastUpdated = previousReport.getUpdated();
+                Instant positionTime = previousReport.getPositionTime();
+                Instant lastUpdated = previousReport.getUpdated();
                 if (isThresholdPassed(positionTime, lastUpdated, threshold)) {
-                    previousReport.setUpdated(new Date());
+                    previousReport.setUpdated(Instant.now());
                     LOG.info("\t ==> Executing RULE '{}', assetGuid: {}, positionTime: {}, threshold: {}",
                             ServiceConstants.ASSET_NOT_SENDING_RULE, previousReport.getAssetGuid(), positionTime, threshold);
                     String ruleName = ServiceConstants.ASSET_NOT_SENDING_RULE;
@@ -57,11 +57,11 @@ public class CheckCommunicationTask implements Runnable {
         }
     }
     
-    private boolean isThresholdPassed(Date positionTime, Date lastUpdated, long threshold) {
-        long positionThreshold = positionTime.getTime() + threshold;
-        long updateThreshold = lastUpdated.getTime() + threshold;
+    private boolean isThresholdPassed(Instant positionTime, Instant lastUpdated, long threshold) {
+        long positionThreshold = positionTime.toEpochMilli() + threshold;
+        long updateThreshold = lastUpdated.toEpochMilli() + threshold;
         long now = System.currentTimeMillis();
-        return positionThreshold <= now && (lastUpdated.getTime() <= positionThreshold || updateThreshold <= now);
+        return positionThreshold <= now && (lastUpdated.toEpochMilli() <= positionThreshold || updateThreshold <= now);
     }
     
     private long getAssetNotSendingThreshold() {

@@ -7,10 +7,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.nio.file.AccessDeniedException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.ejb.EJBTransactionRolledbackException;
@@ -41,8 +41,6 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
@@ -100,10 +98,8 @@ public class RulesServiceBeanTest extends TransactionalTests {
     public void createCustomRuleWithIntervalTest() throws Exception {
         CustomRule customRule = getCompleteNewCustomRule();
         Interval interval = new Interval();
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.HOUR, -1);
-        interval.setStart(calendar.getTime());
-        interval.setEnd(new Date());
+        interval.setStart(Instant.now().minus(1, ChronoUnit.HOURS));
+        interval.setEnd(Instant.now());
         customRule.getIntervals().add(interval);
         
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
@@ -865,9 +861,9 @@ public class RulesServiceBeanTest extends TransactionalTests {
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(UUID.randomUUID().toString());
         ticket.setStatus(TicketStatusType.OPEN.value());
-        ticket.setCreatedDate(new Date());
+        ticket.setCreatedDate(Instant.now());
         ticket.setRuleName("Test Rule");
-        ticket.setUpdated(new Date());
+        ticket.setUpdated(Instant.now());
         ticket.setUpdatedBy("Test user");
         return ticket;
     }

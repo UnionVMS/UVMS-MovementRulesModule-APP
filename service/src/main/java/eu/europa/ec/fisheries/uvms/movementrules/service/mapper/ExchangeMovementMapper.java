@@ -24,6 +24,8 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementTypeType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 
+import java.util.Date;
+
 public class ExchangeMovementMapper {
     
     private ExchangeMovementMapper() {};
@@ -62,7 +64,7 @@ public class ExchangeMovementMapper {
         position.setLatitude(movementDetails.getLatitude());
         position.setAltitude(movementDetails.getAltitude());
         movement.setPosition(position);
-        movement.setPositionTime(movementDetails.getPositionTime());
+        movement.setPositionTime(Date.from(movementDetails.getPositionTime()));
         if (movementDetails.getSource() != null) {
             movement.setSource(MovementSourceType.valueOf(movementDetails.getSource()));
         }

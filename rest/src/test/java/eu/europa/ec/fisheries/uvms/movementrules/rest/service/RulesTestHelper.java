@@ -11,7 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Random;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -130,8 +130,8 @@ public class RulesTestHelper {
 
     public static Ticket getCompleteTicket() {
         Ticket ticket = new Ticket();
-        ticket.setUpdated(new Date());
-        ticket.setCreatedDate(new Date());
+        ticket.setUpdated(Instant.now());
+        ticket.setCreatedDate(Instant.now());
         ticket.setStatus(TicketStatusType.OPEN);
         ticket.setUpdatedBy("test user");
         ticket.setRuleGuid("tmp rule guid");

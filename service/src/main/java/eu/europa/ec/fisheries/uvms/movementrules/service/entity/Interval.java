@@ -22,7 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
 import java.util.Objects;
 
 //@formatter:off
@@ -40,10 +40,10 @@ public class Interval implements Serializable {
     private Long id;
 
     @Column(name = "interval_start")
-    private Date start;
+    private Instant start;
 
     @Column(name = "interval_end")
-    private Date end;
+    private Instant end;
 
     @JoinColumn(name = "interval_rule_id", referencedColumnName = "rule_id")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -57,19 +57,19 @@ public class Interval implements Serializable {
         this.id = id;
     }
 
-    public Date getStart() {
+    public Instant getStart() {
         return start;
     }
 
-    public void setStart(Date start) {
+    public void setStart(Instant start) {
         this.start = start;
     }
 
-    public Date getEnd() {
+    public Instant getEnd() {
         return end;
     }
 
-    public void setEnd(Date end) {
+    public void setEnd(Instant end) {
         this.end = end;
     }
 
@@ -92,12 +92,12 @@ public class Interval implements Serializable {
         if (obj instanceof Interval) {
 
             Interval other = (Interval) obj;
-            if (start != null && start.getTime() != other.start.getTime()) {
+            if (start != null && !start.equals(other.start)) {
                 return false;
             } else if (start == null && other.start != null) {
                 return false;
             }
-            if (end != null && end.getTime() != other.end.getTime()) {
+            if (end != null && !end.equals(other.end)) {
                 return false;
             } else if (end == null && other.end != null) {
                 return false;

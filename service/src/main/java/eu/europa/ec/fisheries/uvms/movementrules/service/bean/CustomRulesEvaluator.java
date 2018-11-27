@@ -11,7 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import java.util.Date;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -26,6 +25,8 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator
 import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
+
+import java.time.Instant;
 
 @Stateless
 public class CustomRulesEvaluator {
@@ -54,7 +55,7 @@ public class CustomRulesEvaluator {
         rulesValidator.evaluate(movementDetails);
     }
   
-    private Long timeDiffAndPersistPreviousReport(String movementSource, String assetGuid, String assetFlagState, Date positionTime) {
+    private Long timeDiffAndPersistPreviousReport(String movementSource, String assetGuid, String assetFlagState, Instant positionTime) {
         // This needs to be done before persisting last report
         Long timeDiffInSeconds = null;
         Long timeDiff = timeDiffFromLastCommunication(assetGuid, positionTime);
@@ -69,13 +70,16 @@ public class CustomRulesEvaluator {
     }
     
     
-    private Long timeDiffFromLastCommunication(String assetGuid, Date thisTime) {
+    private Long timeDiffFromLastCommunication(String assetGuid, Instant thisTime) {
         Long timeDiff = null;
         try {
             PreviousReport entity = rulesDao.getPreviousReportByAssetGuid(assetGuid);
+            if(entity == null){         //aka not local flag state and not AIS, see line 65
+                return null;
+            }
 
-            Date previousTime = entity.getPositionTime();
-            timeDiff = thisTime.getTime() - previousTime.getTime();
+            Instant previousTime = entity.getPositionTime();
+            timeDiff = thisTime.toEpochMilli() - previousTime.toEpochMilli();
         } catch (Exception e) {
             // If something goes wrong, continue with the other validation
             LOG.error("[ERROR] Error when getting previous report by asset guid {}", e.getMessage());
@@ -83,14 +87,14 @@ public class CustomRulesEvaluator {
         return timeDiff;
     }
     
-    private void persistLastCommunication(String assetGuid, Date positionTime) {
+    private void persistLastCommunication(String assetGuid, Instant positionTime) {
         PreviousReport entity = rulesDao.getPreviousReportByAssetGuid(assetGuid);
         if (entity == null) {
             entity = new PreviousReport();
         }
         entity.setPositionTime(positionTime);
         entity.setAssetGuid(assetGuid);
-        entity.setUpdated(new Date());
+        entity.setUpdated(Instant.now());
         entity.setUpdatedBy("UVMS");
         rulesDao.updatePreviousReport(entity);
     }
