@@ -1,6 +1,5 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
-import java.util.Date;
 import javax.inject.Inject;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -14,6 +13,8 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceB
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
+
+import java.time.Instant;
 
 
 @RunWith(Arquillian.class)
@@ -33,15 +34,15 @@ public class CheckRulesChangesTaskTest extends TransactionalTests {
 
 
     @Test
-@OperateOnDeployment("normal")
+    @OperateOnDeployment("normal")
     public void checkRulesChangesTaskTest() throws Exception {
         CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
         Interval interval = new Interval();
         interval.setCustomRule(customRule);
-        interval.setStart(new Date(System.currentTimeMillis() - 20000));
-        interval.setEnd(new Date(System.currentTimeMillis() - 10000));
+        interval.setStart(Instant.ofEpochMilli(System.currentTimeMillis() - 20000));
+        interval.setEnd(Instant.ofEpochMilli(System.currentTimeMillis() - 10000));
         customRule.getIntervals().add(interval);
-        customRule.setUpdated(new Date());
+        customRule.setUpdated(Instant.now());
         customRule.setUpdatedBy("TestUser");
 
         customRule = rulesDao.createCustomRule(customRule);

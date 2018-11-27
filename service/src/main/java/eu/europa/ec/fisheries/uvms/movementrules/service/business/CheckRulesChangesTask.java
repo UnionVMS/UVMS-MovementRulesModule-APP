@@ -11,7 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +48,10 @@ public class CheckRulesChangesTask implements Runnable {
             boolean inactivate = !rule.getIntervals().isEmpty();
             for (Interval interval : rule.getIntervals()) {
                 if (interval.getEnd() != null && interval.getStart() != null) {
-                    Date end = interval.getEnd();
-                    Date start = interval.getStart();
-                    Date now = new Date();
-                    if (start.before(now) && end.after(now)) {
+                    Instant end = interval.getEnd();
+                    Instant start = interval.getStart();
+                    Instant now = Instant.now();
+                    if (start.isBefore(now) && end.isAfter(now)) {
                         inactivate = false;
                         break;
                     }

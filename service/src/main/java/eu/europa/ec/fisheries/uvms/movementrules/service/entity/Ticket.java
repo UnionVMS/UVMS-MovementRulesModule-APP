@@ -15,7 +15,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -89,13 +89,11 @@ public class Ticket implements Serializable {
     private Long ticketCount;       //exists in Type, same name
 
     @Column(name = "ticket_createddate")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;       //exists in Type as openDate
+    private Instant createdDate;       //exists in Type as openDate
 
     @Column(name = "ticket_updattim")
     @NotNull
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;       //exists in Type, same name
+    private Instant updated;       //exists in Type, same name
 
     @Column(name = "ticket_upuser")
     @NotNull
@@ -198,19 +196,19 @@ public class Ticket implements Serializable {
         this.ticketCount = ticketCount;
     }
 
-    public Date getCreatedDate() {
+    public Instant getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(Instant createdDate) {
         this.createdDate = createdDate;
     }
 
-    public Date getUpdated() {
+    public Instant getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Date updated) {
+    public void setUpdated(Instant updated) {
         this.updated = updated;
     }
 

@@ -11,9 +11,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
 
-import java.util.Date;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import eu.europa.ec.fisheries.uvms.movementrules.model.MovementRulesInstantDeserializer;
+
+import java.time.Instant;
 import java.util.List;
-import javax.json.bind.annotation.JsonbDateFormat;
 
 public class MovementDetails {
 
@@ -54,9 +58,10 @@ public class MovementDetails {
     private Double calculatedCourse;
     private Double calculatedSpeed;
     private String movementType; // MovementTypeType
-    // TODO use instant
-    @JsonbDateFormat(value = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
-    private Date positionTime;
+
+    @JsonSerialize(using = InstantSerializer.class)
+    @JsonDeserialize(using = MovementRulesInstantDeserializer.class)
+    private Instant positionTime;
     private Double reportedCourse;
     private Double reportedSpeed;
     private String segmentType;
@@ -321,11 +326,11 @@ public class MovementDetails {
         this.movementType = movementType;
     }
 
-    public Date getPositionTime() {
+    public Instant getPositionTime() {
         return positionTime;
     }
 
-    public void setPositionTime(Date positionTime) {
+    public void setPositionTime(Instant positionTime) {
         this.positionTime = positionTime;
     }
 

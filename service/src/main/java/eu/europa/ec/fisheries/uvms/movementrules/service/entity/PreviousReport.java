@@ -12,7 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,8 +21,6 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -51,12 +49,11 @@ public class PreviousReport implements Serializable {
     private String assetGuid;
 
     @Column(name = "prevrep_positiontime")
-    private Date positionTime;
+    private Instant positionTime;
 
     @Column(name = "prevrep_updattim")
     @NotNull
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;
+    private Instant updated;
 
     @Column(name = "prevrep_upuser")
     @NotNull
@@ -78,19 +75,19 @@ public class PreviousReport implements Serializable {
         this.assetGuid = assetGuid;
     }
 
-    public Date getPositionTime() {
+    public Instant getPositionTime() {
         return positionTime;
     }
 
-    public void setPositionTime(Date positionTime) {
+    public void setPositionTime(Instant positionTime) {
         this.positionTime = positionTime;
     }
 
-    public Date getUpdated() {
+    public Instant getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Date updated) {
+    public void setUpdated(Instant updated) {
         this.updated = updated;
     }
 

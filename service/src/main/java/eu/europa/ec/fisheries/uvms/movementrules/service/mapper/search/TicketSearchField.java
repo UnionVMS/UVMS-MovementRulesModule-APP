@@ -11,7 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search;
 
-import java.util.Date;
+
+import java.time.Instant;
 
 public enum TicketSearchField {
     TICKET_GUID("guid", TicketSearchTables.TICKET, String.class),
@@ -20,8 +21,8 @@ public enum TicketSearchField {
     RULE_NAME("ruleName", TicketSearchTables.TICKET, String.class),
     RULE_RECIPIENT("recipient", TicketSearchTables.TICKET, String.class),
     STATUS("status", TicketSearchTables.TICKET, String.class),
-    FROM_DATE("createdDate", TicketSearchTables.TICKET, Date.class),
-    TO_DATE("createdDate", TicketSearchTables.TICKET, Date.class),
+    FROM_DATE("createdDate", TicketSearchTables.TICKET, Instant.class),
+    TO_DATE("createdDate", TicketSearchTables.TICKET, Instant.class),
     UPDATED_BY("updatedBy", TicketSearchTables.TICKET, String.class);
 
     private final String fieldName;

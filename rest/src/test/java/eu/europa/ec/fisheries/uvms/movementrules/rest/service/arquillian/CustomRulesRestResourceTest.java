@@ -1,13 +1,13 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
@@ -82,13 +82,13 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
 
         customRule.setName("Actual rule name");
         CustomRuleIntervalType customRuleIntervalType = new CustomRuleIntervalType();
-        customRuleIntervalType.setEnd(RulesUtil.dateToString(new Date()));
+        customRuleIntervalType.setEnd(MRDateUtils.dateToString(Instant.now()));
         customRule.getTimeIntervals().add(customRuleIntervalType);
         response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(500, getReturnCode(response)); //500 since this one is a spontaneous null pointer....
 
 
-        customRuleIntervalType.setStart(RulesUtil.dateToString(new Date(System.currentTimeMillis() + 1000L)));
+        customRuleIntervalType.setStart(MRDateUtils.dateToString(Instant.ofEpochMilli(System.currentTimeMillis() + 1000L)));
         response = getWebTarget().path("/customrules").request(MediaType.APPLICATION_JSON).post(Entity.json(customRule), String.class);
         Assert.assertEquals(511, getReturnCode(response));
 

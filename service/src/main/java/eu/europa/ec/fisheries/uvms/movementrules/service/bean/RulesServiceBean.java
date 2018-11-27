@@ -12,8 +12,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import java.nio.file.AccessDeniedException;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.ejb.Stateless;
@@ -117,8 +117,8 @@ public class RulesServiceBean {
         customRule.getRuleSubscriptionList().addAll(subscriptionEntities);
 
 
-        customRule.setUpdated(new Date());
-        customRule.setStartDate(new Date());
+        customRule.setUpdated(Instant.now());
+        customRule.setStartDate(Instant.now());
         customRule.setGuid(UUID.randomUUID().toString());
 
         rulesDao.createCustomRule(customRule);
@@ -222,7 +222,7 @@ public class RulesServiceBean {
         // Close old version
         oldEntity.setArchived(true);
         oldEntity.setActive(false);
-        oldEntity.setEndDate(new Date());
+        oldEntity.setEndDate(Instant.now());
         // Copy subscription list (ignore if provided)
         // Copy to new array to avoid concurrent modification exception
         List<RuleSubscription> subscriptions = new ArrayList<>(oldEntity.getRuleSubscriptionList());
@@ -232,8 +232,8 @@ public class RulesServiceBean {
             subscription.setCustomRule(newEntity);
         }
 
-        newEntity.setUpdated(new Date());
-        newEntity.setStartDate(new Date());
+        newEntity.setUpdated(Instant.now());
+        newEntity.setStartDate(Instant.now());
         newEntity = rulesDao.createCustomRule(newEntity);
         return newEntity;
     }
@@ -306,7 +306,7 @@ public class RulesServiceBean {
         CustomRule entity = rulesDao.getCustomRuleByGuid(guid);
         entity.setArchived(true);
         entity.setActive(false);
-        entity.setEndDate(new Date());
+        entity.setEndDate(Instant.now());
 
         rulesValidator.updateCustomRules();
         auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, entity.getGuid(), null, username);
@@ -391,7 +391,7 @@ public class RulesServiceBean {
         Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
 
         entity.setStatus(ticket.getStatus());
-        entity.setUpdated(new Date());
+        entity.setUpdated(Instant.now());
         entity.setUpdatedBy(ticket.getUpdatedBy());
 
         rulesDao.updateTicket(entity);
@@ -421,7 +421,7 @@ public class RulesServiceBean {
         List<Ticket> tickets = rulesDao.getTicketList(sql);
         for (Ticket ticket : tickets) {
             ticket.setStatus(status.name());
-            ticket.setUpdated(new Date());
+            ticket.setUpdated(Instant.now());
             ticket.setUpdatedBy(loggedInUser);
 
             rulesDao.updateTicket(ticket);
@@ -467,11 +467,11 @@ public class RulesServiceBean {
     private void createAssetNotSendingTicket(String ruleName, PreviousReport previousReport) {
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(previousReport.getAssetGuid());
-        ticket.setCreatedDate(new Date());
+        ticket.setCreatedDate(Instant.now());
         ticket.setRuleName(ruleName);
         ticket.setRuleGuid(ruleName);
         ticket.setUpdatedBy("UVMS");
-        ticket.setUpdated(new Date());
+        ticket.setUpdated(Instant.now());
         ticket.setStatus(TicketStatusType.OPEN.value());
         ticket.setTicketCount(1L);
         rulesDao.createTicket(ticket);
@@ -485,7 +485,7 @@ public class RulesServiceBean {
         if (ticket == null || ticket.getGuid() == null) {
             throw new IllegalArgumentException("Ticket is null, can not upate status");
         }
-        ticket.setUpdated(new Date());
+        ticket.setUpdated(Instant.now());
 
         // Notify long-polling clients of the update
         ticketUpdateEvent.fire(new NotificationMessage("guid", ticket.getGuid()));

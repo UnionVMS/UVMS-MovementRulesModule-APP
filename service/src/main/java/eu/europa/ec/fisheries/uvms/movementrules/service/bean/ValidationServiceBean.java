@@ -11,8 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -81,7 +81,7 @@ public class ValidationServiceBean  {
     public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails movementDetails, String actions) {
         LOG.info("Performing actions on triggered user rules, rule: {}", ruleName);
 
-        Date auditTimestamp = new Date();
+        Instant auditTimestamp = Instant.now();
 
         // Update last update
         updateLastTriggered(ruleGuid);
@@ -177,7 +177,7 @@ public class ValidationServiceBean  {
             }
 
             CustomRule entity = rulesDao.getCustomRuleByGuid(ruleGuid);
-            entity.setTriggered(new Date());
+            entity.setTriggered(Instant.now());
             rulesDao.updateCustomRule(entity);
 
         } catch (Exception e) {
@@ -368,8 +368,8 @@ public class ValidationServiceBean  {
             ticket.setAssetGuid(fact.getAssetGuid());
             ticket.setMobileTerminalGuid(fact.getMobileTerminalGuid());
             ticket.setChannelGuid(fact.getChannelGuid());
-            ticket.setCreatedDate(new Date());
-            ticket.setUpdated(new Date());
+            ticket.setCreatedDate(Instant.now());
+            ticket.setUpdated(Instant.now());
             ticket.setRuleName(ruleName);
             ticket.setRuleGuid(ruleGuid);
             ticket.setStatus(TicketStatusType.OPEN.value());
@@ -390,7 +390,7 @@ public class ValidationServiceBean  {
 
             ticketEvent.fire(new NotificationMessage("guid", createdTicket.getGuid()));
 
-            // Notify long-polling clients of the change (no vlaue since FE will need to fetch it)
+            // Notify long-polling clients of the change (no value since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, createdTicket.getUpdatedBy());
@@ -410,9 +410,9 @@ public class ValidationServiceBean  {
         return 0;
     }
 
-    private Date auditLog(String msg, Date lastTimestamp) {
-        Date newTimestamp = new Date();
-        long duration = newTimestamp.getTime() - lastTimestamp.getTime();
+    private Instant auditLog(String msg, Instant lastTimestamp) {
+        Instant newTimestamp = Instant.now();
+        long duration = newTimestamp.toEpochMilli() - lastTimestamp.toEpochMilli();
         LOG.info("--> AUDIT - {} {}ms", msg, duration);
         return newTimestamp;
     }

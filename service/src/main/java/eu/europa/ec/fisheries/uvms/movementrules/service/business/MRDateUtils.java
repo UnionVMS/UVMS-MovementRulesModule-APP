@@ -11,36 +11,30 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
-public class RulesUtil {
+public class MRDateUtils {
     
     private static final String FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
-    private RulesUtil() {}
+    private MRDateUtils() {}
     
-    public static Date stringToDate(String dateString) throws ParseException {
-        if (dateString != null) {
-            DateFormat df = new SimpleDateFormat(FORMAT);
-            df.parse(dateString);
-
-            return df.parse(dateString);
+    public static Instant stringToDate(String date){
+        if (date != null) {
+            return ZonedDateTime.parse(date, DateTimeFormatter.ofPattern(FORMAT)).toInstant();   //goes via ZonedDateTime to make sure that it can handle formats other then ISO_INSTANT, for example formats other then 2011-12-03T10:15:30Z and does not cry in pain from a zone
         } else {
             return null;
         }
     }
 
-    public static String dateToString(Date date) {
+    public static String dateToString(Instant date) {
         String dateString = null;
         if (date != null) {
-            DateFormat df = new SimpleDateFormat(FORMAT);
-            df.setTimeZone(TimeZone.getTimeZone("UTC"));
-            dateString = df.format(date);
+            dateString = date.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(FORMAT));
         }
         return dateString;
     }

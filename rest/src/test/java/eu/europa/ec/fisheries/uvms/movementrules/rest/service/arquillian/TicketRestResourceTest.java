@@ -13,7 +13,7 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
@@ -233,7 +233,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
         Date now = new Date(System.currentTimeMillis() - 1000);
         tlc.setKey(TicketSearchKey.FROM_DATE);
-        tlc.setValue(RulesUtil.dateToString(now));
+        tlc.setValue(MRDateUtils.dateToString(now.toInstant()));
 
         CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
         customRule.setGuid(UUID.randomUUID().toString());

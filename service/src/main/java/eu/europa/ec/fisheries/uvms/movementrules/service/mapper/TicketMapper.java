@@ -11,14 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 public class TicketMapper {
@@ -34,8 +32,8 @@ public class TicketMapper {
         ticketType.setChannelGuid(ticketEntity.getChannelGuid());
         ticketType.setGuid(ticketEntity.getGuid());
         ticketType.setStatus(TicketStatusType.valueOf(ticketEntity.getStatus()));
-        ticketType.setOpenDate(DateUtils.dateToString(ticketEntity.getCreatedDate()));
-        ticketType.setUpdated(DateUtils.dateToString(ticketEntity.getUpdated()));
+        ticketType.setOpenDate(MRDateUtils.dateToString(ticketEntity.getCreatedDate()));
+        ticketType.setUpdated(MRDateUtils.dateToString(ticketEntity.getUpdated()));
         ticketType.setUpdatedBy(ticketEntity.getUpdatedBy());
         ticketType.setRuleGuid(ticketEntity.getRuleGuid());
         ticketType.setMovementGuid(ticketEntity.getMovementGuid());
@@ -54,9 +52,9 @@ public class TicketMapper {
         ticketEntity.setChannelGuid(ticketType.getChannelGuid());
         ticketEntity.setGuid(ticketType.getGuid());
         ticketEntity.setStatus(ticketType.getStatus().name());
-        ticketEntity.setCreatedDate(DateUtils.stringToDate(ticketType.getOpenDate()));
+        ticketEntity.setCreatedDate(MRDateUtils.stringToDate(ticketType.getOpenDate()));
         ticketEntity.setRuleGuid(ticketType.getRuleGuid());
-        ticketEntity.setUpdated(new Date());
+        ticketEntity.setUpdated(Instant.now());
         ticketEntity.setUpdatedBy(ticketType.getUpdatedBy());
         ticketEntity.setMovementGuid(ticketType.getMovementGuid());
         ticketEntity.setRuleName(ticketType.getRuleName());

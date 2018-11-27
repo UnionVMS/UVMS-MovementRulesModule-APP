@@ -11,15 +11,16 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search;
 
-import java.util.Date;
+
+import java.time.Instant;
 
 public enum AlarmSearchField {
     ALARM_GUID("guid", AlarmSearchTables.ALARM_REPORT, String.class),
     ASSET_GUID("assetGuid", AlarmSearchTables.ALARM_REPORT, String.class),
     STATUS("status", AlarmSearchTables.ALARM_REPORT, String.class),
     RULE_RECIPIENT("recipient", AlarmSearchTables.ALARM_REPORT, String.class),
-    FROM_DATE("createdDate", AlarmSearchTables.ALARM_REPORT, Date.class),
-    TO_DATE("createdDate", AlarmSearchTables.ALARM_REPORT, Date.class),
+    FROM_DATE("createdDate", AlarmSearchTables.ALARM_REPORT, Instant.class),
+    TO_DATE("createdDate", AlarmSearchTables.ALARM_REPORT, Instant.class),
     RULE_GUID("ruleGuid", AlarmSearchTables.ALARM_ITEM, String.class),
     RULE_NAME("ruleName", AlarmSearchTables.ALARM_ITEM, String.class);
 

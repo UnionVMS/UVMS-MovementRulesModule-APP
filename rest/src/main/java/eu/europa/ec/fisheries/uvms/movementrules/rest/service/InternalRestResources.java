@@ -39,7 +39,11 @@ public class InternalRestResources {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response evaluateCustomRules(MovementDetails movementDetails) {
-        customRuleEvaluator.evaluate(movementDetails);
-        return Response.ok().build();
+        try {
+            customRuleEvaluator.evaluate(movementDetails);
+            return Response.ok().build();
+        }catch(Exception e){
+            return Response.serverError().entity(e).build();
+        }
     }
 }

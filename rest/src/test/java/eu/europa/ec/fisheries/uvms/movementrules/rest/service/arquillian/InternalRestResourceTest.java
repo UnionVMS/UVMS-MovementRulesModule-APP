@@ -3,8 +3,9 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -155,7 +156,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         movementDetails.setConnectId(UUID.randomUUID().toString());
         movementDetails.setLatitude(11d);
         movementDetails.setLongitude(56d);
-        movementDetails.setPositionTime(new Date());
+        movementDetails.setPositionTime(Instant.now());
         movementDetails.setSource("INMARSAT_C");
         movementDetails.setAssetGuid(UUID.randomUUID().toString());
         movementDetails.setFlagState("SWE");

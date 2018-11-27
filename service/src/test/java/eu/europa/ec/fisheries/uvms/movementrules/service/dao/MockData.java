@@ -11,8 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.dao;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
@@ -25,6 +25,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
@@ -32,7 +33,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 
 public class MockData {
 
-    private static final Date A_DATE = new Date(1441065600000l);
+    private static final Instant A_DATE = Instant.ofEpochMilli(1441065600000l);
     private static final String ACTION_SEND_TO_ENDPOINT = "SEND_TO_FLUX";
     private static final String ACTION_EMAIL = "EMAIL";
     private static final String GUID = "DummyGuid";
@@ -49,7 +50,7 @@ public class MockData {
         dto.setDescription(DESCRIPTION);
         dto.setActive(true);
         dto.setArchived(false);
-        dto.setLastTriggered(DateUtils.dateToString(A_DATE));
+        dto.setLastTriggered(MRDateUtils.dateToString(A_DATE));
         dto.setUpdatedBy("UVMS");
 
         // Actions
@@ -109,12 +110,12 @@ public class MockData {
 
         // Intervals
         CustomRuleIntervalType interval1 = new CustomRuleIntervalType();
-        interval1.setStart(DateUtils.dateToString(A_DATE));
-        interval1.setEnd(DateUtils.dateToString(A_DATE));
+        interval1.setStart(MRDateUtils.dateToString(A_DATE));
+        interval1.setEnd(MRDateUtils.dateToString(A_DATE));
 
         CustomRuleIntervalType interval2 = new CustomRuleIntervalType();
-        interval2.setStart(DateUtils.dateToString(A_DATE));
-        interval2.setEnd(DateUtils.dateToString(A_DATE));
+        interval2.setStart(MRDateUtils.dateToString(A_DATE));
+        interval2.setEnd(MRDateUtils.dateToString(A_DATE));
 
         dto.getTimeIntervals().add(interval1);
         dto.getTimeIntervals().add(interval2);

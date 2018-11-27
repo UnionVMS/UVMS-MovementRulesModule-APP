@@ -12,8 +12,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -29,8 +29,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
@@ -76,12 +74,10 @@ public class CustomRule implements Serializable {
     private String organisation;    //exists in Type, same name
 
     @Column(name = "rule_startdate")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startDate;         //exists in Type as the value timeIntervals
+    private Instant startDate;         //exists in Type as the value timeIntervals
 
     @Column(name = "rule_enddate")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date endDate;           //exists in Type as the value timeIntervals
+    private Instant endDate;           //exists in Type as the value timeIntervals
 
     @Column(name = "rule_active")
     private Boolean active;         //exists in Type, same name     TODO: Make requires not null
@@ -90,13 +86,11 @@ public class CustomRule implements Serializable {
     private Boolean archived;       //exists in Type, same name     TODO: Make requires not null
 
     @Column(name = "rule_lasttriggered")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date triggered;         //exists in Type names lastTriggered
+    private Instant triggered;         //exists in Type names lastTriggered
 
     @Column(name = "rule_updattim")
     @NotNull
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;           //exists in Type, same name
+    private Instant updated;           //exists in Type, same name
 
     @Column(name = "rule_upuser")
     @NotNull
@@ -172,19 +166,19 @@ public class CustomRule implements Serializable {
         this.organisation = organisation;
     }
 
-    public Date getStartDate() {
+    public Instant getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(Instant startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public Instant getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(Instant endDate) {
         this.endDate = endDate;
     }
 
@@ -204,19 +198,19 @@ public class CustomRule implements Serializable {
         this.archived = archived;
     }
 
-    public Date getTriggered() {
+    public Instant getTriggered() {
         return triggered;
     }
 
-    public void setTriggered(Date triggered) {
+    public void setTriggered(Instant triggered) {
         this.triggered = triggered;
     }
 
-    public Date getUpdated() {
+    public Instant getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Date updated) {
+    public void setUpdated(Instant updated) {
         this.updated = updated;
     }
 

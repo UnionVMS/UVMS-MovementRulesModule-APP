@@ -19,7 +19,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.CustomRuleDto;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesUtil;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
@@ -256,7 +256,7 @@ public class CustomRuleParser {
                 // Remove quotations (event though there shouldn't be any) from the value, since it totally messes up the rule engine
                 String value = segment.getValue().replace("\"","");
                 if (segment.getSubCriteria().equals(SubCriteriaType.POSITION_REPORT_TIME.value())) {
-                    sb.append("RulesUtil.stringToDate(\"");
+                    sb.append("MRDateUtils.stringToDate(\"");
                     sb.append(value);
                     sb.append("\")");
                 } else  {
@@ -348,8 +348,8 @@ public class CustomRuleParser {
         StringBuilder sb = new StringBuilder();
         if (interval.getStart() != null) {
             // TODO find a better solution than date to string to date conversion
-            String start = RulesUtil.dateToString(interval.getStart());
-            sb.append("RulesUtil.stringToDate(\"");
+            String start = MRDateUtils.dateToString(interval.getStart());
+            sb.append("MRDateUtils.stringToDate(\"");
             sb.append(start);
             sb.append("\")");
             sb.append(" <= positionTime");
@@ -360,9 +360,9 @@ public class CustomRuleParser {
         }
 
         if (interval.getEnd() != null) {
-            String end = RulesUtil.dateToString(interval.getEnd());
+            String end = MRDateUtils.dateToString(interval.getEnd());
             sb.append("positionTime <= ");
-            sb.append("RulesUtil.stringToDate(\"");
+            sb.append("MRDateUtils.stringToDate(\"");
             sb.append(end);
             sb.append("\")");
         }
