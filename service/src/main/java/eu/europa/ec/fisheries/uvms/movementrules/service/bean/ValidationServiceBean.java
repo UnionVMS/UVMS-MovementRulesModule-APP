@@ -83,7 +83,8 @@ public class ValidationServiceBean  {
 
         Instant auditTimestamp = Instant.now();
 
-        // Update last update
+        // Update last update 
+        // TODO check if this is needed
         updateLastTriggered(ruleGuid);
         auditTimestamp = auditLog("Time to update last triggered:", auditTimestamp);
 
@@ -191,35 +192,11 @@ public class ValidationServiceBean  {
         try {
             MovementType exchangeMovement = ExchangeMovementMapper.mapToExchangeMovementType(movementDetails);
 
-            FindOrganisationsResponse userResponse = userService.findOrganisation(endpoint);
-
-            List<RecipientInfoType> recipientInfoList = new ArrayList<>();
-
-            List<Organisation> organisations = userResponse.getOrganisation();
-            for (Organisation organisation : organisations) {
-                List<EndPoint> endPoints = organisation.getEndPoints();
-                for (EndPoint endPoint : endPoints) {
-                    RecipientInfoType recipientInfo = new RecipientInfoType();
-                    recipientInfo.setKey(endPoint.getName());
-                    recipientInfo.setValue(endPoint.getUri());
-                    recipientInfoList.add(recipientInfo);
-                }
-            }
-         
-            // TODO this should be handled in Exchange
-//            List<ServiceResponseType> pluginList = exchangeService.getPluginList(pluginType);
-//            if (pluginList != null && !pluginList.isEmpty()) {
-//                for (ServiceResponseType service : pluginList) {
-//                    if (StatusType.STOPPED.equals(service.getStatus())) {
-//                        LOG.info("Service {} was Stopped, trying the next one, if possible.", service.getName());
-//                        continue;
-//                    }
-            exchangeService.sendReportToPlugin(pluginType, ruleName, endpoint, exchangeMovement, recipientInfoList, movementDetails);
+            exchangeService.sendReportToPlugin(pluginType, ruleName, endpoint, exchangeMovement, new ArrayList<>(), movementDetails);
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, endpoint, "UVMS");
-//                }
-//            }
-        } catch (ExchangeModelMapperException | MessageException | ModelMarshallException | MovementRulesModelMarshallException e) {
+
+        } catch (ExchangeModelMapperException | MessageException e) {
             LOG.error("[ Failed to send to endpoint! ] {}", e.getMessage());
         }
         
