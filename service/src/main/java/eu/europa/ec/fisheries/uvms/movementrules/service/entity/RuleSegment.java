@@ -62,6 +62,21 @@ public class RuleSegment implements Serializable {  //Type class is customRuleSe
     @ManyToOne(fetch = FetchType.LAZY)
     private CustomRule customRule;  //does not exist in type
 
+    public RuleSegment copy (CustomRule newCustomRule){
+        RuleSegment rs = new RuleSegment();
+        rs.setStartOperator(startOperator);
+        rs.setCriteria(criteria);
+        rs.setSubCriteria(subCriteria);
+        rs.setCondition(condition);
+        rs.setValue(value);
+        rs.setEndOperator(endOperator);
+        rs.setLogicOperator(logicOperator);
+        rs.setOrder(order);
+
+        rs.setCustomRule(newCustomRule);
+        return rs;
+    }
+
     public UUID getId() {
         return id;
     }

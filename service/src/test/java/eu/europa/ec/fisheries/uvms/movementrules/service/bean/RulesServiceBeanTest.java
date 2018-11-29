@@ -2,10 +2,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+
 import java.nio.file.AccessDeniedException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -331,7 +329,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         createdCustomRule.setDescription(newDescription);
         CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule);
         assertThat(updatedCustomRule.getDescription(), is(newDescription));
-        assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+        assertNotEquals(updatedCustomRule.getGuid(),createdCustomRule.getGuid());
         assertThat(updatedCustomRule.getRuleSegmentList().size(), is(createdCustomRule.getRuleSegmentList().size()));
     }
 
@@ -356,7 +354,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         createdCustomRule.setDescription(newDescription);
         CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule);
         assertThat(updatedCustomRule.getDescription(), is(newDescription));
-        assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+        assertNotEquals(updatedCustomRule.getGuid(), createdCustomRule.getGuid());
         assertThat(updatedCustomRule.getRuleSegmentList().size(), is(createdCustomRule.getRuleSegmentList().size()));
         assertEquals(updatedCustomRule.getRuleSegmentList().get(0), createdCustomRule.getRuleSegmentList().get(0));
     }
@@ -370,7 +368,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         createdCustomRule.setDescription(newDescription);
         CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule, "", "");
         assertThat(updatedCustomRule.getDescription(), is(newDescription));
-        assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+        assertNotEquals(updatedCustomRule.getGuid(), createdCustomRule.getGuid());
     }
 
     @Test

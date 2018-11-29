@@ -99,6 +99,33 @@ public class CustomRule implements Serializable {
     private Instant lastTriggered;
 
 
+    public CustomRule copy(){
+        CustomRule copy = new CustomRule();
+        copy.setName(name);
+        copy.setDescription(description);
+        copy.setAvailability(availability);
+        copy.setOrganisation(organisation);
+        copy.setStartDate(startDate);
+        copy.setEndDate(endDate);
+        copy.setActive(active);
+        copy.setArchived(archived);
+        copy.setUpdated(updated);
+        copy.setUpdatedBy(updatedBy);
+
+        for (RuleSegment rs: ruleSegmentList) {
+            copy.getRuleSegmentList().add(rs.copy(copy));
+        }
+        for (RuleAction ra: ruleActionList) {
+            copy.getRuleActionList().add(ra.copy(copy));
+        }
+
+        for (Interval i : intervals) {
+            copy.getIntervals().add(i.copy(copy));
+        }
+
+        return copy;
+    }
+
     public UUID getGuid() {
         return guid;
     }

@@ -47,6 +47,16 @@ public class RuleAction implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private CustomRule customRule;
 
+    public RuleAction copy(CustomRule newCustomRule){
+        RuleAction copy = new RuleAction();
+        copy.setAction(action);
+        copy.setValue(value);
+        copy.setOrder(order);
+        copy.setCustomRule(newCustomRule);
+
+        return copy;
+    }
+
     public UUID getId() {
         return id;
     }

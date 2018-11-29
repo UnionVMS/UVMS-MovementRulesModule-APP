@@ -120,12 +120,13 @@ public class CustomRuleMapper {
     }
 
     public static CustomRule toCustomRuleEntity(CustomRule customRuleEntity, CustomRuleType customRuleType) {
-        //Date now = DateUtils.nowUTC().toGregorianCalendar().getTime();   //just writing new Date() is apperently way to simple.......
 
         Instant now = Instant.now();
         // Base
         customRuleEntity.setName(customRuleType.getName());
-        customRuleEntity.setGuid(UUID.fromString(customRuleType.getGuid()));     //why was this not here from the beginning ?!?!?!?  Well because in its usage it was stored elsewhere and then given a new guid......
+        if(customRuleType.getGuid() != null) {
+            customRuleEntity.setGuid(UUID.fromString(customRuleType.getGuid()));     //why was this not here from the beginning ?!?!?!?  Well because in its usage it was stored elsewhere and then given a new guid......
+        }
         customRuleEntity.setAvailability(customRuleType.getAvailability().value());
         customRuleEntity.setDescription(customRuleType.getDescription());
         customRuleEntity.setActive(customRuleType.isActive());

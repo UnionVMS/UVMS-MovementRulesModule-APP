@@ -59,7 +59,6 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
 
         // Create a CustomRule
         CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setGuid(UUID.randomUUID());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("TestUser");
         RuleSubscription ruleSubscription = new RuleSubscription();

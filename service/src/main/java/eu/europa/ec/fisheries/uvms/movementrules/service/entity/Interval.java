@@ -45,6 +45,15 @@ public class Interval implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private CustomRule customRule;
 
+    public Interval copy (CustomRule newCustomRule){
+        Interval copy = new Interval();
+        copy.setStart(start);
+        copy.setEnd(end);
+        copy.setCustomRule(newCustomRule);
+
+        return copy;
+    }
+
     public UUID getId() {
         return id;
     }

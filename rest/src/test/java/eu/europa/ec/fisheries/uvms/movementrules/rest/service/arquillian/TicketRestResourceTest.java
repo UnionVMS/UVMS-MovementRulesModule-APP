@@ -62,7 +62,6 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         Ticket ticket = RulesTestHelper.getCompleteTicket();
 
         CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setGuid(UUID.randomUUID());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("testUser");
         RuleSubscription ruleSubscription = new RuleSubscription();
@@ -210,7 +209,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         TicketQuery ticketQuery = new TicketQuery();
         TicketListCriteria tlc = new TicketListCriteria();
         tlc.setKey(TicketSearchKey.TICKET_GUID);
-        tlc.setValue("Test Guid");
+        tlc.setValue(UUID.randomUUID().toString());
         ticketQuery.getTicketSearchCriteria().add(tlc);
         ListPagination lp = new ListPagination();
         lp.setPage(1);
@@ -236,7 +235,6 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         tlc.setValue(MRDateUtils.dateToString(now.toInstant()));
 
         CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setGuid(UUID.randomUUID());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("vms_admin_com");
         RuleSubscription ruleSubscription = new RuleSubscription();
@@ -291,7 +289,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
         TicketType responseTicket = RulesTestHelper.deserializeResponseDto(response, TicketType.class);
         assertNotNull(responseTicket);
-        assertEquals(ticket.getGuid(), responseTicket.getGuid());
+        assertEquals(ticket.getGuid().toString(), responseTicket.getGuid());
 
         rulesDao.removeTicketAfterTests(ticket);
     }
@@ -308,7 +306,6 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         assertEquals(0 , ticketList.intValue());
 
         CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setGuid(UUID.randomUUID());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("TestUser");
         RuleSubscription ruleSubscription = new RuleSubscription();

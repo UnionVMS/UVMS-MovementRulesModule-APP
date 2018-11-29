@@ -215,6 +215,8 @@ public class RulesServiceBean {
 
         CustomRule oldEntity = getCustomRuleByGuid(newEntity.getGuid());
 
+        CustomRule copiedNewEntity = newEntity.copy();
+
 
         // Close old version
         oldEntity.setArchived(true);
@@ -225,14 +227,15 @@ public class RulesServiceBean {
         List<RuleSubscription> subscriptions = new ArrayList<>(oldEntity.getRuleSubscriptionList());
         for (RuleSubscription subscription : subscriptions) {
             rulesDao.detachSubscription(subscription);
-            newEntity.getRuleSubscriptionList().add(subscription);
-            subscription.setCustomRule(newEntity);
+            copiedNewEntity.getRuleSubscriptionList().add(subscription);
+            subscription.setCustomRule(copiedNewEntity);
         }
 
-        newEntity.setUpdated(Instant.now());
-        newEntity.setStartDate(Instant.now());
-        newEntity = rulesDao.createCustomRule(newEntity);
-        return newEntity;
+        copiedNewEntity.setUpdated(Instant.now());
+        copiedNewEntity.setStartDate(Instant.now());
+        copiedNewEntity.setGuid(null);
+        copiedNewEntity = rulesDao.createCustomRule(copiedNewEntity);
+        return copiedNewEntity;
     }
 
     public CustomRule updateCustomRule(CustomRule oldCustomRule) {

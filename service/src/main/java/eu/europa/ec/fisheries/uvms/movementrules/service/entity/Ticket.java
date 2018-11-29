@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
         @NamedQuery(name = Ticket.FIND_TICKETS_BY_MOVEMENTS, query = "SELECT t FROM Ticket t where t.movementGuid IN :movements"),
         @NamedQuery(name = Ticket.COUNT_OPEN_TICKETS, query = "SELECT count(t) FROM Ticket t where t.status = 'OPEN' AND t.ruleGuid IN :validRuleGuids"),
         @NamedQuery(name = Ticket.COUNT_TICKETS_BY_MOVEMENTS, query = "SELECT count(t) FROM Ticket t where t.movementGuid IN :movements"),
-        @NamedQuery(name = Ticket.COUNT_ASSETS_NOT_SENDING, query = "SELECT count(t) FROM Ticket t where t.guid = :ruleGuid"),
+        @NamedQuery(name = Ticket.COUNT_ASSETS_NOT_SENDING, query = "SELECT count(t) FROM Ticket t where t.ruleGuid = :ruleGuid"),
         @NamedQuery(name = Ticket.FIND_LATEST_TICKET_FOR_RULE, query = "SELECT t FROM Ticket t WHERE t.ruleGuid = :ruleGuid ORDER BY t.createdDate DESC")
 })
 public class Ticket implements Serializable {
