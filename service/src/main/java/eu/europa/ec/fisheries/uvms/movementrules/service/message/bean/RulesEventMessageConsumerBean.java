@@ -21,7 +21,8 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbException;
+import javax.xml.bind.JAXBException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -32,7 +33,6 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
@@ -86,10 +86,10 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                     break;
             }
 
-        } catch (MovementRulesModelMarshallException | MessageException e) {
+        } catch (MessageException e) {
             LOG.error("[ Error when receiving message in rules: {}]", e);
             rulesProducer.sendModuleErrorResponseMessage(MovementRulesModuleResponseMapper.createFaultMessage(FaultCode.RULES_MESSAGE, "Error when receiving message in rules:" + e), textMessage);
-        } catch (JMSException e) {
+        } catch (JMSException | JAXBException e) {
             throw new IllegalArgumentException("Could not read message text", e);
         } finally {
             MDC.remove("clientName");

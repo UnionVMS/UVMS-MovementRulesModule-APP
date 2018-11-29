@@ -35,8 +35,6 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
@@ -53,7 +51,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.exception.RulesServiceException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchFieldMapper;
@@ -93,7 +90,7 @@ public class RulesServiceBean {
     @TicketCountEvent
     private Event<NotificationMessage> ticketCountEvent;
 
-    public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, MovementRulesModelMarshallException, ModelMarshallException, MessageException {
+    public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws AccessDeniedException, ModelMarshallException, MessageException {
         // Get organisation of user
         String organisationName = userService.getOrganisationName(customRule.getUpdatedBy());
         if (organisationName != null) {
@@ -181,7 +178,7 @@ public class RulesServiceBean {
         return customRuleListByQuery;
     }
 
-    public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, MovementRulesModelMarshallException, MessageException, AccessDeniedException, RulesServiceException {
+    public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, MessageException, AccessDeniedException {
         // Get organisation of user
         String organisationName = userService.getOrganisationName(oldCustomRule.getUpdatedBy());
         if (organisationName != null) {
@@ -289,7 +286,7 @@ public class RulesServiceBean {
         return customRuleEntity;
     }
 
-    public CustomRule deleteCustomRule(String guidString, String username, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, MovementRulesModelMapperException {
+    public CustomRule deleteCustomRule(String guidString, String username, String featureName, String applicationName) throws AccessDeniedException {
         LOG.info("[INFO] Deleting custom rule by guid: {}.", guidString);
         if (guidString == null) {
             throw new IllegalArgumentException("No custom rule to remove");

@@ -14,49 +14,56 @@ package eu.europa.ec.fisheries.uvms.movementrules.model.mapper;
 import java.util.List;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import javax.xml.bind.JAXBException;
+
 import eu.europa.ec.fisheries.schema.movementrules.common.v1.RulesFault;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesFaultException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 
 public class MovementRulesModuleResponseMapper {
     
     private MovementRulesModuleResponseMapper() {}
 
-    private static void validateResponse(TextMessage response, String correlationId) throws MovementRulesModelMapperException, JMSException, MovementRulesFaultException {
+    private static void validateResponse(TextMessage response, String correlationId) throws JMSException {
 
         if (response == null) {
-            throw new MovementRulesModelMapperException("Error when validating response in ResponseMapper: Reesponse is Null");
+            throw new IllegalArgumentException("Error when validating response in ResponseMapper: Reesponse is Null");
         }
 
         if (response.getJMSCorrelationID() == null) {
-            throw new MovementRulesModelMapperException("No corelationId in response (Null) . Expected was: " + correlationId);
+            throw new IllegalArgumentException("No corelationId in response (Null) . Expected was: " + correlationId);
         }
 
         if (!correlationId.equalsIgnoreCase(response.getJMSCorrelationID())) {
-            throw new MovementRulesModelMapperException("Wrong corelationId in response. Expected was: " + correlationId + "But actual was: " + response.getJMSCorrelationID());
+            throw new IllegalArgumentException("Wrong corelationId in response. Expected was: " + correlationId + "But actual was: " + response.getJMSCorrelationID());
         }
 
         try {
             RulesFault rulesFault = JAXBMarshaller.unmarshallTextMessage(response, RulesFault.class);
-            throw new MovementRulesFaultException(response.getText(), rulesFault);
-        } catch (MovementRulesModelMarshallException e) {
+            throw new RuntimeException(response.getText());
+        } catch (JAXBException e) {
             // All is well
         }
     }
 
-    public static GetTicketsAndRulesByMovementsResponse mapToGetTicketsAndRulesByMovementsFromResponse(TextMessage message) throws MovementRulesModelMapperException, JMSException, MovementRulesFaultException {
-        validateResponse(message, message.getJMSCorrelationID());
-        return JAXBMarshaller.unmarshallTextMessage(message, GetTicketsAndRulesByMovementsResponse.class);
+    public static GetTicketsAndRulesByMovementsResponse mapToGetTicketsAndRulesByMovementsFromResponse(TextMessage message) throws  JMSException {
+        try {
+            validateResponse(message, message.getJMSCorrelationID());
+            return JAXBMarshaller.unmarshallTextMessage(message, GetTicketsAndRulesByMovementsResponse.class);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static String getTicketsAndRulesByMovementsResponse(List<TicketAndRuleType> ticketAndRuleType) throws MovementRulesModelMapperException {
-        GetTicketsAndRulesByMovementsResponse response = new GetTicketsAndRulesByMovementsResponse();
-        response.getTicketsAndRules().addAll(ticketAndRuleType);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    public static String getTicketsAndRulesByMovementsResponse(List<TicketAndRuleType> ticketAndRuleType) {
+        try {
+            GetTicketsAndRulesByMovementsResponse response = new GetTicketsAndRulesByMovementsResponse();
+            response.getTicketsAndRules().addAll(ticketAndRuleType);
+            return JAXBMarshaller.marshallJaxBObjectToString(response);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static RulesFault createFaultMessage(FaultCode code, String message) {

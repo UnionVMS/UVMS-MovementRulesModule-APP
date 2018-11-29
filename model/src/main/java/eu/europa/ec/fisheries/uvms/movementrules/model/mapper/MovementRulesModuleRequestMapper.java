@@ -17,26 +17,36 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesB
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
+
+import javax.xml.bind.JAXBException;
 
 public class MovementRulesModuleRequestMapper {
 
     private MovementRulesModuleRequestMapper() {}
     
-    public static String createSetMovementReportRequest(PluginType type, RawMovementType rawMovementType, String username) throws MovementRulesModelMapperException {
-        SetMovementReportRequest request = new SetMovementReportRequest();
-        request.setMethod(RulesModuleMethod.SET_MOVEMENT_REPORT);
-        request.setType(type);
-        request.setUsername(username);
-        request.setRequest(rawMovementType);
-        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    public static String createSetMovementReportRequest(PluginType type, RawMovementType rawMovementType, String username) {
+        try {
+
+            SetMovementReportRequest request = new SetMovementReportRequest();
+            request.setMethod(RulesModuleMethod.SET_MOVEMENT_REPORT);
+            request.setType(type);
+            request.setUsername(username);
+            request.setRequest(rawMovementType);
+            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static String createGetTicketsAndRulesByMovementsRequest(List<String> movementsGuids) throws MovementRulesModelMarshallException {
-        GetTicketsAndRulesByMovementsRequest request = new GetTicketsAndRulesByMovementsRequest();
-        request.setMethod(RulesModuleMethod.GET_TICKETS_AND_RULES_BY_MOVEMENTS);
-        request.getMovementGuids().addAll(movementsGuids);
-        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    public static String createGetTicketsAndRulesByMovementsRequest(List<String> movementsGuids) {
+        try {
+            GetTicketsAndRulesByMovementsRequest request = new GetTicketsAndRulesByMovementsRequest();
+            request.setMethod(RulesModuleMethod.GET_TICKETS_AND_RULES_BY_MOVEMENTS);
+            request.getMovementGuids().addAll(movementsGuids);
+
+            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
