@@ -20,6 +20,8 @@ import java.util.UUID;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -34,6 +36,8 @@ import org.hibernate.annotations.GenericGenerator;
         @NamedQuery(name = CustomRule.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, query = "SELECT r.guid FROM CustomRule r LEFT OUTER JOIN r.ruleSubscriptionList s WHERE r.availability = 'GLOBAL' OR (s.owner = :owner AND s.type='TICKET')")
 })
 //@formatter:on
+@DynamicUpdate
+@DynamicInsert
 public class CustomRule implements Serializable {
     
     public static final String GET_RUNNABLE_CUSTOM_RULES = "CustomRule.getValidCustomRule";
