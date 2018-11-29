@@ -2,10 +2,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+
 import java.nio.file.AccessDeniedException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -104,7 +102,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         assertThat(createdCustomRule.getGuid(), is(notNullValue()));
-        Long createdIntervalId = createdCustomRule.getIntervals().get(0).getId();
+        UUID createdIntervalId = createdCustomRule.getIntervals().get(0).getId();
         assertThat(createdIntervalId, is(notNullValue()));
     }
 
@@ -112,7 +110,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
     @OperateOnDeployment ("normal")
     public void getCustomRuleByDummyGuidTest() throws Exception{   //a get with proper input exists among the rest tests
         try {
-            rulesService.getCustomRuleByGuid("dummyGuid");
+            rulesService.getCustomRuleByGuid(UUID.randomUUID());
             fail();
         }catch (EJBTransactionRolledbackException e){
             Assert.assertTrue(true);
@@ -151,7 +149,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         List<CustomRule> runnableCustomRulesAfter = rulesService.getRunnableCustomRules();
         assertThat(runnableCustomRulesAfter.size(), is(runnableCustomRulesBefore.size() + 1));
 
-        rulesService.deleteCustomRule(createdCustomRule.getGuid(), "Test", "", "");
+        rulesService.deleteCustomRule(createdCustomRule.getGuid().toString(), "Test", "", "");
 
         List<CustomRule> runnableCustomRulesAfterDelete = rulesService.getRunnableCustomRules();
         assertThat(runnableCustomRulesAfterDelete.size(), is(runnableCustomRulesBefore.size()));
@@ -166,7 +164,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRuleQuery query = RulesTestHelper.createBasicCustomRuleQuery();
         CustomRuleListCriteria criteria = new CustomRuleListCriteria();
         criteria.setKey(CustomRuleSearchKey.GUID);
-        criteria.setValue(createdCustomRule.getGuid());
+        criteria.setValue(createdCustomRule.getGuid().toString());
         query.getCustomRuleSearchCriteria().add(criteria);
 
         CustomRuleListResponseDto customRulesResponse = rulesService.getCustomRulesByQuery(query);
@@ -193,11 +191,11 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRuleQuery query = RulesTestHelper.createBasicCustomRuleQuery();
         CustomRuleListCriteria criteria = new CustomRuleListCriteria();
         criteria.setKey(CustomRuleSearchKey.GUID);
-        criteria.setValue(createdCustomRule.getGuid());
+        criteria.setValue(createdCustomRule.getGuid().toString());
         query.getCustomRuleSearchCriteria().add(criteria);
         CustomRuleListCriteria criteria2 = new CustomRuleListCriteria();
         criteria2.setKey(CustomRuleSearchKey.GUID);
-        criteria2.setValue(createdCustomRule2.getGuid());
+        criteria2.setValue(createdCustomRule2.getGuid().toString());
         query.getCustomRuleSearchCriteria().add(criteria2);
 
 
@@ -300,7 +298,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
 
-        input.setGuid("dummyGuid");
+        input.setGuid(UUID.randomUUID()); //dummy guid
 
         userTransaction.rollback();
         userTransaction.begin();
@@ -331,7 +329,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         createdCustomRule.setDescription(newDescription);
         CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule);
         assertThat(updatedCustomRule.getDescription(), is(newDescription));
-        assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+        assertNotEquals(updatedCustomRule.getGuid(),createdCustomRule.getGuid());
         assertThat(updatedCustomRule.getRuleSegmentList().size(), is(createdCustomRule.getRuleSegmentList().size()));
     }
 
@@ -356,7 +354,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         createdCustomRule.setDescription(newDescription);
         CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule);
         assertThat(updatedCustomRule.getDescription(), is(newDescription));
-        assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+        assertNotEquals(updatedCustomRule.getGuid(), createdCustomRule.getGuid());
         assertThat(updatedCustomRule.getRuleSegmentList().size(), is(createdCustomRule.getRuleSegmentList().size()));
         assertEquals(updatedCustomRule.getRuleSegmentList().get(0), createdCustomRule.getRuleSegmentList().get(0));
     }
@@ -370,7 +368,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         createdCustomRule.setDescription(newDescription);
         CustomRule updatedCustomRule = rulesService.updateCustomRule(createdCustomRule, "", "");
         assertThat(updatedCustomRule.getDescription(), is(newDescription));
-        assertThat(updatedCustomRule.getGuid(), is(createdCustomRule.getGuid()));
+        assertNotEquals(updatedCustomRule.getGuid(), createdCustomRule.getGuid());
     }
 
     @Test
@@ -459,7 +457,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         newRule = rulesService.createCustomRule(newRule, "test", "test");
         Assert.assertNotNull(newRule.getGuid());
 
-        input.setRuleGuid(newRule.getGuid());
+        input.setRuleGuid(newRule.getGuid().toString());
 
         input.setOperation(SubscritionOperationType.ADD);
         CustomRule output = rulesService.updateSubscription(input, null);
@@ -501,13 +499,13 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         Ticket ticket = getBasicTicket();
-        ticket.setRuleGuid(createdCustomRule.getGuid());
+        ticket.setRuleGuid(createdCustomRule.getGuid().toString());
         Ticket createdTicket = rulesDao.createTicket(ticket);
         
         TicketQuery query = RulesTestHelper.getBasicTicketQuery();
         TicketListCriteria criteria = new TicketListCriteria();
         criteria.setKey(TicketSearchKey.TICKET_GUID);
-        criteria.setValue(createdTicket.getGuid());
+        criteria.setValue(createdTicket.getGuid().toString());
         query.getTicketSearchCriteria().add(criteria);
         TicketListResponseDto ticketList = rulesService.getTicketList(user, query);
         List<Ticket> tickets = ticketList.getTicketList();
@@ -523,21 +521,21 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         Ticket ticket = getBasicTicket();
-        ticket.setRuleGuid(createdCustomRule.getGuid());
+        ticket.setRuleGuid(createdCustomRule.getGuid().toString());
         Ticket createdTicket = rulesDao.createTicket(ticket);
         
         Ticket ticket2 = getBasicTicket();
-        ticket2.setRuleGuid(createdCustomRule.getGuid());
+        ticket2.setRuleGuid(createdCustomRule.getGuid().toString());
         Ticket createdTicket2 = rulesDao.createTicket(ticket2);
         
         TicketQuery query = RulesTestHelper.getBasicTicketQuery();
         TicketListCriteria criteria = new TicketListCriteria();
         criteria.setKey(TicketSearchKey.TICKET_GUID);
-        criteria.setValue(createdTicket.getGuid());
+        criteria.setValue(createdTicket.getGuid().toString());
         query.getTicketSearchCriteria().add(criteria);
         TicketListCriteria criteria2 = new TicketListCriteria();
         criteria2.setKey(TicketSearchKey.TICKET_GUID);
-        criteria2.setValue(createdTicket2.getGuid());
+        criteria2.setValue(createdTicket2.getGuid().toString());
         query.getTicketSearchCriteria().add(criteria2);
         TicketListResponseDto ticketList = rulesService.getTicketList(user, query);
         List<Ticket> tickets = ticketList.getTicketList();
@@ -553,7 +551,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         Ticket ticket = getBasicTicket();
-        ticket.setRuleGuid(createdCustomRule.getGuid());
+        ticket.setRuleGuid(createdCustomRule.getGuid().toString());
         Ticket createdTicket = rulesDao.createTicket(ticket);
         
         TicketQuery query = RulesTestHelper.getBasicTicketQuery();
@@ -575,13 +573,13 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         Ticket ticket = getBasicTicket();
-        ticket.setRuleGuid(createdCustomRule.getGuid());
+        ticket.setRuleGuid(createdCustomRule.getGuid().toString());
         rulesDao.createTicket(ticket);
         
         TicketQuery query = RulesTestHelper.getBasicTicketQuery();
         TicketListCriteria criteria = new TicketListCriteria();
         criteria.setKey(TicketSearchKey.RULE_GUID);
-        criteria.setValue(createdCustomRule.getGuid());
+        criteria.setValue(createdCustomRule.getGuid().toString());
         query.getTicketSearchCriteria().add(criteria);
         TicketListResponseDto ticketList = rulesService.getTicketList(user, query);
         List<Ticket> tickets = ticketList.getTicketList();
@@ -636,14 +634,14 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         Ticket ticket = getBasicTicket();
-        ticket.setRuleGuid(createdCustomRule.getGuid());
+        ticket.setRuleGuid(createdCustomRule.getGuid().toString());
         ticket.setMovementGuid(guid);
         rulesDao.createTicket(ticket);
         
         GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(Collections.singletonList(guid));
         List<TicketAndRuleType> ticketsAndRules = response.getTicketsAndRules();
         assertThat(ticketsAndRules.size(), is(1));
-        assertThat(ticketsAndRules.get(0).getRule().getGuid(), is(createdCustomRule.getGuid()));
+        assertThat(ticketsAndRules.get(0).getRule().getGuid(), is(createdCustomRule.getGuid().toString()));
     }
 
     @Test
@@ -752,14 +750,14 @@ public class RulesServiceBeanTest extends TransactionalTests {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         
         Ticket ticket = getBasicTicket();
-        ticket.setRuleGuid(createdCustomRule.getGuid());
+        ticket.setRuleGuid(createdCustomRule.getGuid().toString());
         ticket.setStatus(TicketStatusType.OPEN.value());
         Ticket createdTicket = rulesDao.createTicket(ticket);
         
         TicketQuery query = RulesTestHelper.getBasicTicketQuery();
         TicketListCriteria criteria = new TicketListCriteria();
         criteria.setKey(TicketSearchKey.TICKET_GUID);
-        criteria.setValue(createdTicket.getGuid());
+        criteria.setValue(createdTicket.getGuid().toString());
         query.getTicketSearchCriteria().add(criteria);
         
         rulesService.updateTicketStatusByQuery(user, query, TicketStatusType.PENDING);

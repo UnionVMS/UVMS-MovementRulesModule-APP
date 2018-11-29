@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -85,7 +86,6 @@ public class ValidationServiceBean  {
 
         // Update last update 
         // TODO check if this is needed
-        updateLastTriggered(ruleGuid);
         auditTimestamp = auditLog("Time to update last triggered:", auditTimestamp);
 
         // Always create a ticket
@@ -147,7 +147,7 @@ public class ValidationServiceBean  {
     private void sendMailToSubscribers(String ruleGuid, String ruleName, MovementDetails movementDetails) {
         CustomRule customRule = null;
         try {
-            customRule = rulesDao.getCustomRuleByGuid(ruleGuid);
+            customRule = rulesDao.getCustomRuleByGuid(UUID.fromString(ruleGuid));
         } catch (Exception e) {
             LOG.error("[ Failed to fetch rule when sending email to subscribers due to erro when getting CustomRule by GUID! ] {}", e.getMessage());
             return;
@@ -171,20 +171,6 @@ public class ValidationServiceBean  {
         }
     }
 
-    private void updateLastTriggered(String ruleGuid) {
-        try {
-            if (ruleGuid == null) {
-                throw new IllegalArgumentException("GUID of Custom Rule is null");
-            }
-
-            CustomRule entity = rulesDao.getCustomRuleByGuid(ruleGuid);
-            entity.setTriggered(Instant.now());
-            rulesDao.updateCustomRule(entity);
-
-        } catch (Exception e) {
-            LOG.warn("Failed to update last triggered date for rule {}", ruleGuid, e);
-        }
-    }
     
     private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String endpoint, PluginType pluginType) {
         LOG.info("Sending to endpoint '{}'", endpoint);
@@ -370,7 +356,7 @@ public class ValidationServiceBean  {
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
-            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid(), null, createdTicket.getUpdatedBy());
+            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid().toString(), null, createdTicket.getUpdatedBy());
         } catch (Exception e) { //TODO: figure out if we are to have this kind of exception handling here and if we are to catch everything
             LOG.error("[ Failed to create ticket! ] {}", e);
             LOG.error("[ERROR] Error when creating ticket {}", e);
@@ -380,9 +366,13 @@ public class ValidationServiceBean  {
 
     public long getNumberOfOpenTickets(String userName) {
         LOG.info("Counting open tickets for user: {}", userName);
-        List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);
+        List<UUID> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);
         if (!validRuleGuids.isEmpty()) {
-            return rulesDao.getNumberOfOpenTickets(validRuleGuids);
+            List<String> validRuleStrings = new ArrayList<>();
+            for (UUID uuid: validRuleGuids) {
+                validRuleStrings.add(uuid.toString());
+            }
+            return rulesDao.getNumberOfOpenTickets(validRuleStrings);
         }
         return 0;
     }

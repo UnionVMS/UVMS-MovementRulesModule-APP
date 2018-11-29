@@ -11,22 +11,18 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 //@formatter:off
 @Entity
-@Table(name = "rulesegment")
+@Table(name = "rulesegment", indexes = {
+        @Index(columnList = "ruleseg_rule_id", name = "ruleseg_rule_fk_inx", unique = false)})
 @XmlRootElement
 //@formatter:on
 public class RuleSegment implements Serializable {  //Type class is customRuleSegmentType
@@ -36,7 +32,7 @@ public class RuleSegment implements Serializable {  //Type class is customRuleSe
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ruleseg_id")
-    private Long id;        //internal DB id
+    private UUID id;        //internal DB id
 
     @Column(name = "ruleseg_start_operator")
     private String startOperator;   //exists in type, same name, preferably ( or empty
@@ -66,11 +62,26 @@ public class RuleSegment implements Serializable {  //Type class is customRuleSe
     @ManyToOne(fetch = FetchType.LAZY)
     private CustomRule customRule;  //does not exist in type
 
-    public Long getId() {
+    public RuleSegment copy (CustomRule newCustomRule){
+        RuleSegment rs = new RuleSegment();
+        rs.setStartOperator(startOperator);
+        rs.setCriteria(criteria);
+        rs.setSubCriteria(subCriteria);
+        rs.setCondition(condition);
+        rs.setValue(value);
+        rs.setEndOperator(endOperator);
+        rs.setLogicOperator(logicOperator);
+        rs.setOrder(order);
+
+        rs.setCustomRule(newCustomRule);
+        return rs;
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

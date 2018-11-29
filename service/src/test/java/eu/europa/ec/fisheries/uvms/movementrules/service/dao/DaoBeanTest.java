@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
@@ -56,37 +57,37 @@ public class DaoBeanTest {
     @Test
 @OperateOnDeployment ("normal")
     public void testGetCustomRuleByGuid() {
-        String guid = "sdfsadfsdsagsd";
+        String guid = UUID.randomUUID().toString();
         CustomRule entity = new CustomRule();
-        entity.setGuid(guid);
+        entity.setGuid(UUID.fromString(guid));
 
         TypedQuery<CustomRule> query = mock(TypedQuery.class);
         when(em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class)).thenReturn(query);
         CustomRule dummyResult = new CustomRule();
         when(query.getSingleResult()).thenReturn(dummyResult);
 
-        CustomRule result = dao.getCustomRuleByGuid(guid);
+        CustomRule result = dao.getCustomRuleByGuid(UUID.fromString(guid));
         verify(em).createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
         verify(query).getSingleResult();
         assertSame(dummyResult, result);
     }
 
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void testUpdateCustomRule() {
-        Long id = 11L;
+        UUID id = UUID.randomUUID();
 
         CustomRule myEntity = new CustomRule();
-        myEntity.setId(id);
+        myEntity.setGuid(id);
 
         CustomRule result = new CustomRule();
-        result.setId(id);
+        result.setGuid(id);
         when(em.merge(myEntity)).thenReturn(result);
 
         CustomRule resultEntity = dao.updateCustomRule(myEntity);
 
         verify(em).merge(myEntity);
-        assertSame(id, resultEntity.getId());
+        assertSame(id, resultEntity.getGuid());
     }
 
     @Test

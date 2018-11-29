@@ -12,22 +12,17 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+import java.util.UUID;
 
 //@formatter:off
 @Entity
-@Table(name = "rulesubscription")
+@Table(name = "rulesubscription", indexes = {
+        @Index(columnList = "rulesub_rule_id", name = "rulesub_rule_fk_inx", unique = false)})
 @XmlRootElement
 //@formatter:on
 public class RuleSubscription implements Serializable {
@@ -37,7 +32,7 @@ public class RuleSubscription implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "rulesub_id")
-    private Long id;        //internal DB id
+    private UUID id;        //internal DB id
 
     @Column(name = "rulesub_owner")
     private String owner;   //exists in Type, same name
@@ -49,11 +44,11 @@ public class RuleSubscription implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private CustomRule customRule;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

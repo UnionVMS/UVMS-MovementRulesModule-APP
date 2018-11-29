@@ -38,10 +38,10 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
 
         MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid(), movementFact, "EMAIL,test@test.com");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
 
         CustomRule updatedCustomRule = rulesService.getCustomRuleByGuid(createdCustomRule.getGuid());
-        String lastTriggered = MRDateUtils.dateToString(updatedCustomRule.getTriggered());
+        String lastTriggered = MRDateUtils.dateToString(updatedCustomRule.getLastTriggered());
         assertThat(lastTriggered, is(notNullValue()));
 
         Instant dateTriggered = MRDateUtils.stringToDate(lastTriggered);
@@ -57,7 +57,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
 
         MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid(), movementFact, "EMAIL,test@test.com");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
 
         long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
         assertThat(openTicketsAfter, is(openTicketsBefore + 1));
@@ -72,7 +72,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
 
         MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid(), movementFact, "SEND_TO_NAF,SWE");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "SEND_TO_NAF,SWE");
 
         long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
         assertThat(openTicketsAfter, is(openTicketsBefore + 1));

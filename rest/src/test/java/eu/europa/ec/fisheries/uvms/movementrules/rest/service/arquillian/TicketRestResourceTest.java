@@ -62,7 +62,6 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         Ticket ticket = RulesTestHelper.getCompleteTicket();
 
         CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setGuid(UUID.randomUUID().toString());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("testUser");
         RuleSubscription ruleSubscription = new RuleSubscription();
@@ -73,7 +72,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         customRule = rulesDao.createCustomRule(customRule);
 
         ticket.setRuleName(customRule.getName());
-        ticket.setRuleGuid(customRule.getGuid());
+        ticket.setRuleGuid(customRule.getGuid().toString());
         ticket.setUpdatedBy("testUser");
 
         Ticket createdTicket = rulesDao.createTicket(ticket);
@@ -210,7 +209,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         TicketQuery ticketQuery = new TicketQuery();
         TicketListCriteria tlc = new TicketListCriteria();
         tlc.setKey(TicketSearchKey.TICKET_GUID);
-        tlc.setValue("Test Guid");
+        tlc.setValue(UUID.randomUUID().toString());
         ticketQuery.getTicketSearchCriteria().add(tlc);
         ListPagination lp = new ListPagination();
         lp.setPage(1);
@@ -236,7 +235,6 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         tlc.setValue(MRDateUtils.dateToString(now.toInstant()));
 
         CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setGuid(UUID.randomUUID().toString());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("vms_admin_com");
         RuleSubscription ruleSubscription = new RuleSubscription();
@@ -247,9 +245,9 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         customRule = rulesDao.createCustomRule(customRule);
 
         Ticket ticket1 = RulesTestHelper.getCompleteTicket();
-        ticket1.setRuleGuid(customRule.getGuid());
+        ticket1.setRuleGuid(customRule.getGuid().toString());
         Ticket ticket2 = RulesTestHelper.getCompleteTicket();
-        ticket2.setRuleGuid(customRule.getGuid());
+        ticket2.setRuleGuid(customRule.getGuid().toString());
         ticket1 = rulesDao.createTicket(ticket1);
         ticket2 = rulesDao.createTicket(ticket2);
 
@@ -291,7 +289,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
         TicketType responseTicket = RulesTestHelper.deserializeResponseDto(response, TicketType.class);
         assertNotNull(responseTicket);
-        assertEquals(ticket.getGuid(), responseTicket.getGuid());
+        assertEquals(ticket.getGuid().toString(), responseTicket.getGuid());
 
         rulesDao.removeTicketAfterTests(ticket);
     }
@@ -308,7 +306,6 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         assertEquals(0 , ticketList.intValue());
 
         CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setGuid(UUID.randomUUID().toString());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("TestUser");
         RuleSubscription ruleSubscription = new RuleSubscription();
@@ -319,7 +316,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         customRule = rulesDao.createCustomRule(customRule);
 
         Ticket ticket = RulesTestHelper.getCompleteTicket();
-        ticket.setRuleGuid(customRule.getGuid());
+        ticket.setRuleGuid(customRule.getGuid().toString());
         ticket.setUpdatedBy("TestUser");
         response = getWebTarget()
                 .path("/tickets/countopen/" + ticket.getUpdatedBy())

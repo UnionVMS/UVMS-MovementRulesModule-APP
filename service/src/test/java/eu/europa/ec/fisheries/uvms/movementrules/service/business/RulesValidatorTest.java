@@ -73,7 +73,7 @@ public class RulesValidatorTest extends TransactionalTests {
         long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         assertThat(ticketsAfter, is(ticketsBefore + 1));
         
-        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
     
     @Test
@@ -132,7 +132,7 @@ public class RulesValidatorTest extends TransactionalTests {
         long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         assertThat(ticketsAfter, is(ticketsBefore + 1));
         
-        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), positionTime);
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), positionTime);
     }
     
     @Test
@@ -164,7 +164,7 @@ public class RulesValidatorTest extends TransactionalTests {
         long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         assertThat(ticketsAfter, is(ticketsBefore + 1));
         
-        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
     
     @Test
@@ -196,7 +196,7 @@ public class RulesValidatorTest extends TransactionalTests {
         long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         assertThat(ticketsAfter, is(ticketsBefore + 1));
         
-        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
     
     @Test
@@ -228,7 +228,7 @@ public class RulesValidatorTest extends TransactionalTests {
         long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         assertThat(ticketsAfter, is(ticketsBefore + 1));
         
-        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
     
     @Test
@@ -260,7 +260,7 @@ public class RulesValidatorTest extends TransactionalTests {
         long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         assertThat(ticketsAfter, is(ticketsBefore + 1));
         
-        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
     
     @Test
@@ -305,14 +305,14 @@ public class RulesValidatorTest extends TransactionalTests {
         long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         assertThat(ticketsAfter, is(ticketsBefore + 1));
         
-        assertCustomRuleWasTriggered(createdCustomRule.getGuid(), timestamp);
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
     
     private void assertCustomRuleWasTriggered(String ruleGuid, Instant fromDate) throws Exception {
-        CustomRule customRule = rulesService.getCustomRuleByGuid(ruleGuid);
-        assertThat(customRule.getTriggered(), is(notNullValue()));
-        assertTrue(customRule.getTriggered().isAfter(fromDate)
-                || customRule.getTriggered().equals(fromDate));
+        CustomRule customRule = rulesService.getCustomRuleByGuid(UUID.fromString(ruleGuid));
+        assertThat(customRule.getLastTriggered(), is(notNullValue()));
+        assertTrue(customRule.getLastTriggered().isAfter(fromDate)
+                || customRule.getLastTriggered().equals(fromDate));
     }
     
     private Instant getTimestamp() {

@@ -11,23 +11,19 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 //@formatter:off
 @Entity
-@Table(name = "interval")
+@Table(name = "interval", indexes = {
+        @Index(columnList = "interval_rule_id", name = "interval_rule_fk_inx", unique = false)})
 @XmlRootElement
 //@formatter:on
 public class Interval implements Serializable {
@@ -37,7 +33,7 @@ public class Interval implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "interval_id")
-    private Long id;
+    private UUID id;
 
     @Column(name = "interval_start")
     private Instant start;
@@ -49,11 +45,20 @@ public class Interval implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private CustomRule customRule;
 
-    public Long getId() {
+    public Interval copy (CustomRule newCustomRule){
+        Interval copy = new Interval();
+        copy.setStart(start);
+        copy.setEnd(end);
+        copy.setCustomRule(newCustomRule);
+
+        return copy;
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

@@ -59,7 +59,6 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
 
         // Create a CustomRule
         CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setGuid(UUID.randomUUID().toString());
         customRule.setAvailability(AvailabilityType.GLOBAL);
         customRule.setUpdatedBy("TestUser");
         RuleSubscription ruleSubscription = new RuleSubscription();
@@ -73,7 +72,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
 
         // Create a Ticket
         Ticket ticket = RulesTestHelper.getCompleteTicket();
-        ticket.setRuleGuid(customRule.getGuid());
+        ticket.setRuleGuid(customRule.getGuid().toString());
         ticket.setUpdatedBy("TestUser");
         ticket.setMovementGuid(movementGuid);
         ticket = rulesDao.createTicket(ticket);

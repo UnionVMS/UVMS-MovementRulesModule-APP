@@ -36,7 +36,7 @@ public class CustomRuleParser {
             CustomRuleDto rulesDto = new CustomRuleDto();
 
             rulesDto.setRuleName(rawRule.getName());
-            rulesDto.setRuleGuid(rawRule.getGuid());
+            rulesDto.setRuleGuid(rawRule.getGuid().toString());
 
             List<RuleSegment> segments = rawRule.getRuleSegmentList();
             segments.sort(Comparator.comparing(RuleSegment::getOrder));

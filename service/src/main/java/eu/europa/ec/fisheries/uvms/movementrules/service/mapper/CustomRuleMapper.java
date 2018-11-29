@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class CustomRuleMapper {
 
     public static CustomRuleType toCustomRuleType(CustomRuleType customRuleType, CustomRule customRuleEntity) {
         // Base
-        customRuleType.setGuid(customRuleEntity.getGuid());
+        customRuleType.setGuid(customRuleEntity.getGuid().toString());
         customRuleType.setName(customRuleEntity.getName());
         if (customRuleEntity.getAvailability() != null) {
             customRuleType.setAvailability(AvailabilityType.fromValue(customRuleEntity.getAvailability()));
@@ -52,7 +53,7 @@ public class CustomRuleMapper {
         customRuleType.setDescription(customRuleEntity.getDescription());
         customRuleType.setActive(customRuleEntity.getActive());
         customRuleType.setArchived(customRuleEntity.getArchived());
-        customRuleType.setLastTriggered(MRDateUtils.dateToString(customRuleEntity.getTriggered()));
+        customRuleType.setLastTriggered(MRDateUtils.dateToString(customRuleEntity.getLastTriggered()));
         customRuleType.setUpdated(MRDateUtils.dateToString(customRuleEntity.getUpdated()));
         customRuleType.setUpdatedBy(customRuleEntity.getUpdatedBy());
         customRuleType.setOrganisation(customRuleEntity.getOrganisation());
@@ -119,18 +120,18 @@ public class CustomRuleMapper {
     }
 
     public static CustomRule toCustomRuleEntity(CustomRule customRuleEntity, CustomRuleType customRuleType) {
-        //Date now = DateUtils.nowUTC().toGregorianCalendar().getTime();   //just writing new Date() is apperently way to simple.......
 
         Instant now = Instant.now();
         // Base
         customRuleEntity.setName(customRuleType.getName());
-        customRuleEntity.setGuid(customRuleType.getGuid());     //why was this not here from the beginning ?!?!?!?  Well because in its usage it was stored elsewhere and then given a new guid......
+        if(customRuleType.getGuid() != null) {
+            customRuleEntity.setGuid(UUID.fromString(customRuleType.getGuid()));     //why was this not here from the beginning ?!?!?!?  Well because in its usage it was stored elsewhere and then given a new guid......
+        }
         customRuleEntity.setAvailability(customRuleType.getAvailability().value());
         customRuleEntity.setDescription(customRuleType.getDescription());
         customRuleEntity.setActive(customRuleType.isActive());
         customRuleEntity.setArchived(customRuleType.isArchived());
         customRuleEntity.setStartDate(now);
-        customRuleEntity.setTriggered(MRDateUtils.stringToDate(customRuleType.getLastTriggered()));
         customRuleEntity.setUpdated(now);
         customRuleEntity.setUpdatedBy(customRuleType.getUpdatedBy());
         customRuleEntity.setOrganisation(customRuleType.getOrganisation());

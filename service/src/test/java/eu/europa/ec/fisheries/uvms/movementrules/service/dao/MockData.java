@@ -14,6 +14,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.dao;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
@@ -36,7 +38,6 @@ public class MockData {
     private static final Instant A_DATE = Instant.ofEpochMilli(1441065600000l);
     private static final String ACTION_SEND_TO_ENDPOINT = "SEND_TO_FLUX";
     private static final String ACTION_EMAIL = "EMAIL";
-    private static final String GUID = "DummyGuid";
     private static final String RULE_NAME = "DummyRuleName";
     private static final String AVAILABILITY = "PUBLIC";
     private static final String DESCRIPTION = "DummyDesc";
@@ -44,7 +45,7 @@ public class MockData {
     public static CustomRuleType getModel(int id) {
         CustomRuleType dto = new CustomRuleType();
         // Base
-        dto.setGuid(GUID + id);
+        dto.setGuid(UUID.randomUUID().toString());
         dto.setName(RULE_NAME + id);
         dto.setAvailability(AvailabilityType.PUBLIC);
         dto.setDescription(DESCRIPTION);
@@ -126,13 +127,13 @@ public class MockData {
     public static CustomRule getCustomRuleEntity(int id) {
         CustomRule entity = new CustomRule();
         // Base
-        entity.setGuid(GUID + id);
+        entity.setGuid(UUID.randomUUID());
         entity.setName(RULE_NAME + id);
         entity.setAvailability(AVAILABILITY);
         entity.setDescription(DESCRIPTION);
         entity.setActive(true);
         entity.setArchived(false);
-        entity.setTriggered(A_DATE);
+        entity.setLastTriggered(A_DATE);
         entity.setUpdated(A_DATE);
         entity.setUpdatedBy("UVMS");
 

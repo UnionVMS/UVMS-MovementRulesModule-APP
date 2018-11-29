@@ -9,6 +9,8 @@
         <class>eu.europa.ec.fisheries.uvms.config.service.entity.Parameter</class>
         <properties>
             <property name="hibernate.dialect" value="${hibernate.dialect}"/>
+            <!--             <property name="hibernate.hbm2ddl.auto" value="create" /> -->
+
         </properties>
     </persistence-unit>
 </persistence>

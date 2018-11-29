@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import org.junit.Test;
@@ -37,6 +38,7 @@ public class CustomRuleParserTest {
 
         CustomRule customRule = new CustomRule();
         customRule.setName("DummyName");
+        customRule.setGuid(UUID.randomUUID());
         customRule.setAvailability(AvailabilityType.PRIVATE.value());
 
         // First part of rule
@@ -127,6 +129,7 @@ public class CustomRuleParserTest {
 
         CustomRule customRule = new CustomRule();
         customRule.setName("DummyName");
+        customRule.setGuid(UUID.randomUUID());
         customRule.setAvailability(AvailabilityType.PRIVATE.value());
 
         // ACTIVITY_CALLBACK
@@ -677,6 +680,7 @@ public class CustomRuleParserTest {
 
         CustomRule customRule = new CustomRule();
         customRule.setName("DummyName");
+        customRule.setGuid(UUID.randomUUID());
         customRule.setAvailability(AvailabilityType.PRIVATE.value());
 
         // ACTIVITY_CALLBACK
@@ -715,6 +719,7 @@ public class CustomRuleParserTest {
 
         CustomRule customRule = new CustomRule();
         customRule.setName("Name");
+        customRule.setGuid(UUID.randomUUID());
         customRule.setAvailability(AvailabilityType.PRIVATE.value());
 
         // Second part of rule
