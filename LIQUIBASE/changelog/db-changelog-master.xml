@@ -7,8 +7,6 @@
     <!-- set DB specific properties, like sysdate vs now() -->
     <include file="properties.xml" relativeToChangelogFile="true"/>
 
-    <!--include file="v0.1\db-changelog-createTables_0.1.xml" relativeToChangelogFile="true"/-->
-
     <include file="v2.0.1\db-changelog-createTables.xml" relativeToChangelogFile="true"/>
 
     <include file="v0.1\insertParameter.xml" relativeToChangelogFile="true"/>
