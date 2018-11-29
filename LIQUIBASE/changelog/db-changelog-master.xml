@@ -11,6 +11,6 @@
     
     <include file="v0.1\insertParameter.xml" relativeToChangelogFile="true"/>
 
-    <!--include file="v2.0.1\db-changelog-changeTables_2.0.1.xml" relativeToChangelogFile="true"/-->
+    <include file="v2.0.1\db-changelog-createTables.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="thofan (generated)" id="1543482103240-1">
+        <createSequence sequenceName="hibernate_sequence"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-2">
+        <createTable tableName="action">
+            <column name="action_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action_action" type="VARCHAR(255)"/>
+            <column name="action_order" type="INT"/>
+            <column name="action_value" type="VARCHAR(255)"/>
+            <column name="action_rule_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-3">
+        <createTable tableName="customrule">
+            <column name="rule_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rule_active" type="BOOLEAN"/>
+            <column name="rule_archived" type="BOOLEAN"/>
+            <column name="rule_availability" type="VARCHAR(255)"/>
+            <column name="rule_description" type="VARCHAR(255)"/>
+            <column name="rule_enddate" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="rule_name" type="VARCHAR(255)"/>
+            <column name="rule_organisation" type="VARCHAR(255)"/>
+            <column name="rule_startdate" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="rule_updattim" type="TIMESTAMP(6) WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rule_upuser" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-4">
+        <createTable tableName="interval">
+            <column name="interval_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="interval_end" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="interval_start" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="interval_rule_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-5">
+        <createTable tableName="parameter">
+            <column name="param_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="param_description" type="VARCHAR(255)"/>
+            <column name="param_value" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-6">
+        <createTable tableName="previousreport">
+            <column name="prevrep_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prevrep_assetguid" type="VARCHAR(255)"/>
+            <column name="prevrep_positiontime" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="prevrep_updattim" type="TIMESTAMP(6) WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prevrep_upuser" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-7">
+        <createTable tableName="rulesegment">
+            <column name="ruleseg_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ruleseg_condition" type="VARCHAR(255)"/>
+            <column name="ruleseg_criteria" type="VARCHAR(255)"/>
+            <column name="ruleseg_end_operator" type="VARCHAR(255)"/>
+            <column name="ruleseg_logic_operator" type="VARCHAR(255)"/>
+            <column name="ruleseg_order" type="INT"/>
+            <column name="ruleseg_start_operator" type="VARCHAR(255)"/>
+            <column name="ruleseg_subcriteria" type="VARCHAR(255)"/>
+            <column name="ruleseg_value" type="VARCHAR(255)"/>
+            <column name="ruleseg_rule_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-8">
+        <createTable tableName="rulesubscription">
+            <column name="rulesub_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rulesub_owner" type="VARCHAR(255)"/>
+            <column name="rulesub_type" type="VARCHAR(255)"/>
+            <column name="rulesub_rule_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-9">
+        <createTable tableName="ticket">
+            <column name="ticket_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ticket_assetguid" type="VARCHAR(255)"/>
+            <column name="ticket_channelguid" type="VARCHAR(255)"/>
+            <column name="ticket_createddate" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="ticket_mobileterminalguid" type="VARCHAR(255)"/>
+            <column name="ticket_movementguid" type="VARCHAR(255)"/>
+            <column name="ticket_recipient" type="VARCHAR(255)"/>
+            <column name="ticket_ruleguid" type="VARCHAR(255)"/>
+            <column name="ticket_rulename" type="VARCHAR(255)"/>
+            <column name="ticket_status" type="VARCHAR(255)"/>
+            <column name="ticket_count" type="BIGINT"/>
+            <column name="ticket_updattim" type="TIMESTAMP(6) WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ticket_upuser" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-10">
+        <addPrimaryKey columnNames="action_id" constraintName="action_pkey" tableName="action"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-11">
+        <addPrimaryKey columnNames="rule_id" constraintName="customrule_pkey" tableName="customrule"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-12">
+        <addPrimaryKey columnNames="interval_id" constraintName="interval_pkey" tableName="interval"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-13">
+        <addPrimaryKey columnNames="param_id" constraintName="parameter_pkey" tableName="parameter"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-14">
+        <addPrimaryKey columnNames="prevrep_id" constraintName="previousreport_pkey" tableName="previousreport"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-15">
+        <addPrimaryKey columnNames="ruleseg_id" constraintName="rulesegment_pkey" tableName="rulesegment"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-16">
+        <addPrimaryKey columnNames="rulesub_id" constraintName="rulesubscription_pkey" tableName="rulesubscription"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-17">
+        <addPrimaryKey columnNames="ticket_id" constraintName="ticket_pkey" tableName="ticket"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-18">
+        <addUniqueConstraint columnNames="prevrep_assetguid" constraintName="uk_g124t9kxlb65nfed1my02ghyl" tableName="previousreport"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-19">
+        <createIndex indexName="action_rule_fk_inx" tableName="action">
+            <column name="action_rule_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-20">
+        <createIndex indexName="interval_rule_fk_inx" tableName="interval">
+            <column name="interval_rule_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-21">
+        <createIndex indexName="ruleseg_rule_fk_inx" tableName="rulesegment">
+            <column name="ruleseg_rule_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-22">
+        <createIndex indexName="rulesub_rule_fk_inx" tableName="rulesubscription">
+            <column name="rulesub_rule_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-23">
+        <addForeignKeyConstraint baseColumnNames="action_rule_id" baseTableName="action" constraintName="fkb7oseuh5vinsq5ulecytup949" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rule_id" referencedTableName="customrule"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-24">
+        <addForeignKeyConstraint baseColumnNames="interval_rule_id" baseTableName="interval" constraintName="fkbcyqfxiwuk9bq0hd5pa13evwr" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rule_id" referencedTableName="customrule"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-25">
+        <addForeignKeyConstraint baseColumnNames="rulesub_rule_id" baseTableName="rulesubscription" constraintName="fkf3hwdvcy8333lunb43tvngi52" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rule_id" referencedTableName="customrule"/>
+    </changeSet>
+    <changeSet author="thofan (generated)" id="1543482103240-26">
+        <addForeignKeyConstraint baseColumnNames="ruleseg_rule_id" baseTableName="rulesegment" constraintName="fkfak4712bpag1rwgh25t3ymbb3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rule_id" referencedTableName="customrule"/>
+    </changeSet>
+</databaseChangeLog>
