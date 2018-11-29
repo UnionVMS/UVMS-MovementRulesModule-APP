@@ -14,6 +14,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
@@ -30,7 +32,7 @@ public class TicketMapper {
         ticketType.setAssetGuid(ticketEntity.getAssetGuid());
         ticketType.setMobileTerminalGuid(ticketEntity.getMobileTerminalGuid());
         ticketType.setChannelGuid(ticketEntity.getChannelGuid());
-        ticketType.setGuid(ticketEntity.getGuid());
+        ticketType.setGuid(ticketEntity.getGuid().toString());
         ticketType.setStatus(TicketStatusType.valueOf(ticketEntity.getStatus()));
         ticketType.setOpenDate(MRDateUtils.dateToString(ticketEntity.getCreatedDate()));
         ticketType.setUpdated(MRDateUtils.dateToString(ticketEntity.getUpdated()));
@@ -50,7 +52,7 @@ public class TicketMapper {
         ticketEntity.setAssetGuid(ticketType.getAssetGuid());
         ticketEntity.setMobileTerminalGuid(ticketType.getMobileTerminalGuid());
         ticketEntity.setChannelGuid(ticketType.getChannelGuid());
-        ticketEntity.setGuid(ticketType.getGuid());
+        ticketEntity.setGuid(UUID.fromString(ticketType.getGuid()));
         ticketEntity.setStatus(ticketType.getStatus().name());
         ticketEntity.setCreatedDate(MRDateUtils.stringToDate(ticketType.getOpenDate()));
         ticketEntity.setRuleGuid(ticketType.getRuleGuid());

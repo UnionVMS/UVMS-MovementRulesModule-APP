@@ -49,7 +49,7 @@ public class MapperTest {
     }
 
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void testEntityToModel() throws Exception {
         Integer id = 1;
         CustomRule entity = MockData.getCustomRuleEntity(id);
@@ -62,7 +62,7 @@ public class MapperTest {
         assertSame(entity.getDescription(), result.getDescription());
         assertSame(entity.getGuid(), result.getGuid());
         assertSame(entity.getName(), result.getName());
-        assertEquals(MRDateUtils.dateToString(entity.getTriggered()), result.getLastTriggered());
+        assertEquals(MRDateUtils.dateToString(entity.getLastTriggered()), result.getLastTriggered());
         assertEquals(MRDateUtils.dateToString(entity.getUpdated()), result.getUpdated());
         assertSame(entity.getUpdatedBy(), result.getUpdatedBy());
 
@@ -154,7 +154,7 @@ public class MapperTest {
         assertSame(model.getAvailability().value(), result.getAvailability());
         assertSame(model.getDescription(), result.getDescription());
         assertSame(model.getName(), result.getName());
-        assertEquals(MRDateUtils.stringToDate(model.getLastTriggered()), result.getTriggered());
+        assertEquals(MRDateUtils.stringToDate(model.getLastTriggered()), result.getLastTriggered());
         assertSame(model.getUpdatedBy(), result.getUpdatedBy());
 
         // TODO:
@@ -166,7 +166,7 @@ public class MapperTest {
 
     // TODO:
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void testEntityAndModelToEntity() {
         int id = 1;
         CustomRule entity = MockData.getCustomRuleEntity(id);
@@ -179,7 +179,7 @@ public class MapperTest {
 
     // TODO:
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void testEntityAndModelToModel() {
         int id = 1;
         CustomRule entity = MockData.getCustomRuleEntity(id);

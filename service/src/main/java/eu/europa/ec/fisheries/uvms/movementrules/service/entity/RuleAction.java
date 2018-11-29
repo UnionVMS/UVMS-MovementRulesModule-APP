@@ -11,22 +11,16 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 //@formatter:off
 @Entity
-@Table(name = "action")
+@Table(name = "action" , indexes = {
+        @Index(columnList = "action_rule_id", name = "action_rule_fk_inx", unique = false)})
 @XmlRootElement
 //@formatter:on
 public class RuleAction implements Serializable {
@@ -36,7 +30,7 @@ public class RuleAction implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "action_id")
-    private Long id;
+    private UUID id;
 
     @Column(name = "action_action")
     private String action;
@@ -51,11 +45,11 @@ public class RuleAction implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private CustomRule customRule;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

@@ -24,10 +24,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -36,11 +33,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
         @NamedQuery(name = Ticket.FIND_TICKET_BY_GUID, query = "SELECT t FROM Ticket t WHERE t.guid = :guid"),
-        @NamedQuery(name = Ticket.FIND_TICKET_BY_ASSET_AND_RULE, query = "SELECT t FROM Ticket t WHERE t.assetGuid = :assetGuid and t.status <> 'CLOSED' and t.ruleGuid = :ruleGuid"),
+        @NamedQuery(name = Ticket.FIND_TICKET_BY_ASSET_AND_RULE, query = "SELECT t FROM Ticket t WHERE t.assetGuid = :assetGuid and t.status <> 'CLOSED' and t.guid = :ruleGuid"),
         @NamedQuery(name = Ticket.FIND_TICKETS_BY_MOVEMENTS, query = "SELECT t FROM Ticket t where t.movementGuid IN :movements"),
         @NamedQuery(name = Ticket.COUNT_OPEN_TICKETS, query = "SELECT count(t) FROM Ticket t where t.status = 'OPEN' AND t.ruleGuid IN :validRuleGuids"),
         @NamedQuery(name = Ticket.COUNT_TICKETS_BY_MOVEMENTS, query = "SELECT count(t) FROM Ticket t where t.movementGuid IN :movements"),
-        @NamedQuery(name = Ticket.COUNT_ASSETS_NOT_SENDING, query = "SELECT count(t) FROM Ticket t where t.ruleGuid = :ruleGuid")
+        @NamedQuery(name = Ticket.COUNT_ASSETS_NOT_SENDING, query = "SELECT count(t) FROM Ticket t where t.guid = :ruleGuid"),
+        @NamedQuery(name = Ticket.FIND_LATEST_TICKET_FOR_RULE, query = "SELECT t FROM Ticket t WHERE t.ruleGuid = :ruleGuid ORDER BY t.createdDate DESC")
 })
 public class Ticket implements Serializable {
 
@@ -52,14 +50,12 @@ public class Ticket implements Serializable {
     public static final String COUNT_OPEN_TICKETS = "Ticket.countOpenTickets";
     public static final String COUNT_TICKETS_BY_MOVEMENTS = "Ticket.countByMovementGuids";
     public static final String COUNT_ASSETS_NOT_SENDING = "Ticket.countAssetsNotSending";
+    public static final String FIND_LATEST_TICKET_FOR_RULE = "Ticket.findLastTicketForRule";
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ticket_id")
-    private Long id;        //internal DB id
-
-    @Column(name = "ticket_guid")
-    private String guid;    //exists in Type, same name
+    private UUID guid;    //exists in Type, same name
 
     @Column(name = "ticket_assetguid")
     private String assetGuid;   //exists in Type, same name
@@ -101,24 +97,11 @@ public class Ticket implements Serializable {
 
     //TicketType has a variable called comment that is not present in this class
 
-    @PrePersist
-    public void prePersist() {
-        this.guid = UUID.randomUUID().toString();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getGuid() {
+    public UUID getGuid() {
         return guid;
     }
 
-    public void setGuid(String guid) {
+    public void setGuid(UUID guid) {
         this.guid = guid;
     }
 

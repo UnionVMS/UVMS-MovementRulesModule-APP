@@ -15,6 +15,7 @@ import java.nio.file.AccessDeniedException;
 import java.text.ParseException;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.UUID;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.servlet.ServletContext;
@@ -164,7 +165,7 @@ public class CustomRulesRestResource {
     public ResponseDto getCustomRuleByGuid(@PathParam(value = "guid") final String guid) {
         LOG.info("Get custom rule by guid invoked in rest layer");
         try {
-            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.getCustomRuleByGuid(guid));
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.getCustomRuleByGuid(UUID.fromString(guid)));
             return new ResponseDto(response, ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when getting custom rule by guid. ] {} ", ex);

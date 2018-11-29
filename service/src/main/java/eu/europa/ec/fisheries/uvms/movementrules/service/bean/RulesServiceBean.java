@@ -119,24 +119,26 @@ public class RulesServiceBean {
 
         customRule.setUpdated(Instant.now());
         customRule.setStartDate(Instant.now());
-        customRule.setGuid(UUID.randomUUID().toString());
+        customRule.setGuid(UUID.randomUUID());
 
         rulesDao.createCustomRule(customRule);
 
         // TODO: Rewrite so rules are loaded when changed
         rulesValidator.updateCustomRules();
-        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, customRule.getGuid(), null, customRule.getUpdatedBy());
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, customRule.getGuid().toString(), null, customRule.getUpdatedBy());
         return customRule;
 
 
     }
 
-    public CustomRule getCustomRuleByGuid(String guid) throws RulesServiceException {
+    public CustomRule getCustomRuleByGuid(UUID guid) {
         try {
-            return rulesDao.getCustomRuleByGuid(guid);
+            CustomRule retVal = rulesDao.getCustomRuleByGuid(guid);
+            retVal.setLastTriggered(getLastTriggeredForRule(guid));
+            return retVal;
         } catch (NoResultException e) {
             LOG.error("[ERROR] Error when getting CustomRule by GUID ] {}", e.getMessage());
-            throw new RulesServiceException(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -197,7 +199,7 @@ public class RulesServiceBean {
 
         CustomRule customRule = internalUpdateCustomRule(oldCustomRule);
         rulesValidator.updateCustomRules();
-        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, customRule.getGuid(), null, oldCustomRule.getUpdatedBy());
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, customRule.getGuid().toString(), null, oldCustomRule.getUpdatedBy());
         return customRule;
 
     }
@@ -211,13 +213,9 @@ public class RulesServiceBean {
             throw new IllegalArgumentException("GUID of Custom Rule is null");
         }
 
-        CustomRule oldEntity = rulesDao.getCustomRuleByGuid(newEntity.getGuid());
-        newEntity.setGuid(UUID.randomUUID().toString());
+        CustomRule oldEntity = getCustomRuleByGuid(newEntity.getGuid());
+        newEntity.setGuid(UUID.randomUUID());
 
-        // Copy last triggered if entities are equal
-        if (oldEntity.equals(newEntity)) {
-            newEntity.setTriggered(oldEntity.getTriggered());
-        }
 
         // Close old version
         oldEntity.setArchived(true);
@@ -240,7 +238,7 @@ public class RulesServiceBean {
 
     public CustomRule updateCustomRule(CustomRule oldCustomRule) {
         CustomRule updatedCustomRule = internalUpdateCustomRule(oldCustomRule);
-        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid(), null, oldCustomRule.getUpdatedBy());
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.UPDATE, updatedCustomRule.getGuid().toString(), null, oldCustomRule.getUpdatedBy());
         return updatedCustomRule;
 
     }
@@ -259,7 +257,7 @@ public class RulesServiceBean {
             throw new IllegalArgumentException("Custom Rule GUID for Subscription is null");
         }
 
-        CustomRule customRuleEntity = rulesDao.getCustomRuleByGuid(updateSubscriptionType.getRuleGuid());
+        CustomRule customRuleEntity = rulesDao.getCustomRuleByGuid(UUID.fromString(updateSubscriptionType.getRuleGuid()));
 
         if (SubscritionOperationType.ADD.equals(updateSubscriptionType.getOperation())) {
             RuleSubscription ruleSubscription = new RuleSubscription();
@@ -289,12 +287,13 @@ public class RulesServiceBean {
         return customRuleEntity;
     }
 
-    public CustomRule deleteCustomRule(String guid, String username, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, MovementRulesModelMapperException {
-        LOG.info("[INFO] Deleting custom rule by guid: {}.", guid);
-        if (guid == null) {
+    public CustomRule deleteCustomRule(String guidString, String username, String featureName, String applicationName) throws RulesServiceException, AccessDeniedException, MovementRulesModelMapperException {
+        LOG.info("[INFO] Deleting custom rule by guid: {}.", guidString);
+        if (guidString == null) {
             throw new IllegalArgumentException("No custom rule to remove");
         }
 
+        UUID guid = UUID.fromString(guidString);
         CustomRule customRuleFromDb = getCustomRuleByGuid(guid);
         if (customRuleFromDb.getAvailability().equals(AvailabilityType.GLOBAL.value())) {
             UserContext userContext = userService.getFullUserContext(username, applicationName);
@@ -309,7 +308,7 @@ public class RulesServiceBean {
         entity.setEndDate(Instant.now());
 
         rulesValidator.updateCustomRules();
-        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, entity.getGuid(), null, username);
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, entity.getGuid().toString(), null, username);
         return entity;
 
     }
@@ -343,6 +342,15 @@ public class RulesServiceBean {
         return ticketListDto;
     }
 
+    public Instant getLastTriggeredForRule(UUID ruleGuid){
+        Ticket ticket = rulesDao.getLatestTicketForRule(ruleGuid);
+        Instant retVal = null;
+        if(ticket != null){
+            retVal = ticket.getCreatedDate();
+        }
+        return retVal;
+    }
+
     public List<Ticket> getTicketsByMovements(List<String> movements) {
         if (movements == null) {
             throw new IllegalArgumentException("Movements list is null");
@@ -359,7 +367,7 @@ public class RulesServiceBean {
         // TODO: This can be done more efficiently with some join stuff
         List<Ticket> tickets = rulesDao.getTicketsByMovements(movementGuidList);
         for (Ticket ticket : tickets) {
-            CustomRule rule = rulesDao.getCustomRuleByGuid(ticket.getRuleGuid());
+            CustomRule rule = rulesDao.getCustomRuleByGuid(UUID.fromString(ticket.getRuleGuid()));
             TicketType ticketType = TicketMapper.toTicketType(ticket);
             CustomRuleType ruleType = CustomRuleMapper.toCustomRuleType(rule);
             TicketAndRuleType ticketsAndRule = new TicketAndRuleType();
@@ -388,7 +396,7 @@ public class RulesServiceBean {
         if (ticket == null || ticket.getGuid() == null) {
             throw new IllegalArgumentException("Ticket is null");
         }
-        Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
+        Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid().toString());
 
         entity.setStatus(ticket.getStatus());
         entity.setUpdated(Instant.now());
@@ -400,7 +408,7 @@ public class RulesServiceBean {
         ticketUpdateEvent.fire(new NotificationMessage("guid", entity.getGuid()));
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-        auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid(), "", ticket.getUpdatedBy());
+        auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid().toString(), "", ticket.getUpdatedBy());
         return entity;
 
     }
@@ -428,7 +436,7 @@ public class RulesServiceBean {
 
             // Notify long-polling clients of the update
             ticketUpdateEvent.fire(new NotificationMessage("guid", ticket.getGuid()));
-            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid(), null, loggedInUser);
+            auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid().toString(), null, loggedInUser);
         }
 
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
@@ -476,7 +484,7 @@ public class RulesServiceBean {
         ticket.setTicketCount(1L);
         rulesDao.createTicket(ticket);
 
-		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid(), null, ticket.getUpdatedBy());	        
+		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
 		// Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
     }
@@ -491,7 +499,7 @@ public class RulesServiceBean {
         ticketUpdateEvent.fire(new NotificationMessage("guid", ticket.getGuid()));
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-        auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid(), null, ticket.getUpdatedBy());
+        auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
         return ticket;
     }
 

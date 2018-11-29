@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -43,7 +44,7 @@ public class PreviousReport implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "prevrep_id")
-    private Long id;
+    private UUID id;
 
     @Column(name = "prevrep_assetguid", unique = true)
     private String assetGuid;
@@ -59,11 +60,11 @@ public class PreviousReport implements Serializable {
     @NotNull
     private String updatedBy;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

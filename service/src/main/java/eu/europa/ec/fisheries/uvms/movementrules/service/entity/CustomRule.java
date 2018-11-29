@@ -17,18 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
@@ -56,13 +45,10 @@ public class CustomRule implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "rule_id")
-    private Long id;        //internal DB id
+    private UUID guid;        //internal DB id
 
     @Column(name = "rule_name")
     private String name;    //exists in Type, same name
-
-    @Column(name = "rule_guid")
-    private String guid;    //exists in Type, same name
 
     @Column(name = "rule_description")
     private String description; //exists in Type, same name
@@ -84,9 +70,6 @@ public class CustomRule implements Serializable {
 
     @Column(name = "rule_archived")
     private Boolean archived;       //exists in Type, same name     TODO: Make requires not null
-
-    @Column(name = "rule_lasttriggered")
-    private Instant triggered;         //exists in Type names lastTriggered
 
     @Column(name = "rule_updattim")
     @NotNull
@@ -111,24 +94,15 @@ public class CustomRule implements Serializable {
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Interval> intervals;           //exists in Type as timeIntervals
 
-    @PrePersist
-    public void prePersist() {
-        this.guid = UUID.randomUUID().toString();
-    }
+    @Transient
+    private Instant lastTriggered;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getGuid() {
+    public UUID getGuid() {
         return guid;
     }
 
-    public void setGuid(String guid) {
+    public void setGuid(UUID guid) {
         this.guid = guid;
     }
 
@@ -198,14 +172,6 @@ public class CustomRule implements Serializable {
         this.archived = archived;
     }
 
-    public Instant getTriggered() {
-        return triggered;
-    }
-
-    public void setTriggered(Instant triggered) {
-        this.triggered = triggered;
-    }
-
     public Instant getUpdated() {
         return updated;
     }
@@ -268,9 +234,17 @@ public class CustomRule implements Serializable {
         this.ruleSubscriptionList = ruleSubscriptionList;
     }
 
+    public Instant getLastTriggered() {
+        return lastTriggered;
+    }
+
+    public void setLastTriggered(Instant lastTriggered) {
+        this.lastTriggered = lastTriggered;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, guid, description, availability, organisation, startDate, endDate, active, archived, triggered, updated, updatedBy, ruleSubscriptionList, ruleSegmentList, ruleActionList, intervals);
+        return Objects.hash(guid, name, description, availability, organisation, startDate, endDate, active, archived, updated, updatedBy, ruleSubscriptionList, ruleSegmentList, ruleActionList, intervals);
     }
 
     @Override
