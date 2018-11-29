@@ -119,7 +119,7 @@ public class RulesServiceBean {
 
         customRule.setUpdated(Instant.now());
         customRule.setStartDate(Instant.now());
-        customRule.setGuid(UUID.randomUUID());
+
 
         rulesDao.createCustomRule(customRule);
 
@@ -214,7 +214,6 @@ public class RulesServiceBean {
         }
 
         CustomRule oldEntity = getCustomRuleByGuid(newEntity.getGuid());
-        newEntity.setGuid(UUID.randomUUID());
 
 
         // Close old version
@@ -323,10 +322,14 @@ public class RulesServiceBean {
 
         Integer listSize = query.getPagination().getListSize();
         List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
-        List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
+        List<UUID> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
+        List<String> validRuleStrings = new ArrayList<>();
+        for (UUID uuid: validRuleGuids) {
+            validRuleStrings.add(uuid.toString());
+        }
 
-        String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleGuids, true);
-        String countSql = TicketSearchFieldMapper.createCountSearchSql(searchKeyValues, validRuleGuids, true);
+        String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleStrings, true);
+        String countSql = TicketSearchFieldMapper.createCountSearchSql(searchKeyValues, validRuleStrings, true);
         Long numberMatches = rulesDao.getTicketListSearchCount(countSql);
         List<Ticket> ticketEntityList = rulesDao.getTicketListPaginated(query.getPagination().getPage(), listSize, sql);
 
@@ -396,7 +399,7 @@ public class RulesServiceBean {
         if (ticket == null || ticket.getGuid() == null) {
             throw new IllegalArgumentException("Ticket is null");
         }
-        Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid().toString());
+        Ticket entity = rulesDao.getTicketByGuid(ticket.getGuid());
 
         entity.setStatus(ticket.getStatus());
         entity.setUpdated(Instant.now());
@@ -424,8 +427,12 @@ public class RulesServiceBean {
             throw new IllegalArgumentException("Status is null, can not update status");
         }
         List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
-        List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
-        String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleGuids, true);
+        List<UUID> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
+        List<String> validRuleStrings = new ArrayList<>();
+        for (UUID uuid: validRuleGuids) {
+            validRuleStrings.add(uuid.toString());
+        }
+        String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleStrings, true);
         List<Ticket> tickets = rulesDao.getTicketList(sql);
         for (Ticket ticket : tickets) {
             ticket.setStatus(status.name());
@@ -504,7 +511,7 @@ public class RulesServiceBean {
     }
 
 
-    public Ticket getTicketByGuid(String guid){
+    public Ticket getTicketByGuid(UUID guid){
         return rulesDao.getTicketByGuid(guid);
     }
 

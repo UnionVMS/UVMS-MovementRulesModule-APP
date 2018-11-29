@@ -389,9 +389,13 @@ public class ValidationServiceBean  {
 
     public long getNumberOfOpenTickets(String userName) {
         LOG.info("Counting open tickets for user: {}", userName);
-        List<String> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);
+        List<UUID> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(userName);
         if (!validRuleGuids.isEmpty()) {
-            return rulesDao.getNumberOfOpenTickets(validRuleGuids);
+            List<String> validRuleStrings = new ArrayList<>();
+            for (UUID uuid: validRuleGuids) {
+                validRuleStrings.add(uuid.toString());
+            }
+            return rulesDao.getNumberOfOpenTickets(validRuleStrings);
         }
         return 0;
     }

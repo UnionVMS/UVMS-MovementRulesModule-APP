@@ -62,7 +62,7 @@ public class RulesDao {
         em.remove(em.contains(ticket) ? ticket : em.merge(ticket));
     }
 
-    public Ticket getTicketByGuid(String guid){
+    public Ticket getTicketByGuid(UUID guid){
         TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_GUID, Ticket.class);
         query.setParameter("guid", guid);
         return query.getSingleResult();
@@ -80,8 +80,8 @@ public class RulesDao {
         return query.getSingleResult();
     }
 
-    public List<String> getCustomRulesForTicketsByUser(String owner) {
-        TypedQuery<String> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, String.class);
+    public List<UUID> getCustomRulesForTicketsByUser(String owner) {
+        TypedQuery<UUID> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, UUID.class);
         query.setParameter("owner", owner);
         return query.getResultList();
     }
@@ -100,8 +100,8 @@ public class RulesDao {
     public Ticket getLatestTicketForRule(UUID ruleGuid){
         try {
             TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_LATEST_TICKET_FOR_RULE, Ticket.class);
-            query.setParameter("ruleGuid", ruleGuid);
-            return query.setMaxResults(1).getResultList().get(0);
+            query.setParameter("ruleGuid", ruleGuid.toString());
+            return query.setMaxResults(1).getSingleResult();
         } catch (NoResultException e) {
             return null;
         }

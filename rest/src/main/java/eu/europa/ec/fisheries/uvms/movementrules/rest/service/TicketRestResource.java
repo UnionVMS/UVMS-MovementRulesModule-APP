@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
 import java.util.List;
+import java.util.UUID;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
@@ -191,7 +192,7 @@ public class TicketRestResource {
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
     public ResponseDto getTicketByGuid(@PathParam("guid") String guid) {
         try {
-            TicketType response = TicketMapper.toTicketType(rulesService.getTicketByGuid(guid));
+            TicketType response = TicketMapper.toTicketType(rulesService.getTicketByGuid(UUID.fromString(guid)));
             return new ResponseDto(response, ResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting ticket by GUID. ] {} ", e);

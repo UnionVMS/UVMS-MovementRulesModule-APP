@@ -21,6 +21,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
+import org.hibernate.annotations.GenericGenerator;
 
 //@formatter:off
 @Entity

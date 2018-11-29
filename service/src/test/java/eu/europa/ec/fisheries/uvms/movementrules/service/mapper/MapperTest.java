@@ -60,7 +60,7 @@ public class MapperTest {
         assertSame(entity.getName(), result.getName());
         assertSame(entity.getAvailability(), result.getAvailability().value());
         assertSame(entity.getDescription(), result.getDescription());
-        assertSame(entity.getGuid(), result.getGuid());
+        assertEquals(entity.getGuid().toString(), result.getGuid());
         assertSame(entity.getName(), result.getName());
         assertEquals(MRDateUtils.dateToString(entity.getLastTriggered()), result.getLastTriggered());
         assertEquals(MRDateUtils.dateToString(entity.getUpdated()), result.getUpdated());
@@ -154,7 +154,6 @@ public class MapperTest {
         assertSame(model.getAvailability().value(), result.getAvailability());
         assertSame(model.getDescription(), result.getDescription());
         assertSame(model.getName(), result.getName());
-        assertEquals(MRDateUtils.stringToDate(model.getLastTriggered()), result.getLastTriggered());
         assertSame(model.getUpdatedBy(), result.getUpdatedBy());
 
         // TODO:

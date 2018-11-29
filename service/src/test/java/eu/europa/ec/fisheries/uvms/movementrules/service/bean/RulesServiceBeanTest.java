@@ -643,7 +643,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         GetTicketsAndRulesByMovementsResponse response = rulesService.getTicketsAndRulesByMovements(Collections.singletonList(guid));
         List<TicketAndRuleType> ticketsAndRules = response.getTicketsAndRules();
         assertThat(ticketsAndRules.size(), is(1));
-        assertThat(ticketsAndRules.get(0).getRule().getGuid(), is(createdCustomRule.getGuid()));
+        assertThat(ticketsAndRules.get(0).getRule().getGuid(), is(createdCustomRule.getGuid().toString()));
     }
 
     @Test
@@ -764,7 +764,7 @@ public class RulesServiceBeanTest extends TransactionalTests {
         
         rulesService.updateTicketStatusByQuery(user, query, TicketStatusType.PENDING);
         
-        Ticket fetchedTicket = rulesService.getTicketByGuid(createdTicket.getGuid().toString());
+        Ticket fetchedTicket = rulesService.getTicketByGuid(createdTicket.getGuid());
         assertThat(fetchedTicket.getStatus(), is(TicketStatusType.PENDING.value()));
         assertThat(fetchedTicket.getGuid(), is(createdTicket.getGuid()));
     }

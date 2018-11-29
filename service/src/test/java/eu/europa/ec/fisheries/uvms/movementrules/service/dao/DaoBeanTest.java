@@ -57,7 +57,7 @@ public class DaoBeanTest {
     @Test
 @OperateOnDeployment ("normal")
     public void testGetCustomRuleByGuid() {
-        String guid = "sdfsadfsdsagsd";
+        String guid = UUID.randomUUID().toString();
         CustomRule entity = new CustomRule();
         entity.setGuid(UUID.fromString(guid));
 
