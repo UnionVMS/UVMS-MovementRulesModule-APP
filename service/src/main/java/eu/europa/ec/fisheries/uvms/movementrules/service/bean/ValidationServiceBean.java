@@ -22,7 +22,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
@@ -34,7 +33,6 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
@@ -47,11 +45,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
-import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
-import eu.europa.ec.fisheries.wsdl.user.module.FindOrganisationsResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
-import eu.europa.ec.fisheries.wsdl.user.types.EndPoint;
-import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 
 @Stateless
 public class ValidationServiceBean  {

@@ -24,7 +24,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException;
 
 public class JAXBMarshaller {
 
@@ -41,9 +40,8 @@ public class JAXBMarshaller {
      * @param data
      * @return
      * @throws
-     * eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException
      */
-    public static <T> String marshallJaxBObjectToString(T data) throws MovementRulesModelMarshallException {
+    public static <T> String marshallJaxBObjectToString(T data) throws JAXBException {
         try {
             JAXBContext jaxbContext = contexts.get(data.getClass().getName());
             if (jaxbContext == null) {
@@ -63,7 +61,7 @@ public class JAXBMarshaller {
             return marshalled;
         } catch (JAXBException ex) {
             LOG.error("[ Error when marshalling object to string ] {} ", ex.getMessage());
-            throw new MovementRulesModelMarshallException("[ Error when marshalling Object to String ]", ex);        }
+            throw new JAXBException("[ Error when marshalling Object to String ]", ex);        }
     }
 
     /**
@@ -75,9 +73,8 @@ public class JAXBMarshaller {
      * @param clazz pperException
      * @return
      * @throws
-     * eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMarshallException
      */
-    public static <R> R unmarshallTextMessage(TextMessage textMessage, Class clazz) throws MovementRulesModelMarshallException {
+    public static <R> R unmarshallTextMessage(TextMessage textMessage, Class clazz) throws JAXBException {
         try {
             JAXBContext jc = contexts.get(clazz.getName());
             if (jc == null) {
@@ -95,7 +92,7 @@ public class JAXBMarshaller {
             LOG.debug("Unmarshalling time: {}", (System.currentTimeMillis() - before));
             return object;
         } catch (JMSException | JAXBException ex) {
-            throw new MovementRulesModelMarshallException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
+            throw new JAXBException("[Error when unmarshalling response in ResponseMapper. Expected class was " + clazz.getName() + " ]", ex);
         }
     }
 }
