@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.longpolling.service;
 
 import java.io.IOException;
+import java.util.UUID;
 import javax.ejb.EJB;
 import javax.enterprise.event.Observes;
 import javax.json.Json;
@@ -58,13 +59,13 @@ public class LongPollingHttpServlet extends HttpServlet {
     }
     
     public void observeTicketUpdate(@Observes @TicketEvent NotificationMessage message) throws IOException {
-        String guid = (String) message.getProperties().get(LongPollingConstants.PROPERTY_GUID);
-        completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid, LongPollingConstants.ACTION_CREATED));
+        UUID guid = (UUID) message.getProperties().get(LongPollingConstants.PROPERTY_GUID);
+        completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid.toString(), LongPollingConstants.ACTION_CREATED));
     }
 
     public void observeTicketUpdateEvent(@Observes @TicketUpdateEvent NotificationMessage message) throws IOException {
-        String guid = (String) message.getProperties().get(LongPollingConstants.PROPERTY_GUID);
-        completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid, LongPollingConstants.ACTION_UPDATED));
+        UUID guid = (UUID) message.getProperties().get(LongPollingConstants.PROPERTY_GUID);
+        completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid.toString(), LongPollingConstants.ACTION_UPDATED));
     }
 
     public void observeAlarmReportCount(@Observes @TicketCountEvent NotificationMessage message) throws IOException {
