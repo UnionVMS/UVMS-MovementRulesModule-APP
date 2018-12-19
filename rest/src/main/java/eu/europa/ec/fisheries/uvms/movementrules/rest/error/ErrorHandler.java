@@ -15,6 +15,7 @@ import java.nio.file.AccessDeniedException;
 
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class ErrorHandler {
 
@@ -22,10 +23,10 @@ public class ErrorHandler {
 
 
         if(ex instanceof AccessDeniedException){
-            return new ResponseDto<String>(ex.getMessage(), ResponseCode.FORBIDDEN);
+            return new ResponseDto<Throwable>(ExceptionUtils.getRootCause(ex), ResponseCode.FORBIDDEN);
         }
 
-        return new ResponseDto<String>(ex.getMessage(), ResponseCode.UNDEFINED_ERROR);
+        return new ResponseDto<Throwable>(ExceptionUtils.getRootCause(ex), ResponseCode.UNDEFINED_ERROR);
     }
 
 }
