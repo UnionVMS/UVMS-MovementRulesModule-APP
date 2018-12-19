@@ -33,7 +33,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "ticket")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = Ticket.FIND_TICKET_BY_GUID, query = "SELECT t FROM Ticket t WHERE t.guid = :guid"),
         @NamedQuery(name = Ticket.FIND_TICKET_BY_ASSET_AND_RULE, query = "SELECT t FROM Ticket t WHERE t.assetGuid = :assetGuid and t.status <> 'CLOSED' and t.ruleGuid = :ruleGuid"),
         @NamedQuery(name = Ticket.FIND_TICKETS_BY_MOVEMENTS, query = "SELECT t FROM Ticket t where t.movementGuid IN :movements"),
         @NamedQuery(name = Ticket.COUNT_OPEN_TICKETS, query = "SELECT count(t) FROM Ticket t where t.status = 'OPEN' AND t.ruleGuid IN :validRuleGuids"),
@@ -45,7 +44,6 @@ public class Ticket implements Serializable {
 
     private static final long serialVersionUID = -2423644165824696757L;
     
-    public static final String FIND_TICKET_BY_GUID = "Ticket.findByGuid";
     public static final String FIND_TICKET_BY_ASSET_AND_RULE = "Ticket.findByAssetGuid";
     public static final String FIND_TICKETS_BY_MOVEMENTS = "Ticket.findByMovementGuids";
     public static final String COUNT_OPEN_TICKETS = "Ticket.countOpenTickets";
