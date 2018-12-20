@@ -43,15 +43,7 @@ public class RulesDao {
     }
 
     public CustomRule getCustomRuleByGuid(UUID guid) {
-        try {
-            TypedQuery<CustomRule> query = em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
-            query.setParameter("guid", guid);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            //throw new NoEntityFoundException("[ No custom rule with guid: " + guid + " can be found ]", e);
-            throw new NoResultException("[ No custom rule with guid: " + guid + " can be found ]");  //Trying to remove NoEntityFoundException but I still want the error message, so maybe do it this way?
-        }
-
+            return em.find(CustomRule.class, guid);
     }
 
     public void removeCustomRuleAfterTests(CustomRule customRule) {
@@ -63,9 +55,7 @@ public class RulesDao {
     }
 
     public Ticket getTicketByGuid(UUID guid){
-        TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_TICKET_BY_GUID, Ticket.class);
-        query.setParameter("guid", guid);
-        return query.getSingleResult();
+        return em.find(Ticket.class, guid);
     }
 
     public List<Ticket> getTicketsByMovements(List<String> movements) {

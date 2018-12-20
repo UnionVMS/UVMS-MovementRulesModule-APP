@@ -46,7 +46,7 @@ public class DaoBeanTest {
     }
 
     @Test
-@OperateOnDeployment("normal")
+    @OperateOnDeployment("normal")
     public void testCreateCustomRule() {
         CustomRule customRule = new CustomRule();
 
@@ -55,20 +55,18 @@ public class DaoBeanTest {
     }
 
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void testGetCustomRuleByGuid() {
-        String guid = UUID.randomUUID().toString();
+        UUID guid = UUID.randomUUID();
         CustomRule entity = new CustomRule();
-        entity.setGuid(UUID.fromString(guid));
+        entity.setGuid(guid);
 
-        TypedQuery<CustomRule> query = mock(TypedQuery.class);
-        when(em.createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class)).thenReturn(query);
         CustomRule dummyResult = new CustomRule();
-        when(query.getSingleResult()).thenReturn(dummyResult);
+        when(em.find(CustomRule.class, guid)).thenReturn(dummyResult);
 
-        CustomRule result = dao.getCustomRuleByGuid(UUID.fromString(guid));
-        verify(em).createNamedQuery(CustomRule.FIND_CUSTOM_RULE_BY_GUID, CustomRule.class);
-        verify(query).getSingleResult();
+
+        CustomRule result = dao.getCustomRuleByGuid(guid);
+        verify(em).find(CustomRule.class, guid);
         assertSame(dummyResult, result);
     }
 
@@ -91,13 +89,13 @@ public class DaoBeanTest {
     }
 
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void testDeleteCustomRule() {
         // em.remove(arg0);
     }
 
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void testGetCustomRuleList() {
         TypedQuery<CustomRule> query = mock(TypedQuery.class);
         when(em.createNamedQuery(CustomRule.LIST_CUSTOM_RULES_BY_USER, CustomRule.class)).thenReturn(query);
