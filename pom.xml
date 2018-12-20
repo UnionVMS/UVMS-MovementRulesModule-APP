@@ -20,7 +20,7 @@
         <audit.model.version>4.0.8</audit.model.version>
         <spatial.model.version>1.0.12</spatial.model.version>
         <usm4uvms.version>4.0.10</usm4uvms.version>
-        <uvms.config.version>4.0.0</uvms.config.version>
+        <uvms.config.version>4.0.2</uvms.config.version>
         <uvms.common.version>3.0.29</uvms.common.version>
         <javaee.version>8.0</javaee.version>
         <project.scm.id>github</project.scm.id>
