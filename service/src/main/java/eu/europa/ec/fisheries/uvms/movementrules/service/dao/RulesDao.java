@@ -43,13 +43,7 @@ public class RulesDao {
     }
 
     public CustomRule getCustomRuleByGuid(UUID guid) {
-        try {
             return em.find(CustomRule.class, guid);
-        } catch (NoResultException e) {
-            //throw new NoEntityFoundException("[ No custom rule with guid: " + guid + " can be found ]", e);
-            throw new NoResultException("[ No custom rule with guid: " + guid + " can be found ]");  //Trying to remove NoEntityFoundException but I still want the error message, so maybe do it this way?
-        }
-
     }
 
     public void removeCustomRuleAfterTests(CustomRule customRule) {
