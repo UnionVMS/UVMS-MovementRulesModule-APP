@@ -13,6 +13,7 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesB
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 @Path("/internal")
 @Stateless
@@ -43,7 +44,7 @@ public class InternalRestResources {
             customRuleEvaluator.evaluate(movementDetails);
             return Response.ok().build();
         }catch(Exception e){
-            return Response.serverError().entity(e).build();
+            return Response.serverError().entity(ExceptionUtils.getRootCause(e)).build();
         }
     }
 }
