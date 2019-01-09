@@ -165,6 +165,11 @@ public class RulesServiceBean {
 
         Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql);
         List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql);
+
+        for (CustomRule customRule: customRuleEntityList) {         //this might not be the fastest solution but as long as the number of results are small it should be fine with an extra DB query per result
+                customRule.setLastTriggered(getLastTriggeredForRule(customRule.getGuid()));
+        }
+
         
         int numberOfPages = (int) (numberMatches / listSize);
         if (numberMatches % listSize != 0) {
