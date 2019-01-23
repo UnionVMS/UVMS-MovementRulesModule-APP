@@ -140,7 +140,11 @@ public class RulesServiceBean {
     }
     
     public List<CustomRule> getCustomRulesByUser(String userName) {
-        return rulesDao.getCustomRulesByUser(userName);
+        List<CustomRule> customRules = rulesDao.getCustomRulesByUser(userName);
+        for (CustomRule customRule: customRules) {         //this might not be the fastest solution but as long as the number of results are small it should be fine with an extra DB query per result
+            customRule.setLastTriggered(getLastTriggeredForRule(customRule.getGuid()));
+        }
+        return customRules;
     }
     
     public List<CustomRule> getRunnableCustomRules() {

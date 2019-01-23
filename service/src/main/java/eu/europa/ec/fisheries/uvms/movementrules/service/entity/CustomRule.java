@@ -84,15 +84,12 @@ public class CustomRule implements Serializable {
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<RuleSubscription> ruleSubscriptionList;    //exists in Type as subscriptions
 
-    //@OrderBy("order")
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<RuleSegment> ruleSegmentList;      //exists in Type as definitions
 
-    //@OrderBy("order")
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<RuleAction> ruleActionList;    //exists in Type as actions
 
-    //@OrderBy("start")
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Interval> intervals;           //exists in Type as timeIntervals
 
