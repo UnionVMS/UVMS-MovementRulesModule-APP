@@ -2,7 +2,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
 
 import java.util.UUID;
 
-public class VicinityTuple {
+public class VicinityInfoDTO {
     UUID asset;
     double distance;
     UUID movementID;
