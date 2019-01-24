@@ -7,6 +7,15 @@ public class VicinityInfoDTO {
     double distance;
     UUID movementID;
 
+    public VicinityInfoDTO() {
+    }
+
+    public VicinityInfoDTO(UUID asset, UUID movementID, double distance) {
+        this.asset = asset;
+        this.distance = distance;
+        this.movementID = movementID;
+    }
+
     public UUID getAsset() {
         return asset;
     }
