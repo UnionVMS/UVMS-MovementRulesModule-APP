@@ -72,7 +72,7 @@ public class MovementDetails {
     private Double previousLongitude;
 
     // REPORT
-    private List<String> vicinityOf;
+    private List<VicinityInfoDTO> vicinityOf;
     private Integer sumPositionReport;
     
     /*
@@ -390,11 +390,11 @@ public class MovementDetails {
         this.previousLongitude = previousLongitude;
     }
 
-    public List<String> getVicinityOf() {
+    public List<VicinityInfoDTO> getVicinityOf() {
         return vicinityOf;
     }
 
-    public void setVicinityOf(List<String> vicinityOf) {
+    public void setVicinityOf(List<VicinityInfoDTO> vicinityOf) {
         this.vicinityOf = vicinityOf;
     }
 
