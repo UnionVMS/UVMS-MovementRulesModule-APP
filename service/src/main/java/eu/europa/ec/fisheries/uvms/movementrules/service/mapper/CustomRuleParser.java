@@ -195,11 +195,20 @@ public class CustomRuleParser {
                             sb.append("statusCode");
                             break;
                         case VICINITY_OF:
+                            sb.append(vicinitySpecialCase(segment));
                             // If list and NE
                             if (segment.getCondition().equals(ConditionType.NE.value())) {
                                 sb.append("!");
                             }
                             sb.append("vicinityOf");
+                            break;
+                        case VICINITY_DISTANCE_OF:
+                            sb.append(vicinitySpecialCase(segment));
+                            // If list and NE
+                            if (segment.getCondition().equals(ConditionType.NE.value())) {
+                                sb.append("!");
+                            }
+                            sb.append("vicinityDistance");
                             break;
                         case CLOSEST_COUNTRY_CODE:
                             sb.append("closestCountryCode");
@@ -333,6 +342,10 @@ public class CustomRuleParser {
         return rules;
     }
 
+    private static String vicinitySpecialCase(RuleSegment segment){
+        return "";
+    }
+
     private static boolean isListCriteria(String subcriteria) {
         return SubCriteriaType.AREA_CODE.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_TYPE.value().equals(subcriteria) ||
@@ -341,6 +354,7 @@ public class CustomRuleParser {
                 SubCriteriaType.AREA_CODE_EXT.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_TYPE_EXT.value().equals(subcriteria) ||
                 SubCriteriaType.ASSET_GROUP.value().equals(subcriteria) ||
+                SubCriteriaType.VICINITY_DISTANCE_OF.value().equals(subcriteria) ||
                 SubCriteriaType.VICINITY_OF.value().equals(subcriteria);
     }
 

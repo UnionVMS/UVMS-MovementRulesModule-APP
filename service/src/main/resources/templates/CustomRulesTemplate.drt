@@ -7,6 +7,7 @@ ruleguid
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import java.util.Arrays;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.VicinityInfoDTO;
 
 global org.slf4j.Logger logger;
 global eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean validationService;

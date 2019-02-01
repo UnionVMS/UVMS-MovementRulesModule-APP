@@ -13,6 +13,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
@@ -43,6 +45,10 @@ public class RulesValidator {
     private static final Logger LOG = LoggerFactory.getLogger(RulesValidator.class);
     private static final String CUSTOM_RULE_DRL_FILE = "src/main/resources/rules/CustomRules.drl";
     private static final String CUSTOM_RULE_TEMPLATE = "/templates/CustomRulesTemplate.drt";
+    private static final String CUSTOM_VICINITY_RULE_TEMPLATE = "/templates/CustomRuleVicinityListTemplate.drt";
+
+    String valuePattern = "\".*?\"";
+    String dividerPattern = "(&&)|(\\|\\|)";
 
 
     @Inject
@@ -75,6 +81,8 @@ public class RulesValidator {
 
                 customKfs.write(CUSTOM_RULE_DRL_FILE, drl);
 
+                LOG.error(drl);
+                LOG.info(drl);
                 // Create session
                 kieServices.newKieBuilder(customKfs).buildAll();
                 customKcontainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
@@ -104,23 +112,98 @@ public class RulesValidator {
         TemplateContainer tc = new DefaultTemplateContainer(templateStream);
         TemplateDataListener listener = new TemplateDataListener(tc);
 
+        InputStream templateStreamV = this.getClass().getResourceAsStream(CUSTOM_VICINITY_RULE_TEMPLATE);
+        TemplateContainer tcV = new DefaultTemplateContainer(templateStreamV);
+        TemplateDataListener listenerV = new TemplateDataListener(tcV);
+
         int rowNum = 0;
+        int rowNumV = 0;
+
         for (CustomRuleDto ruleDto : ruleDtos) {
-            listener.newRow(rowNum, 0);
-            listener.newCell(rowNum, 0, ruleDto.getRuleName(), 0);
-            listener.newCell(rowNum, 1, ruleDto.getExpression(), 0);
-            listener.newCell(rowNum, 2, ruleDto.getAction(), 0);
-            listener.newCell(rowNum, 3, ruleDto.getRuleGuid(), 0);
-            rowNum++;
+            if(ruleDto.getExpression().contains("vicinity")){
+
+                String vExpression = vicinityReplacement(ruleDto.getExpression());
+
+                listenerV.newRow(rowNumV, 0);
+                listenerV.newCell(rowNumV, 0, ruleDto.getRuleName(), 0);
+                listenerV.newCell(rowNumV, 1, vExpression, 0);
+                listenerV.newCell(rowNumV, 2, ruleDto.getAction(), 0);
+                listenerV.newCell(rowNumV, 3, ruleDto.getRuleGuid(), 0);
+                rowNumV++;
+
+            }else {
+                listener.newRow(rowNum, 0);
+                listener.newCell(rowNum, 0, ruleDto.getRuleName(), 0);
+                listener.newCell(rowNum, 1, ruleDto.getExpression(), 0);
+                listener.newCell(rowNum, 2, ruleDto.getAction(), 0);
+                listener.newCell(rowNum, 3, ruleDto.getRuleGuid(), 0);
+                rowNum++;
+            }
         }
         listener.finishSheet();
-        String drl = listener.renderDRL();
+        listenerV.finishSheet();
+        String drl = listener.renderDRL() + "\n" + listenerV.renderDRL();
 
         LOG.debug("Custom rule file:\n{}", drl);
 
         return drl;
     }
 
+    private String vicinityReplacement(String oldExpression){
+
+        String[] splitExpression = oldExpression.split("(&&)|(\\|\\|)");
+
+        Pattern splitter = Pattern.compile("(&&)|(\\|\\|)");
+        Matcher splitterMatcher = splitter.matcher(oldExpression);
+
+        Pattern p = Pattern.compile(valuePattern);
+        StringBuilder resultBuilder = new StringBuilder();
+        //resultBuilder.append("$movementDetails : MovementDetails()\n");
+        for (int i = 0; i < splitExpression.length; i++) {
+            if(i == 0){} //do nothing
+            else{
+                splitterMatcher.find();
+                resultBuilder.append( "\n" + splitterMatcher.group() + " ");
+            }
+            resultBuilder.append("\n");
+
+            if(splitExpression[i].contains("vicinity")){
+                Matcher valueMatcher = p.matcher(splitExpression[i]);
+                valueMatcher.find();
+                String value = valueMatcher.group();
+
+                if(splitExpression[i].contains("Of")) {
+                    if(splitExpression[i].charAt(1) == '!'){
+                        resultBuilder.append(addVicinityText(" asset != " + value));
+                    }else {
+                        resultBuilder.append(addVicinityText(" asset == " + value));
+                    }
+                }else {
+                    if(splitExpression[i].charAt(1) == '!') {
+                        resultBuilder.append(addVicinityText(" distance != " + value));
+                    }else{
+                        resultBuilder.append(addVicinityText(" distance == " + value));
+                    }
+                }
+            }else {
+                resultBuilder.append(addNormalText(splitExpression[i]));
+            }
+
+        }
+
+        return resultBuilder.toString();
+
+    }
+
+    private String addVicinityText(String variableAndValue){
+        String s = "(MovementDetails( $vicOf: vicinityOf ) \n VicinityInfoDTO ( " + variableAndValue + ") from $vicOf)";
+        return s;
+    }
+
+    private String addNormalText(String variableAndValue){
+        String s = "$movementDetails : MovementDetails( " + variableAndValue + ")";
+        return s;
+    }
 
 
 }
