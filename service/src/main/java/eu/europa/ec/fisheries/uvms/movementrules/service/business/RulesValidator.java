@@ -152,57 +152,55 @@ public class RulesValidator {
     static String valuePattern = "\".*?\"";         //everyting between two ""
     static String itemPatternString = "!*\\w.*?(( .*?\".*?\")|(contains\\(.*?\"\\)))";          //might start with a !, then a character followed by anything and then: ( something inside "" OR contains( "thing" )
 
-    String dividerPattern = "(&&)|(\\|\\|)";            //&& or ||
+    static String dividerPattern = "(&&)|(\\|\\|)";            // && or ||
 
     private String vicinityReplacement(String oldExpression){
 
-        String[] splitExpression = oldExpression.split(dividerPattern);
+        String[] splitExpression = oldExpression.split(dividerPattern);     //split incoming string on the logical operators
 
         Pattern itemPattern = Pattern.compile(itemPatternString);
 
         Pattern splitter = Pattern.compile(dividerPattern);
         Matcher splitterMatcher = splitter.matcher(oldExpression);
 
-        Pattern p = Pattern.compile(valuePattern);
+        Pattern valuePattern = Pattern.compile(RulesValidator.valuePattern);
         StringBuilder resultBuilder = new StringBuilder();
-        //resultBuilder.append("$movementDetails : MovementDetails()\n");
         for (int i = 0; i < splitExpression.length; i++) {
             if(i == 0){} //do nothing
             else{
                 splitterMatcher.find();
-                if(splitterMatcher.group().contains("&")) {
+                if(splitterMatcher.group().contains("&")) {             //add and/or as needed
                     resultBuilder.append(" and ");
                 }else {
                     resultBuilder.append(" or ");
                 }
             }
-            //resultBuilder.append("\n");
+
             Matcher itemMatcher = itemPattern.matcher(splitExpression[i]);
             itemMatcher.find();
             String toBeReplaced = itemMatcher.group();
 
-            if(splitExpression[i].contains("vicinity")){
-                Matcher valueMatcher = p.matcher(splitExpression[i]);
-                valueMatcher.find();
-                String value = valueMatcher.group();
+            if(splitExpression[i].contains("vicinity")){        //if the rule part needs to look at vicinity
 
                 if(splitExpression[i].contains("Of")) {
-                    if(splitExpression[i].contains("!")){
-                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText2(" asset != " + value)));
+
+                    Matcher valueMatcher = valuePattern.matcher(splitExpression[i]);
+                    valueMatcher.find();
+                    String value = valueMatcher.group();
+
+                    if(splitExpression[i].contains("!")){           //add correct text as needed
+                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText(" asset != " + value)));
                     }else {
-                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText2(" asset == " + value)));
+                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText(" asset == " + value)));
                     }
                 }else {
-                    if(splitExpression[i].contains("!")) {
-                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText2(" distance != " + value)));
-                    }else{
-                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText2(" distance == " + value)));
-                    }
+
+                    String value = splitExpression[i].replace("vicinityDistance", "distance");
+                    resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText(value)));
                 }
             }else {
 
-                //resultBuilder.append(splitExpression[i].replace(toBeReplaced, addNormalText(splitExpression[i])));
-                resultBuilder.append(addNormalText(splitExpression[i]));
+                resultBuilder.append(addNormalText(splitExpression[i]));    //if "normal", just encapsulate the expression
             }
 
         }
@@ -211,41 +209,8 @@ public class RulesValidator {
 
     }
 
-    Pattern v2 = Pattern.compile("!*vicinity.*?\\)");
-    private String vicinityReplacementV2(String oldExpression){
-        Matcher m = v2.matcher(oldExpression);
-        while(m.find()){
-            String found = m.group();
-
-            Pattern valueP = Pattern.compile(valuePattern);
-            Matcher valueMatcher = valueP.matcher(found);
-            valueMatcher.find();
-            String value = valueMatcher.group();
-
-            String replaceExpression = "";
-            if(found.startsWith("!")) {
-                replaceExpression = addVicinityText("asset != " + value);
-            }else{
-                replaceExpression = addVicinityText("asset == " + value);
-            }
-            found = found.replace("(", "\\(");
-            found = found.replace( ")", "\\)");
-            oldExpression = oldExpression.replaceFirst(found, replaceExpression);
-        }
-
-        Pattern normal = Pattern.compile("[^!*vicinityOf.*?\\)]");
-
-        oldExpression = oldExpression.replaceAll("&&", "and");
-        oldExpression = oldExpression.replaceAll("\\|\\|", "or");
-        return oldExpression;
-    }
 
     private String addVicinityText(String variableAndValue){
-        String s = "(VicinityInfoDTO ( " + variableAndValue + ") from \\$vicOf)";
-        return s;
-    }
-
-    private String addVicinityText2(String variableAndValue){
         String s = "(VicinityInfoDTO ( " + variableAndValue + ") from $vicOf)";
         return s;
     }

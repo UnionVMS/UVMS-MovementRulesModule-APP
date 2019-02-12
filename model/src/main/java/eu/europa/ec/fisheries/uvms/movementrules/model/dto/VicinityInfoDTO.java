@@ -1,17 +1,16 @@
 package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
 
-import java.util.UUID;
 
 public class VicinityInfoDTO {
-    UUID asset;
+    String asset;
     double distance;
-    UUID movementID;
+    String movementID;
 
-    public UUID getAsset() {
+    public String getAsset() {
         return asset;
     }
 
-    public void setAsset(UUID asset) {
+    public void setAsset(String asset) {
         this.asset = asset;
     }
 
@@ -23,11 +22,11 @@ public class VicinityInfoDTO {
         this.distance = distance;
     }
 
-    public UUID getMovementID() {
+    public String getMovementID() {
         return movementID;
     }
 
-    public void setMovementID(UUID movementID) {
+    public void setMovementID(String movementID) {
         this.movementID = movementID;
     }
 }

@@ -7,9 +7,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
+
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.VicinityInfoDTO;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -307,6 +311,183 @@ public class RulesValidatorTest extends TransactionalTests {
         
         assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
+
+
+    /*
+            VICINITY PART
+     */
+
+    @Test
+    @OperateOnDeployment ("normal")
+    public void triggerVicinityBoatRuleTest() throws Exception {
+        Instant timestamp = getTimestamp();
+        UUID vicOfID = UUID.randomUUID();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_OF.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(vicOfID.toString());
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setEndOperator("");
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        List<VicinityInfoDTO> vicList = new ArrayList<>();
+        VicinityInfoDTO vic = new VicinityInfoDTO();
+        vic.setAsset(vicOfID.toString());
+        vic.setDistance(500);
+        vicList.add(vic);
+        fact.setVicinityOf(vicList);
+        rulesValidator.evaluate(fact);
+
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+
+        //dont trigger if different
+
+        vic.setAsset(UUID.randomUUID().toString());
+
+        rulesValidator.evaluate(fact);
+
+        ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+    }
+
+    @Test
+    @OperateOnDeployment ("normal")
+    public void triggerVicinityDistanceRuleTest() throws Exception {
+        Instant timestamp = getTimestamp();
+        UUID vicOfID = UUID.randomUUID();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_DISTANCE_OF.value());
+        segment.setCondition(ConditionType.LT.value());
+        segment.setValue("500");
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setEndOperator("");
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        List<VicinityInfoDTO> vicList = new ArrayList<>();
+        VicinityInfoDTO vic = new VicinityInfoDTO();
+        vic.setAsset(vicOfID.toString());
+        vic.setDistance(400);
+        vicList.add(vic);
+        fact.setVicinityOf(vicList);
+        rulesValidator.evaluate(fact);
+
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+
+        //dont trigger if longer
+        vic.setDistance(600);
+
+        rulesValidator.evaluate(fact);
+
+        ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+    }
+
+
+    @Test
+    @OperateOnDeployment ("normal")
+    public void triggerVicinityBoatRuleMoreComplexRuleTest() throws Exception {
+        Instant timestamp = getTimestamp();
+        UUID vicOfID = UUID.randomUUID();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_OF.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(vicOfID.toString());
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator("");
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("(");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_OF.value());
+        segment.setCondition(ConditionType.NE.value());
+        segment.setValue(UUID.randomUUID().toString());
+        segment.setLogicOperator(LogicOperatorType.OR.value());
+        segment.setEndOperator("");
+        segment.setOrder(1);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.ALTITUDE.value());
+        segment.setCondition(ConditionType.GT.value());
+        segment.setValue("50");
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator(")");
+        segment.setOrder(2);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_DISTANCE_OF.value());
+        segment.setCondition(ConditionType.LE.value());
+        segment.setValue("500");
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setEndOperator("");
+        segment.setOrder(3);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        fact.setAltitude(9001d);
+        List<VicinityInfoDTO> vicList = new ArrayList<>();
+        VicinityInfoDTO vic = new VicinityInfoDTO();
+        vic.setAsset(vicOfID.toString());
+        vic.setDistance(500);
+        vicList.add(vic);
+        fact.setVicinityOf(vicList);
+        rulesValidator.evaluate(fact);
+
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 2));    //drools handles 'OR' in a really wierd way, internally creating separate rules for every 'OR' condition, thus giving more activations. For more info see: https://stackoverflow.com/questions/46858200/drools-aftermatchfiringevent-triggering-multiple-times-for-the-same-rule-with-o
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+    }
+
+
     
     private void assertCustomRuleWasTriggered(String ruleGuid, Instant fromDate) throws Exception {
         CustomRule customRule = rulesService.getCustomRuleByGuid(UUID.fromString(ruleGuid));
