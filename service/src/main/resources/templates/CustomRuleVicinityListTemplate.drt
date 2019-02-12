@@ -9,6 +9,7 @@ template "CustomRulesTemplate"
 
 rule "@{rulename}"
 when
+    $movementDetails: MovementDetails( $vicOf: vicinityOf )
     @{expression}
 
 then
