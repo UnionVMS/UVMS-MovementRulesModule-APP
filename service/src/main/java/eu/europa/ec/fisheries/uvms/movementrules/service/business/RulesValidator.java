@@ -45,7 +45,6 @@ public class RulesValidator {
     private static final Logger LOG = LoggerFactory.getLogger(RulesValidator.class);
     private static final String CUSTOM_RULE_DRL_FILE = "src/main/resources/rules/CustomRules.drl";
     private static final String CUSTOM_RULE_TEMPLATE = "/templates/CustomRulesTemplate.drt";
-    private static final String CUSTOM_VICINITY_RULE_TEMPLATE = "/templates/CustomRuleVicinityListTemplate.drt";
 
 
 
@@ -111,37 +110,21 @@ public class RulesValidator {
         TemplateContainer tc = new DefaultTemplateContainer(templateStream);
         TemplateDataListener listener = new TemplateDataListener(tc);
 
-        InputStream templateStreamV = this.getClass().getResourceAsStream(CUSTOM_VICINITY_RULE_TEMPLATE);
-        TemplateContainer tcV = new DefaultTemplateContainer(templateStreamV);
-        TemplateDataListener listenerV = new TemplateDataListener(tcV);
-
         int rowNum = 0;
-        int rowNumV = 0;
 
         for (CustomRuleDto ruleDto : ruleDtos) {
-            if(ruleDto.getExpression().contains("vicinity")){
 
-                String vExpression = vicinityReplacement(ruleDto.getExpression());
+            String vExpression = vicinityReplacement(ruleDto.getExpression());
 
-                listenerV.newRow(rowNumV, 0);
-                listenerV.newCell(rowNumV, 0, ruleDto.getRuleName(), 0);
-                listenerV.newCell(rowNumV, 1, vExpression, 0);
-                listenerV.newCell(rowNumV, 2, ruleDto.getAction(), 0);
-                listenerV.newCell(rowNumV, 3, ruleDto.getRuleGuid(), 0);
-                rowNumV++;
-
-            }else {
-                listener.newRow(rowNum, 0);
-                listener.newCell(rowNum, 0, ruleDto.getRuleName(), 0);
-                listener.newCell(rowNum, 1, ruleDto.getExpression(), 0);
-                listener.newCell(rowNum, 2, ruleDto.getAction(), 0);
-                listener.newCell(rowNum, 3, ruleDto.getRuleGuid(), 0);
-                rowNum++;
-            }
+            listener.newRow(rowNum, 0);
+            listener.newCell(rowNum, 0, ruleDto.getRuleName(), 0);
+            listener.newCell(rowNum, 1, vExpression, 0);
+            listener.newCell(rowNum, 2, ruleDto.getAction(), 0);
+            listener.newCell(rowNum, 3, ruleDto.getRuleGuid(), 0);
+            rowNum++;
         }
         listener.finishSheet();
-        listenerV.finishSheet();
-        String drl = listener.renderDRL() + "\n" + listenerV.renderDRL();
+        String drl = listener.renderDRL();
 
         LOG.debug("Custom rule file:\n{}", drl);
 
@@ -150,7 +133,7 @@ public class RulesValidator {
 
 
     static String valuePattern = "\".*?\"";         //everything between two ""
-    static String itemPatternString = "!*\\w.*?(( .*?\".*?\")|(contains\\(.*?\"\\)))";          //might start with a !, then a character followed by anything and then: ( something inside "" OR contains( "thing" )
+    static String itemPatternString = "!*\\w.*?(( .*?\".*?\")|(contains\\(.*?\"\\))|(Time))";          //might start with a !, then a character followed by anything and then: { something inside "  " OR contains( "thing" ) OR ends with Time") }
 
     static String dividerPattern = "(&&)|(\\|\\|)";            // && or ||
 
@@ -165,6 +148,9 @@ public class RulesValidator {
 
         Pattern valuePattern = Pattern.compile(RulesValidator.valuePattern);
         StringBuilder resultBuilder = new StringBuilder();
+        if(oldExpression.contains("vicinity")){
+            resultBuilder.append("($vicOf: VicinityInfoDTO( ) from $vicOfList) \n");
+        }
         for (int i = 0; i < splitExpression.length; i++) {
             if(i == 0){} //do nothing
             else{
@@ -189,13 +175,13 @@ public class RulesValidator {
                     String value = valueMatcher.group();
 
                     if(splitExpression[i].contains("!")){           //add correct text as needed
-                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText(" asset != " + value)));
+                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText2("getAsset().contains(" + value + ")").replace("$","!$")));
                     }else {
-                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText(" asset == " + value)));
+                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText2("getAsset().contains(" + value + ")")));
                     }
                 }else {         //aka vicinityDistance
 
-                    String value = splitExpression[i].replace(toBeReplaced, addVicinityText(toBeReplaced)).replace("vicinityDistance", "distance");
+                    String value = splitExpression[i].replace(toBeReplaced, addVicinityText2(toBeReplaced)).replace("vicinityDistance", "getDistance()").replace("\"","");
                     resultBuilder.append(value);
                 }
             }else {                     //if "normal", encapsulate the expression
@@ -212,6 +198,11 @@ public class RulesValidator {
 
     private String addVicinityText(String variableAndValue){
         String s = "(VicinityInfoDTO ( " + variableAndValue + ") from $vicOf)";
+        return s;
+    }
+
+    private String addVicinityText2(String variableAndValue){
+        String s = "(eval ( $vicOf." + variableAndValue + "))";
         return s;
     }
 

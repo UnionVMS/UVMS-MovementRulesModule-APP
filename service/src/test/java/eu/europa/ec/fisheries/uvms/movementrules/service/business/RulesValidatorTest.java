@@ -730,6 +730,66 @@ public class RulesValidatorTest extends TransactionalTests {
         assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
 
+
+    @Test
+    @OperateOnDeployment ("normal")
+    public void triggerVicinityBoatRuleSeveralBoatsInProximityRuleTest() throws Exception {
+        Instant timestamp = getTimestamp();
+        UUID vicOfID = UUID.randomUUID();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("(");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_OF.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(vicOfID.toString());
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator("");
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_DISTANCE_OF.value());
+        segment.setCondition(ConditionType.LE.value());
+        segment.setValue("300");
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setEndOperator(")");
+        segment.setOrder(3);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        List<VicinityInfoDTO> vicList = new ArrayList<>();
+        VicinityInfoDTO vic1 = new VicinityInfoDTO();
+        vic1.setAsset(vicOfID.toString());
+        vic1.setDistance(600);
+        vicList.add(vic1);
+
+        VicinityInfoDTO vic2 = new VicinityInfoDTO();
+        vic2.setAsset(UUID.randomUUID().toString());
+        vic2.setDistance(50);
+        vicList.add(vic2);
+        fact.setVicinityOf(vicList);
+        rulesValidator.evaluate(fact);
+
+        //Checking if it triggered
+
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore));
+
+        vic1.setDistance(10.5);
+        rulesValidator.evaluate(fact);
+
+        ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+    }
     
     private void assertCustomRuleWasTriggered(String ruleGuid, Instant fromDate) throws Exception {
         CustomRule customRule = rulesService.getCustomRuleByGuid(UUID.fromString(ruleGuid));

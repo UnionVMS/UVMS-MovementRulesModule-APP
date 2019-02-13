@@ -49,6 +49,8 @@ public class CustomRuleParser {
                 }
 
                 // All subcriteria
+                String value = segment.getValue().replace("\"","");
+
                 if (segment.getSubCriteria() != null) {
                     switch (SubCriteriaType.valueOf(segment.getSubCriteria())) {
                         case ASSET_GROUP:
@@ -176,8 +178,10 @@ public class CustomRuleParser {
                         case MOVEMENT_TYPE:
                             sb.append("movementType");
                             break;
-                        case POSITION_REPORT_TIME:
-                            sb.append("positionTime");
+                        case POSITION_REPORT_TIME:      //some problems require really creative solutions.......
+                            sb.append("MRDateUtils.stringToDate(\"");
+                            sb.append(value);
+                            sb.append("\")");
                             break;
                         case REPORTED_COURSE:
                             sb.append("reportedCourse");
@@ -259,11 +263,8 @@ public class CustomRuleParser {
 
                 }
                 // Remove quotations (event though there shouldn't be any) from the value, since it totally messes up the rule engine
-                String value = segment.getValue().replace("\"","");
                 if (segment.getSubCriteria().equals(SubCriteriaType.POSITION_REPORT_TIME.value())) {
-                    sb.append("MRDateUtils.stringToDate(\"");
-                    sb.append(value);
-                    sb.append("\")");
+                    sb.append("positionTime");
                 } else  {
                     sb.append("\"");
                     sb.append(value);
@@ -371,10 +372,11 @@ public class CustomRuleParser {
 
         if (interval.getEnd() != null) {
             String end = MRDateUtils.dateToString(interval.getEnd());
-            sb.append("positionTime <= ");
             sb.append("MRDateUtils.stringToDate(\"");
             sb.append(end);
             sb.append("\")");
+            sb.append(">= positionTime");
+
         }
         return sb.toString();
     }
