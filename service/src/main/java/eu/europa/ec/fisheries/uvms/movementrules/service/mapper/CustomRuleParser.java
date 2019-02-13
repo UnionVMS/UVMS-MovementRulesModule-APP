@@ -204,10 +204,6 @@ public class CustomRuleParser {
                             break;
                         case VICINITY_DISTANCE_OF:
                             sb.append(vicinitySpecialCase(segment));
-                            // If list and NE
-                            /*if (segment.getCondition().equals(ConditionType.NE.value())) {
-                                sb.append("!");
-                            }*/
                             sb.append("vicinityDistance");
                             break;
                         case CLOSEST_COUNTRY_CODE:
