@@ -9,7 +9,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
         <artifactId>movement-rules</artifactId>
-        <version>2.0.5-SNAPSHOT</version>
+        <version>2.0.7-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -52,7 +52,13 @@
             <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
             <artifactId>uvms-commons-notification</artifactId>
             <version>${uvms.common.version}</version>
-        </dependency> 
+        </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+            <artifactId>uvms-commons-rest</artifactId>
+            <version>${uvms.common.version}</version>
+        </dependency>
+
 
         <!-- TEST DEPENDENCIES -->
         <dependency>

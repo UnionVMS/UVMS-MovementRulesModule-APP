@@ -47,7 +47,7 @@ public class ConfigServiceMock implements MessageListener {
                     mockSetting.setValue("SWE");
                     mockSetting.setDescription("From ConfigServiceMock.java");
                     String pullResponse = ModuleResponseMapper.toPullSettingsResponse(Arrays.asList(mockSetting), PullSettingsStatus.OK);
-                    messageProducer.sendModuleResponseMessage((TextMessage) message, pullResponse);
+                    messageProducer.sendResponseMessageToSender((TextMessage) message, pullResponse);
                     break;
                 default:
                     break;

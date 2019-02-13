@@ -3,6 +3,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 import java.io.File;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+
+import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -30,6 +32,7 @@ public abstract class BuildRulesRestDeployment {
 
         testWar.deleteClass(UnionVMSRestMock.class);
         testWar.deleteClass(SpatialModuleMock.class);
+        testWar.addClass(MDCFilter.class);
         
         testWar.delete("/WEB-INF/web.xml");
         testWar.addAsWebInfResource("mock-web.xml", "web.xml");

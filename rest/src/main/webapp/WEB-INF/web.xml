@@ -54,4 +54,17 @@
 		<url-pattern>/rest/customrules/*</url-pattern>
 		<url-pattern>/rest/tickets/*</url-pattern>
 	</filter-mapping>
+
+	<filter>
+		<filter-name>MDCFilter</filter-name>
+		<filter-class>eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>MDCFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+
+
 </web-app>
