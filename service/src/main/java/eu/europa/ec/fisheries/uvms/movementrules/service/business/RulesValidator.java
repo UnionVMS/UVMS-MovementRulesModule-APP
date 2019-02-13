@@ -175,13 +175,13 @@ public class RulesValidator {
                     String value = valueMatcher.group();
 
                     if(splitExpression[i].contains("!")){           //add correct text as needed
-                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText2("getAsset().contains(" + value + ")").replace("$","!$")));
+                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText("getAsset().contains(" + value + ")").replace("$","!$")));
                     }else {
-                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText2("getAsset().contains(" + value + ")")));
+                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText("getAsset().contains(" + value + ")")));
                     }
                 }else {         //aka vicinityDistance
 
-                    String value = splitExpression[i].replace(toBeReplaced, addVicinityText2(toBeReplaced)).replace("vicinityDistance", "getDistance()").replace("\"","");
+                    String value = splitExpression[i].replace(toBeReplaced, addVicinityText(toBeReplaced)).replace("vicinityDistance", "getDistance()").replace("\"","");
                     resultBuilder.append(value);
                 }
             }else {                     //if "normal", encapsulate the expression
@@ -197,11 +197,6 @@ public class RulesValidator {
 
 
     private String addVicinityText(String variableAndValue){
-        String s = "(VicinityInfoDTO ( " + variableAndValue + ") from $vicOf)";
-        return s;
-    }
-
-    private String addVicinityText2(String variableAndValue){
         String s = "(eval ( $vicOf." + variableAndValue + "))";
         return s;
     }
