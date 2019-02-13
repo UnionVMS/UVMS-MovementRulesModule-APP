@@ -149,7 +149,7 @@ public class RulesValidator {
     }
 
 
-    static String valuePattern = "\".*?\"";         //everyting between two ""
+    static String valuePattern = "\".*?\"";         //everything between two ""
     static String itemPatternString = "!*\\w.*?(( .*?\".*?\")|(contains\\(.*?\"\\)))";          //might start with a !, then a character followed by anything and then: ( something inside "" OR contains( "thing" )
 
     static String dividerPattern = "(&&)|(\\|\\|)";            // && or ||
@@ -193,14 +193,14 @@ public class RulesValidator {
                     }else {
                         resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText(" asset == " + value)));
                     }
-                }else {
+                }else {         //aka vicinityDistance
 
-                    String value = splitExpression[i].replace("vicinityDistance", "distance");
-                    resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText(value)));
+                    String value = splitExpression[i].replace(toBeReplaced, addVicinityText(toBeReplaced)).replace("vicinityDistance", "distance");
+                    resultBuilder.append(value);
                 }
-            }else {
-
-                resultBuilder.append(addNormalText(splitExpression[i]));    //if "normal", just encapsulate the expression
+            }else {                     //if "normal", encapsulate the expression
+                String s = splitExpression[i].replace(toBeReplaced, addNormalText(toBeReplaced));
+                resultBuilder.append(s);
             }
 
         }

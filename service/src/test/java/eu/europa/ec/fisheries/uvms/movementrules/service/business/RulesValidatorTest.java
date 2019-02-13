@@ -415,7 +415,7 @@ public class RulesValidatorTest extends TransactionalTests {
 
     @Test
     @OperateOnDeployment ("normal")
-    public void triggerVicinityBoatRuleMoreComplexRuleTest() throws Exception {
+    public void triggerVicinityBoatRuleMoreComplexORRuleTest() throws Exception {
         Instant timestamp = getTimestamp();
         UUID vicOfID = UUID.randomUUID();
 
@@ -487,6 +487,248 @@ public class RulesValidatorTest extends TransactionalTests {
         assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
 
+    @Test
+    @OperateOnDeployment ("normal")
+    public void triggerVicinityBoatRuleMoreComplexANDRuleTest() throws Exception {
+        Instant timestamp = getTimestamp();
+        UUID vicOfID = UUID.randomUUID();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_DISTANCE_OF.value());
+        segment.setCondition(ConditionType.GT.value());
+        segment.setValue("150");
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator("");
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("((");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.FLAG_STATE.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue("SWE");
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator("");
+        segment.setOrder(1);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.ALTITUDE.value());
+        segment.setCondition(ConditionType.GT.value());
+        segment.setValue("50");
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator(")");
+        segment.setOrder(2);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_OF.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(vicOfID.toString());
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setEndOperator(")");
+        segment.setOrder(3);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        List<VicinityInfoDTO> vicList = new ArrayList<>();
+        VicinityInfoDTO vic = new VicinityInfoDTO();
+        vic.setAsset(UUID.randomUUID().toString());
+        vic.setDistance(50);
+        vicList.add(vic);
+        fact.setVicinityOf(vicList);
+        fact.setAltitude(0d);
+        fact.setFlagState("DNK");
+        rulesValidator.evaluate(fact);
+
+        //Start checking if it triggered
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore));
+
+        fact.setFlagState("SWE");
+        rulesValidator.evaluate(fact);
+
+        ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore));
+
+        vic.setAsset(vicOfID.toString());
+        rulesValidator.evaluate(fact);
+
+        ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore));
+
+        fact.setAltitude(51d);
+        rulesValidator.evaluate(fact);
+
+        ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore));
+
+        vic.setDistance(200);
+        rulesValidator.evaluate(fact);
+
+        ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+    }
+
+
+    @Test
+    @OperateOnDeployment ("normal")
+    public void triggerVicinityBoatRuleManyParenthesisRuleTest() throws Exception {
+        Instant timestamp = getTimestamp();
+        UUID vicOfID = UUID.randomUUID();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("(((");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_DISTANCE_OF.value());
+        segment.setCondition(ConditionType.GT.value());
+        segment.setValue("150");
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator("");
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.FLAG_STATE.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue("SWE");
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator(")");
+        segment.setOrder(1);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.ALTITUDE.value());
+        segment.setCondition(ConditionType.GT.value());
+        segment.setValue("50");
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator(")");
+        segment.setOrder(2);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_OF.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(vicOfID.toString());
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setEndOperator(")");
+        segment.setOrder(3);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        List<VicinityInfoDTO> vicList = new ArrayList<>();
+        VicinityInfoDTO vic = new VicinityInfoDTO();
+        vic.setAsset(vicOfID.toString());
+        vic.setDistance(500);
+        vicList.add(vic);
+        fact.setVicinityOf(vicList);
+        fact.setAltitude(500d);
+        fact.setFlagState("SWE");
+        rulesValidator.evaluate(fact);
+
+        //Start checking if it triggered
+
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+    }
+
+    @Test
+    @OperateOnDeployment ("normal")
+    public void triggerVicinityBoatRuleManyParenthesisInFrontOfVicinityRuleTest() throws Exception {
+        Instant timestamp = getTimestamp();
+        UUID vicOfID = UUID.randomUUID();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("(((");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_OF.value());
+        segment.setCondition(ConditionType.GT.value());
+        segment.setValue(vicOfID.toString());
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator("");
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.ALTITUDE.value());
+        segment.setCondition(ConditionType.GT.value());
+        segment.setValue("50");
+        segment.setLogicOperator(LogicOperatorType.AND.value());
+        segment.setEndOperator(")");
+        segment.setOrder(2);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.POSITION.value());
+        segment.setSubCriteria(SubCriteriaType.VICINITY_OF.value());
+        segment.setCondition(ConditionType.NE.value());
+        segment.setValue(UUID.randomUUID().toString());
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setEndOperator("))");
+        segment.setOrder(3);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        List<VicinityInfoDTO> vicList = new ArrayList<>();
+        VicinityInfoDTO vic = new VicinityInfoDTO();
+        vic.setAsset(vicOfID.toString());
+        vic.setDistance(500);
+        vicList.add(vic);
+        fact.setVicinityOf(vicList);
+        fact.setAltitude(500d);
+        fact.setFlagState("SWE");
+        rulesValidator.evaluate(fact);
+
+        //Start checking if it triggered
+
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+    }
 
     
     private void assertCustomRuleWasTriggered(String ruleGuid, Instant fromDate) throws Exception {
