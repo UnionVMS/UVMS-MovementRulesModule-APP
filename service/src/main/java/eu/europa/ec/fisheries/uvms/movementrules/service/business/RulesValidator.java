@@ -13,6 +13,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
@@ -45,6 +47,8 @@ public class RulesValidator {
     private static final String CUSTOM_RULE_TEMPLATE = "/templates/CustomRulesTemplate.drt";
 
 
+
+
     @Inject
     private ValidationServiceBean validationService;
 
@@ -75,6 +79,7 @@ public class RulesValidator {
 
                 customKfs.write(CUSTOM_RULE_DRL_FILE, drl);
 
+                LOG.trace(drl);
                 // Create session
                 kieServices.newKieBuilder(customKfs).buildAll();
                 customKcontainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
@@ -105,10 +110,14 @@ public class RulesValidator {
         TemplateDataListener listener = new TemplateDataListener(tc);
 
         int rowNum = 0;
+
         for (CustomRuleDto ruleDto : ruleDtos) {
+
+            String vExpression = vicinityReplacement(ruleDto.getExpression());
+
             listener.newRow(rowNum, 0);
             listener.newCell(rowNum, 0, ruleDto.getRuleName(), 0);
-            listener.newCell(rowNum, 1, ruleDto.getExpression(), 0);
+            listener.newCell(rowNum, 1, vExpression, 0);
             listener.newCell(rowNum, 2, ruleDto.getAction(), 0);
             listener.newCell(rowNum, 3, ruleDto.getRuleGuid(), 0);
             rowNum++;
@@ -121,6 +130,80 @@ public class RulesValidator {
         return drl;
     }
 
+
+    static String valuePattern = "\".*?\"";         //everything between two ""
+    static String itemPatternString = "!*\\w.*?(( .*?\".*?\")|(contains\\(.*?\"\\))|(Time))";          //might start with a !, then a character followed by anything and then: { something inside "  " OR contains( "thing" ) OR ends with Time") }
+
+    static String dividerPattern = "(&&)|(\\|\\|)";            // && or ||
+
+    private String vicinityReplacement(String oldExpression){
+
+        String[] splitExpression = oldExpression.split(dividerPattern);     //split incoming string on the logical operators
+
+        Pattern itemPattern = Pattern.compile(itemPatternString);
+
+        Pattern splitter = Pattern.compile(dividerPattern);
+        Matcher splitterMatcher = splitter.matcher(oldExpression);
+
+        Pattern valuePattern = Pattern.compile(RulesValidator.valuePattern);
+        StringBuilder resultBuilder = new StringBuilder();
+        if(oldExpression.contains("vicinity")){                             //if there is a need to iterate through the vicinity list
+            resultBuilder.append("($vicOf: VicinityInfoDTO( ) from $vicOfList) \n");
+        }
+        for (int i = 0; i < splitExpression.length; i++) {
+            if(i == 0){} //do nothing
+            else{
+                splitterMatcher.find();
+                if(splitterMatcher.group().contains("&")) {             //add and/or as needed
+                    resultBuilder.append(" and ");
+                }else {
+                    resultBuilder.append(" or ");
+                }
+            }
+
+            Matcher itemMatcher = itemPattern.matcher(splitExpression[i]);
+            itemMatcher.find();
+            String toBeReplaced = itemMatcher.group();
+
+            if(splitExpression[i].contains("vicinity")){        //if the rule part needs to look at vicinity
+
+                if(splitExpression[i].contains("Of")) {
+
+                    Matcher valueMatcher = valuePattern.matcher(splitExpression[i]);
+                    valueMatcher.find();
+                    String value = valueMatcher.group();
+
+                    if(splitExpression[i].contains("!")){           //add correct text as needed
+                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText("getAsset().contains(" + value + ")").replace("$","!$")));
+                    }else {
+                        resultBuilder.append(splitExpression[i].replace(toBeReplaced, addVicinityText("getAsset().contains(" + value + ")")));
+                    }
+                }else {         //aka vicinityDistance
+
+                    String value = splitExpression[i].replace(toBeReplaced, addVicinityText(toBeReplaced)).replace("vicinityDistance", "getDistance()").replace("\"","");
+                    resultBuilder.append(value);
+                }
+            }else {                     //if "normal", encapsulate the expression
+                String s = splitExpression[i].replace(toBeReplaced, addNormalText(toBeReplaced));
+                resultBuilder.append(s);
+            }
+
+        }
+
+        return resultBuilder.toString();
+
+    }
+
+
+    private String addVicinityText(String variableAndValue){
+        String s = "(eval ( $vicOf." + variableAndValue + "))";
+        return s;
+    }
+
+    private String addNormalText(String variableAndValue){
+        String s = "(MovementDetails( " + variableAndValue + "))";
+        return s;
+    }
 
 
 }

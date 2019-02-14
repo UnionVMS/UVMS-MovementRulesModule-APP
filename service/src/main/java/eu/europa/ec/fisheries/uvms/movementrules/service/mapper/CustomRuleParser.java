@@ -49,6 +49,8 @@ public class CustomRuleParser {
                 }
 
                 // All subcriteria
+                String value = segment.getValue().replace("\"","");
+
                 if (segment.getSubCriteria() != null) {
                     switch (SubCriteriaType.valueOf(segment.getSubCriteria())) {
                         case ASSET_GROUP:
@@ -176,8 +178,10 @@ public class CustomRuleParser {
                         case MOVEMENT_TYPE:
                             sb.append("movementType");
                             break;
-                        case POSITION_REPORT_TIME:
-                            sb.append("positionTime");
+                        case POSITION_REPORT_TIME:      //some problems require really creative solutions.......
+                            sb.append("MRDateUtils.stringToDate(\"");
+                            sb.append(value);
+                            sb.append("\")");
                             break;
                         case REPORTED_COURSE:
                             sb.append("reportedCourse");
@@ -200,6 +204,9 @@ public class CustomRuleParser {
                                 sb.append("!");
                             }
                             sb.append("vicinityOf");
+                            break;
+                        case VICINITY_DISTANCE_OF:
+                            sb.append("vicinityDistance");
                             break;
                         case CLOSEST_COUNTRY_CODE:
                             sb.append("closestCountryCode");
@@ -254,11 +261,8 @@ public class CustomRuleParser {
 
                 }
                 // Remove quotations (event though there shouldn't be any) from the value, since it totally messes up the rule engine
-                String value = segment.getValue().replace("\"","");
                 if (segment.getSubCriteria().equals(SubCriteriaType.POSITION_REPORT_TIME.value())) {
-                    sb.append("MRDateUtils.stringToDate(\"");
-                    sb.append(value);
-                    sb.append("\")");
+                    sb.append("positionTime");
                 } else  {
                     sb.append("\"");
                     sb.append(value);
@@ -334,13 +338,14 @@ public class CustomRuleParser {
     }
 
     private static boolean isListCriteria(String subcriteria) {
-        return SubCriteriaType.AREA_CODE.value().equals(subcriteria) ||
+        return SubCriteriaType.AREA_CODE.value().equals(subcriteria) ||             //this does not contain VICINITY_DISTANCE_OF since that needs < > = !
                 SubCriteriaType.AREA_TYPE.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_CODE_ENT.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_TYPE_ENT.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_CODE_EXT.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_TYPE_EXT.value().equals(subcriteria) ||
                 SubCriteriaType.ASSET_GROUP.value().equals(subcriteria) ||
+                //SubCriteriaType.VICINITY_DISTANCE_OF.value().equals(subcriteria) ||
                 SubCriteriaType.VICINITY_OF.value().equals(subcriteria);
     }
 
@@ -361,10 +366,11 @@ public class CustomRuleParser {
 
         if (interval.getEnd() != null) {
             String end = MRDateUtils.dateToString(interval.getEnd());
-            sb.append("positionTime <= ");
             sb.append("MRDateUtils.stringToDate(\"");
             sb.append(end);
             sb.append("\")");
+            sb.append(">= positionTime");
+
         }
         return sb.toString();
     }

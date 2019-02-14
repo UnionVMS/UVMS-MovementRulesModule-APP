@@ -114,7 +114,7 @@ public class CustomRuleParserTest {
         rawRules.add(customRule);
 
         String expectedRule =
-                "(cfr == \"SWE111111\" || cfr == \"SWE222222\") && mobileTerminalMemberNumber == \"ABC99\" && (MRDateUtils.stringToDate(\"" + interval1start + "\") <= positionTime && positionTime <= MRDateUtils.stringToDate(\"" + interval1end + "\") || MRDateUtils.stringToDate(\"" + interval2start + "\") <= positionTime && positionTime <= MRDateUtils.stringToDate(\"" + interval2end + "\"))";
+                "(cfr == \"SWE111111\" || cfr == \"SWE222222\") && mobileTerminalMemberNumber == \"ABC99\" && (MRDateUtils.stringToDate(\"" + interval1start + "\") <= positionTime && MRDateUtils.stringToDate(\"" + interval1end + "\")>= positionTime || MRDateUtils.stringToDate(\"" + interval2start + "\") <= positionTime && MRDateUtils.stringToDate(\"" + interval2end + "\")>= positionTime)";
 
         List<CustomRuleDto> rules = CustomRuleParser.parseRules(rawRules);
         assertEquals(expectedRule, rules.get(0)
@@ -647,7 +647,7 @@ public class CustomRuleParserTest {
         sb.append("calculatedCourse <= \"46\" || ");
         sb.append("calculatedSpeed >= \"10.1\" || ");
         sb.append("movementType == \"POS\" || ");
-        sb.append("positionTime == MRDateUtils.stringToDate(\"2000-10-30 01:00:00 +0100\") || ");
+        sb.append("MRDateUtils.stringToDate(\"2000-10-30 01:00:00 +0100\") == positionTime || ");
         sb.append("reportedCourse < \"45\" || ");
         sb.append("reportedSpeed > \"10\" || ");
         sb.append("segmentType != \"GAP\" || ");

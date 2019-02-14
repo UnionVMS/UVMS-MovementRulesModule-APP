@@ -106,6 +106,7 @@
             <xsd:enumeration value="SUM_POSITION_REPORT"/>
 
             <xsd:enumeration value="VICINITY_OF"/>
+            <xsd:enumeration value="VICINITY_DISTANCE_OF"/>
         </xsd:restriction>
     </xsd:simpleType>
 
