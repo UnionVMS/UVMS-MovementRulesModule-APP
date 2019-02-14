@@ -199,7 +199,6 @@ public class CustomRuleParser {
                             sb.append("statusCode");
                             break;
                         case VICINITY_OF:
-                            sb.append(vicinitySpecialCase(segment));
                             // If list and NE
                             if (segment.getCondition().equals(ConditionType.NE.value())) {
                                 sb.append("!");
@@ -207,7 +206,6 @@ public class CustomRuleParser {
                             sb.append("vicinityOf");
                             break;
                         case VICINITY_DISTANCE_OF:
-                            sb.append(vicinitySpecialCase(segment));
                             sb.append("vicinityDistance");
                             break;
                         case CLOSEST_COUNTRY_CODE:
@@ -337,10 +335,6 @@ public class CustomRuleParser {
         }
 
         return rules;
-    }
-
-    private static String vicinitySpecialCase(RuleSegment segment){
-        return "";
     }
 
     private static boolean isListCriteria(String subcriteria) {
