@@ -79,8 +79,7 @@ public class RulesValidator {
 
                 customKfs.write(CUSTOM_RULE_DRL_FILE, drl);
 
-                LOG.error(drl);
-                LOG.info(drl);
+                LOG.trace(drl);
                 // Create session
                 kieServices.newKieBuilder(customKfs).buildAll();
                 customKcontainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
@@ -148,7 +147,7 @@ public class RulesValidator {
 
         Pattern valuePattern = Pattern.compile(RulesValidator.valuePattern);
         StringBuilder resultBuilder = new StringBuilder();
-        if(oldExpression.contains("vicinity")){
+        if(oldExpression.contains("vicinity")){                             //if there is a need to iterate through the vicinity list
             resultBuilder.append("($vicOf: VicinityInfoDTO( ) from $vicOfList) \n");
         }
         for (int i = 0; i < splitExpression.length; i++) {
