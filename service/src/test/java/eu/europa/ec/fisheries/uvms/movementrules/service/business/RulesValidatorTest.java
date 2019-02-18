@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -309,6 +310,68 @@ public class RulesValidatorTest extends TransactionalTests {
         long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
         assertThat(ticketsAfter, is(ticketsBefore + 1));
         
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+    }
+
+    @Test
+    @OperateOnDeployment ("normal")
+    public void positionTimeB4Test() throws Exception {
+        Instant timestamp = getTimestamp();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment timeSegment = new RuleSegment();
+        timeSegment.setStartOperator("");
+        timeSegment.setCriteria(CriteriaType.POSITION.value());
+        timeSegment.setSubCriteria(SubCriteriaType.POSITION_REPORT_TIME.value());
+        timeSegment.setCondition(ConditionType.LT.value());
+        timeSegment.setValue(MRDateUtils.dateToString(timestamp));
+        timeSegment.setEndOperator("");
+        timeSegment.setLogicOperator(LogicOperatorType.NONE.value());
+        timeSegment.setOrder(0);
+        timeSegment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(timeSegment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        fact.setPositionTime(timestamp.minusSeconds(60));
+        rulesValidator.evaluate(fact);
+
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+    }
+
+    @Test
+    @OperateOnDeployment ("normal")
+    public void positionTimeAfterTest() throws Exception {
+        Instant timestamp = getTimestamp();
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment timeSegment = new RuleSegment();
+        timeSegment.setStartOperator("");
+        timeSegment.setCriteria(CriteriaType.POSITION.value());
+        timeSegment.setSubCriteria(SubCriteriaType.POSITION_REPORT_TIME.value());
+        timeSegment.setCondition(ConditionType.GT.value());
+        timeSegment.setValue(MRDateUtils.dateToString(timestamp));
+        timeSegment.setEndOperator("");
+        timeSegment.setLogicOperator(LogicOperatorType.NONE.value());
+        timeSegment.setOrder(0);
+        timeSegment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(timeSegment);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        fact.setPositionTime(timestamp.plusSeconds(60));
+        rulesValidator.evaluate(fact);
+
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
         assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
 
