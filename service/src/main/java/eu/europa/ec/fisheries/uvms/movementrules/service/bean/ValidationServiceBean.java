@@ -15,10 +15,25 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollMobileTerminal;
+import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollRequestType;
+import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
+import eu.europa.ec.fisheries.uvms.mobileterminal.dto.CreatePollResultDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
@@ -116,11 +131,12 @@ public class ValidationServiceBean  {
                     auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
                     break;
 
-                /*
                 case MANUAL_POLL:
-                    LOG.info("NOT IMPLEMENTED!");
+                    createManualPoll(movementDetails, ruleName);
+                    auditTimestamp = auditLog("Time to send poll:", auditTimestamp);
                     break;
 
+                    /*
                 case ON_HOLD:
                     LOG.info("NOT IMPLEMENTED!");
                     break;
@@ -318,6 +334,39 @@ public class ValidationServiceBean  {
         return positionBuilder.toString();
     }
 
+    private String createManualPoll(MovementDetails fact, String ruleName){
+
+        try {
+
+
+            PollRequestType poll = new PollRequestType();
+            poll.setUserName("Triggerd by rule: " + ruleName);
+            poll.setComment("This poll was triggered by rule: " + ruleName + " on: " + Instant.now().toString() + " on Asset: " + fact.getAssetName());
+            poll.setPollType(PollType.MANUAL_POLL);
+
+            PollMobileTerminal pmt = new PollMobileTerminal();
+            pmt.setComChannelId(fact.getChannelGuid());
+            pmt.setConnectId(fact.getAssetGuid());
+            pmt.setMobileTerminalId(fact.getMobileTerminalGuid());
+            poll.getMobileTerminals().add(pmt);
+
+            CreatePollResultDto createdPoll = getWebTarget()
+                    .path("internal/poll")
+                    .request(MediaType.APPLICATION_JSON)
+                    .post(Entity.json(poll), CreatePollResultDto.class);
+
+        if(createdPoll.isUnsentPoll()){
+            return "NOK";
+        }
+        return "OK";
+        } catch (Exception e){
+            LOG.error("Error while sending rule-triggered poll: ", e);
+            return "NOK";
+        }
+
+
+    }
+
     private void createTicket(String ruleName, String ruleGuid, MovementDetails fact) {
         try {
             Ticket ticket = new Ticket();
@@ -376,6 +425,17 @@ public class ValidationServiceBean  {
         long duration = newTimestamp.toEpochMilli() - lastTimestamp.toEpochMilli();
         LOG.info("--> AUDIT - {} {}ms", msg, duration);
         return newTimestamp;
+    }
+
+    @Resource(name = "java:global/asset_endpoint")
+    private String assetEndpoint;
+    protected WebTarget getWebTarget() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        Client client = ClientBuilder.newClient();
+        return client.target(assetEndpoint);
     }
 
 }

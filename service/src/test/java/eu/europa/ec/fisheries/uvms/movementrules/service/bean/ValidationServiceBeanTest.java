@@ -2,11 +2,14 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import javax.inject.Inject;
 
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -76,5 +79,30 @@ public class ValidationServiceBeanTest extends TransactionalTests {
 
         long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
         assertThat(openTicketsAfter, is(openTicketsBefore + 1));
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void customRuleTriggeredCreatePollTest() throws Exception {
+
+        System.setProperty("AssetPollEndpointReached", "False");
+        Instant timestamp = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+
+        RuleAction action = new RuleAction();
+        action.setAction(ActionType.MANUAL_POLL.value());
+        action.setValue("Dont Care About This");
+        action.setOrder(5);
+        action.setCustomRule(customRule);
+        customRule.getRuleActionList().add(action);
+
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "MANUAL_POLL,ThisDoesNotMatter");
+
+        assertEquals("True", System.getProperty("AssetPollEndpointReached"));
+        System.clearProperty("AssetPollEndpointReached");
     }
 }
