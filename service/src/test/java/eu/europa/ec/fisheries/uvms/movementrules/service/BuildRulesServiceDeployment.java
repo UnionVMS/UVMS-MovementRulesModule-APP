@@ -52,8 +52,7 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addClass(SpatialModuleMock.class);
         testWar.addClass(AreaTransitionsDTO.class);
         testWar.addClass(AssetModuleMock.class);
-        testWar.addClass(PollBaseType.class);
-        testWar.addClass(PollRequestType.class);
+        testWar.addPackage("eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1");
 
         return testWar;
     }

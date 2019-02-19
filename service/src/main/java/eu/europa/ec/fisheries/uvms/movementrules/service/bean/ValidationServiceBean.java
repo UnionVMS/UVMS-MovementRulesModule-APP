@@ -25,6 +25,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +34,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollMobileTerminal;
 import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollRequestType;
 import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
-import eu.europa.ec.fisheries.uvms.mobileterminal.dto.CreatePollResultDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
@@ -350,12 +350,12 @@ public class ValidationServiceBean  {
             pmt.setMobileTerminalId(fact.getMobileTerminalGuid());
             poll.getMobileTerminals().add(pmt);
 
-            CreatePollResultDto createdPoll = getWebTarget()
+            Response createdPoll = getWebTarget()
                     .path("internal/poll")
                     .request(MediaType.APPLICATION_JSON)
-                    .post(Entity.json(poll), CreatePollResultDto.class);
+                    .post(Entity.json(poll), Response.class);
 
-        if(createdPoll.isUnsentPoll()){
+        if(createdPoll.getStatus() != 200){
             return "NOK";
         }
         return "OK";

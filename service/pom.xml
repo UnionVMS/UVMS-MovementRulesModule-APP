@@ -97,11 +97,6 @@
             <artifactId>asset-model</artifactId>
             <version>${uvms.asset.version}</version>
         </dependency>
-        <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
-            <artifactId>asset-service</artifactId>
-            <version>${uvms.asset.version}</version>
-        </dependency>
 
         <!-- drools dependencies -->
         <dependency>

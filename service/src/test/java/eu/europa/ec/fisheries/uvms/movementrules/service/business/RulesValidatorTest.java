@@ -2,6 +2,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -13,15 +14,13 @@ import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
 
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.VicinityInfoDTO;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
@@ -312,6 +311,53 @@ public class RulesValidatorTest extends TransactionalTests {
         assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
     }
 
+    @Test
+    @OperateOnDeployment ("normal")
+    public void ruleTriggerPollTest() throws Exception {
+        Instant timestamp = getTimestamp();
+        String flagstate = "SWE";
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        RuleSegment segment = new RuleSegment();
+        segment.setStartOperator("");
+        segment.setCriteria(CriteriaType.ASSET.value());
+        segment.setSubCriteria(SubCriteriaType.FLAG_STATE.value());
+        segment.setCondition(ConditionType.EQ.value());
+        segment.setValue(flagstate);
+        segment.setLogicOperator(LogicOperatorType.NONE.value());
+        segment.setEndOperator("");
+        segment.setOrder(0);
+        segment.setCustomRule(customRule);
+        customRule.getRuleSegmentList().add(segment);
+
+        RuleAction ruleAction = new RuleAction();
+        ruleAction.setCustomRule(customRule);
+        ruleAction.setOrder(1);
+        ruleAction.setValue("Not Needed");
+        ruleAction.setAction(ActionType.MANUAL_POLL.value());
+        List<RuleAction> ruleActionList = new ArrayList<>();
+        ruleActionList.add(ruleAction);
+        customRule.setRuleActionList(ruleActionList);
+
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long ticketsBefore = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+
+        System.setProperty("AssetPollEndpointReached", "False");
+
+        MovementDetails fact = RulesTestHelper.createBasicMovementDetails();
+        fact.setFlagState(flagstate);
+        rulesValidator.evaluate(fact);
+
+        long ticketsAfter = validationService.getNumberOfOpenTickets(customRule.getUpdatedBy());
+        assertThat(ticketsAfter, is(ticketsBefore + 1));
+
+
+        assertCustomRuleWasTriggered(createdCustomRule.getGuid().toString(), timestamp);
+
+        assertEquals("True", System.getProperty("AssetPollEndpointReached"));
+        System.clearProperty("AssetPollEndpointReached");
+    }
 
     /*
             VICINITY PART
