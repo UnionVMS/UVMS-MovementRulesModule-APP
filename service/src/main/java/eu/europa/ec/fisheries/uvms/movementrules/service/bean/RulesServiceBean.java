@@ -150,7 +150,7 @@ public class RulesServiceBean {
     public List<CustomRule> getRunnableCustomRules() {
         return rulesDao.getRunnableCustomRuleList();
     }
-    
+
     public CustomRuleListResponseDto getCustomRulesByQuery(CustomRuleQuery query) {
         if (query == null) {
             throw new IllegalArgumentException("Custom rule list query is null");

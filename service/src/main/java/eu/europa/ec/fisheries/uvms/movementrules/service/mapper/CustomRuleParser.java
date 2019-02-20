@@ -245,16 +245,32 @@ public class CustomRuleParser {
                         }
                         break;
                     case GT:
-                        sb.append(" > ");
+                        if(SubCriteriaType.POSITION_REPORT_TIME.value().equals(segment.getSubCriteria())) {             //really beautiful solution......................
+                            sb.append(" < ");
+                        }else {
+                            sb.append(" > ");
+                        }
                         break;
                     case GE:
-                        sb.append(" >= ");
+                        if(SubCriteriaType.POSITION_REPORT_TIME.value().equals(segment.getSubCriteria())) {
+                            sb.append(" <= ");
+                        }else {
+                            sb.append(" >= ");
+                        }
                         break;
                     case LT:
-                        sb.append(" < ");
+                        if(SubCriteriaType.POSITION_REPORT_TIME.value().equals(segment.getSubCriteria())) {
+                            sb.append(" > ");
+                        }else {
+                            sb.append(" < ");
+                        }
                         break;
                     case LE:
-                        sb.append(" <= ");
+                        if(SubCriteriaType.POSITION_REPORT_TIME.value().equals(segment.getSubCriteria())) {
+                            sb.append(" >= ");
+                        }else {
+                            sb.append(" <= ");
+                        }
                         break;
                     default: // undefined
                         break;
