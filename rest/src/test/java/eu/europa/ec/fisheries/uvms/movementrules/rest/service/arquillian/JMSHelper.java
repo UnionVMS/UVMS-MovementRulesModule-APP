@@ -25,10 +25,10 @@ public class JMSHelper {
 
     private static final long TIMEOUT = 20000;
 
-    @Resource(name = "java:/ConnectionFactory")
+    @Resource(mappedName = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;
     
-    @Resource(name = "java:/jms/queue/UVMSExchangeEvent")
+    @Resource(mappedName = "java:/jms/queue/UVMSExchangeEvent")
     private Queue exchangeQueue;
     
     public Message getMessageFromExchangeQueue() throws Exception {

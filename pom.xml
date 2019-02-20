@@ -4,7 +4,7 @@
     <parent>
         <groupId>fish.focus.uvms.maven</groupId>
         <artifactId>uvms-pom</artifactId>
-        <version>1.21</version>
+        <version>1.23</version>
     </parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
@@ -30,7 +30,7 @@
         
         <installAtEnd>false</installAtEnd>
         
-        <docker.dev.version>3.29.2.w14</docker.dev.version>
+        <docker.dev.version>3.31.16.w15</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>movementrules</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>movementrules</docker.liquibase.db.passwd>
@@ -41,31 +41,31 @@
         	<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-gis-deps</artifactId>
-				<version>1.21</version>
+				<version>1.23</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-logging-deps</artifactId>
-				<version>1.21</version>
+				<version>1.23</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-monitoring-deps</artifactId>
-				<version>1.21</version>
+				<version>1.23</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-test-deps</artifactId>
-				<version>1.21</version>
+				<version>1.23</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-arquillian-deps</artifactId>
-				<version>1.21</version>
+				<version>1.23</version>
 				<type>pom</type>
 			</dependency>
             <dependency>

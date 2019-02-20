@@ -42,7 +42,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
     @Test
     @OperateOnDeployment("normal")
     public void pingTest() throws Exception {
-        final String RESPONSE_QUEUE = "RulesTestQueue";
+        final String RESPONSE_QUEUE = "IntegrationTestsResponseQueue";
         PingRequest request = new PingRequest();
         request.setMethod(RulesModuleMethod.PING);
         String requestString = JAXBMarshaller.marshallJaxBObjectToString(request);
