@@ -179,9 +179,9 @@
             <xsd:enumeration value="SEND_TO_FLUX"/>
             <xsd:enumeration value="SEND_TO_NAF"/>
             <xsd:enumeration value="EMAIL"/>
+            <xsd:enumeration value="MANUAL_POLL"/>
 
             <!-- NOT IMPLEMENTED YET
-            <xsd:enumeration value="MANUAL_POLL"/>
             <xsd:enumeration value="ON_HOLD"/>
             <xsd:enumeration value="SMS"/>
             <xsd:enumeration value="TOP_BAR_NOTIFICATION"/>
