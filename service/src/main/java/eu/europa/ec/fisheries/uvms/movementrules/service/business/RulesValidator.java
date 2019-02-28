@@ -30,6 +30,7 @@ import org.kie.api.KieServices;
 import org.kie.api.builder.KieFileSystem;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.rule.FactHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
@@ -99,8 +100,10 @@ public class RulesValidator {
             ksession.setGlobal("validationService", validationService);
             ksession.setGlobal("logger", LOG);
 
-            ksession.insert(fact);
+            FactHandle factHandle = ksession.insert(fact);
             ksession.fireAllRules();
+
+            ksession.delete(factHandle);
         }
     }
 
