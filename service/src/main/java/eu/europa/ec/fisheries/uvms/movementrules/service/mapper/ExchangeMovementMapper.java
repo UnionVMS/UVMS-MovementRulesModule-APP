@@ -35,7 +35,9 @@ public class ExchangeMovementMapper {
         movement.setGuid(movementDetails.getMovementGuid());
         movement.setConnectId(movementDetails.getConnectId());
         movement.setTripNumber(movementDetails.getTripNumber());
+        movement.setReportedCourse(movementDetails.getReportedCourse());
         movement.setCalculatedCourse(movementDetails.getCalculatedCourse());
+        movement.setReportedSpeed(movementDetails.getReportedSpeed());
         movement.setCalculatedSpeed(movementDetails.getCalculatedSpeed());
         MovementMetaData metadata = new MovementMetaData();
         metadata.setClosestCountryCoast(movementDetails.getClosestCountryCode());
@@ -52,6 +54,11 @@ public class ExchangeMovementMapper {
         activity.setCallback(movementDetails.getActivityCallback());
         movement.setActivity(activity);
         movement.setAssetId(mapAssetId(movementDetails));
+        movement.setAssetName(movementDetails.getAssetName());
+        movement.setFlagState(movementDetails.getFlagState());
+        movement.setExternalMarking(movementDetails.getExternalMarking());
+        movement.setIrcs(movementDetails.getIrcs());
+        movement.setMmsi(movementDetails.getMmsi());
         if (movementDetails.getComChannelType() != null) {
             movement.setComChannelType(MovementComChannelType.valueOf(movementDetails.getComChannelType()));
         }
