@@ -11,26 +11,30 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBException;
-
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.UserProducerBean;
-import eu.europa.ec.fisheries.wsdl.user.module.UserModuleMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.UserProducerBean;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleRequestMapper;
 import eu.europa.ec.fisheries.wsdl.user.module.FindOrganisationsResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetUserContextResponse;
+import eu.europa.ec.fisheries.wsdl.user.module.UserModuleMethod;
+import eu.europa.ec.fisheries.wsdl.user.types.EndPoint;
+import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContextId;
 
@@ -67,13 +71,13 @@ public class UserServiceBean {
                 userContext = userContextResponse.getContext();
             } else {
                 LOG.error("Error occurred while receiving JMS response for message ID: {}", messageId);
-                throw new RuntimeException("Unable to receive a response from USM.");
+                throw new IllegalArgumentException("Unable to receive a response from USM.");
             }
         } catch (ModelMarshallException | JAXBException e) {
-            throw new RuntimeException("Unexpected exception while trying to get user context.", e);
+            throw new IllegalArgumentException("Unexpected exception while trying to get user context.", e);
         } catch (MessageException e) {
             LOG.error("Unable to receive a response from USM.");
-            throw new RuntimeException("Unable to receive a response from USM.");
+            throw new IllegalArgumentException("Unable to receive a response from USM.");
         }
         return userContext;
     }
@@ -94,20 +98,35 @@ public class UserServiceBean {
             TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
             return JAXBMarshaller.unmarshallTextMessage(userMessage, GetContactDetailResponse.class);
         } catch (JAXBException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
     
-    public FindOrganisationsResponse findOrganisation(String nationIsoName) throws ModelMarshallException, MessageException {
+    public FindOrganisationsResponse findOrganisation(String nationIsoName) throws MessageException {
         try {
-
             String userRequest = UserModuleRequestMapper.mapToFindOrganisationsRequest(nationIsoName);
             String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.FIND_ORGANISATIONS.value(), "");
             TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
             return JAXBMarshaller.unmarshallTextMessage(userMessage, FindOrganisationsResponse.class);
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
+        } catch (ModelMarshallException | JAXBException e) {
+            throw new IllegalArgumentException(e);
         }
     }
     
+    public List<RecipientInfoType> getRecipientInfoType(String nationIsoName) throws MessageException {
+        FindOrganisationsResponse response = findOrganisation(nationIsoName);
+
+        List<RecipientInfoType> recipientInfoList = new ArrayList<>();
+        List<Organisation> organisations = response.getOrganisation();
+        for (Organisation organisation : organisations) {
+            List<EndPoint> endPoints = organisation.getEndPoints();
+            for (EndPoint endPoint : endPoints) {
+                RecipientInfoType recipientInfo = new RecipientInfoType();
+                recipientInfo.setKey(endPoint.getName());
+                recipientInfo.setValue(endPoint.getUri());
+                recipientInfoList.add(recipientInfo);
+            }
+        }
+        return recipientInfoList;
+    }
 }

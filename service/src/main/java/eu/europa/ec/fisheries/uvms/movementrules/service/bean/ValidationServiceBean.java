@@ -37,6 +37,7 @@ import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
@@ -188,7 +189,9 @@ public class ValidationServiceBean  {
         try {
             MovementType exchangeMovement = ExchangeMovementMapper.mapToExchangeMovementType(movementDetails);
 
-            exchangeService.sendReportToPlugin(pluginType, ruleName, endpoint, exchangeMovement, new ArrayList<>(), movementDetails);
+            List<RecipientInfoType> recipientInfo = userService.getRecipientInfoType(endpoint);
+
+            exchangeService.sendReportToPlugin(pluginType, ruleName, endpoint, exchangeMovement, recipientInfo, movementDetails);
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, endpoint, "UVMS");
 
