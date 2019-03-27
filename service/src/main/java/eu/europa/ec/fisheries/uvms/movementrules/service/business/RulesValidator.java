@@ -92,7 +92,7 @@ public class RulesValidator {
     @Lock(LockType.READ)
     public void evaluate(MovementDetails fact) {
         if (customKcontainer != null) {
-            LOG.info("Verify user defined rules");
+            LOG.debug("Verify user defined rules");
 
             KieSession ksession = customKcontainer.newKieSession();
 

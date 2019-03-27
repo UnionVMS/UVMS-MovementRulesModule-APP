@@ -67,7 +67,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                 throw new NullPointerException("[ Request method is null ]");
             }
 
-            LOG.info("Request message method: {}", method.value());
+            LOG.debug("Request message method: {}", method.value());
             switch (method) {
                 case PING:
                     PingResponse pingResponse = new PingResponse();
