@@ -67,6 +67,6 @@ public class ExchangeServiceBean {
     
     public void sendEmail(ServiceResponseType service, EmailType email, String ruleName) throws ExchangeModelMapperException, MessageException {
         String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(service.getServiceClassName(), email, ruleName);
-        exchangeProducer.sendModuleMessage(request, responseQueue, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
+        exchangeProducer.sendModuleMessage(request, responseQueue, ExchangeModuleMethod.SET_COMMAND.value());
     }
 }
