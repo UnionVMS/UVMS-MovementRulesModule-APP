@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;    //Leave be for now
 import java.util.List;
@@ -29,7 +30,6 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
@@ -50,22 +50,22 @@ public class ExchangeServiceBean {
     @Resource(mappedName = "java:/" + MessageConstants.QUEUE_MOVEMENTRULES)
     private Queue responseQueue;
 
-    public List<ServiceResponseType> getPluginList(PluginType pluginType) throws ExchangeModelMapperException, MessageException {
+    public List<ServiceResponseType> getPluginList(PluginType pluginType) throws MessageException {
         ArrayList<PluginType> types = new ArrayList<>();
         types.add(pluginType);
         String serviceListRequest = ExchangeModuleRequestMapper.createGetServiceListRequest(types);
         String serviceListRequestId = exchangeProducer.sendModuleMessage(serviceListRequest, responseQueue, ExchangeModuleMethod.LIST_SERVICES.value());
 
         TextMessage serviceListResponse = consumer.getMessage(serviceListRequestId, TextMessage.class);
-        return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromModuleResponse(serviceListResponse, serviceListRequestId);
+        return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromModuleResponse(serviceListResponse);
     }
     
-    public void sendReportToPlugin(PluginType pluginType, String ruleName, String endpoint, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws ExchangeModelMapperException, MessageException {
-        String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin("", pluginType, new Date(), ruleName, endpoint, exchangeMovement, recipientInfoList, movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getMmsi(), movementDetails.getExternalMarking(), movementDetails.getFlagState());
+    public void sendReportToPlugin(PluginType pluginType, String ruleName, String endpoint, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws  MessageException {
+        String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin("", pluginType, Instant.now(), ruleName, endpoint, exchangeMovement, recipientInfoList, movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getMmsi(), movementDetails.getExternalMarking(), movementDetails.getFlagState());
         exchangeProducer.sendModuleMessage(exchangeRequest, responseQueue, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
     }
     
-    public void sendEmail(ServiceResponseType service, EmailType email, String ruleName) throws ExchangeModelMapperException, MessageException {
+    public void sendEmail(ServiceResponseType service, EmailType email, String ruleName) throws MessageException {
         String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(service.getServiceClassName(), email, ruleName);
         exchangeProducer.sendModuleMessage(request, responseQueue, ExchangeModuleMethod.SET_COMMAND.value());
     }
