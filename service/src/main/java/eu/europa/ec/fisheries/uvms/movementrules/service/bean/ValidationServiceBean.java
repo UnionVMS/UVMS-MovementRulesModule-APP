@@ -47,7 +47,6 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
@@ -195,7 +194,7 @@ public class ValidationServiceBean  {
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, endpoint, "UVMS");
 
-        } catch (ExchangeModelMapperException | MessageException e) {
+        } catch (MessageException e) {
             LOG.error("[ Failed to send to endpoint! ] {}", e.getMessage());
         }
         
@@ -233,7 +232,7 @@ public class ValidationServiceBean  {
                 }
             }
             LOG.info("No plugin of the correct type found. Nothing was sent.");
-        } catch (ExchangeModelMapperException | MessageException e) {
+        } catch (MessageException e) {
             LOG.error("Failed to send email! {}", e.getMessage());
         }
     }
