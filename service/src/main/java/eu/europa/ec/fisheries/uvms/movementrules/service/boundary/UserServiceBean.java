@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -33,6 +34,7 @@ import eu.europa.ec.fisheries.wsdl.user.module.FindOrganisationsResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetUserContextResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.UserModuleMethod;
+import eu.europa.ec.fisheries.wsdl.user.types.Channel;
 import eu.europa.ec.fisheries.wsdl.user.types.EndPoint;
 import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
@@ -113,7 +115,7 @@ public class UserServiceBean {
         }
     }
     
-    public List<RecipientInfoType> getRecipientInfoType(String nationIsoName) throws MessageException {
+    public List<RecipientInfoType> getRecipientInfoType(String nationIsoName, String dataflow) throws MessageException {
         FindOrganisationsResponse response = findOrganisation(nationIsoName);
 
         List<RecipientInfoType> recipientInfoList = new ArrayList<>();
@@ -121,10 +123,14 @@ public class UserServiceBean {
         for (Organisation organisation : organisations) {
             List<EndPoint> endPoints = organisation.getEndPoints();
             for (EndPoint endPoint : endPoints) {
-                RecipientInfoType recipientInfo = new RecipientInfoType();
-                recipientInfo.setKey(endPoint.getName());
-                recipientInfo.setValue(endPoint.getUri());
-                recipientInfoList.add(recipientInfo);
+                for (Channel channel : endPoint.getChannels()) {
+                    if (channel.getDataFlow().equals(dataflow)) {
+                        RecipientInfoType recipientInfo = new RecipientInfoType();
+                        recipientInfo.setKey(endPoint.getName());
+                        recipientInfo.setValue(endPoint.getUri());
+                        recipientInfoList.add(recipientInfo);
+                    }
+                }
             }
         }
         return recipientInfoList;

@@ -188,7 +188,10 @@ public class ValidationServiceBean  {
         try {
             MovementType exchangeMovement = ExchangeMovementMapper.mapToExchangeMovementType(movementDetails);
 
-            List<RecipientInfoType> recipientInfo = userService.getRecipientInfoType(endpoint);
+            List<RecipientInfoType> recipientInfo = new ArrayList<>();
+            if (pluginType.equals(PluginType.NAF)) {
+                recipientInfo = userService.getRecipientInfoType(endpoint, "NAF");
+            }
 
             exchangeService.sendReportToPlugin(pluginType, ruleName, endpoint, exchangeMovement, recipientInfo, movementDetails);
 
