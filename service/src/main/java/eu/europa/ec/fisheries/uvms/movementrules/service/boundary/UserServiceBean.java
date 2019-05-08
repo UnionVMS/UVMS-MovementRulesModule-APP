@@ -11,9 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -22,7 +19,6 @@ import javax.jms.TextMessage;
 import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
@@ -30,12 +26,10 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesR
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.UserProducerBean;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleRequestMapper;
-import eu.europa.ec.fisheries.wsdl.user.module.FindOrganisationsResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
+import eu.europa.ec.fisheries.wsdl.user.module.GetOrganisationResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetUserContextResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.UserModuleMethod;
-import eu.europa.ec.fisheries.wsdl.user.types.Channel;
-import eu.europa.ec.fisheries.wsdl.user.types.EndPoint;
 import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContextId;
@@ -103,36 +97,16 @@ public class UserServiceBean {
             throw new IllegalArgumentException(e);
         }
     }
-    
-    public FindOrganisationsResponse findOrganisation(String nationIsoName) throws MessageException {
+
+    public Organisation getOrganisation(String organisationName) throws MessageException {
         try {
-            String userRequest = UserModuleRequestMapper.mapToFindOrganisationsRequest(nationIsoName);
-            String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.FIND_ORGANISATIONS.value(), "");
+            String userRequest = UserModuleRequestMapper.mapToGetOrganisationRequest(organisationName);
+            String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.GET_ORGANISATIONS.value(), "");
             TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
-            return JAXBMarshaller.unmarshallTextMessage(userMessage, FindOrganisationsResponse.class);
+            GetOrganisationResponse organisationResponse = JAXBMarshaller.unmarshallTextMessage(userMessage, GetOrganisationResponse.class);
+            return organisationResponse.getOrganisation();
         } catch (ModelMarshallException | JAXBException e) {
             throw new IllegalArgumentException(e);
         }
-    }
-    
-    public List<RecipientInfoType> getRecipientInfoType(String nationIsoName, String dataflow) throws MessageException {
-        FindOrganisationsResponse response = findOrganisation(nationIsoName);
-
-        List<RecipientInfoType> recipientInfoList = new ArrayList<>();
-        List<Organisation> organisations = response.getOrganisation();
-        for (Organisation organisation : organisations) {
-            List<EndPoint> endPoints = organisation.getEndPoints();
-            for (EndPoint endPoint : endPoints) {
-                for (Channel channel : endPoint.getChannels()) {
-                    if (channel.getDataFlow().equals(dataflow)) {
-                        RecipientInfoType recipientInfo = new RecipientInfoType();
-                        recipientInfo.setKey(endPoint.getName());
-                        recipientInfo.setValue(endPoint.getUri());
-                        recipientInfoList.add(recipientInfo);
-                    }
-                }
-            }
-        }
-        return recipientInfoList;
     }
 }

@@ -26,22 +26,21 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollMobileTerminal;
-import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollRequestType;
-import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollMobileTerminal;
+import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollRequestType;
+import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
@@ -61,6 +60,9 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
+import eu.europa.ec.fisheries.wsdl.user.types.Channel;
+import eu.europa.ec.fisheries.wsdl.user.types.EndPoint;
+import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 
 @Stateless
 public class ValidationServiceBean  {
@@ -182,33 +184,56 @@ public class ValidationServiceBean  {
     }
 
     
-    private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String endpoint, PluginType pluginType) {
-        LOG.info("Sending to endpoint '{}'", endpoint);
+    private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String organisationName, PluginType pluginType) {
+        LOG.info("Sending to organisation '{}'", organisationName);
 
         try {
             MovementType exchangeMovement = ExchangeMovementMapper.mapToExchangeMovementType(movementDetails);
 
+            Organisation organisation = userService.getOrganisation(organisationName);
+
             List<RecipientInfoType> recipientInfo = new ArrayList<>();
-            if (pluginType.equals(PluginType.NAF)) {
-                recipientInfo = userService.getRecipientInfoType(endpoint, "NAF");
+            String recipient = organisationName;
+
+            if (pluginType.equals(PluginType.NAF) && organisation != null) {
+                recipient = organisation.getNation();
+                recipientInfo = getRecipientInfoType(organisation, "NAF");
+            } else if (pluginType.equals(PluginType.FLUX) && organisation != null) {
+                List<RecipientInfoType> endpoints = getRecipientInfoType(organisation, "FLUXVesselPositionMessage");
+                recipient = endpoints.isEmpty() ? organisation.getNation() : endpoints.get(0).getValue();
             }
 
-            exchangeService.sendReportToPlugin(pluginType, ruleName, endpoint, exchangeMovement, recipientInfo, movementDetails);
+            exchangeService.sendReportToPlugin(pluginType, ruleName, recipient, exchangeMovement, recipientInfo, movementDetails);
 
-            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, endpoint, "UVMS");
+            auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, organisationName, "UVMS");
 
         } catch (MessageException e) {
             LOG.error("[ Failed to send to endpoint! ] {}", e.getMessage());
         }
-        
     }
 
-    private void sendToEndpointFlux(String ruleName, MovementDetails movementDetails, String endpoint) {
-        sendToEndpoint(ruleName, movementDetails, endpoint, PluginType.FLUX);
+    private List<RecipientInfoType> getRecipientInfoType(Organisation organisation, String dataflow) {
+        List<RecipientInfoType> recipientInfoList = new ArrayList<>();
+        List<EndPoint> endPoints = organisation.getEndPoints();
+        for (EndPoint endPoint : endPoints) {
+            for (Channel channel : endPoint.getChannels()) {
+                if (channel.getDataFlow().equals(dataflow)) {
+                    RecipientInfoType recipientInfo = new RecipientInfoType();
+                    recipientInfo.setKey(endPoint.getName());
+                    recipientInfo.setValue(endPoint.getUri());
+                    recipientInfoList.add(recipientInfo);
+                }
+            }
+        }
+        return recipientInfoList;
     }
 
-    private void sendToEndpointNaf(String ruleName, MovementDetails movementDetails, String endpoint) {
-        sendToEndpoint(ruleName, movementDetails, endpoint, PluginType.NAF);
+    private void sendToEndpointFlux(String ruleName, MovementDetails movementDetails, String organisation) {
+        sendToEndpoint(ruleName, movementDetails, organisation, PluginType.FLUX);
+    }
+
+    private void sendToEndpointNaf(String ruleName, MovementDetails movementDetails, String organisation) {
+        sendToEndpoint(ruleName, movementDetails, organisation, PluginType.NAF);
     }
     
     private void sendToEmail(String emailAddress, String ruleName, MovementDetails movementDetails) {
