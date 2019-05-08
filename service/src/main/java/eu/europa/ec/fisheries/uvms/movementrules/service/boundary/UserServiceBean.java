@@ -32,6 +32,7 @@ import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleRequestMapper;
 import eu.europa.ec.fisheries.wsdl.user.module.FindOrganisationsResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
+import eu.europa.ec.fisheries.wsdl.user.module.GetOrganisationResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.GetUserContextResponse;
 import eu.europa.ec.fisheries.wsdl.user.module.UserModuleMethod;
 import eu.europa.ec.fisheries.wsdl.user.types.Channel;
@@ -103,36 +104,16 @@ public class UserServiceBean {
             throw new IllegalArgumentException(e);
         }
     }
-    
-    public FindOrganisationsResponse findOrganisation(String nationIsoName) throws MessageException {
+
+    public Organisation getOrganisation(String organisationName) throws MessageException {
         try {
-            String userRequest = UserModuleRequestMapper.mapToFindOrganisationsRequest(nationIsoName);
-            String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.FIND_ORGANISATIONS.value(), "");
+            String userRequest = UserModuleRequestMapper.mapToGetOrganisationRequest(organisationName);
+            String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.GET_ORGANISATIONS.value(), "");
             TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
-            return JAXBMarshaller.unmarshallTextMessage(userMessage, FindOrganisationsResponse.class);
+            GetOrganisationResponse organisationResponse = JAXBMarshaller.unmarshallTextMessage(userMessage, GetOrganisationResponse.class);
+            return organisationResponse.getOrganisation();
         } catch (ModelMarshallException | JAXBException e) {
             throw new IllegalArgumentException(e);
         }
-    }
-    
-    public List<RecipientInfoType> getRecipientInfoType(String nationIsoName, String dataflow) throws MessageException {
-        FindOrganisationsResponse response = findOrganisation(nationIsoName);
-
-        List<RecipientInfoType> recipientInfoList = new ArrayList<>();
-        List<Organisation> organisations = response.getOrganisation();
-        for (Organisation organisation : organisations) {
-            List<EndPoint> endPoints = organisation.getEndPoints();
-            for (EndPoint endPoint : endPoints) {
-                for (Channel channel : endPoint.getChannels()) {
-                    if (channel.getDataFlow().equals(dataflow)) {
-                        RecipientInfoType recipientInfo = new RecipientInfoType();
-                        recipientInfo.setKey(endPoint.getName());
-                        recipientInfo.setValue(endPoint.getUri());
-                        recipientInfoList.add(recipientInfo);
-                    }
-                }
-            }
-        }
-        return recipientInfoList;
     }
 }

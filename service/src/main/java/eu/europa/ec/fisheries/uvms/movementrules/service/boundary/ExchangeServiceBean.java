@@ -60,8 +60,8 @@ public class ExchangeServiceBean {
         return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromModuleResponse(serviceListResponse);
     }
     
-    public void sendReportToPlugin(PluginType pluginType, String ruleName, String endpoint, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws  MessageException {
-        String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin("", pluginType, Instant.now(), ruleName, endpoint, exchangeMovement, recipientInfoList, movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getMmsi(), movementDetails.getExternalMarking(), movementDetails.getFlagState());
+    public void sendReportToPlugin(PluginType pluginType, String ruleName, String recipient, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws  MessageException {
+        String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin("", pluginType, Instant.now(), ruleName, recipient, exchangeMovement, recipientInfoList, movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getMmsi(), movementDetails.getExternalMarking(), movementDetails.getFlagState());
         exchangeProducer.sendModuleMessage(exchangeRequest, responseQueue, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
     }
     
