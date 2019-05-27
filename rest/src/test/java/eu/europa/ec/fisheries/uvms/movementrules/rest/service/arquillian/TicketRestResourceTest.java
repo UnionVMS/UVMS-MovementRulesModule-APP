@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
 
@@ -53,6 +54,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                 .path("tickets/list/" + "testUser")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(query), String.class);
         
         GetTicketListByQueryResponse ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByQueryResponse.class);
@@ -80,6 +82,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("tickets/list/" + "testUser")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(query), String.class);
 
         ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByQueryResponse.class);
@@ -95,6 +98,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                 .path("tickets/list/" + "testUser")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(new TicketQuery()), String.class);
 
         assertEquals(500, getReturnCode(response));
@@ -106,6 +110,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                 .path("tickets/listByMovements")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(Collections.singletonList("TEST_GUID")), String.class);
         
         GetTicketListByMovementsResponse ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByMovementsResponse.class);
@@ -114,6 +119,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("tickets/listByMovements")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(Collections.singletonList("movement Guid")), String.class);
 
         ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByMovementsResponse.class);
@@ -128,6 +134,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("tickets/listByMovements")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(Collections.singletonList("movement Guid")), String.class);
         ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByMovementsResponse.class);
         assertEquals(ticketList.getTickets().size(), numberOfPriorTickets + 1);
@@ -141,6 +148,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                 .path("tickets/countByMovements")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(Collections.singletonList("TEST_GUID")), String.class);
         
         Long ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
@@ -149,6 +157,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("tickets/countByMovements")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(Collections.singletonList("movement Guid")), String.class);
 
         ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
@@ -163,6 +172,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("tickets/countByMovements")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(Collections.singletonList("movement Guid")), String.class);
         ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
         assertEquals(ticketList.intValue(), numberOfPriorTickets + 1);
@@ -179,6 +189,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                 .path("tickets/status")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json(ticketType), String.class);
         assertEquals(500 ,getReturnCode(response));
     }
@@ -195,6 +206,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                 .path("tickets/status")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json(ticketType), String.class);
         TicketType responseTicket = RulesTestHelper.deserializeResponseDto(response, TicketType.class);
 
@@ -220,6 +232,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                     .path("tickets/status/vms_admin_com/" + TicketStatusType.OPEN)
                     .request(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.AUTHORIZATION, getToken())
                     .post(Entity.json(ticketQuery), String.class);
 
         //ObjectMapper objectMapper = new ObjectMapper();
@@ -254,6 +267,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("tickets/status/vms_admin_com/" + TicketStatusType.CLOSED)
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(ticketQuery), String.class);
 
         //ObjectMapper objectMapper = new ObjectMapper();
@@ -275,6 +289,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                 .path("tickets/" + "TestGuid")    //no tickets in the db
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
         assertEquals(500, getReturnCode(response));
 
@@ -285,6 +300,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("tickets/" + ticket.getGuid())    //no tickets in the db
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         TicketType responseTicket = RulesTestHelper.deserializeResponseDto(response, TicketType.class);
@@ -300,6 +316,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                 .path("/tickets/countopen/" + "ShouldBeEmpty")    //no tickets in the db
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         Long ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
@@ -321,6 +338,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("/tickets/countopen/" + ticket.getUpdatedBy())
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
@@ -331,6 +349,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("/tickets/countopen/" + ticket.getUpdatedBy())
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
@@ -347,6 +366,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         String response = getWebTarget()
                 .path("/tickets/countAssetsNotSending")    //no tickets in the db
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         Long ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
@@ -360,6 +380,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         response = getWebTarget()
                 .path("/tickets/countAssetsNotSending")    //no tickets in the db
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);

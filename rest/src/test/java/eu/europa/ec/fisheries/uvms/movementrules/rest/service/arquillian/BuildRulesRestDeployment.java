@@ -1,6 +1,8 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
 import java.io.File;
+import java.util.Arrays;
+import javax.ejb.EJB;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
@@ -13,10 +15,17 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.SpatialModuleMock;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UnionVMSRestMock;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
 
 @ArquillianSuiteDeployment
 public abstract class BuildRulesRestDeployment {
 
+    @EJB
+    private JwtTokenHandler tokenHandler;
+
+    private String token;
+    
     @Deployment(name = "normal", order = 2)
     public static Archive<?> createDeployment() {
 
@@ -50,7 +59,8 @@ public abstract class BuildRulesRestDeployment {
 
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "unionvms.war");
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.spatial:spatial-model")
+                .resolve("eu.europa.ec.fisheries.uvms.spatial:spatial-model",
+                        "eu.europa.ec.fisheries.uvms:usm4uvms")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
@@ -59,5 +69,16 @@ public abstract class BuildRulesRestDeployment {
         testWar.addClass(AreaTransitionsDTO.class);
         
         return testWar;
+    }
+
+    protected String getToken() {
+        if (token == null) {
+            token = tokenHandler.createToken("user", 
+                    Arrays.asList(UnionVMSFeature.viewAlarmRules.getFeatureId(), 
+                            UnionVMSFeature.manageAlarmRules.getFeatureId(),
+                            UnionVMSFeature.manageAlarmsOpenTickets.getFeatureId(),
+                            UnionVMSFeature.viewAlarmsOpenTickets.getFeatureId()));
+        }
+        return token;
     }
 }

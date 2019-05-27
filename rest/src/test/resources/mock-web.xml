@@ -4,13 +4,15 @@
          xmlns="http://java.sun.com/xml/ns/javaee">
 	
     <filter>
-        <filter-name>AuthenticationFilterMock</filter-name>
-        <filter-class>eu.europa.ec.fisheries.uvms.movementrules.rest.service.AuthenticationFilterMock</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>AuthenticationFilterMock</filter-name>
-        <url-pattern>/rest/*</url-pattern>
-    </filter-mapping>
+		<filter-name>AuthenticationFilter</filter-name>
+		<filter-class>eu.europa.ec.fisheries.uvms.rest.security.AuthenticationFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>AuthenticationFilter</filter-name>
+		<url-pattern>/rest/config/*</url-pattern>
+		<url-pattern>/rest/customrules/*</url-pattern>
+		<url-pattern>/rest/tickets/*</url-pattern>
+	</filter-mapping>
 
 
     <filter>

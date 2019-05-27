@@ -8,8 +8,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +24,7 @@ public class ConfigResourcesTest extends TransactionalTests {
         String response = getWebTarget()
                 .path("config/")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         Map map = deserializeResponseDto(response, HashMap.class);
@@ -49,6 +49,7 @@ public class ConfigResourcesTest extends TransactionalTests {
         String response = getWebTarget()
                 .path("config/ticketstatus")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         Object[] o = deserializeResponseDto(response, Object[].class);
