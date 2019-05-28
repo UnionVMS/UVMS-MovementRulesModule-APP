@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.UUID;
 import javax.ejb.EJB;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
@@ -58,17 +59,17 @@ public class LongPollingHttpServlet extends HttpServlet {
         asyncContexts.add(ctx, req.getServletPath());
     }
     
-    public void observeTicketUpdate(@Observes @TicketEvent NotificationMessage message) throws IOException {
+    public void observeTicketUpdate(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent NotificationMessage message) throws IOException {
         UUID guid = (UUID) message.getProperties().get(LongPollingConstants.PROPERTY_GUID);
         completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid.toString(), LongPollingConstants.ACTION_CREATED));
     }
 
-    public void observeTicketUpdateEvent(@Observes @TicketUpdateEvent NotificationMessage message) throws IOException {
+    public void observeTicketUpdateEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent NotificationMessage message) throws IOException {
         UUID guid = (UUID) message.getProperties().get(LongPollingConstants.PROPERTY_GUID);
         completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid.toString(), LongPollingConstants.ACTION_UPDATED));
     }
 
-    public void observeAlarmReportCount(@Observes @TicketCountEvent NotificationMessage message) throws IOException {
+    public void observeAlarmReportCount(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketCountEvent NotificationMessage message) throws IOException {
         completePoll(LongPollingConstants.TICKET_COUNT_PATH, createJsonMessageCount(true));
     }
 
