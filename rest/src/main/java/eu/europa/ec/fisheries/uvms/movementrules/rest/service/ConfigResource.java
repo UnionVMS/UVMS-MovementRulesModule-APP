@@ -85,8 +85,7 @@ public class ConfigResource {
             SubCriteria[] subCriterias = SubCriteria.values();
             for (SubCriteria subCriteria : subCriterias) {
                 if (subCriteria.getMainCriteria().equals(mainCriteria)) {
-                    ArrayList<String> conditionsByCriteria = getConditionsByCriteria(subCriteria);
-                    subResult.put(subCriteria.toString(), conditionsByCriteria);
+                    subResult.put(subCriteria.toString(), getConditionsByCriteria(subCriteria));
                 }
                 if (!mainCriteria.equals(MainCriteria.ROOT)) {
                     map.put(mainCriteria.name(), subResult);
@@ -115,6 +114,7 @@ public class ConfigResource {
 
     private Map getActions() {
         Map map = new HashMap();
+        // NeedValue is true for all ActionTypes. Update if new ActionTypes with a false value are added.
         Arrays.stream(ActionType.values()).forEach(actionType -> map.put(actionType, true));
         return map;
     }
