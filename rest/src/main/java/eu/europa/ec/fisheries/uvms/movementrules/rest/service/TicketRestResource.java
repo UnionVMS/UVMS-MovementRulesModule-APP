@@ -11,20 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import java.util.List;
-import java.util.UUID;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
@@ -40,33 +26,34 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.List;
+import java.util.UUID;
 
 @Path("/tickets")
 @Stateless
+@Consumes(value = { MediaType.APPLICATION_JSON })
+@Produces(value = { MediaType.APPLICATION_JSON })
 public class TicketRestResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(TicketRestResource.class);
 
     @EJB
-    RulesServiceBean rulesService;
+    private RulesServiceBean rulesService;
 
     @EJB
-    ValidationServiceBean validationService;
+    private ValidationServiceBean validationService;
 
-    /**
-     *
-     * @responseMessage 200 All tickets matching query fetched
-     * @responseMessage 500 No tickets fetched
-     *
-     * @summary Get a list of all tickets by query
-     *
-     */
     @POST
-    @Consumes(value = { MediaType.APPLICATION_JSON })
-    @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/list/{loggedInUser}")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto<TicketListResponseDto> getTicketList(@PathParam("loggedInUser") String loggedInUser, TicketQuery query) {
+    public ResponseDto getTicketListByQuery(@PathParam("loggedInUser") String loggedInUser, TicketQuery query) {
         LOG.info("Get tickets list invoked in rest layer");
         try {
             TicketListResponseDto ticketList = rulesService.getTicketList(loggedInUser, query);
@@ -74,148 +61,89 @@ public class TicketRestResource {
             response.setCurrentPage(ticketList.getCurrentPage());
             response.setTotalNumberOfPages(ticketList.getTotalNumberOfPages());
             response.getTickets().addAll(TicketMapper.listToTicketType(ticketList.getTicketList()));
-            return new ResponseDto(response, ResponseCode.OK);
+            return new ResponseDto<>(response, ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ERROR] Error when getting ticket list by query ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
     }
 
-    /**
-     *
-     * @responseMessage 200 All tickets for provided movement guids
-     * @responseMessage 500 No tickets fetched
-     *
-     * @summary Get a list of all tickets for provided movement guids
-     *
-     */
     @POST
-    @Consumes(value = { MediaType.APPLICATION_JSON })
-    @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/listByMovements")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto getTicketsByMovements(List<String> movements) {
+    public ResponseDto getTicketsByMovementGUIDs(List<String> movements) {
         LOG.info("Get tickets by movements invoked in rest layer");
         try {
             List<Ticket> tickets = rulesService.getTicketsByMovements(movements);
             GetTicketListByMovementsResponse response = new GetTicketListByMovementsResponse();
             response.getTickets().addAll(TicketMapper.listToTicketType(tickets));
-            return new ResponseDto(response, ResponseCode.OK);
+            return new ResponseDto<>(response, ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when getting ticket list by movements. ] {} ", ex);
             return ErrorHandler.getFault(ex);
         }
     }
 
-    /**
-     *
-     * @responseMessage 200 Number of tickets for provided movement guids
-     * @responseMessage 500 Error
-     *
-     * @summary Get number of tickets for provided movement guids
-     *
-     */
     @POST
-    @Consumes(value = { MediaType.APPLICATION_JSON })
-    @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/countByMovements")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto countTicketsByMovements(List<String> movements) {
+    public ResponseDto countTicketsByMovementGUIDs(List<String> movements) {
         try {
-            return new ResponseDto(rulesService.countTicketsByMovements(movements), ResponseCode.OK);
+            return new ResponseDto<>(rulesService.countTicketsByMovements(movements), ResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when counting number of open tickets by movements. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
 
-    /**
-     *
-     * @responseMessage 200 Selected tickets updated
-     * @responseMessage 500 No tickets updated
-     *
-     * @summary Update ticket status
-     *
-     */
     @PUT
-    @Consumes(value = { MediaType.APPLICATION_JSON })
-    @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/status")
     @RequiresFeature(UnionVMSFeature.manageAlarmsOpenTickets)
     public ResponseDto updateTicketStatus(final TicketType ticketType) {
         LOG.info("Update ticket status invoked in rest layer");
         try {
-
             TicketType response = TicketMapper.toTicketType(rulesService.updateTicketStatus(TicketMapper.toTicketEntity(ticketType)));
-            return new ResponseDto(response, ResponseCode.OK);
+            return new ResponseDto<>(response, ResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when updating ticket. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
 
-    /**
-     *
-     * @responseMessage 200 Selected tickets updated
-     * @responseMessage 500 No tickets updated
-     *
-     * @summary Update ticket status
-     *
-     */
     @POST
-    @Consumes(value = { MediaType.APPLICATION_JSON })
-    @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/status/{loggedInUser}/{status}")
     @RequiresFeature(UnionVMSFeature.manageAlarmsOpenTickets)
-    public ResponseDto updateTicketStatusByQuery(@PathParam("loggedInUser") String loggedInUser, TicketQuery query, @PathParam("status") TicketStatusType status) {
+    public ResponseDto updateTicketStatusByQuery(@PathParam("loggedInUser") String loggedInUser, TicketQuery query,
+                                                 @PathParam("status") TicketStatusType status) {
         LOG.info("Update ticket status invoked in rest layer");
         try {
             List response = TicketMapper.listToTicketType(rulesService.updateTicketStatusByQuery(loggedInUser, query, status));
-            return new ResponseDto(response, ResponseCode.OK);
+            return new ResponseDto<>(response, ResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when updating tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
 
-    /**
-     *
-     * @responseMessage 200 Selected ticket fetched
-     * @responseMessage 500 Error
-     *
-     * @summary Get a ticket by GUID
-     *
-     */
     @GET
-    @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/{guid}")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
     public ResponseDto getTicketByGuid(@PathParam("guid") String guid) {
         try {
             TicketType response = TicketMapper.toTicketType(rulesService.getTicketByGuid(UUID.fromString(guid)));
-            return new ResponseDto(response, ResponseCode.OK);
+            return new ResponseDto<>(response, ResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting ticket by GUID. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
 
-    /**
-     *
-     * @responseMessage 200 Number of open tickets for logged in user
-     * @responseMessage 500 Error
-     *
-     * @summary Get number of open tickets
-     *
-     */
     @GET
-    @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/countopen/{loggedInUser}")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
     public ResponseDto getNumberOfOpenTicketReports(@PathParam(value = "loggedInUser") final String loggedInUser) {
-
         try {
-            return new ResponseDto(validationService.getNumberOfOpenTickets(loggedInUser), ResponseCode.OK);
+            return new ResponseDto<>(validationService.getNumberOfOpenTickets(loggedInUser), ResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting number of open tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
@@ -231,16 +159,14 @@ public class TicketRestResource {
      *
      */
     @GET
-    @Produces(value = { MediaType.APPLICATION_JSON })
     @Path("/countAssetsNotSending")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
     public ResponseDto getNumberOfAssetsNotSending() {
         try {
-            return new ResponseDto(rulesService.getNumberOfAssetsNotSending(), ResponseCode.OK);
+            return new ResponseDto<>(rulesService.getNumberOfAssetsNotSending(), ResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting number of assets not sending. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
-
 }

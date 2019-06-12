@@ -11,23 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ejb.Stateless;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AssetStatus;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.MobileTerminalStatus;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.MainCriteria;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
@@ -36,13 +20,39 @@ import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.SubCriteria;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.Stateless;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Path("/config")
 @Stateless
 @RequiresFeature(UnionVMSFeature.viewAlarmRules)
+@Consumes(value = {MediaType.APPLICATION_JSON})
+@Produces(value = {MediaType.APPLICATION_JSON})
 public class ConfigResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigResource.class);
+
+    @GET
+    @Path(value = "/ticketstatus")
+    public ResponseDto getTicketStatuses() {
+        try {
+            return new ResponseDto<>(TicketStatusType.values(), ResponseCode.OK);
+        } catch (Exception ex) {
+            LOG.error("[ Error when getting ticket statuses. ] {} ", ex.getMessage());
+            return ErrorHandler.getFault(ex);
+        }
+    }
 
     /**
      * @responseMessage 200 Get all config for custom rules
@@ -50,28 +60,17 @@ public class ConfigResource {
      * @summary Get a map of all config for populating drop downs in custom rule
      */
     @GET
-    @Consumes(value = {MediaType.APPLICATION_JSON})
-    @Produces(value = {MediaType.APPLICATION_JSON})
     @Path(value = "/")
     public ResponseDto getConfig() {
         try {
             Map map = new HashMap();
-
-            Map<String, HashMap<String, ArrayList<String>>> crit = getCriterias();
-            Map act = getActions();
-            LogicOperatorType[] log = getLogicOperatorType();
-            AvailabilityType[] availability = getAvailability();
-            MobileTerminalStatus[] mobileTerminalStatuses = getMobileTerminalStatuses();
-            AssetStatus[] assetStatuses = getAssetStatuses();
-
-            map.put("CRITERIA", crit);
-            map.put("ACTIONS", act);
-            map.put("LOGIC_OPERATORS", log);
-            map.put("AVAILABILITY", availability);
-            map.put("MOBILETERMINAL_STATUSES", mobileTerminalStatuses);
-            map.put("ASSET_STATUSES", assetStatuses);
-
-            return new ResponseDto(map, ResponseCode.OK);
+            map.put("CRITERIA", getCriterias());
+            map.put("ACTIONS", getActions());
+            map.put("LOGIC_OPERATORS", getLogicOperatorType());
+            map.put("AVAILABILITY", getAvailability());
+            map.put("MOBILETERMINAL_STATUSES", getMobileTerminalStatuses());
+            map.put("ASSET_STATUSES", getAssetStatuses());
+            return new ResponseDto<>(map, ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when getting config. ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
@@ -83,15 +82,14 @@ public class ConfigResource {
         MainCriteria[] mainCriterias = MainCriteria.values();
         for (MainCriteria mainCriteria : mainCriterias) {
             HashMap<String, ArrayList<String>> subResult = new HashMap<>();
-            String mainCrit = mainCriteria.toString();
             SubCriteria[] subCriterias = SubCriteria.values();
             for (SubCriteria subCriteria : subCriterias) {
                 if (subCriteria.getMainCriteria().equals(mainCriteria)) {
-                    getConditionsByCriteria(subCriteria);
-                    subResult.put(subCriteria.toString(), getConditionsByCriteria(subCriteria));
+                    ArrayList<String> conditionsByCriteria = getConditionsByCriteria(subCriteria);
+                    subResult.put(subCriteria.toString(), conditionsByCriteria);
                 }
                 if (!mainCriteria.equals(MainCriteria.ROOT)) {
-                    map.put(mainCrit, subResult);
+                    map.put(mainCriteria.name(), subResult);
                 }
             }
         }
@@ -117,32 +115,7 @@ public class ConfigResource {
 
     private Map getActions() {
         Map map = new HashMap();
-        ActionType[] actionTypes = ActionType.values();
-        for (int i = 0; i < actionTypes.length; i++) {
-
-            boolean needValue = false;
-            ActionType actionType = actionTypes[i];
-            switch (actionType) {
-                case SEND_TO_FLUX:
-                case SEND_TO_NAF:
-                case EMAIL:
-                    needValue = true;
-                    break;
-//                case TICKET:
-//                    needValue = false;
-//                    break;
-//                case MANUAL_POLL:
-//                    break;
-//                case ON_HOLD:
-//                    break;
-//                case TOP_BAR_NOTIFICATION:
-//                    break;
-//                case SMS:
-//                    needValue = true;
-//                    break;
-            }
-            map.put(actionType, needValue);
-        }
+        Arrays.stream(ActionType.values()).forEach(actionType -> map.put(actionType, true));
         return map;
     }
 
@@ -202,27 +175,6 @@ public class ConfigResource {
                 conditions.add(ConditionType.GE.name());
                 break;
         }
-
         return conditions;
     }
-
-
-    /**
-     * @responseMessage 200 Ticket statuses fetched
-     * @responseMessage 500 No config fetched
-     * @summary Get ticket statuses
-     */
-    @GET
-    @Consumes(value = {MediaType.APPLICATION_JSON})
-    @Produces(value = {MediaType.APPLICATION_JSON})
-    @Path(value = "/ticketstatus")
-    public ResponseDto getTicketStatuses() {
-        try {
-            return new ResponseDto(TicketStatusType.values(), ResponseCode.OK);
-        } catch (Exception ex) {
-            LOG.error("[ Error when getting ticket statuses. ] {} ", ex.getMessage());
-            return ErrorHandler.getFault(ex);
-        }
-    }
-
 }
