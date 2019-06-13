@@ -57,21 +57,22 @@ public class CustomRulesRestResource {
     @RequiresFeature(UnionVMSFeature.manageAlarmRules)
     public ResponseDto createCustomRule(final CustomRuleType customRule) {
         LOG.info("Create invoked in rest layer");
-        try {
-            if(!rulesService.isValid(customRule)){
-                return new ResponseDto<>("Custom rule data is not correct", ResponseCode.INPUT_ERROR);
+        if(rulesService.isValid(customRule)) {
+            try {
+                CustomRule entity = CustomRuleMapper.toCustomRuleEntity(customRule);
+                CustomRule created = rulesService.createCustomRule(entity, UnionVMSFeature.manageGlobalAlarmsRules.name(),
+                        rulesService.getApplicationName(servletContext));
+                CustomRuleType response = CustomRuleMapper.toCustomRuleType(created);
+                return new ResponseDto<>(response, ResponseCode.OK);
+            } catch (AccessDeniedException e) {
+                LOG.error("[ User has no right to create global alarm rules ] {} ", e);
+                return ErrorHandler.getFault(e);
+            } catch (Exception e) {
+                LOG.error("[ Error when creating. ] {} ", e);
+                return ErrorHandler.getFault(e);
             }
-            CustomRule entity = CustomRuleMapper.toCustomRuleEntity(customRule);
-            CustomRule created = rulesService.createCustomRule(entity, UnionVMSFeature.manageGlobalAlarmsRules.name(),
-                    rulesService.getApplicationName(servletContext));
-            CustomRuleType response = CustomRuleMapper.toCustomRuleType(created);
-            return new ResponseDto<>(response, ResponseCode.OK);
-        } catch (AccessDeniedException e) {
-            LOG.error("[ User has no right to create global alarm rules ] {} ", e);
-            return ErrorHandler.getFault(e);
-        } catch (Exception e ) {
-            LOG.error("[ Error when creating. ] {} ", e);
-            return ErrorHandler.getFault(e);
+        } else {
+            return new ResponseDto<>("Custom rule data is not correct", ResponseCode.INPUT_ERROR);
         }
     }
 
