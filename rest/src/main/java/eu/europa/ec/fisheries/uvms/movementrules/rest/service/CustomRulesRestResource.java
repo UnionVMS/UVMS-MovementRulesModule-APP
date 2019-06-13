@@ -11,14 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
@@ -35,7 +35,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.nio.file.AccessDeniedException;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,11 +58,13 @@ public class CustomRulesRestResource {
     public ResponseDto createCustomRule(final CustomRuleType customRule) {
         LOG.info("Create invoked in rest layer");
         try {
-            if(!validate(customRule)){
+            if(!rulesService.isValid(customRule)){
                 return new ResponseDto<>("Custom rule data is not correct", ResponseCode.INPUT_ERROR);
             }
             CustomRule entity = CustomRuleMapper.toCustomRuleEntity(customRule);
-            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.createCustomRule(entity, UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)));
+            CustomRule created = rulesService.createCustomRule(entity, UnionVMSFeature.manageGlobalAlarmsRules.name(),
+                    rulesService.getApplicationName(servletContext));
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(created);
             return new ResponseDto<>(response, ResponseCode.OK);
         } catch (AccessDeniedException e) {
             LOG.error("[ User has no right to create global alarm rules ] {} ", e);
@@ -112,7 +113,8 @@ public class CustomRulesRestResource {
     public ResponseDto getCustomRuleByGuid(@PathParam(value = "guid") final String guid) {
         LOG.info("Get custom rule by guid invoked in rest layer");
         try {
-            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.getCustomRuleByGuid(UUID.fromString(guid)));
+            CustomRule customRuleByGuid = rulesService.getCustomRuleByGuid(UUID.fromString(guid));
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(customRuleByGuid);
             return new ResponseDto<>(response, ResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when getting custom rule by guid. ] {} ", ex);
@@ -124,19 +126,22 @@ public class CustomRulesRestResource {
     @RequiresFeature(UnionVMSFeature.manageAlarmRules)
     public ResponseDto update(final CustomRuleType customRuleType) {
         LOG.info("Update custom rule invoked in rest layer");
-        try {
-            if(!validate(customRuleType)){
-                return new ResponseDto<>("Custom rule data is not correct", ResponseCode.INPUT_ERROR);
+        if(rulesService.isValid(customRuleType)) {
+            try {
+                CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(customRuleType);
+                CustomRule updated = rulesService.updateCustomRule(customRule, UnionVMSFeature.manageGlobalAlarmsRules.name(),
+                        rulesService.getApplicationName(servletContext));
+                CustomRuleType response = CustomRuleMapper.toCustomRuleType(updated);
+                return new ResponseDto<>(response, ResponseCode.OK);
+            } catch (AccessDeniedException e) {
+                LOG.error("Forbidden access", e.getMessage());
+                return ErrorHandler.getFault(e);
+            } catch (Exception e) {
+                LOG.error("[ Error when updating. ] {} ", e);
+                return ErrorHandler.getFault(e);
             }
-            CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(customRuleType);
-            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.updateCustomRule(customRule, UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)));
-            return new ResponseDto<>(response, ResponseCode.OK);
-        } catch (AccessDeniedException e) {
-            LOG.error("Forbidden access", e.getMessage());
-            return ErrorHandler.getFault(e);
-        } catch (Exception e) {
-            LOG.error("[ Error when updating. ] {} ", e);
-            return ErrorHandler.getFault(e);
+        } else {
+            return new ResponseDto<>("Custom rule data is not correct", ResponseCode.INPUT_ERROR);
         }
     }
 
@@ -146,7 +151,8 @@ public class CustomRulesRestResource {
     public ResponseDto updateSubscription(UpdateSubscriptionType updateSubscriptionType) {
         LOG.info("Update subscription invoked in rest layer");
         try {
-            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.updateSubscription(updateSubscriptionType, request.getRemoteUser()));
+            CustomRule updated = rulesService.updateSubscription(updateSubscriptionType, request.getRemoteUser());
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(updated);
             return new ResponseDto<>(response, ResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when updating subscription and custom rule. ] {} ", e);
@@ -160,7 +166,9 @@ public class CustomRulesRestResource {
     public ResponseDto deleteCustomRule(@PathParam(value = "guid") final String guid) {
         LOG.info("Delete custom rule invoked in rest layer");
         try {
-            CustomRuleType response = CustomRuleMapper.toCustomRuleType(rulesService.deleteCustomRule(guid, request.getRemoteUser(),UnionVMSFeature.manageGlobalAlarmsRules.name(), getApplicationName(servletContext)));
+            CustomRule deleted = rulesService.deleteCustomRule(guid, request.getRemoteUser(),
+                    UnionVMSFeature.manageGlobalAlarmsRules.name(), rulesService.getApplicationName(servletContext));
+            CustomRuleType response = CustomRuleMapper.toCustomRuleType(deleted);
             return new ResponseDto<>(response, ResponseCode.OK);
         } catch (AccessDeniedException e) {
             LOG.error("Forbidden access", e.getMessage());
@@ -169,55 +177,5 @@ public class CustomRulesRestResource {
             LOG.error("[ Error when deleting custom rule. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
-    }
-
-    private String getApplicationName(ServletContext servletContext) {
-        String cfgName = servletContext.getInitParameter("usmApplication");
-        if (cfgName == null) {
-            cfgName = "Union-VMS";
-        }
-        return cfgName;
-    }
-
-    //TODO: Add more to this function to stop it from letting invalid stuff past
-    private boolean validate(CustomRuleType customRule){
-        boolean valid = true;
-        if(customRule.getName()==null || customRule.getName().isEmpty()){
-            valid = false;
-        } else if(customRule.getTimeIntervals()!=null && !customRule.getTimeIntervals().isEmpty()){
-            for (CustomRuleIntervalType intervalType : customRule.getTimeIntervals()){
-                try {
-                    if(MRDateUtils.stringToDate(intervalType.getStart()).isAfter(MRDateUtils.stringToDate(intervalType.getEnd()))){
-                        valid = false;
-                        break;
-                    }
-                } catch (DateTimeParseException e) {
-                    LOG.error("Error in parsing date, returning non-valid customRule. Errormessage: " + e.getMessage());
-                    return false;
-                }
-            }
-        }
-        int startOperators = 0;
-        int endOperators = 0;
-        for (int i = 0; i < customRule.getDefinitions().size(); i++) {
-            CustomRuleSegmentType segment = customRule.getDefinitions().get(i);
-            if(!(segment.getStartOperator().equals("(") || segment.getStartOperator().isEmpty()) || !(segment.getEndOperator().equals(")") || segment.getEndOperator().isEmpty())){
-                valid = false;
-                break;
-            }
-            startOperators += segment.getStartOperator().length();
-            endOperators += segment.getEndOperator().length();
-            if (LogicOperatorType.NONE.equals(segment.getLogicBoolOperator()) && i < (customRule.getDefinitions().size() - 1)) {
-                valid = false;
-                break;
-            } else if (!LogicOperatorType.NONE.equals(segment.getLogicBoolOperator()) && i == (customRule.getDefinitions().size() - 1)) {
-                valid = false;
-                break;
-            }
-        }
-        if (startOperators != endOperators) {
-            valid = false;
-        }
-        return valid;
     }
 }
