@@ -15,8 +15,6 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
@@ -34,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
@@ -55,7 +54,7 @@ public class CustomRulesRestResource {
 
     @POST
     @RequiresFeature(UnionVMSFeature.manageAlarmRules)
-    public ResponseDto createCustomRule(final CustomRuleType customRule) {
+    public Response createCustomRule(CustomRuleType customRule) {
         LOG.info("Create invoked in rest layer");
         if(rulesService.isValid(customRule)) {
             try {
@@ -63,7 +62,7 @@ public class CustomRulesRestResource {
                 CustomRule created = rulesService.createCustomRule(entity, UnionVMSFeature.manageGlobalAlarmsRules.name(),
                         rulesService.getApplicationName(servletContext));
                 CustomRuleType response = CustomRuleMapper.toCustomRuleType(created);
-                return new ResponseDto<>(response, ResponseCode.OK);
+                return Response.ok(response).build();
             } catch (AccessDeniedException e) {
                 LOG.error("[ User has no right to create global alarm rules ] {} ", e);
                 return ErrorHandler.getFault(e);
@@ -72,18 +71,19 @@ public class CustomRulesRestResource {
                 return ErrorHandler.getFault(e);
             }
         } else {
-            return new ResponseDto<>("Custom rule data is not correct", ResponseCode.INPUT_ERROR);
+            return Response.status(Response.Status.BAD_REQUEST).entity("Custom rule data is not correct").build();
         }
     }
 
     @GET
     @Path(value = "listAll/{userName}")
     @RequiresFeature(UnionVMSFeature.viewAlarmRules)
-    public ResponseDto getCustomRulesByUser(@PathParam(value = "userName") final String userName) {
+    public Response getCustomRulesByUser(@PathParam(value = "userName") final String userName) {
         LOG.info("Get all custom rules invoked in rest layer");
         try {
-            List<CustomRule> customRulesByUser = rulesService.getCustomRulesByUser(userName);
-            return new ResponseDto<>(CustomRuleMapper.toCustomRuleTypeList(customRulesByUser), ResponseCode.OK);
+            List<CustomRule> entityList = rulesService.getCustomRulesByUser(userName);
+            List<CustomRuleType> typeList = CustomRuleMapper.toCustomRuleTypeList(entityList);
+            return Response.ok(typeList).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting all custom rules. ] {} ", ex);
             return ErrorHandler.getFault(ex);
@@ -93,7 +93,7 @@ public class CustomRulesRestResource {
     @POST
     @Path("listByQuery")
     @RequiresFeature(UnionVMSFeature.viewAlarmRules)
-    public ResponseDto getCustomRulesByQuery(CustomRuleQuery query) {
+    public Response getCustomRulesByQuery(CustomRuleQuery query) {
         LOG.info("Get custom rules by query invoked in rest layer");
         try {
             CustomRuleListResponseDto customRulesListDto = rulesService.getCustomRulesByQuery(query);
@@ -101,7 +101,7 @@ public class CustomRulesRestResource {
             response.setTotalNumberOfPages(customRulesListDto.getTotalNumberOfPages());
             response.setCurrentPage(customRulesListDto.getCurrentPage());
             response.getCustomRules().addAll(CustomRuleMapper.toCustomRuleTypeList(customRulesListDto.getCustomRuleList()));
-            return new ResponseDto<>(response, ResponseCode.OK);
+            return Response.ok(response).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting custom rules by query. ] {} ", ex);
             return ErrorHandler.getFault(ex);
@@ -111,12 +111,12 @@ public class CustomRulesRestResource {
     @GET
     @Path(value = "{guid}")
     @RequiresFeature(UnionVMSFeature.viewAlarmRules)
-    public ResponseDto getCustomRuleByGuid(@PathParam(value = "guid") final String guid) {
+    public Response getCustomRuleByGuid(@PathParam(value = "guid") final String guid) {
         LOG.info("Get custom rule by guid invoked in rest layer");
         try {
             CustomRule customRuleByGuid = rulesService.getCustomRuleByGuid(UUID.fromString(guid));
             CustomRuleType response = CustomRuleMapper.toCustomRuleType(customRuleByGuid);
-            return new ResponseDto<>(response, ResponseCode.OK);
+            return Response.ok(response).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting custom rule by guid. ] {} ", ex);
             return ErrorHandler.getFault(ex);
@@ -125,7 +125,7 @@ public class CustomRulesRestResource {
 
     @PUT
     @RequiresFeature(UnionVMSFeature.manageAlarmRules)
-    public ResponseDto update(final CustomRuleType customRuleType) {
+    public Response updateCustomRule(final CustomRuleType customRuleType) {
         LOG.info("Update custom rule invoked in rest layer");
         if(rulesService.isValid(customRuleType)) {
             try {
@@ -133,7 +133,7 @@ public class CustomRulesRestResource {
                 CustomRule updated = rulesService.updateCustomRule(customRule, UnionVMSFeature.manageGlobalAlarmsRules.name(),
                         rulesService.getApplicationName(servletContext));
                 CustomRuleType response = CustomRuleMapper.toCustomRuleType(updated);
-                return new ResponseDto<>(response, ResponseCode.OK);
+                return Response.ok(response).build();
             } catch (AccessDeniedException e) {
                 LOG.error("Forbidden access", e.getMessage());
                 return ErrorHandler.getFault(e);
@@ -142,19 +142,19 @@ public class CustomRulesRestResource {
                 return ErrorHandler.getFault(e);
             }
         } else {
-            return new ResponseDto<>("Custom rule data is not correct", ResponseCode.INPUT_ERROR);
+            return Response.status(Response.Status.BAD_REQUEST).entity("Custom rule data is not correct").build();
         }
     }
 
     @POST
     @Path("/subscription")
     @RequiresFeature(UnionVMSFeature.manageAlarmRules)
-    public ResponseDto updateSubscription(UpdateSubscriptionType updateSubscriptionType) {
+    public Response updateSubscription(UpdateSubscriptionType updateSubscriptionType) {
         LOG.info("Update subscription invoked in rest layer");
         try {
             CustomRule updated = rulesService.updateSubscription(updateSubscriptionType, request.getRemoteUser());
             CustomRuleType response = CustomRuleMapper.toCustomRuleType(updated);
-            return new ResponseDto<>(response, ResponseCode.OK);
+            return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when updating subscription and custom rule. ] {} ", e);
             return ErrorHandler.getFault(e);
@@ -164,13 +164,13 @@ public class CustomRulesRestResource {
     @DELETE
     @Path("/{guid}")
     @RequiresFeature(UnionVMSFeature.manageAlarmRules)
-    public ResponseDto deleteCustomRule(@PathParam(value = "guid") final String guid) {
+    public Response deleteCustomRule(@PathParam(value = "guid") final String guid) {
         LOG.info("Delete custom rule invoked in rest layer");
         try {
             CustomRule deleted = rulesService.deleteCustomRule(guid, request.getRemoteUser(),
                     UnionVMSFeature.manageGlobalAlarmsRules.name(), rulesService.getApplicationName(servletContext));
             CustomRuleType response = CustomRuleMapper.toCustomRuleType(deleted);
-            return new ResponseDto<>(response, ResponseCode.OK);
+            return Response.ok(response).build();
         } catch (AccessDeniedException e) {
             LOG.error("Forbidden access", e.getMessage());
             return ErrorHandler.getFault(e);

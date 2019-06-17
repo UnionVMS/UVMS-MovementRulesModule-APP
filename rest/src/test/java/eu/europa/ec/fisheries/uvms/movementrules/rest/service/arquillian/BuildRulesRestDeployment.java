@@ -7,6 +7,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.dto.AreaTransitionsDTO;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;

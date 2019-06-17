@@ -29,11 +29,11 @@ public class CustomRuleValidator {
     }
 
     private static boolean isNameValid(CustomRuleType customRule) {
-        return customRule.getName() != null && !customRule.getName().isEmpty();
+        return customRule.getName() != null && !customRule.getName().trim().isEmpty();
     }
 
     private static boolean isDescriptionValid(CustomRuleType customRule) {
-        return customRule.getDescription() != null && !customRule.getDescription().isEmpty();
+        return customRule.getDescription() != null && !customRule.getDescription().trim().isEmpty();
     }
 
     private static boolean isTimeIntervalsValid(CustomRuleType customRule) {

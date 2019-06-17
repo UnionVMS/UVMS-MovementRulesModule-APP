@@ -30,8 +30,10 @@ public class InternalRestResources {
 
     @POST
     @Path("/tickets-and-rules-by-movement")
-    public GetTicketsAndRulesByMovementsResponse getTicketsAndRulesByMovementsEvent(GetTicketsAndRulesByMovementsRequest request) {
-        return rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());
+    public Response getTicketsAndRulesByMovementsEvent(GetTicketsAndRulesByMovementsRequest request) {
+        GetTicketsAndRulesByMovementsResponse response =
+                rulesService.getTicketsAndRulesByMovements(request.getMovementGuids());
+        return Response.ok(response).build();
     }
 
     @POST

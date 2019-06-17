@@ -11,27 +11,16 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import java.time.Instant;
-import java.util.Random;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleSegmentType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmQuery;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
+import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+
+import java.time.Instant;
 
 public class RulesTestHelper {
 
@@ -45,26 +34,6 @@ public class RulesTestHelper {
         return customRule;
     }
     
-    public static CustomRuleQuery createBasicCustomRuleQuery() {
-        CustomRuleQuery query = new CustomRuleQuery();
-        query.setDynamic(true);
-        ListPagination pagination = new ListPagination();
-        pagination.setPage(1);
-        pagination.setListSize(100);
-        query.setPagination(pagination);
-        return query;
-    }
-
-    public static AlarmQuery getBasicAlarmQuery() {
-        AlarmQuery query = new AlarmQuery();
-        query.setDynamic(true);
-        ListPagination pagination = new ListPagination();
-        pagination.setPage(1);
-        pagination.setListSize(100);
-        query.setPagination(pagination);
-        return query;
-    }
-    
     public static TicketQuery getBasicTicketQuery() {
         TicketQuery query = new TicketQuery();
         ListPagination pagination = new ListPagination();
@@ -73,20 +42,19 @@ public class RulesTestHelper {
         query.setPagination(pagination);
         return query;
     }
-    
-    public static String getRandomIntegers(int length) {
-        return new Random()
-                .ints(0,9)
-                .mapToObj(i -> String.valueOf(i))
-                .limit(length)
-                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-                .toString();
+
+    public static TicketListCriteria getTicketListCriteria(TicketSearchKey key, String value) {
+        TicketListCriteria criteria = new TicketListCriteria();
+        criteria.setKey(key);
+        criteria.setValue(value);
+        return criteria;
     }
 
     public static CustomRuleType getCompleteNewCustomRule(){
         CustomRuleType customRule = new CustomRuleType();
 
         customRule.setName("Flag SWE && area DNK => Send to DNK" + " (" + System.currentTimeMillis() + ")");
+        customRule.setDescription("A description for CustomRule");
         customRule.setAvailability(AvailabilityType.PRIVATE);
         customRule.setUpdatedBy("vms_admin_com");
         customRule.setActive(true);
@@ -121,12 +89,10 @@ public class RulesTestHelper {
         action.setAction(ActionType.SEND_TO_FLUX);
         action.setValue("FLUX DNK");
         action.setOrder("0");
-
         customRule.getActions().add(action);
 
         return customRule;
     }
-
 
     public static Ticket getCompleteTicket() {
         Ticket ticket = new Ticket();
@@ -144,12 +110,5 @@ public class RulesTestHelper {
         ticket.setRecipient("tmp recipient");
 
         return ticket;
-    }
-
-    public static <T> T deserializeResponseDto(String responseDto, Class<T> clazz) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode node = objectMapper.readValue(responseDto, ObjectNode.class);
-        JsonNode jsonNode = node.get("data");
-        return objectMapper.readValue(objectMapper.writeValueAsString(jsonNode), clazz);
     }
 }

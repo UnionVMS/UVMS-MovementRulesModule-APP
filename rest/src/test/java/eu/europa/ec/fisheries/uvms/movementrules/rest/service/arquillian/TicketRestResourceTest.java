@@ -1,12 +1,9 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQueryResponse;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
@@ -28,14 +25,20 @@ import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import java.util.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
-//@RunAsClient
 @RunWith(Arquillian.class)
 public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
@@ -44,34 +47,23 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @OperateOnDeployment("normal")
-    public void getTicketListTest() throws Exception {
+    public void getTicketListByTicketQueryTest() {
         TicketQuery query = RulesTestHelper.getBasicTicketQuery();
-        TicketListCriteria criteria = new TicketListCriteria();
-        criteria.setKey(TicketSearchKey.RULE_NAME);
-        criteria.setValue("Test Name");
+        TicketListCriteria criteria = RulesTestHelper.getTicketListCriteria(TicketSearchKey.RULE_NAME, "Test Name");
         query.getTicketSearchCriteria().add(criteria);
-        
-        String response = getWebTarget()
+
+        GetTicketListByQueryResponse ticketList = getWebTarget()
                 .path("tickets/list/" + "testUser")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(query), String.class);
-        
-        GetTicketListByQueryResponse ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByQueryResponse.class);
+                .post(Entity.json(query), GetTicketListByQueryResponse.class);
+
         assertNotNull(ticketList.getTickets());
         int numberOfTickets = ticketList.getTickets().size();
 
         Ticket ticket = RulesTestHelper.getCompleteTicket();
 
-        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setAvailability(AvailabilityType.GLOBAL);
-        customRule.setUpdatedBy("testUser");
-        RuleSubscription ruleSubscription = new RuleSubscription();
-        ruleSubscription.setType(SubscriptionTypeType.TICKET);
-        ruleSubscription.setCustomRule(customRule);
-        ruleSubscription.setOwner("testUser");
-        customRule.getRuleSubscriptionList().add(ruleSubscription);
-        customRule = rulesDao.createCustomRule(customRule);
+        CustomRule customRule = createCustomRule("testUser");
 
         ticket.setRuleName(customRule.getName());
         ticket.setRuleGuid(customRule.getGuid().toString());
@@ -79,13 +71,12 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
         Ticket createdTicket = rulesDao.createTicket(ticket);
         criteria.setValue(customRule.getName());
-        response = getWebTarget()
+        ticketList = getWebTarget()
                 .path("tickets/list/" + "testUser")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(query), String.class);
+                .post(Entity.json(query), GetTicketListByQueryResponse.class);
 
-        ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByQueryResponse.class);
         assertThat(ticketList.getTickets().size(), is(numberOfTickets + 1));
 
         rulesDao.removeTicketAfterTests(createdTicket);
@@ -94,38 +85,29 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @OperateOnDeployment("normal")
-    public void negativeGetTicketListTest() throws Exception{
-        String response = getWebTarget()
+    public void getTicketListByTicketQuery_ShouldFailInvalidTestQueryTest() {
+        Response response = getWebTarget()
                 .path("tickets/list/" + "testUser")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(new TicketQuery()), String.class);
+                .post(Entity.json(new TicketQuery()));
 
-        assertEquals(500, getReturnCode(response));
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     }
     
     @Test
     @OperateOnDeployment("normal")
-    public void getTicketsByMovementsTest() throws Exception {
-        String response = getWebTarget()
+    public void getTicketsByMovementGuidListTest() {
+        Response response = getWebTarget()
                 .path("tickets/listByMovements")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(Collections.singletonList("TEST_GUID")), String.class);
-        
-        GetTicketListByMovementsResponse ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByMovementsResponse.class);
-        assertThat(ticketList.getTickets().size(), is(0));
+                .post(Entity.json(Collections.singletonList("movement Guid")));
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
 
-        response = getWebTarget()
-                .path("tickets/listByMovements")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(Collections.singletonList("movement Guid")), String.class);
-
-        ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByMovementsResponse.class);
-        assertNotNull(ticketList.getTickets());
+        GetTicketListByMovementsResponse ticketList = response.readEntity(GetTicketListByMovementsResponse.class);
         int numberOfPriorTickets = ticketList.getTickets().size();
-
+        assertEquals(0, numberOfPriorTickets);
 
         Ticket ticket = RulesTestHelper.getCompleteTicket();
         ticket.setMovementGuid("movement Guid");
@@ -135,8 +117,9 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .path("tickets/listByMovements")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(Collections.singletonList("movement Guid")), String.class);
-        ticketList = RulesTestHelper.deserializeResponseDto(response, GetTicketListByMovementsResponse.class);
+                .post(Entity.json(Collections.singletonList("movement Guid")));
+
+        ticketList = response.readEntity(GetTicketListByMovementsResponse.class);
         assertEquals(ticketList.getTickets().size(), numberOfPriorTickets + 1);
 
         rulesDao.removeTicketAfterTests(ticket);
@@ -144,26 +127,15 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @OperateOnDeployment("normal")
-    public void countTicketsByMovementsTest() throws Exception {
-        String response = getWebTarget()
+    public void countTicketsByMovementGuidListTest() {
+        Long response = getWebTarget()
                 .path("tickets/countByMovements")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(Collections.singletonList("TEST_GUID")), String.class);
-        
-        Long ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
-        assertThat(ticketList, is(0L));
+                .post(Entity.json(Collections.singletonList("movement Guid")), Long.class);
+        assertEquals((Long)0L, response);
 
-        response = getWebTarget()
-                .path("tickets/countByMovements")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(Collections.singletonList("movement Guid")), String.class);
-
-        ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
-        assertNotNull(ticketList);
-        int numberOfPriorTickets = ticketList.intValue();
-
+        int numberOfPriorTickets = response.intValue();
 
         Ticket ticket = RulesTestHelper.getCompleteTicket();
         ticket.setMovementGuid("movement Guid");
@@ -173,89 +145,71 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .path("tickets/countByMovements")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(Collections.singletonList("movement Guid")), String.class);
-        ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
-        assertEquals(ticketList.intValue(), numberOfPriorTickets + 1);
+                .post(Entity.json(Collections.singletonList("movement Guid")), Long.class);
+
+        assertEquals(response.intValue(), numberOfPriorTickets + 1);
+        rulesDao.removeTicketAfterTests(ticket);
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void updateTicketStatusTest() {
+        Ticket ticket = RulesTestHelper.getCompleteTicket();
+        ticket = rulesDao.createTicket(ticket);
+        TicketType ticketType = TicketMapper.toTicketType(ticket);
+
+        assertEquals(TicketStatusType.OPEN, ticketType.getStatus());
+
+        ticketType.setStatus(TicketStatusType.CLOSED);
+
+        TicketType response = getWebTarget()
+                .path("tickets/status")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .put(Entity.json(ticketType), TicketType.class);
+
+        assertEquals(TicketStatusType.CLOSED, response.getStatus());
 
         rulesDao.removeTicketAfterTests(ticket);
     }
-    
+
     @Test
     @OperateOnDeployment("normal")
-    public void negativeUpdateTicketStatusTest() throws Exception{ //there are no tickets to update so this one will result in an internal server error
+    public void updateTicketStatus_ShouldFailInvalidTicketTest() {
         TicketType ticketType = new TicketType();
         ticketType.setGuid("TestGuid");
 
-        String response = getWebTarget()
+        Response response = getWebTarget()
                 .path("tickets/status")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .put(Entity.json(ticketType), String.class);
-        assertEquals(500 ,getReturnCode(response));
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void updateTicketStatusTest() throws Exception{
-        Ticket ticket = RulesTestHelper.getCompleteTicket();
-        ticket.setStatus(TicketStatusType.OPEN);
-        ticket = rulesDao.createTicket(ticket);
-        TicketType ticketType = TicketMapper.toTicketType(ticket);
-        ticketType.setStatus(TicketStatusType.CLOSED);
-
-        String response = getWebTarget()
-                .path("tickets/status")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .put(Entity.json(ticketType), String.class);
-        TicketType responseTicket = RulesTestHelper.deserializeResponseDto(response, TicketType.class);
-
-        assertEquals(TicketStatusType.CLOSED, responseTicket.getStatus());
-
-        rulesDao.removeTicketAfterTests(ticket);
+                .put(Entity.json(ticketType));
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     }
     
     @Test
     @OperateOnDeployment("normal")
-    public void updateTicketStatusByQueryTest() throws Exception {
-        TicketQuery ticketQuery = new TicketQuery();
-        TicketListCriteria tlc = new TicketListCriteria();
-        tlc.setKey(TicketSearchKey.TICKET_GUID);
-        tlc.setValue(UUID.randomUUID().toString());
+    public void updateTicketStatusByQueryTest() {
+        TicketQuery ticketQuery = RulesTestHelper.getBasicTicketQuery();
+        TicketListCriteria tlc = RulesTestHelper
+                .getTicketListCriteria(TicketSearchKey.TICKET_GUID, UUID.randomUUID().toString());
         ticketQuery.getTicketSearchCriteria().add(tlc);
-        ListPagination lp = new ListPagination();
-        lp.setPage(1);
-        lp.setListSize(10);
-        ticketQuery.setPagination(lp);
 
-
-        String response = getWebTarget()
-                    .path("tickets/status/vms_admin_com/" + TicketStatusType.OPEN)
+        List<TicketType> response = getWebTarget()
+                    .path("tickets/status/")
+                    .path("vms_admin_com")
+                    .path(TicketStatusType.OPEN.name())
                     .request(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.AUTHORIZATION, getToken())
-                    .post(Entity.json(ticketQuery), String.class);
+                    .post(Entity.json(ticketQuery), new GenericType<List<TicketType>>(){});
 
-        //ObjectMapper objectMapper = new ObjectMapper();
-        //why are we treating this as an array??????
-        //Object[] returnArray = deserializeResponseDto(response, Object[].class);
-        //I have no idea why but for some reason the response gets deserialized as a hashmap instead of a ticketType, so bring out the ugly hack......
-        //List<TicketType> responseList = deserializeResponseDto(response, List.class);
-        List<HashMap> responseList = RulesTestHelper.deserializeResponseDto(response, List.class);
-        assertThat(responseList.size(), is(0));
+        assertEquals(0, response.size());
 
         Date now = new Date(System.currentTimeMillis() - 1000);
         tlc.setKey(TicketSearchKey.FROM_DATE);
         tlc.setValue(MRDateUtils.dateToString(now.toInstant()));
 
-        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setAvailability(AvailabilityType.GLOBAL);
-        customRule.setUpdatedBy("vms_admin_com");
-        RuleSubscription ruleSubscription = new RuleSubscription();
-        ruleSubscription.setType(SubscriptionTypeType.TICKET);
-        ruleSubscription.setCustomRule(customRule);
-        ruleSubscription.setOwner("vms_admin_com");
-        customRule.getRuleSubscriptionList().add(ruleSubscription);
-        customRule = rulesDao.createCustomRule(customRule);
+        CustomRule customRule = createCustomRule("vms_admin_com");
 
         Ticket ticket1 = RulesTestHelper.getCompleteTicket();
         ticket1.setRuleGuid(customRule.getGuid().toString());
@@ -268,15 +222,15 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .path("tickets/status/vms_admin_com/" + TicketStatusType.CLOSED)
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(ticketQuery), String.class);
+                .post(Entity.json(ticketQuery), new GenericType<List<TicketType>>(){});
 
-        //ObjectMapper objectMapper = new ObjectMapper();
-        responseList = RulesTestHelper.deserializeResponseDto(response, ArrayList.class);
-        assertEquals(2 ,responseList.size());
-        //Why is it treating this as a hash map???????
-        for(HashMap ticketType : responseList){
-            assertEquals(TicketStatusType.CLOSED.value(), ticketType.get("status"));
-        }
+        assertEquals(2, response.size());
+
+        List<TicketType> filtered = response.stream()
+                .filter(tt -> TicketStatusType.CLOSED.equals(tt.getStatus()))
+                .collect(Collectors.toList());
+
+        assertEquals(2, filtered.size());
 
         rulesDao.removeTicketAfterTests(ticket1);
         rulesDao.removeTicketAfterTests(ticket2);
@@ -285,76 +239,70 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @OperateOnDeployment("normal")
-    public void getTicketByGuid() throws Exception {
-        String response = getWebTarget()
-                .path("tickets/" + "TestGuid")    //no tickets in the db
+    public void getTicketByGuidTest() {
+        Ticket ticket = createTicket();
+
+        TicketType response = getWebTarget()
+                .path("tickets/")
+                .path(ticket.getGuid().toString())
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
-        assertEquals(500, getReturnCode(response));
+                .get(TicketType.class);
 
-
-        Ticket ticket = RulesTestHelper.getCompleteTicket();
-        ticket = rulesDao.createTicket(ticket);
-
-        response = getWebTarget()
-                .path("tickets/" + ticket.getGuid())    //no tickets in the db
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
-
-        TicketType responseTicket = RulesTestHelper.deserializeResponseDto(response, TicketType.class);
-        assertNotNull(responseTicket);
-        assertEquals(ticket.getGuid().toString(), responseTicket.getGuid());
+        assertNotNull(response.getGuid());
+        assertEquals(ticket.getGuid().toString(), response.getGuid());
 
         rulesDao.removeTicketAfterTests(ticket);
     }
 
     @Test
     @OperateOnDeployment("normal")
-    public void getNumberOfOpenTicketReportsTest() throws Exception{
-        String response = getWebTarget()
-                .path("/tickets/countopen/" + "ShouldBeEmpty")    //no tickets in the db
+    public void getTicketByGuid_ShouldFailInvalidGuidTest() {
+        Response response = getWebTarget()
+                .path("tickets/")
+                .path("INVALID-GUID")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
+                .get();
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
 
-        Long ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
-        assertEquals(0 , ticketList.intValue());
+    @Test
+    @OperateOnDeployment("normal")
+    public void getNumberOfOpenTicketReportsTest() {
+        Long response = getWebTarget()
+                .path("/tickets/countopen/")
+                .path("invalid_user")    //no tickets in the db
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .get(Long.class);
 
-        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
-        customRule.setAvailability(AvailabilityType.GLOBAL);
-        customRule.setUpdatedBy("TestUser");
-        RuleSubscription ruleSubscription = new RuleSubscription();
-        ruleSubscription.setType(SubscriptionTypeType.TICKET);
-        ruleSubscription.setCustomRule(customRule);
-        ruleSubscription.setOwner("TestUser");
-        customRule.getRuleSubscriptionList().add(ruleSubscription);
-        customRule = rulesDao.createCustomRule(customRule);
+        assertEquals(0 , response.intValue());
+
+        CustomRule customRule = createCustomRule("TestUser");
 
         Ticket ticket = RulesTestHelper.getCompleteTicket();
         ticket.setRuleGuid(customRule.getGuid().toString());
         ticket.setUpdatedBy("TestUser");
+
         response = getWebTarget()
-                .path("/tickets/countopen/" + ticket.getUpdatedBy())
+                .path("/tickets/countopen/")
+                .path(ticket.getUpdatedBy())
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
+                .get(Long.class);
 
-        ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
-        assertNotNull(ticketList);
-        int numberOfTicketsB4 = ticketList.intValue();
+        int numberOfTicketsBefore = response.intValue();
         ticket = rulesDao.createTicket(ticket);
 
         response = getWebTarget()
-                .path("/tickets/countopen/" + ticket.getUpdatedBy())
+                .path("/tickets/countopen/")
+                .path(ticket.getUpdatedBy())
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
+                .get(Long.class);
 
-        ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
-        assertNotNull(ticketList);
-        assertEquals(numberOfTicketsB4 + 1 , ticketList.intValue());
+        assertEquals(numberOfTicketsBefore + 1 , response.intValue());
 
         rulesDao.removeTicketAfterTests(ticket);
         rulesDao.removeCustomRuleAfterTests(customRule);
@@ -362,16 +310,14 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @OperateOnDeployment("normal")
-    public void getNumberOfAssetsNotSendingTest() throws Exception{
-        String response = getWebTarget()
-                .path("/tickets/countAssetsNotSending")    //no tickets in the db
+    public void getNumberOfAssetsNotSendingTest() {
+        Long response = getWebTarget()
+                .path("/tickets/countAssetsNotSending")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
+                .get(Long.class);
 
-        Long ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
-        assertNotNull(ticketList);
-        int numberOfTicketsB4 = ticketList.intValue();
+        int numberOfTicketsBefore = response.intValue();
 
         Ticket ticket = RulesTestHelper.getCompleteTicket();
         ticket.setRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
@@ -381,17 +327,28 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .path("/tickets/countAssetsNotSending")    //no tickets in the db
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
+                .get(Long.class);
 
-        ticketList = RulesTestHelper.deserializeResponseDto(response, Long.class);
-        assertEquals(numberOfTicketsB4 +1 , ticketList.intValue());
+        assertEquals(numberOfTicketsBefore +1 , response.intValue());
 
         rulesDao.removeTicketAfterTests(ticket);
     }
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private int getReturnCode(String responsDto) throws Exception{
-        return objectMapper.readValue(responsDto, ObjectNode.class).get("code").asInt();
+    private CustomRule createCustomRule(String testUser) {
+        CustomRule customRule = CustomRuleMapper.toCustomRuleEntity(RulesTestHelper.getCompleteNewCustomRule());
+        customRule.setAvailability(AvailabilityType.GLOBAL);
+        customRule.setUpdatedBy(testUser);
+        RuleSubscription ruleSubscription = new RuleSubscription();
+        ruleSubscription.setType(SubscriptionTypeType.TICKET);
+        ruleSubscription.setCustomRule(customRule);
+        ruleSubscription.setOwner(testUser);
+        customRule.getRuleSubscriptionList().add(ruleSubscription);
+        customRule = rulesDao.createCustomRule(customRule);
+        return customRule;
     }
 
+    private Ticket createTicket() {
+        Ticket ticket = RulesTestHelper.getCompleteTicket();
+        return rulesDao.createTicket(ticket);
+    }
 }

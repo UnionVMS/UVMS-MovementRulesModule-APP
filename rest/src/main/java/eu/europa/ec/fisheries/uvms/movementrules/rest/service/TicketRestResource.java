@@ -16,8 +16,6 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQuer
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
@@ -33,6 +31,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,15 +52,16 @@ public class TicketRestResource {
     @POST
     @Path("/list/{loggedInUser}")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto getTicketListByQuery(@PathParam("loggedInUser") String loggedInUser, TicketQuery query) {
+    public Response getTicketListByQuery(@PathParam("loggedInUser") String loggedInUser, TicketQuery query) {
         LOG.info("Get tickets list invoked in rest layer");
         try {
             TicketListResponseDto ticketList = rulesService.getTicketList(loggedInUser, query);
             GetTicketListByQueryResponse response = new GetTicketListByQueryResponse();
             response.setCurrentPage(ticketList.getCurrentPage());
             response.setTotalNumberOfPages(ticketList.getTotalNumberOfPages());
-            response.getTickets().addAll(TicketMapper.listToTicketType(ticketList.getTicketList()));
-            return new ResponseDto<>(response, ResponseCode.OK);
+            List<TicketType> ticketTypes = TicketMapper.listToTicketType(ticketList.getTicketList());
+            response.getTickets().addAll(ticketTypes);
+            return Response.ok(response).build();
         } catch (Exception ex) {
             LOG.error("[ERROR] Error when getting ticket list by query ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
@@ -71,13 +71,14 @@ public class TicketRestResource {
     @POST
     @Path("/listByMovements")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto getTicketsByMovementGUIDs(List<String> movements) {
+    public Response getTicketsByMovementGuidList(List<String> movements) {
         LOG.info("Get tickets by movements invoked in rest layer");
         try {
             List<Ticket> tickets = rulesService.getTicketsByMovements(movements);
             GetTicketListByMovementsResponse response = new GetTicketListByMovementsResponse();
-            response.getTickets().addAll(TicketMapper.listToTicketType(tickets));
-            return new ResponseDto<>(response, ResponseCode.OK);
+            List<TicketType> ticketTypes = TicketMapper.listToTicketType(tickets);
+            response.getTickets().addAll(ticketTypes);
+            return Response.ok(response).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting ticket list by movements. ] {} ", ex);
             return ErrorHandler.getFault(ex);
@@ -87,9 +88,10 @@ public class TicketRestResource {
     @POST
     @Path("/countByMovements")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto countTicketsByMovementGUIDs(List<String> movements) {
+    public Response countTicketsByMovementGuidList(List<String> movements) {
         try {
-            return new ResponseDto<>(rulesService.countTicketsByMovements(movements), ResponseCode.OK);
+            Long count = rulesService.countTicketsByMovements(movements);
+            return Response.ok(count).build();
         } catch (Exception e) {
             LOG.error("[ Error when counting number of open tickets by movements. ] {} ", e);
             return ErrorHandler.getFault(e);
@@ -99,11 +101,13 @@ public class TicketRestResource {
     @PUT
     @Path("/status")
     @RequiresFeature(UnionVMSFeature.manageAlarmsOpenTickets)
-    public ResponseDto updateTicketStatus(final TicketType ticketType) {
+    public Response updateTicketStatus(final TicketType ticketType) {
         LOG.info("Update ticket status invoked in rest layer");
         try {
-            TicketType response = TicketMapper.toTicketType(rulesService.updateTicketStatus(TicketMapper.toTicketEntity(ticketType)));
-            return new ResponseDto<>(response, ResponseCode.OK);
+            Ticket entity = TicketMapper.toTicketEntity(ticketType);
+            entity = rulesService.updateTicketStatus(entity);
+            TicketType response = TicketMapper.toTicketType(entity);
+            return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when updating ticket. ] {} ", e);
             return ErrorHandler.getFault(e);
@@ -113,12 +117,13 @@ public class TicketRestResource {
     @POST
     @Path("/status/{loggedInUser}/{status}")
     @RequiresFeature(UnionVMSFeature.manageAlarmsOpenTickets)
-    public ResponseDto updateTicketStatusByQuery(@PathParam("loggedInUser") String loggedInUser, TicketQuery query,
-                                                 @PathParam("status") TicketStatusType status) {
+    public Response updateTicketStatusByQuery(@PathParam("loggedInUser") String loggedInUser, TicketQuery query,
+                                              @PathParam("status") TicketStatusType status) {
         LOG.info("Update ticket status invoked in rest layer");
         try {
-            List response = TicketMapper.listToTicketType(rulesService.updateTicketStatusByQuery(loggedInUser, query, status));
-            return new ResponseDto<>(response, ResponseCode.OK);
+            List<Ticket> ticketList = rulesService.updateTicketStatusByQuery(loggedInUser, query, status);
+            List<TicketType> response = TicketMapper.listToTicketType(ticketList);
+            return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when updating tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
@@ -128,10 +133,11 @@ public class TicketRestResource {
     @GET
     @Path("/{guid}")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto getTicketByGuid(@PathParam("guid") String guid) {
+    public Response getTicketByGuid(@PathParam("guid") String guid) {
         try {
-            TicketType response = TicketMapper.toTicketType(rulesService.getTicketByGuid(UUID.fromString(guid)));
-            return new ResponseDto<>(response, ResponseCode.OK);
+            Ticket ticket = rulesService.getTicketByGuid(UUID.fromString(guid));
+            TicketType response = TicketMapper.toTicketType(ticket);
+            return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting ticket by GUID. ] {} ", e);
             return ErrorHandler.getFault(e);
@@ -141,29 +147,23 @@ public class TicketRestResource {
     @GET
     @Path("/countopen/{loggedInUser}")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto getNumberOfOpenTicketReports(@PathParam(value = "loggedInUser") final String loggedInUser) {
+    public Response getNumberOfOpenTicketReports(@PathParam(value = "loggedInUser") final String loggedInUser) {
         try {
-            return new ResponseDto<>(validationService.getNumberOfOpenTickets(loggedInUser), ResponseCode.OK);
+            Long count = validationService.getNumberOfOpenTickets(loggedInUser);
+            return Response.ok(count).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting number of open tickets. ] {} ", e);
             return ErrorHandler.getFault(e);
         }
     }
 
-    /**
-     *
-     * @responseMessage 200 Number of open tickets for logged in user
-     * @responseMessage 500 Error
-     *
-     * @summary Get number of not sending transponders (used by dashboard widget)
-     *
-     */
     @GET
     @Path("/countAssetsNotSending")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
-    public ResponseDto getNumberOfAssetsNotSending() {
+    public Response getNumberOfAssetsNotSending() {
         try {
-            return new ResponseDto<>(rulesService.getNumberOfAssetsNotSending(), ResponseCode.OK);
+            Long count = rulesService.getNumberOfAssetsNotSending();
+            return Response.ok(count).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting number of assets not sending. ] {} ", e);
             return ErrorHandler.getFault(e);
