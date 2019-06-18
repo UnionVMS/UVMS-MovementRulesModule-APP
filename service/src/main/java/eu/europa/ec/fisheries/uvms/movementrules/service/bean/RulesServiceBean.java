@@ -11,22 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import java.nio.file.AccessDeniedException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscritionOperationType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketsAndRulesByMovementsResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
@@ -37,6 +22,7 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.CustomRuleValidator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
@@ -60,6 +46,19 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSea
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.wsdl.user.types.Feature;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.persistence.NoResultException;
+import javax.servlet.ServletContext;
+import java.nio.file.AccessDeniedException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Stateless
 public class RulesServiceBean {
@@ -533,5 +532,17 @@ public class RulesServiceBean {
             }
         }
         return false;
+    }
+
+    public boolean isValid(CustomRuleType customRule) {
+        return CustomRuleValidator.isCustomRuleValid(customRule);
+    }
+
+    public String getApplicationName(ServletContext servletContext) {
+        String cfgName = servletContext.getInitParameter("usmApplication");
+        if (cfgName == null) {
+            cfgName = "Union-VMS";
+        }
+        return cfgName;
     }
 }

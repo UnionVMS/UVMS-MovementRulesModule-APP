@@ -1,66 +1,73 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalStatus;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AssetStatus;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(Arquillian.class)
 public class ConfigResourcesTest extends TransactionalTests {
 
     @Test
     @OperateOnDeployment("normal")
-    public void getConfigTest() throws Exception{
-
-        String response = getWebTarget()
+    public void getConfigTest() {
+        Response response = getWebTarget()
                 .path("config/")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
+                .get();
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
 
-        Map map = deserializeResponseDto(response, HashMap.class);
-        Assert.assertEquals(6, map.keySet().size());
+        Map configMap = response.readEntity(Map.class);
 
-        for(Object o : map.keySet()){
-            Assert.assertNotNull(map.get(o));
-        }
+        Map<String, HashMap<String, ArrayList<String>>> criteriaMap
+                = (Map<String, HashMap<String, ArrayList<String>>>) configMap.get("CRITERIA");
+        assertFalse(criteriaMap.isEmpty());
 
-        Map<String, HashMap<String, ArrayList<String>>> crit = (Map<String, HashMap<String, ArrayList<String>>>)map.get("CRITERIA");
+        Map actionMap = (Map) configMap.get("ACTIONS");
+        assertFalse(actionMap.isEmpty());
 
-        Assert.assertEquals(7, crit.keySet().size());
-        for(String s : crit.keySet()){
-            Assert.assertNotNull(crit.get(s));
-        }
+        List<LogicOperatorType> logicOperators = (List<LogicOperatorType>) configMap.get("LOGIC_OPERATORS");
+        assertFalse(logicOperators.isEmpty());
+
+        List<AvailabilityType> availabilities = (List<AvailabilityType>) configMap.get("AVAILABILITY");
+        assertFalse(availabilities.isEmpty());
+
+        List<MobileTerminalStatus> terminalStatuses = (List<MobileTerminalStatus>) configMap.get("MOBILETERMINAL_STATUSES");
+        assertFalse(terminalStatuses.isEmpty());
+
+        List<AssetStatus> assetStatuses = (List<AssetStatus>) configMap.get("ASSET_STATUSES");
+        assertFalse(assetStatuses.isEmpty());
     }
 
 
     @Test
     @OperateOnDeployment("normal")
-    public void getTicketStatusesTest() throws Exception{
-        String response = getWebTarget()
+    public void getTicketStatusesTest() {
+        List<TicketStatusType> response = getWebTarget()
                 .path("config/ticketstatus")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
+                .get(new GenericType<List<TicketStatusType>>(){});
 
-        Object[] o = deserializeResponseDto(response, Object[].class);
-        Assert.assertEquals(4, o.length);
-    }
-
-
-    private static <T> T deserializeResponseDto(String responseDto, Class<T> clazz) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode node = objectMapper.readValue(responseDto, ObjectNode.class);
-        JsonNode jsonNode = node.get("data");
-        return objectMapper.readValue(objectMapper.writeValueAsString(jsonNode), clazz);
+        assertEquals(4, response.size());
     }
 }

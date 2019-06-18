@@ -1,409 +1,426 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
-import java.time.Instant;
-import java.util.List;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
-import org.jboss.arquillian.container.test.api.OperateOnDeployment;
-import org.jboss.arquillian.junit.Arquillian;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.type.CollectionType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
+import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-//@RunAsClient
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.*;
+
 @RunWith(Arquillian.class)
 public class CustomRulesRestResourceTest extends TransactionalTests {
 
     @Test
     @OperateOnDeployment("normal")
-    public void createAndDeleteCustomRuleTest() throws Exception{
+    public void createCustomRuleTest() {
+        createCustomRule();
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void createCustomRuleWithTimeIntervalTest() {
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
-        String response = getWebTarget().path("/customrules")
+        CustomRuleIntervalType intervalType = new CustomRuleIntervalType();
+        intervalType.setStart(MRDateUtils.dateToString(Instant.now()));
+        intervalType.setEnd(MRDateUtils.dateToString(Instant.now()
+                .plus(10, ChronoUnit.MINUTES)));
+        customRule.getTimeIntervals().add(intervalType);
+
+        Response response = getWebTarget().path("/customrules")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-        CustomRuleType returnCrt = deserializeResponseDto(response, CustomRuleType.class);
+                .post(Entity.json(customRule));
 
-        Assert.assertEquals(customRule.getName(), returnCrt.getName());
-
-        String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .delete(String.class);
-
-        Assert.assertEquals(200, getReturnCode(deleteResponse));
-
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
     }
+
     @Test
     @OperateOnDeployment("normal")
-    public void createAndDeleteTwoCustomRules() throws Exception{
+    public void createCustomRuleWithActionEmailTest() {
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
-        String response = getWebTarget().path("/customrules")
+        CustomRuleActionType emailAction = new CustomRuleActionType();
+        emailAction.setAction(ActionType.EMAIL);
+        emailAction.setValue("jarvis@consid.se");
+        emailAction.setOrder("0");
+
+        customRule.getActions().add(emailAction);
+
+        Response response = getWebTarget().path("/customrules")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-        CustomRuleType returnCrt = deserializeResponseDto(response, CustomRuleType.class);
-        Assert.assertNotNull(returnCrt.getGuid());
+                .post(Entity.json(customRule));
 
-        CustomRuleType customRule2 = RulesTestHelper.getCompleteNewCustomRule();
-
-        String response2 = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule2), String.class);
-        Assert.assertEquals(200, getReturnCode(response2));
-        CustomRuleType returnCrt2 = deserializeResponseDto(response2, CustomRuleType.class);
-        Assert.assertNotNull(returnCrt2.getGuid());
-
-        String deleteResponse = getWebTarget()
-                .path("/customrules/" + returnCrt.getGuid())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .delete(String.class);
-        Assert.assertEquals(200, getReturnCode(deleteResponse));
-
-        deleteResponse = getWebTarget().path("/customrules/" + returnCrt2.getGuid())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .delete(String.class);
-        Assert.assertEquals(200, getReturnCode(deleteResponse));
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
     }
 
     @Test
     @OperateOnDeployment("normal")
-    public void createInvalidCustomRule() throws Exception{
-        CustomRuleType customRule = new CustomRuleType();
-        String response = getWebTarget().path("/customrules")
+    public void getCustomRulesByUserTest() {
+        CustomRuleType created = createCustomRule();
+
+        List<CustomRuleType> found = getWebTarget()
+                .path("/customrules/listAll")
+                .path(created.getUpdatedBy())
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(511, getReturnCode(response));
+                .get(new GenericType<List<CustomRuleType>>() {
+                });
 
-
-        customRule.setName("");
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(511, getReturnCode(response));
-
-
-        customRule.setName("Actual rule name");
-        CustomRuleIntervalType customRuleIntervalType = new CustomRuleIntervalType();
-        customRuleIntervalType.setEnd(MRDateUtils.dateToString(Instant.now()));
-        customRule.getTimeIntervals().add(customRuleIntervalType);
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(500, getReturnCode(response)); //500 since this one is a spontaneous null pointer....
-
-
-        customRuleIntervalType.setStart(MRDateUtils.dateToString(Instant.ofEpochMilli(System.currentTimeMillis() + 1000L)));
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(511, getReturnCode(response));
-
-
-        customRule = RulesTestHelper.getCompleteNewCustomRule();
-        CustomRuleSegmentType crst = customRule.getDefinitions().get(0);
-        crst.setLogicBoolOperator(LogicOperatorType.NONE);
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(511, getReturnCode(response));
-
-
-        crst.setLogicBoolOperator(LogicOperatorType.AND);
-        crst = customRule.getDefinitions().get(1);
-        crst.setLogicBoolOperator(LogicOperatorType.AND);
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(511, getReturnCode(response));
-
-        crst.setLogicBoolOperator(LogicOperatorType.NONE);
-        crst.setEndOperator("");
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(511, getReturnCode(response));
-
-        crst.setStartOperator("");
-        crst.setEndOperator(")");
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(511, getReturnCode(response));
-
-        crst.setStartOperator("(");
-        customRule.setAvailability(AvailabilityType.GLOBAL);
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(403, getReturnCode(response));  //403 = forbidden
-
-        customRule.setAvailability(AvailabilityType.PRIVATE);
-        crst.setStartOperator("hi");
-        crst.setEndOperator("by");
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class); //this really should not work.......
-        Assert.assertEquals(511, getReturnCode(response));
+        boolean present = found.stream()
+                .map(CustomRuleType::getGuid)
+                .anyMatch(id -> created.getGuid().equals(id));
+        assertTrue(present);
     }
 
     @Test
     @OperateOnDeployment("normal")
-    public void createChangeSubscriptionAndDeleteCustomRule() throws Exception {
-        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
-
-        String response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-        CustomRuleType returnCrt = deserializeResponseDto(response, CustomRuleType.class);
-
-        UpdateSubscriptionType updateSubscriptionType = new UpdateSubscriptionType();
-        SubscriptionType subscriptionType = returnCrt.getSubscriptions().get(0);
-        updateSubscriptionType.setSubscription(subscriptionType);
-
-        updateSubscriptionType.setRuleGuid(returnCrt.getGuid());
-
-        updateSubscriptionType.setOperation(SubscritionOperationType.REMOVE);
-
-        response = getWebTarget().path("/customrules/subscription")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(updateSubscriptionType), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-        returnCrt = deserializeResponseDto(response, CustomRuleType.class);
-        Assert.assertTrue(returnCrt.getSubscriptions().isEmpty());
-
-        getWebTarget().path("/customrules/" + returnCrt.getGuid())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .delete(String.class);
-
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void changeInvalidSubscription() throws Exception {
-        String response = getWebTarget().path("/customrules/subscription")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(new UpdateSubscriptionType()), String.class);
-        Assert.assertEquals(500, getReturnCode(response));
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void createUpdateAndDeleteCustomRule() throws Exception{
-        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
-
-        String response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-        CustomRuleType returnCrt = deserializeResponseDto(response, CustomRuleType.class);
-
-        customRule.setName("New name");
-        customRule.setGuid(returnCrt.getGuid());
-
-
-        response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .put(Entity.json(customRule), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-        returnCrt = deserializeResponseDto(response, CustomRuleType.class);
-        Assert.assertEquals(customRule.getName(), returnCrt.getName());
-
-        String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .delete(String.class);
-        Assert.assertEquals(200, getReturnCode(deleteResponse));
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void updateInvalidCustomRule() throws Exception {
-        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
-        String response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .put(Entity.json(customRule), String.class);
-        Assert.assertEquals(500, getReturnCode(response));
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void createFindByGuidAndDeleteCustomRule() throws Exception{
-        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
-
-        String response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-        CustomRuleType returnCrt = deserializeResponseDto(response, CustomRuleType.class);
-
-        customRule.setGuid(returnCrt.getGuid());
-
-
-        response = getWebTarget().path("/customrules/" + returnCrt.getGuid())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-        returnCrt = deserializeResponseDto(response, CustomRuleType.class);
-
-        Assert.assertEquals(customRule.getGuid(), returnCrt.getGuid());
-        Assert.assertEquals(customRule.getName(), returnCrt.getName());
-
-        String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .delete(String.class);
-        Assert.assertEquals(200, getReturnCode(deleteResponse));
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void findCustomRuleByInvalidGuid() throws Exception {
-        String response = getWebTarget().path("/customrules/" + "invalidCustomRule")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
-        Assert.assertEquals(500, getReturnCode(response));
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void createFindByUserNameAndDelete() throws Exception{
-        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
-        customRule.setDescription("Test description");
-        customRule.setUpdatedBy("vms_admin_com_createFindByUserNameAndDelete");
-
-        String response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-
-
-        response = getWebTarget().path("/customrules/listAll/" + customRule.getUpdatedBy())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
-        Assert.assertEquals(200, getReturnCode(response));
-
-        final ObjectNode data = OBJECT_MAPPER.readValue(response, ObjectNode.class);
-        String valueAsString = OBJECT_MAPPER.writeValueAsString(data.get("data"));
-        CollectionType ct = OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, CustomRuleType.class);
-        List<CustomRuleType> dataValue = OBJECT_MAPPER.readValue(valueAsString, ct);
-
-        CustomRuleType returnCrt = dataValue.get(0);
-        Assert.assertEquals(customRule.getName(), returnCrt.getName());
-        Assert.assertEquals(customRule.getDescription(), returnCrt.getDescription());
-
-        String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .delete(String.class);
-        Assert.assertEquals(200, getReturnCode(deleteResponse));
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void createFindByQueryAndDelete() throws Exception {
-        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
-
-        String response = getWebTarget().path("/customrules")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRule), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
+    public void getCustomRulesByQueryTest() {
+        CustomRuleType created = createCustomRule();
 
         CustomRuleQuery customRuleQuery = new CustomRuleQuery();
-        ListPagination lp = new ListPagination();
-        lp.setListSize(10);
-        lp.setPage(1); //this value can not be 0 or lower...... ;(
-        customRuleQuery.setPagination(lp);
-        CustomRuleListCriteria crlc = new CustomRuleListCriteria();
-        crlc.setKey(CustomRuleSearchKey.NAME);
-        crlc.setValue(customRule.getName());
-        customRuleQuery.getCustomRuleSearchCriteria().add(crlc);
+        ListPagination pagination = new ListPagination();
+        pagination.setListSize(10);
+        pagination.setPage(1);
+        customRuleQuery.setPagination(pagination);
+        CustomRuleListCriteria criteria = new CustomRuleListCriteria();
+        criteria.setKey(CustomRuleSearchKey.NAME);
+        criteria.setValue(created.getName());
+        customRuleQuery.getCustomRuleSearchCriteria().add(criteria);
         customRuleQuery.setDynamic(true);
 
-        response = getWebTarget().path("/customrules/listByQuery")
+        GetCustomRuleListByQueryResponse response = getWebTarget()
+                .path("/customrules/listByQuery")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRuleQuery), String.class);
-        Assert.assertEquals(200, getReturnCode(response));
+                .post(Entity.json(customRuleQuery), GetCustomRuleListByQueryResponse.class);
 
-        GetCustomRuleListByQueryResponse returnResult = deserializeResponseDto(response, GetCustomRuleListByQueryResponse.class);
+        boolean found = response.getCustomRules().stream()
+                .anyMatch(cr -> created.getName().equals(cr.getName()));
 
-        CustomRuleType returnCrt = returnResult.getCustomRules().get(0);
-        Assert.assertEquals(customRule.getName(), returnCrt.getName());
-        Assert.assertEquals(customRule.getActions().get(0).getValue(), returnCrt.getActions().get(0).getValue());
-
-        String deleteResponse = getWebTarget().path("/customrules/" + returnCrt.getGuid())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .delete(String.class);
-        Assert.assertEquals(200, getReturnCode(deleteResponse));
-
+        assertTrue(found);
     }
 
     @Test
     @OperateOnDeployment("normal")
-    public void findCustomRuleByInvalidQuery() throws Exception {
-        String response = getWebTarget().path("/customrules/listByQuery")
+    public void getCustomRuleByGuidTest() {
+        CustomRuleType created = createCustomRule();
+
+        CustomRuleType found = getWebTarget()
+                .path("/customrules")
+                .path(created.getGuid())
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(new CustomRuleQuery()), String.class);
-        Assert.assertEquals(500, getReturnCode(response));
+                .get(CustomRuleType.class);
+
+        assertNotNull(found);
     }
 
-    private static <T> T deserializeResponseDto(String responseDto, Class<T> clazz) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode node = objectMapper.readValue(responseDto, ObjectNode.class);
-        JsonNode jsonNode = node.get("data");
-        return objectMapper.readValue(objectMapper.writeValueAsString(jsonNode), clazz);
+    @Test
+    @OperateOnDeployment("normal")
+    public void getCustomRuleByGuid_ShouldFailWithInvalidGuidTest() {
+        Response response = getWebTarget()
+                .path("/customrules")
+                .path(UUID.randomUUID().toString())
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .get();
+
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     }
 
-    private int getReturnCode(String responsDto) throws Exception{
-         return OBJECT_MAPPER.readValue(responsDto, ObjectNode.class).get("code").asInt();
+    @Test
+    @OperateOnDeployment("normal")
+    public void updateCustomRuleTest() {
+        CustomRuleType created = createCustomRule();
+        final String newName = "NEW_TEST_NAME";
+        created.setName(newName);
+
+        CustomRuleType updated = getWebTarget()
+                .path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .put(Entity.json(created), new GenericType<CustomRuleType>() {
+                });
+
+        assertEquals(newName, updated.getName());
     }
 
+    @Test
+    @OperateOnDeployment("normal")
+    public void updateSubscriptionTest() {
+        CustomRuleType created = createCustomRule();
+        SubscriptionType st = created.getSubscriptions().get(0);
+
+        assertEquals(st.getType(), SubscriptionTypeType.TICKET);
+
+        UpdateSubscriptionType ust = new UpdateSubscriptionType();
+        ust.setSubscription(st);
+        ust.setRuleGuid(created.getGuid());
+        ust.setOperation(SubscritionOperationType.REMOVE);
+
+        CustomRuleType updated = getWebTarget()
+                .path("/customrules/subscription")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(ust), CustomRuleType.class);
+
+        assertTrue(updated.getSubscriptions().isEmpty());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void updateSubscription_ShouldFailInvalidSubscriptionTest() {
+        Response response = getWebTarget()
+                .path("/customrules/subscription")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(new UpdateSubscriptionType()));
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void deleteCustomRuleTest() {
+        CustomRuleType created = createCustomRule();
+        assertTrue(created.isActive());
+
+        CustomRuleType deleted = getWebTarget()
+                .path("/customrules/")
+                .path(created.getGuid())
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .delete(CustomRuleType.class);
+
+        assertFalse(deleted.isActive());
+    }
+
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void createCustomRule_ShouldFailInvalidNameTest() {
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
+        customRule.setName(" ");
+        Response response = getWebTarget().path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void createCustomRule_ShouldFailInvalidDescriptionTest() {
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
+        customRule.setDescription(" ");
+        Response response = getWebTarget().path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void createCustomRule_ShouldFailInvalidActionEmailTest() {
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
+
+        CustomRuleActionType emailAction = new CustomRuleActionType();
+        emailAction.setAction(ActionType.EMAIL);
+        emailAction.setValue("jarvis@consid,se");
+        emailAction.setOrder("0");
+
+        customRule.getActions().add(emailAction);
+
+        Response response = getWebTarget().path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void createCustomRule_ShouldFailInvalidTimeIntervalsTest() {
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
+
+        CustomRuleIntervalType intervalType = new CustomRuleIntervalType();
+        intervalType.setStart(MRDateUtils.dateToString(Instant.now()));
+        customRule.getTimeIntervals().add(intervalType);
+
+        Response response = getWebTarget().path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+        intervalType = new CustomRuleIntervalType();
+        intervalType.setEnd(MRDateUtils.dateToString(Instant.now()));
+        customRule.getTimeIntervals().add(intervalType);
+
+        response = getWebTarget().path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+        intervalType = new CustomRuleIntervalType();
+        intervalType.setStart(MRDateUtils.dateToString(Instant.now()));
+        intervalType.setEnd(MRDateUtils.dateToString(Instant.now()
+                .minus(10, ChronoUnit.MINUTES)));
+        customRule.getTimeIntervals().add(intervalType);
+
+        response = getWebTarget().path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void createCustomRule_ShouldFailInvalidSegmentTypeLogicalOperatorTest() {
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
+        CustomRuleSegmentType segmentType = customRule.getDefinitions().get(0);
+        segmentType.setLogicBoolOperator(LogicOperatorType.NONE);
+
+        Response response = getWebTarget()
+                .path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+        customRule = RulesTestHelper.getCompleteNewCustomRule();
+        segmentType = customRule.getDefinitions().get(1);
+        segmentType.setLogicBoolOperator(LogicOperatorType.AND);
+
+        response = getWebTarget()
+                .path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+        customRule = RulesTestHelper.getCompleteNewCustomRule();
+        segmentType = customRule.getDefinitions().get(1);
+        segmentType.setLogicBoolOperator(LogicOperatorType.OR);
+
+        response = getWebTarget()
+                .path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void createCustomRule_ShouldFailInvalidSegmentTypeStartEndOperatorTest() {
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
+        CustomRuleSegmentType segmentType = customRule.getDefinitions().get(0);
+        segmentType.setStartOperator(")");
+
+        Response response = getWebTarget()
+                .path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+        customRule = RulesTestHelper.getCompleteNewCustomRule();
+        segmentType = customRule.getDefinitions().get(0);
+        segmentType.setEndOperator("(");
+
+        response = getWebTarget()
+                .path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void createCustomRule_ShouldFailInvalidAvailabilityTypeTest() {
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
+        customRule.setAvailability(AvailabilityType.GLOBAL);
+
+        Response response = getWebTarget()
+                .path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule));
+
+        assertEquals(Status.FORBIDDEN.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void updateCustomRule_ShouldFailInvalidCustomRule() {
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
+        Response response = getWebTarget().path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .put(Entity.json(customRule));
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void getCustomRulesByQuery_ShouldFailInvalidQueryTest() {
+        createCustomRule();
+        CustomRuleQuery customRuleQuery = new CustomRuleQuery();
+
+        Response response = getWebTarget()
+                .path("/customrules/listByQuery")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRuleQuery));
+
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    private CustomRuleType createCustomRule() {
+        CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
+        CustomRuleType created = getWebTarget()
+                .path("/customrules")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(customRule), new GenericType<CustomRuleType>() {
+                });
+        assertNotNull(created.getGuid());
+        return created;
+    }
 }

@@ -11,22 +11,16 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.error;
 
-import java.nio.file.AccessDeniedException;
-
-import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseCode;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.dto.ResponseDto;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import javax.ws.rs.core.Response;
+import java.nio.file.AccessDeniedException;
+
 public class ErrorHandler {
-
-    public static ResponseDto getFault(Exception ex) {
-
-
+    public static Response getFault(Exception ex) {
         if(ex instanceof AccessDeniedException){
-            return new ResponseDto<Throwable>(ExceptionUtils.getRootCause(ex), ResponseCode.FORBIDDEN);
+            return Response.status(Response.Status.FORBIDDEN).entity(ExceptionUtils.getRootCause(ex)).build();
         }
-
-        return new ResponseDto<Throwable>(ExceptionUtils.getRootCause(ex), ResponseCode.UNDEFINED_ERROR);
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
     }
-
 }

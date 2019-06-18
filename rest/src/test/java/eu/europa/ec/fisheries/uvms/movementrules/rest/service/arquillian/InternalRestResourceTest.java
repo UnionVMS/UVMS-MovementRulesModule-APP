@@ -51,7 +51,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @OperateOnDeployment("normal")
-    public void getTicketsAndRulesByMovementsEventTest() throws Exception {
+    public void getTicketsAndRulesByMovementsEventTest() {
 
         final List<String> movementGuidList = new ArrayList<>();
         final String movementGuid = UUID.randomUUID().toString();
@@ -82,17 +82,14 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         GetTicketsAndRulesByMovementsRequest request = new GetTicketsAndRulesByMovementsRequest();
         request.getMovementGuids().addAll(movementGuidList);
 
-        String response = getWebTarget()
+        Response response = getWebTarget()
                 .path("internal")
                 .path("tickets-and-rules-by-movement")
                 .request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(request), String.class);
+                .post(Entity.json(request));
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
 
-        assertNotNull(response);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        GetTicketsAndRulesByMovementsResponse retVal = objectMapper.readValue(response, GetTicketsAndRulesByMovementsResponse.class);
-
+        GetTicketsAndRulesByMovementsResponse retVal = response.readEntity(GetTicketsAndRulesByMovementsResponse.class);
         String retrievedMovementGuid = retVal.getTicketsAndRules().get(0).getTicket().getMovementGuid();
         assertEquals(movementGuid, retrievedMovementGuid);
 

@@ -9,31 +9,13 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.rest.dto;
+package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
-public enum ResponseCode {
+public enum MainCriteria {
 
-    OK(200),
-    UNDEFINED_ERROR(500),
+    ROOT, ACTIVITY, AREA, ASSET, ASSET_GROUP, MOBILE_TERMINAL, POSITION, REPORT;
 
-    // RULES_ERROR(501),
-
-    INPUT_ERROR(511),
-    MAPPING_ERROR(512),
-
-    SERVICE_ERROR(521),
-    MODEL_ERROR(522),
-    DOMAIN_ERROR(523),
-    FORBIDDEN(403);
-
-    private final int code;
-
-    private ResponseCode(int code) {
-        this.code = code;
-    }
-
-    public int getCode() {
-        return code;
+    private MainCriteria() {
     }
 
 }
