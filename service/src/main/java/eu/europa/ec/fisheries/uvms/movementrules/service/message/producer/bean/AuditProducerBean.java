@@ -6,12 +6,13 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Queue;
 
 @Stateless
 public class AuditProducerBean extends AbstractProducer {
 
     @Resource(mappedName =  "java:/" + MessageConstants.QUEUE_AUDIT_EVENT)
-    private Destination destination;
+    private Queue destination;
 
     @Override
     public Destination getDestination() {

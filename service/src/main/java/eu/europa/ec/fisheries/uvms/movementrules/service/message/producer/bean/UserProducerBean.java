@@ -8,12 +8,13 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Queue;
 
 @Stateless
 public class UserProducerBean extends AbstractProducer {
 
     @Resource(mappedName =  "java:/" + MessageConstants.QUEUE_USM)
-    private Destination destination;
+    private Queue destination;
 
     @Override
     public Destination getDestination() {

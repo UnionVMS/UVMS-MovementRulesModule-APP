@@ -14,7 +14,7 @@ import javax.jms.Queue;
 public class ExchangeProducerBean extends AbstractProducer {
 
     @Resource(mappedName =  "java:/" + MessageConstants.QUEUE_EXCHANGE_EVENT)
-    private Destination destination;
+    private Queue destination;
 
     @Override
     public Destination getDestination() {

@@ -22,7 +22,7 @@ public class ConfigMessageProducerBean extends AbstractProducer implements Confi
     private static final Logger LOG = LoggerFactory.getLogger(ConfigMessageProducerBean.class);
 
     @Resource(mappedName =  "java:/" + MessageConstants.QUEUE_CONFIG)
-    private Destination destination;
+    private Queue destination;
 
     @Resource(mappedName = "java:/" + MessageConstants.QUEUE_MOVEMENTRULES)
     private Queue responseQueue;
