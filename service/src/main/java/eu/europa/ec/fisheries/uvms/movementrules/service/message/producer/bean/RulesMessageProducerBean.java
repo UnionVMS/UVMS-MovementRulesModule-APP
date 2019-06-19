@@ -12,39 +12,15 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.jms.*;
-import javax.xml.bind.JAXBException;
 
-import eu.europa.ec.fisheries.schema.movementrules.common.v1.RulesFault;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 
 @Stateless
 public class RulesMessageProducerBean extends AbstractProducer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RulesMessageProducerBean.class);
-
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void sendModuleErrorResponseMessage(RulesFault fault, TextMessage message) {
-        try {
-            LOG.debug("Sending error message back from Rules module to recipient on JMS Queue with correlationID: {} ", message.getJMSMessageID());
-            String data = JAXBMarshaller.marshallJaxBObjectToString(fault);
-            this.sendResponseMessageToSender(message, data, "Rules");
-        } catch (JMSException | MessageException | JAXBException e) {
-            LOG.error("Error when returning Error message to recipient");
-            throw new RuntimeException("Error when returning Error message to recipient. Incoming message: " + message, e);
-        }
+    @Override
+    public Destination getDestination() {
+        return null;
     }
-
-    public String getDestinationName() {
-        return MessageConstants.QUEUE_MOVEMENTRULES;
-    }
-
 }
-

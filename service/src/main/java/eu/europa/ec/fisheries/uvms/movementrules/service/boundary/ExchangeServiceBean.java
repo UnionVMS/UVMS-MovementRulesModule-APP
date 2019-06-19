@@ -15,21 +15,16 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;    //Leave be for now
 import java.util.List;
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.jms.Queue;
+import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
@@ -39,34 +34,29 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.E
 @Stateless
 public class ExchangeServiceBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExchangeServiceBean.class);
-    
     @Inject
     private RulesResponseConsumer consumer;
 
     @Inject
     private ExchangeProducerBean exchangeProducer;
 
-    @Resource(mappedName = "java:/" + MessageConstants.QUEUE_MOVEMENTRULES)
-    private Queue responseQueue;
-
-    public List<ServiceResponseType> getPluginList(PluginType pluginType) throws MessageException {
+    public List<ServiceResponseType> getPluginList(PluginType pluginType) throws JMSException {
         ArrayList<PluginType> types = new ArrayList<>();
         types.add(pluginType);
         String serviceListRequest = ExchangeModuleRequestMapper.createGetServiceListRequest(types);
-        String serviceListRequestId = exchangeProducer.sendModuleMessage(serviceListRequest, responseQueue, ExchangeModuleMethod.LIST_SERVICES.value());
+        String serviceListRequestId = exchangeProducer.sendSynchronousModuleMessage(serviceListRequest, ExchangeModuleMethod.LIST_SERVICES.value());
 
         TextMessage serviceListResponse = consumer.getMessage(serviceListRequestId, TextMessage.class);
         return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromModuleResponse(serviceListResponse);
     }
     
-    public void sendReportToPlugin(PluginType pluginType, String ruleName, String recipient, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws  MessageException {
+    public void sendReportToPlugin(PluginType pluginType, String ruleName, String recipient, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws  JMSException {
         String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin("", pluginType, Instant.now(), ruleName, recipient, exchangeMovement, recipientInfoList, movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getMmsi(), movementDetails.getExternalMarking(), movementDetails.getFlagState());
-        exchangeProducer.sendModuleMessage(exchangeRequest, responseQueue, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
+        exchangeProducer.sendModuleMessage(exchangeRequest, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
     }
     
-    public void sendEmail(ServiceResponseType service, EmailType email, String ruleName) throws MessageException {
+    public void sendEmail(ServiceResponseType service, EmailType email, String ruleName) throws JMSException {
         String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(service.getServiceClassName(), email, ruleName);
-        exchangeProducer.sendModuleMessage(request, responseQueue, ExchangeModuleMethod.SET_COMMAND.value());
+        exchangeProducer.sendModuleMessage(request, ExchangeModuleMethod.SET_COMMAND.value());
     }
 }
