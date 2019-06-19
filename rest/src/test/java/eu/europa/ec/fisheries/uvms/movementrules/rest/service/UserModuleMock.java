@@ -10,8 +10,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
@@ -30,7 +28,6 @@ import eu.europa.ec.fisheries.wsdl.user.types.ContactDetails;
 import eu.europa.ec.fisheries.wsdl.user.types.Context;
 import eu.europa.ec.fisheries.wsdl.user.types.ContextSet;
 import eu.europa.ec.fisheries.wsdl.user.types.Feature;
-import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 import eu.europa.ec.fisheries.wsdl.user.types.Role;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
 

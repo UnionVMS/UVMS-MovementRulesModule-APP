@@ -46,7 +46,7 @@ import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRS;
  *          |
  */
 
-@Path("spatial/spatialnonsecure/json")
+@Path("spatialSwe/spatialnonsecure/json")
 @Stateless
 public class SpatialModuleMock {
     

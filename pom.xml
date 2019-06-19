@@ -19,9 +19,9 @@
         <user.model.version>2.0.9</user.model.version>
         <audit.model.version>4.0.8</audit.model.version>
         <spatial.model.version>1.0.12</spatial.model.version>
-        <usm4uvms.version>4.0.18</usm4uvms.version>
-        <uvms.config.version>4.0.3</uvms.config.version>
-        <uvms.common.version>3.0.32</uvms.common.version>
+        <usm4uvms.version>4.0.19</usm4uvms.version>
+        <uvms.config.version>4.0.4</uvms.config.version>
+        <uvms.common.version>4.0.0</uvms.common.version>
         <uvms.asset.version>6.0.30</uvms.asset.version>
 
         <javaee.version>8.0</javaee.version>
@@ -30,7 +30,7 @@
         
         <installAtEnd>false</installAtEnd>
         
-        <docker.dev.version>3.31.16.w15</docker.dev.version>
+        <docker.dev.version>3.37.1.w17</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>movementrules</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>movementrules</docker.liquibase.db.passwd>

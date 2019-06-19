@@ -29,7 +29,6 @@ import org.slf4j.MDC;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
@@ -83,10 +82,10 @@ public class RulesEventMessageConsumerBean implements MessageListener {
                      throw new UnsupportedOperationException("Method not implemented: " + method.name() + " Inbound message: " + textMessage.getText());
             }
 
-        } catch (MessageException e) {
+        } catch (JMSException e) {
             LOG.error("[ Error when receiving message in rules: {}]", e);
-            throw new RuntimeException("Error when receiving message in rules: " + e + " Inbound message: " + textMessage);
-        } catch (JMSException | JAXBException e) {
+            throw new IllegalStateException("Error when receiving message in rules, inbound message: " + textMessage, e);
+        } catch (JAXBException e) {
             throw new IllegalArgumentException("Could not read message text", e);
         } finally {
             MDC.remove("clientName");

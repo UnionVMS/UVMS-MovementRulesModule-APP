@@ -14,13 +14,13 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer.RulesResponseConsumer;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.UserProducerBean;
@@ -71,14 +71,14 @@ public class UserServiceBean {
             }
         } catch (ModelMarshallException | JAXBException e) {
             throw new IllegalArgumentException("Unexpected exception while trying to get user context.", e);
-        } catch (MessageException e) {
-            LOG.error("Unable to receive a response from USM.");
+        } catch (JMSException e) {
+            LOG.error("Unable to receive a response from USM.", e);
             throw new IllegalArgumentException("Unable to receive a response from USM.");
         }
         return userContext;
     }
     
-    public String getOrganisationName(String username) throws ModelMarshallException, MessageException {
+    public String getOrganisationName(String username) throws ModelMarshallException, JMSException {
         GetContactDetailResponse userResponse = getContactDetails(username);
         if (userResponse != null && userResponse.getContactDetails() != null) {
             return userResponse.getContactDetails().getOrganisationName();
@@ -87,7 +87,7 @@ public class UserServiceBean {
         }
     }
     
-    public GetContactDetailResponse getContactDetails(String username) throws ModelMarshallException, MessageException {
+    public GetContactDetailResponse getContactDetails(String username) throws ModelMarshallException, JMSException {
         try {
             String userRequest = UserModuleRequestMapper.mapToGetContactDetailsRequest(username);
             String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.GET_CONTACT_DETAILS.value(), "");
@@ -98,7 +98,7 @@ public class UserServiceBean {
         }
     }
 
-    public Organisation getOrganisation(String organisationName) throws MessageException {
+    public Organisation getOrganisation(String organisationName) throws JMSException {
         try {
             String userRequest = UserModuleRequestMapper.mapToGetOrganisationRequest(organisationName);
             String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.GET_ORGANISATIONS.value(), "");

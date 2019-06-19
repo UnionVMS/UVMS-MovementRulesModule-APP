@@ -9,16 +9,13 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.consumer;
 
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import javax.ejb.Local;
-
-
+import javax.jms.JMSException;
 
 @Local
 public interface RulesResponseConsumer {
-    <T> T getMessage(String correlationId, Class type) throws MessageException;
-    <T> T getMessage(String correlationId, Class type, Long timeoutInMillis) throws MessageException;
+    <T> T getMessage(String correlationId, Class<T> type) throws JMSException;
+    <T> T getMessage(String correlationId, Class<T> type, Long timeoutInMillis) throws JMSException;
 }

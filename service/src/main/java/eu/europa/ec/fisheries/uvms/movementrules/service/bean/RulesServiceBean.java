@@ -18,7 +18,6 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
@@ -52,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.persistence.NoResultException;
 import javax.servlet.ServletContext;
 import java.nio.file.AccessDeniedException;
@@ -89,7 +89,7 @@ public class RulesServiceBean {
     @TicketCountEvent
     private Event<NotificationMessage> ticketCountEvent;
 
-    public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws AccessDeniedException, ModelMarshallException, MessageException {
+    public CustomRule createCustomRule(CustomRule customRule, String featureName, String applicationName) throws AccessDeniedException, ModelMarshallException, JMSException {
         // Get organisation of user
         String organisationName = userService.getOrganisationName(customRule.getUpdatedBy());
         if (organisationName != null) {
@@ -186,7 +186,7 @@ public class RulesServiceBean {
         return customRuleListByQuery;
     }
 
-    public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, MessageException, AccessDeniedException {
+    public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, JMSException, AccessDeniedException {
         // Get organisation of user
         String organisationName = userService.getOrganisationName(oldCustomRule.getUpdatedBy());
         if (organisationName != null) {
