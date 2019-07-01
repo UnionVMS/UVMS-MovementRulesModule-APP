@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -37,7 +38,11 @@ public class SpatialRestClient {
     @PostConstruct
     public void initClient() {
         String url = spatialEndpoint + "/spatialnonsecure/json/";
-        webTarget = ClientBuilder.newClient().target(url);
+        webTarget = ClientBuilder.newBuilder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build()
+                .target(url);
     }
     
     public void populateAreasAndAreaTransitions(MovementDetails movementDetails) {

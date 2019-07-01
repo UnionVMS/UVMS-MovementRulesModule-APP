@@ -11,12 +11,17 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +53,9 @@ public class UserServiceBean {
     @Resource(mappedName = "java:/" + MessageConstants.QUEUE_MOVEMENTRULES)
     private Queue responseQueue;
     
+    @Resource(name = "java:global/user_endpoint")
+    private String userEndpoint;
+
     public UserContext getFullUserContext(String remoteUser, String applicationName) {
         LOG.debug("Request getFullUserContext({}, {})", remoteUser, applicationName);
         UserContext userContext = null;
@@ -98,15 +106,19 @@ public class UserServiceBean {
         }
     }
 
-    public Organisation getOrganisation(String organisationName) throws JMSException {
-        try {
-            String userRequest = UserModuleRequestMapper.mapToGetOrganisationRequest(organisationName);
-            String userMessageId = producer.sendModuleMessage(userRequest, responseQueue, UserModuleMethod.GET_ORGANISATIONS.value(), "");
-            TextMessage userMessage = consumer.getMessage(userMessageId, TextMessage.class);
-            GetOrganisationResponse organisationResponse = JAXBMarshaller.unmarshallTextMessage(userMessage, GetOrganisationResponse.class);
-            return organisationResponse.getOrganisation();
-        } catch (ModelMarshallException | JAXBException e) {
-            throw new IllegalArgumentException(e);
-        }
+    public Organisation getOrganisation(String organisationName) {
+        return getWebTarget()
+            .path("getOrganisation")
+            .queryParam("organisationName", organisationName)
+            .request(MediaType.APPLICATION_JSON)
+            .get(Organisation.class);
+    }
+
+    private WebTarget getWebTarget() {
+        Client client = ClientBuilder.newBuilder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .build();
+        return client.target(userEndpoint + "/user");
     }
 }
