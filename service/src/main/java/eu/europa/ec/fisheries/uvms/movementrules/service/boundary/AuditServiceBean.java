@@ -15,7 +15,6 @@ import javax.annotation.Resource;
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.jms.JMSException;
 import javax.jms.Queue;
 
 import eu.europa.ec.fisheries.schema.audit.source.v1.AuditDataSourceMethod;
@@ -23,8 +22,7 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.AuditProducerBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
-import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogMapper;
+import eu.europa.ec.fisheries.uvms.audit.model.mapper.AuditLogModelMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 
@@ -42,9 +40,9 @@ public class AuditServiceBean {
     @Asynchronous
     public void sendAuditMessage(AuditObjectTypeEnum type, AuditOperationEnum operation, String affectedObject, String comment, String username) {
         try {
-            String message = AuditLogMapper.mapToAuditLog(type.getValue(), operation.getValue(), affectedObject, comment, username);
+            String message = AuditLogModelMapper.mapToAuditLog(type.getValue(), operation.getValue(), affectedObject, comment, username);
             producer.sendModuleMessage(message, responseQueue, AuditDataSourceMethod.CREATE.value(), "");
-        } catch (AuditModelMarshallException | JMSException e) {
+        } catch (Exception e) {
             LOG.error("[ERROR] Error when sending message to Audit. ] {}", e.getMessage());
         }
     }

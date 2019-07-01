@@ -16,6 +16,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.SpatialModuleMock;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UnionVMSRestMock;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UserRestMock;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
 
@@ -61,12 +62,14 @@ public abstract class BuildRulesRestDeployment {
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "unionvms.war");
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
                 .resolve("eu.europa.ec.fisheries.uvms.spatial:spatial-model",
+                        "eu.europa.ec.fisheries.uvms.user:user-model:2.0.19",
                         "eu.europa.ec.fisheries.uvms:usm4uvms")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
         testWar.addClass(UnionVMSRestMock.class);
         testWar.addClass(SpatialModuleMock.class);
+        testWar.addClass(UserRestMock.class);
         testWar.addClass(AreaTransitionsDTO.class);
         
         return testWar;
