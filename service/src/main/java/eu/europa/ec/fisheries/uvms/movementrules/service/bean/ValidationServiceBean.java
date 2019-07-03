@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementTypeType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
@@ -183,7 +184,14 @@ public class ValidationServiceBean  {
         }
     }
 
-    
+    private void sendToEndpointFlux(String ruleName, MovementDetails movementDetails, String organisation) {
+        sendToEndpoint(ruleName, movementDetails, organisation, PluginType.FLUX);
+    }
+
+    private void sendToEndpointNaf(String ruleName, MovementDetails movementDetails, String organisation) {
+        sendToEndpoint(ruleName, movementDetails, organisation, PluginType.NAF);
+    }
+
     private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String organisationName, PluginType pluginType) {
         LOG.info("Sending to organisation '{}'", organisationName);
 
@@ -191,6 +199,8 @@ public class ValidationServiceBean  {
             MovementType exchangeMovement = ExchangeMovementMapper.mapToExchangeMovementType(movementDetails);
 
             Organisation organisation = userService.getOrganisation(organisationName);
+
+            mapTypeOfMessage(exchangeMovement, movementDetails, organisation);
 
             List<RecipientInfoType> recipientInfo = new ArrayList<>();
             String recipient = organisationName;
@@ -228,12 +238,15 @@ public class ValidationServiceBean  {
         return recipientInfoList;
     }
 
-    private void sendToEndpointFlux(String ruleName, MovementDetails movementDetails, String organisation) {
-        sendToEndpoint(ruleName, movementDetails, organisation, PluginType.FLUX);
-    }
-
-    private void sendToEndpointNaf(String ruleName, MovementDetails movementDetails, String organisation) {
-        sendToEndpoint(ruleName, movementDetails, organisation, PluginType.NAF);
+    private void mapTypeOfMessage(MovementType movement, MovementDetails movementDetails, Organisation organisation) {
+        if (organisation == null) {
+            return;
+        }
+        if (movementDetails.getEntAreaCodes().contains(organisation.getNation())) {
+            movement.setMovementType(MovementTypeType.ENT);
+        } else if (movementDetails.getExtAreaCodes().contains(organisation.getNation()) ) {
+            movement.setMovementType(MovementTypeType.EXI);
+        }
     }
     
     private void sendToEmail(String emailAddress, String ruleName, MovementDetails movementDetails) {
