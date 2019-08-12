@@ -209,8 +209,8 @@ public class ValidationServiceBean  {
                 recipient = organisation.getNation();
                 recipientInfo = getRecipientInfoType(organisation, "NAF");
             } else if (pluginType.equals(PluginType.FLUX) && organisation != null) {
-                List<RecipientInfoType> endpoints = getRecipientInfoType(organisation, "FLUXVesselPositionMessage");
-                recipient = endpoints.isEmpty() ? organisation.getNation() : endpoints.get(0).getValue();
+                recipientInfo = getRecipientInfoType(organisation, "FLUXVesselPositionMessage");
+                recipient = recipientInfo.isEmpty() ? organisation.getNation() : recipientInfo.get(0).getValue();
             }
 
             exchangeService.sendReportToPlugin(pluginType, ruleName, recipient, exchangeMovement, recipientInfo, movementDetails);
@@ -227,9 +227,9 @@ public class ValidationServiceBean  {
         List<EndPoint> endPoints = organisation.getEndPoints();
         for (EndPoint endPoint : endPoints) {
             for (Channel channel : endPoint.getChannels()) {
-                if (channel.getDataFlow().equals(dataflow)) {
+                if (channel.getDataFlow().contains(dataflow)) {
                     RecipientInfoType recipientInfo = new RecipientInfoType();
-                    recipientInfo.setKey(endPoint.getName());
+                    recipientInfo.setKey(channel.getDataFlow());
                     recipientInfo.setValue(endPoint.getUri());
                     recipientInfoList.add(recipientInfo);
                 }
