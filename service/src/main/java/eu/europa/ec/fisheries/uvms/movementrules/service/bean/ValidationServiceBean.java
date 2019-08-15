@@ -25,8 +25,11 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import eu.europa.ec.fisheries.uvms.rest.security.InternalRestTokenHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -89,6 +92,9 @@ public class ValidationServiceBean  {
     @Inject
     @TicketCountEvent
     private Event<NotificationMessage> ticketCountEvent;
+
+    @Inject
+    private InternalRestTokenHandler tokenHandler;
 
     // Triggered by rule engine
     public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails movementDetails, String actions) {
@@ -378,10 +384,7 @@ public class ValidationServiceBean  {
     }
 
     private String createManualPoll(MovementDetails fact, String ruleName){
-
         try {
-
-
             PollRequestType poll = new PollRequestType();
             poll.setUserName("Triggerd by rule: " + ruleName);
             poll.setComment("This poll was triggered by rule: " + ruleName + " on: " + Instant.now().toString() + " on Asset: " + fact.getAssetName());
@@ -396,6 +399,7 @@ public class ValidationServiceBean  {
             Response createdPoll = getWebTarget()
                     .path("internal/poll")
                     .request(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.AUTHORIZATION, tokenHandler.createAndFetchToken("user"))
                     .post(Entity.json(poll), Response.class);
 
         if(createdPoll.getStatus() != 200){
@@ -406,8 +410,6 @@ public class ValidationServiceBean  {
             LOG.error("Error while sending rule-triggered poll: ", e);
             return "NOK";
         }
-
-
     }
 
     private void createTicket(String ruleName, String ruleGuid, MovementDetails fact) {
