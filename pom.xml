@@ -19,10 +19,10 @@
         <user.model.version>2.0.19</user.model.version>
         <audit.model.version>4.1.1</audit.model.version>
         <spatial.model.version>1.0.12</spatial.model.version>
-        <usm4uvms.version>4.0.19</usm4uvms.version>
+        <usm4uvms.version>4.0.20</usm4uvms.version>
         <uvms.config.version>4.0.4</uvms.config.version>
         <uvms.common.version>4.0.2</uvms.common.version>
-        <uvms.asset.version>6.0.56</uvms.asset.version>
+        <uvms.asset.version>6.0.58</uvms.asset.version>
 
         <javaee.version>8.0</javaee.version>
         <project.scm.id>github</project.scm.id>
