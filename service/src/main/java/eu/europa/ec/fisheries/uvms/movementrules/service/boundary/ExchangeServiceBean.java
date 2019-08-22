@@ -13,7 +13,6 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;    //Leave be for now
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -50,8 +49,8 @@ public class ExchangeServiceBean {
         return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromModuleResponse(serviceListResponse);
     }
     
-    public void sendReportToPlugin(PluginType pluginType, String ruleName, String recipient, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws  JMSException {
-        String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin("", pluginType, Instant.now(), ruleName, recipient, exchangeMovement, recipientInfoList, movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getMmsi(), movementDetails.getExternalMarking(), movementDetails.getFlagState());
+    public void sendReportToPlugin(String pluginName, String ruleName, String recipient, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws  JMSException {
+        String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin(pluginName, null, Instant.now(), ruleName, recipient, exchangeMovement, recipientInfoList, movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getMmsi(), movementDetails.getExternalMarking(), movementDetails.getFlagState());
         exchangeProducer.sendModuleMessage(exchangeRequest, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
     }
     

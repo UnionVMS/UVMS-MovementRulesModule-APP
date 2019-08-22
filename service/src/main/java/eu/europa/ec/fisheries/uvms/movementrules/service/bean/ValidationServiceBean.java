@@ -114,16 +114,18 @@ public class ValidationServiceBean  {
         auditTimestamp = auditLog("Time to send email to subscribers:", auditTimestamp);
 
         // Actions list format:
-        // ACTION,VALUE;ACTION,VALUE;
+        // ACTION,TARGET,VALUE;ACTION,TARGET,VALUE;
         // N.B! The .drl rule file gives the string "null" when (for instance)
         // value is null.
         String[] parsedActionKeyValueList = actions.split(";");
         for (String keyValue : parsedActionKeyValueList) {
             String[] keyValueList = keyValue.split(",");
             String action = keyValueList[0];
+            String target = "";
             String value = "";
-            if (keyValueList.length == 2) {
-                value = keyValueList[1];
+            if (keyValueList.length == 3) {
+                target = keyValueList[1];
+                value = keyValueList[2];
             }
             switch (ActionType.valueOf(action)) {
                 case EMAIL:
@@ -131,15 +133,10 @@ public class ValidationServiceBean  {
                     sendToEmail(value, ruleName, movementDetails);
                     auditTimestamp = auditLog("Time to send (action) email:", auditTimestamp);
                     break;
-                case SEND_TO_FLUX:
-                    sendToEndpointFlux(ruleName, movementDetails, value);
+                case SEND_REPORT:
+                    sendToEndpoint(ruleName, movementDetails, value, target);
                     auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
                     break;
-                case SEND_TO_NAF:
-                    sendToEndpointNaf(ruleName, movementDetails, value);
-                    auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
-                    break;
-
                 case MANUAL_POLL:
                     createManualPoll(movementDetails, ruleName);
                     auditTimestamp = auditLog("Time to send poll:", auditTimestamp);
@@ -190,15 +187,7 @@ public class ValidationServiceBean  {
         }
     }
 
-    private void sendToEndpointFlux(String ruleName, MovementDetails movementDetails, String organisation) {
-        sendToEndpoint(ruleName, movementDetails, organisation, PluginType.FLUX);
-    }
-
-    private void sendToEndpointNaf(String ruleName, MovementDetails movementDetails, String organisation) {
-        sendToEndpoint(ruleName, movementDetails, organisation, PluginType.NAF);
-    }
-
-    private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String organisationName, PluginType pluginType) {
+    private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String organisationName, String pluginName) {
         LOG.info("Sending to organisation '{}'", organisationName);
 
         try {
@@ -208,18 +197,17 @@ public class ValidationServiceBean  {
 
             mapTypeOfMessage(exchangeMovement, movementDetails, organisation);
 
-            List<RecipientInfoType> recipientInfo = new ArrayList<>();
             String recipient = organisationName;
+            List<RecipientInfoType> recipientInfo = new ArrayList<>();
 
-            if (pluginType.equals(PluginType.NAF) && organisation != null) {
+            if (organisation != null) {
                 recipient = organisation.getNation();
-                recipientInfo = getRecipientInfoType(organisation, "NAF");
-            } else if (pluginType.equals(PluginType.FLUX) && organisation != null) {
-                recipientInfo = getRecipientInfoType(organisation, "FLUXVesselPositionMessage");
-                recipient = recipientInfo.isEmpty() ? organisation.getNation() : recipientInfo.get(0).getValue();
+//                TODO if FLUX
+//                recipient = recipientInfo.isEmpty() ? organisation.getNation() : recipientInfo.get(0).getValue();
+                recipientInfo = getRecipientInfoType(organisation);
             }
 
-            exchangeService.sendReportToPlugin(pluginType, ruleName, recipient, exchangeMovement, recipientInfo, movementDetails);
+            exchangeService.sendReportToPlugin(pluginName, ruleName, recipient, exchangeMovement, recipientInfo, movementDetails);
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, organisationName, "UVMS");
 
@@ -228,17 +216,15 @@ public class ValidationServiceBean  {
         }
     }
 
-    private List<RecipientInfoType> getRecipientInfoType(Organisation organisation, String dataflow) {
+    private List<RecipientInfoType> getRecipientInfoType(Organisation organisation) {
         List<RecipientInfoType> recipientInfoList = new ArrayList<>();
         List<EndPoint> endPoints = organisation.getEndPoints();
         for (EndPoint endPoint : endPoints) {
             for (Channel channel : endPoint.getChannels()) {
-                if (channel.getDataFlow().contains(dataflow)) {
-                    RecipientInfoType recipientInfo = new RecipientInfoType();
-                    recipientInfo.setKey(channel.getDataFlow());
-                    recipientInfo.setValue(endPoint.getUri());
-                    recipientInfoList.add(recipientInfo);
-                }
+                RecipientInfoType recipientInfo = new RecipientInfoType();
+                recipientInfo.setKey(channel.getDataFlow());
+                recipientInfo.setValue(endPoint.getUri());
+                recipientInfoList.add(recipientInfo);
             }
         }
         return recipientInfoList;

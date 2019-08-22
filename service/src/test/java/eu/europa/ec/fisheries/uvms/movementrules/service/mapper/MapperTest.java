@@ -123,7 +123,8 @@ public class MapperTest {
         for (CustomRuleActionType action : actions) {
             switch (action.getOrder()) {
             case "0":
-                assertSame(ActionType.SEND_TO_FLUX, action.getAction());
+                assertSame(ActionType.SEND_REPORT, action.getAction());
+                assertSame("FLUX", action.getTarget());
                 assertSame("value1", action.getValue());
                 break;
             case "1":
@@ -131,7 +132,8 @@ public class MapperTest {
                 assertSame("value2", action.getValue());
                 break;
             case "2":
-                assertSame(ActionType.SEND_TO_NAF, action.getAction());
+                assertSame(ActionType.SEND_REPORT, action.getAction());
+                assertSame("NAF", action.getTarget());
                 assertSame("value3", action.getValue());
                 break;
             default:

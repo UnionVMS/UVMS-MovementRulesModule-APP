@@ -155,6 +155,7 @@
     <xsd:complexType name="CustomRuleActionType">
         <xsd:sequence>
             <xsd:element name="action" type="customrule:ActionType" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="target" type="xsd:string" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="value" type="xsd:string" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="order" type="xsd:string" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
@@ -176,8 +177,7 @@
 
     <xsd:simpleType name="ActionType">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="SEND_TO_FLUX"/>
-            <xsd:enumeration value="SEND_TO_NAF"/>
+            <xsd:enumeration value="SEND_REPORT"/>
             <xsd:enumeration value="EMAIL"/>
             <xsd:enumeration value="MANUAL_POLL"/>
 

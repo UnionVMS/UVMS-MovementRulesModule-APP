@@ -330,7 +330,7 @@ public class CustomRuleParser {
 
             rulesDto.setExpression(sb.toString());
 
-            // Format: "ACTION,VALUE;ACTION,VALUE;ACTION,VALUE;"
+            // Format: "ACTION,TARGET,VALUE;ACTION,TARGET,VALUE;ACTION,TARGET,VALUE;"
             List<RuleAction> actions = rawRule.getRuleActionList();
             
             sb = new StringBuilder();
@@ -339,6 +339,8 @@ public class CustomRuleParser {
             } else {
                 for (RuleAction action : actions) {
                     sb.append(action.getAction());
+                    sb.append(",");
+                    sb.append(action.getTarget() != null ? action.getTarget() : "");
                     sb.append(",");
                     sb.append(action.getValue());
                     sb.append(";");

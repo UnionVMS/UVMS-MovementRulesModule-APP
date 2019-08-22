@@ -75,7 +75,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
 
         MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "SEND_TO_NAF,SWE");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "SEND_REPORT,NAF,SWE");
 
         long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
         assertThat(openTicketsAfter, is(openTicketsBefore + 1));
