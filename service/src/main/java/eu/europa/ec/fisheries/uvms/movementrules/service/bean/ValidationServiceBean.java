@@ -202,9 +202,12 @@ public class ValidationServiceBean  {
 
             if (organisation != null) {
                 recipient = organisation.getNation();
-//                TODO if FLUX
-//                recipient = recipientInfo.isEmpty() ? organisation.getNation() : recipientInfo.get(0).getValue();
                 recipientInfo = getRecipientInfoType(organisation);
+                for (RecipientInfoType recipientInfoType : recipientInfo) {
+                    if (recipientInfoType.getKey().contains("FLUXVesselPositionMessage")) {
+                        recipient = recipientInfoType.getValue();
+                    }
+                }
             }
 
             exchangeService.sendReportToPlugin(pluginName, ruleName, recipient, exchangeMovement, recipientInfo, movementDetails);
