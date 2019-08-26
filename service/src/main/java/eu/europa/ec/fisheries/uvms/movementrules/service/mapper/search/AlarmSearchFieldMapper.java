@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.AlarmSearchKey;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 
 public class AlarmSearchFieldMapper {
 

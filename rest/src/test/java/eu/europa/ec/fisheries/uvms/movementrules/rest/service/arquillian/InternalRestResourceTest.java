@@ -19,7 +19,6 @@ import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
@@ -120,7 +119,8 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         List<RuleAction> actions = new ArrayList<>();
         RuleAction action = new RuleAction();
         action.setCustomRule(customRule);
-        action.setAction("SEND_TO_FLUX");
+        action.setAction("SEND_REPORT");
+        action.setTarget("FLUX");
         action.setValue("DNK");
         action.setOrder(1);
         actions.add(action);

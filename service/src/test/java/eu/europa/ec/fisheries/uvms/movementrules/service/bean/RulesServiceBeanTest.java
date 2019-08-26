@@ -840,12 +840,14 @@ public class RulesServiceBeanTest extends TransactionalTests {
 
         // then send to FLUX DNK
         CustomRuleActionType action = new CustomRuleActionType();
-        action.setAction(ActionType.SEND_TO_FLUX);
+        action.setAction(ActionType.SEND_REPORT);
+        action.setTarget("FLUX");
         action.setValue("FLUX DNK");
         action.setOrder("0");
 
         RuleAction ruleAction = new RuleAction();
-        ruleAction.setAction(ActionType.SEND_TO_FLUX.value());
+        ruleAction.setAction(ActionType.SEND_REPORT.value());
+        ruleAction.setTarget("FLUX");
         ruleAction.setValue("FLUX DNK");
         ruleAction.setOrder(0);
         ruleAction.setCustomRule(customRule);
