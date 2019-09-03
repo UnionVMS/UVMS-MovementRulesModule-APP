@@ -29,8 +29,8 @@
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
         <installAtEnd>false</installAtEnd>
-        
-        <docker.dev.version>3.39.2.w17</docker.dev.version>
+      
+        <docker.dev.version>3.39.4.w17</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>movementrules</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>movementrules</docker.liquibase.db.passwd>
