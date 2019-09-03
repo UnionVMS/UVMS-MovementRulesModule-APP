@@ -36,7 +36,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 public class MockData {
 
     private static final Instant A_DATE = Instant.ofEpochMilli(1441065600000l);
-    private static final String ACTION_SEND_TO_ENDPOINT = "SEND_TO_FLUX";
+    private static final String ACTION_SEND_TO_ENDPOINT = "SEND_REPORT";
     private static final String ACTION_EMAIL = "EMAIL";
     private static final String RULE_NAME = "DummyRuleName";
     private static final String AVAILABILITY = "PUBLIC";
@@ -56,7 +56,8 @@ public class MockData {
 
         // Actions
         CustomRuleActionType action1 = new CustomRuleActionType();
-        action1.setAction(ActionType.SEND_TO_FLUX);
+        action1.setAction(ActionType.SEND_REPORT);
+        action1.setTarget("FLUX");
         action1.setValue("value1");
         action1.setOrder("0");
 
@@ -66,7 +67,8 @@ public class MockData {
         action2.setOrder("1");
         
         CustomRuleActionType action3 = new CustomRuleActionType();
-        action3.setAction(ActionType.SEND_TO_NAF);
+        action3.setAction(ActionType.SEND_REPORT);
+        action3.setTarget("NAF");
         action3.setValue("value3");
         action3.setOrder("0");
 
@@ -141,6 +143,7 @@ public class MockData {
         List<RuleAction> ruleActionList = new ArrayList<>();
         RuleAction action1 = new RuleAction();
         action1.setAction(ACTION_SEND_TO_ENDPOINT);
+        action1.setTarget("FLUX");
         action1.setOrder(0);
         action1.setValue("value1");
 

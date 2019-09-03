@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Stateless
 public class ConfigServiceBean {
@@ -49,11 +51,8 @@ public class ConfigServiceBean {
     }
 
 
-    public Map getActions() {
-        Map map = new HashMap();
-        // NeedValue is true for all ActionTypes. Update if new ActionTypes with a false value are added.
-        Arrays.stream(ActionType.values()).forEach(actionType -> map.put(actionType, true));
-        return map;
+    public Map<ActionType, Boolean> getActions() {
+        return Arrays.stream(ActionType.values()).collect(Collectors.toMap(Function.identity(), a -> !a.equals(ActionType.MANUAL_POLL)));
     }
 
     private ArrayList<String> getConditionsByCriteria(SubCriteria subCriteria) {

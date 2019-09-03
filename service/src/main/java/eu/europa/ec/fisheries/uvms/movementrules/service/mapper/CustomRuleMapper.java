@@ -89,6 +89,7 @@ public class CustomRuleMapper {
             if (ruleAction.getAction() != null) {
                 customRuleActionType.setAction(ActionType.fromValue(ruleAction.getAction()));
             }
+            customRuleActionType.setTarget(ruleAction.getTarget());
             customRuleActionType.setValue(ruleAction.getValue());
             customRuleActionType.setOrder(ruleAction.getOrder().toString());
 
@@ -125,7 +126,7 @@ public class CustomRuleMapper {
         // Base
         customRuleEntity.setName(customRuleType.getName());
         if(customRuleType.getGuid() != null) {
-            customRuleEntity.setGuid(UUID.fromString(customRuleType.getGuid()));     //why was this not here from the beginning ?!?!?!?  Well because in its usage it was stored elsewhere and then given a new guid......
+            customRuleEntity.setGuid(UUID.fromString(customRuleType.getGuid()));
         }
         customRuleEntity.setAvailability(customRuleType.getAvailability().value());
         customRuleEntity.setDescription(customRuleType.getDescription());
@@ -172,6 +173,7 @@ public class CustomRuleMapper {
             RuleAction ruleAction = new RuleAction();
             if (customRuleActionType != null) {
                 ruleAction.setAction(customRuleActionType.getAction().value());
+                ruleAction.setTarget(customRuleActionType.getTarget());
                 ruleAction.setValue(customRuleActionType.getValue());
                 ruleAction.setOrder(Integer.valueOf(customRuleActionType.getOrder()));
                 ruleAction.setCustomRule(customRuleEntity);

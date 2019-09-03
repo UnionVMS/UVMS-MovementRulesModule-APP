@@ -11,8 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -37,6 +35,9 @@ public class RuleAction implements Serializable {
     @Column(name = "action_action")
     private String action;
 
+    @Column(name = "action_target")
+    private String target;
+    
     @Column(name = "action_value")
     private String value;
 
@@ -50,6 +51,7 @@ public class RuleAction implements Serializable {
     public RuleAction copy(CustomRule newCustomRule){
         RuleAction copy = new RuleAction();
         copy.setAction(action);
+        copy.setTarget(target);
         copy.setValue(value);
         copy.setOrder(order);
         copy.setCustomRule(newCustomRule);
@@ -68,9 +70,17 @@ public class RuleAction implements Serializable {
     public String getAction() {
         return action;
     }
-
+    
     public void setAction(String action) {
         this.action = action;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
     }
 
     public CustomRule getCustomRule() {
@@ -99,8 +109,7 @@ public class RuleAction implements Serializable {
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(id, action, value, order, customRule);
+        return Objects.hash(id, action, target, value, order, customRule);
     }
 
     @Override
@@ -112,6 +121,12 @@ public class RuleAction implements Serializable {
                 return false;
 
             } else if (action == null && other.action != null) {
+                return false;
+            }
+            
+            if (target != null && !target.equals(other.target)) {
+                return false;
+            } else if (target == null && other.target != null) {
                 return false;
             }
 

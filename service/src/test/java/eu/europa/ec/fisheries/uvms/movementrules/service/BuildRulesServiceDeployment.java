@@ -42,7 +42,7 @@ public abstract class BuildRulesServiceDeployment {
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "unionvms.war");
 
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.spatial:spatial-model",
+                .resolve("eu.europa.ec.fisheries.uvms.spatialSwe:spatial-model",
                         "eu.europa.ec.fisheries.uvms.user:user-model")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);

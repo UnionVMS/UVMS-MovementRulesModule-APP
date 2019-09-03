@@ -81,7 +81,8 @@ public class RulesTestHelper {
         customRule.getRuleSegmentList().add(areaRule);
 
         RuleAction action = new RuleAction();
-        action.setAction(ActionType.SEND_TO_FLUX.value());
+        action.setAction(ActionType.SEND_REPORT.value());
+        action.setTarget("FLUX");
         action.setValue("DNK");
         action.setOrder(0);
         action.setCustomRule(customRule);
