@@ -98,7 +98,7 @@ public class ValidationServiceBean  {
 
     // Triggered by rule engine
     public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails movementDetails, String actions) {
-        LOG.info("Performing actions on triggered user rules, rule: {}", ruleName);
+        LOG.debug("Performing actions on triggered user rules, rule: {}", ruleName);
 
         Instant auditTimestamp = Instant.now();
 
@@ -188,7 +188,7 @@ public class ValidationServiceBean  {
     }
 
     private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String organisationName, String pluginName) {
-        LOG.info("Sending to organisation '{}'", organisationName);
+        LOG.debug("Sending to organisation '{}'", organisationName);
 
         try {
             MovementType exchangeMovement = ExchangeMovementMapper.mapToExchangeMovementType(movementDetails);
@@ -457,7 +457,7 @@ public class ValidationServiceBean  {
     private Instant auditLog(String msg, Instant lastTimestamp) {
         Instant newTimestamp = Instant.now();
         long duration = newTimestamp.toEpochMilli() - lastTimestamp.toEpochMilli();
-        LOG.info("--> AUDIT - {} {}ms", msg, duration);
+        LOG.debug("--> AUDIT - {} {}ms", msg, duration);
         return newTimestamp;
     }
 
