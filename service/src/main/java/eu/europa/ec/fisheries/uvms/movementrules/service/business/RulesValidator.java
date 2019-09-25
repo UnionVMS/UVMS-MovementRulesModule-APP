@@ -100,8 +100,9 @@ public class RulesValidator {
             ksession.setGlobal("validationService", validationService);
             ksession.setGlobal("logger", LOG);
 
-            ksession.insert(fact);
+            FactHandle factHandle = ksession.insert(fact);
             ksession.fireAllRules();
+            ksession.delete(factHandle);
 
             ksession.dispose();
         }
