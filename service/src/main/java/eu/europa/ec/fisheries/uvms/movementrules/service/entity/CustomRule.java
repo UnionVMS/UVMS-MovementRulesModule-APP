@@ -73,6 +73,9 @@ public class CustomRule implements Serializable {
     @Column(name = "rule_archived")
     private Boolean archived;       //exists in Type, same name     TODO: Make requires not null
 
+    @Column(name = "rule_aggregateinvocations")
+    private boolean aggregateInvocations;
+
     @Column(name = "rule_updattim")
     @NotNull
     private Instant updated;           //exists in Type, same name
@@ -107,6 +110,7 @@ public class CustomRule implements Serializable {
         copy.setEndDate(endDate);
         copy.setActive(active);
         copy.setArchived(archived);
+        copy.setAggregateInvocations(aggregateInvocations);
         copy.setUpdated(updated);
         copy.setUpdatedBy(updatedBy);
 
@@ -192,6 +196,14 @@ public class CustomRule implements Serializable {
 
     public Boolean getArchived() {
         return archived;
+    }
+
+    public boolean isAggregateInvocations() {
+        return aggregateInvocations;
+    }
+
+    public void setAggregateInvocations(boolean aggregateInvocations) {
+        this.aggregateInvocations = aggregateInvocations;
     }
 
     public void setArchived(Boolean archived) {

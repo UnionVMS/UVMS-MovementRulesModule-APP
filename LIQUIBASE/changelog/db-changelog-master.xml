@@ -13,5 +13,7 @@
     <include file="v0.1\insertParameter.xml" relativeToChangelogFile="true"/>
 
 	<include file="v2.1.20\db-changelog-2.1.20.xml" relativeToChangelogFile="true"/>
+	
+	<include file="v2.1.23\db-changelog-2.1.23.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

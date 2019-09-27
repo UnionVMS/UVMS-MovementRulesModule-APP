@@ -53,6 +53,7 @@ public class CustomRuleMapper {
         customRuleType.setDescription(customRuleEntity.getDescription());
         customRuleType.setActive(customRuleEntity.getActive());
         customRuleType.setArchived(customRuleEntity.getArchived());
+        customRuleType.setAggregateInvocations(customRuleEntity.isAggregateInvocations());
         customRuleType.setLastTriggered(MRDateUtils.dateToString(customRuleEntity.getLastTriggered()));
         customRuleType.setUpdated(MRDateUtils.dateToString(customRuleEntity.getUpdated()));
         customRuleType.setUpdatedBy(customRuleEntity.getUpdatedBy());
@@ -132,6 +133,7 @@ public class CustomRuleMapper {
         customRuleEntity.setDescription(customRuleType.getDescription());
         customRuleEntity.setActive(customRuleType.isActive());
         customRuleEntity.setArchived(customRuleType.isArchived());
+        customRuleEntity.setAggregateInvocations(customRuleType.isAggregateInvocations());
         customRuleEntity.setStartDate(now);
         customRuleEntity.setUpdated(now);
         customRuleEntity.setUpdatedBy(customRuleType.getUpdatedBy());
