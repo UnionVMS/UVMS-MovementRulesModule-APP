@@ -1,21 +1,5 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.util.UUID;
-import javax.inject.Inject;
-import org.jboss.arquillian.container.test.api.OperateOnDeployment;
-import org.jboss.arquillian.junit.Arquillian;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
@@ -25,6 +9,19 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConsta
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
+import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import javax.inject.Inject;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.UUID;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
 public class CheckCommunicationTaskTest extends TransactionalTests {
@@ -44,10 +41,11 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     public void setThreshold() throws ConfigServiceException {
         parameterService.setStringValue(ParameterKey.ASSET_NOT_SENDING_THRESHOLD.getKey(), 
                 String.valueOf(ONE_HOUR_IN_MILLISECONDS), "");
+        System.clearProperty("AssetPollEndpointReached");
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void runTaskWithValidReport() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         rulesDao.updatePreviousReport(previousReport);
@@ -61,8 +59,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment("normal")
+    @OperateOnDeployment("normal")
     public void runWithThresholdPassed() throws Exception {
+        System.setProperty("AssetPollEndpointReached", "False");
         PreviousReport previousReport = getBasicPreviousReport();
         previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
         rulesDao.updatePreviousReport(previousReport);
@@ -74,10 +73,12 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         Ticket ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
         assertThat(ticket, is(notNullValue()));
         assertThat(ticket.getTicketCount(), is(1L));
+        assertEquals("True", System.getProperty("AssetPollEndpointReached"));
+        System.clearProperty("AssetPollEndpointReached");
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void runTwiceWithThresholdPassed() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
@@ -95,7 +96,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void updateThresholdPassed() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
@@ -119,7 +120,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void checkPreviousReportUpdateTimeUpdated() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
@@ -134,7 +135,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void runTaskWith30MinSteps() throws Exception {
         long thirtyMinsInMs = ONE_HOUR_IN_MILLISECONDS / 2;
         PreviousReport previousReport = getBasicPreviousReport();
@@ -219,7 +220,7 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     }
     
     @Test
-@OperateOnDeployment ("normal")
+    @OperateOnDeployment ("normal")
     public void runTaskWith30MinStepsWithPastPositionTime() throws Exception {
         long thirtyMinsInMs = ONE_HOUR_IN_MILLISECONDS / 2;
         PreviousReport previousReport = getBasicPreviousReport();

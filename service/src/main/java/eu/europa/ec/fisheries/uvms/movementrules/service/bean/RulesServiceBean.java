@@ -470,6 +470,9 @@ public class RulesServiceBean {
         return rulesDao.getPreviousReportList();
     }
 
+    @Inject
+    ValidationServiceBean validationServiceBean;
+
     // Triggered by timer rule
     public void timerRuleTriggered(String ruleName, PreviousReport previousReport) {
         LOG.info("Timer rule triggered for asset: {}", previousReport.getAssetGuid());
@@ -478,6 +481,7 @@ public class RulesServiceBean {
 
         if (ticketEntity == null) {
             createAssetNotSendingTicket(ruleName, previousReport);
+            validationServiceBean.createPollInternal(previousReport.getAssetGuid(), ruleName);
         } else if (ticketEntity.getTicketCount() != null) {
             ticketEntity.setTicketCount(ticketEntity.getTicketCount() + 1);
             updateTicketCount(ticketEntity);
