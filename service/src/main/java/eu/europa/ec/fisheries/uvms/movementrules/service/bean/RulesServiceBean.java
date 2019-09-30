@@ -82,7 +82,7 @@ public class RulesServiceBean {
 
     @Inject
     @TicketEvent
-    private Event<NotificationMessage> ticketEvent;
+    private Event<Ticket> ticketEvent;
 
     @Inject
     @TicketUpdateEvent
