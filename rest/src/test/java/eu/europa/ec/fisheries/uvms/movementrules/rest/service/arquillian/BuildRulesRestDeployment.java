@@ -5,7 +5,7 @@ import java.util.Arrays;
 import javax.ejb.EJB;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-
+import javax.ws.rs.core.MediaType;
 import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.dto.AreaTransitionsDTO;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
@@ -82,6 +82,16 @@ public abstract class BuildRulesRestDeployment {
                             UnionVMSFeature.manageAlarmRules.getFeatureId(),
                             UnionVMSFeature.manageAlarmsOpenTickets.getFeatureId(),
                             UnionVMSFeature.viewAlarmsOpenTickets.getFeatureId()));
+        }
+        return token;
+    }
+    
+    protected String getTokenExternal() {
+        if (token == null) {
+            token = ClientBuilder.newClient()
+                    .target("http://localhost:8080/unionvms/user/rest/user/token")
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(String.class);
         }
         return token;
     }

@@ -47,12 +47,14 @@
 	<filter>
 		<filter-name>AuthenticationFilter</filter-name>
 		<filter-class>eu.europa.ec.fisheries.uvms.rest.security.AuthenticationFilter</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>AuthenticationFilter</filter-name>
 		<url-pattern>/rest/config/*</url-pattern>
 		<url-pattern>/rest/customrules/*</url-pattern>
 		<url-pattern>/rest/tickets/*</url-pattern>
+		<url-pattern>/rest/sse/*</url-pattern>
 	</filter-mapping>
 
 	<filter>

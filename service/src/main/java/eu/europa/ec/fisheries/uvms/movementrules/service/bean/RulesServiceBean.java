@@ -78,12 +78,8 @@ public class RulesServiceBean {
     private AuditServiceBean auditService;
 
     @Inject
-    @TicketEvent
-    private Event<NotificationMessage> ticketEvent;
-
-    @Inject
     @TicketUpdateEvent
-    private Event<NotificationMessage> ticketUpdateEvent;
+    private Event<Ticket> ticketUpdateEvent;
 
     @Inject
     @TicketCountEvent
@@ -416,7 +412,7 @@ public class RulesServiceBean {
         rulesDao.updateTicket(entity);
 
         // Notify long-polling clients of the update
-        ticketUpdateEvent.fire(new NotificationMessage("guid", entity.getGuid()));
+        ticketUpdateEvent.fire(entity);
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
         auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid().toString(), "", ticket.getUpdatedBy());
@@ -450,7 +446,7 @@ public class RulesServiceBean {
             rulesDao.updateTicket(ticket);
 
             // Notify long-polling clients of the update
-            ticketUpdateEvent.fire(new NotificationMessage("guid", ticket.getGuid()));
+            ticketUpdateEvent.fire(ticket);
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid().toString(), null, loggedInUser);
         }
 
@@ -511,7 +507,7 @@ public class RulesServiceBean {
         ticket.setUpdated(Instant.now());
 
         // Notify long-polling clients of the update
-        ticketUpdateEvent.fire(new NotificationMessage("guid", ticket.getGuid()));
+        ticketUpdateEvent.fire(ticket);
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
         auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());

@@ -87,7 +87,7 @@ public class ValidationServiceBean  {
 
     @Inject
     @TicketEvent
-    private Event<NotificationMessage> ticketEvent;
+    private Event<Ticket> ticketEvent;
 
     @Inject
     @TicketCountEvent
@@ -444,7 +444,7 @@ public class ValidationServiceBean  {
             Ticket createdTicket = rulesDao.createTicket(ticket);
 
 
-            ticketEvent.fire(new NotificationMessage("guid", createdTicket.getGuid()));
+            ticketEvent.fire(createdTicket);
 
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));

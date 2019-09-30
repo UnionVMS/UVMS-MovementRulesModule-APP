@@ -11,6 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
+import java.util.Arrays;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -19,11 +21,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
+import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
 
 @Path("user/rest/user")
 @Stateless
 public class UserRestMock {
+
+    @EJB
+    private JwtTokenHandler tokenHandler;
 
     @GET
     @Path("getOrganisation")
@@ -31,6 +38,13 @@ public class UserRestMock {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOrganisation(@QueryParam("organisationName") String organisationName) {
         return Response.ok(getBasicOrganisation(organisationName)).build();
+    }
+    
+    @GET
+    @Path("token")
+    public Response getToken() {
+        String token = tokenHandler.createToken("user", Arrays.asList(UnionVMSFeature.viewAlarmsOpenTickets.getFeatureId()));
+        return Response.ok(token).build();
     }
     
     private Organisation getBasicOrganisation(String organisationName) {
