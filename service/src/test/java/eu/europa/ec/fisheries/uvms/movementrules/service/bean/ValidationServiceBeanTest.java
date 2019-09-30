@@ -5,22 +5,23 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
 import javax.inject.Inject;
-
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 @RunWith(Arquillian.class)
 public class ValidationServiceBeanTest extends TransactionalTests {
@@ -104,5 +105,61 @@ public class ValidationServiceBeanTest extends TransactionalTests {
 
         assertEquals("True", System.getProperty("AssetPollEndpointReached"));
         System.clearProperty("AssetPollEndpointReached");
+    }
+    
+    @Test
+    @OperateOnDeployment("normal")
+    public void aggregateRuleTriggeredNewTicketShouldBeCreatedTest() throws Exception {
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+        customRule.setAggregateInvocations(true);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
+
+        MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
+
+        long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
+        assertThat(openTicketsAfter, is(openTicketsBefore + 1));
+    }
+    
+    @Test
+    @OperateOnDeployment("normal")
+    public void aggregateRuleTriggeredTicketCountShouldIncreaseTest() throws Exception {
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+        customRule.setAggregateInvocations(true);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
+
+        MovementDetails movementFact2 = RulesTestHelper.createBasicMovementDetails();
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact2, "EMAIL,test@test.com");
+        
+        List<Ticket> tickets = rulesService.getTicketsByMovements(Arrays.asList(movementFact.getMovementGuid()));
+        assertThat(tickets.size(), is(1));
+        assertThat(tickets.get(0).getTicketCount(), is(2l));
+    }
+    
+    @Test
+    @OperateOnDeployment("normal")
+    public void aggregateRuleTriggeredDateTriggeredShouldUpdateTest() throws Exception {
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+        customRule.setAggregateInvocations(true);
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
+
+        Instant firstTimestamp = rulesService.getCustomRuleByGuid(createdCustomRule.getGuid())
+                .getLastTriggered();
+        
+        MovementDetails movementFact2 = RulesTestHelper.createBasicMovementDetails();
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact2, "EMAIL,test@test.com");
+
+        Instant secondTimestamp = rulesService.getCustomRuleByGuid(createdCustomRule.getGuid())
+                .getLastTriggered();
+
+        assertTrue(firstTimestamp.isBefore(secondTimestamp));
     }
 }

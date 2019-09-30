@@ -106,6 +106,7 @@ public class RulesTestHelper {
         movementDetails.setLatitude(56d);
         movementDetails.setLongitude(11d);
         movementDetails.setPositionTime(Instant.now());
+        movementDetails.setMovementGuid(UUID.randomUUID().toString());
         movementDetails.setAssetGuid(UUID.randomUUID().toString());
         movementDetails.setAssetType(AssetType.VESSEL.value());
         movementDetails.setFlagState("SWE");

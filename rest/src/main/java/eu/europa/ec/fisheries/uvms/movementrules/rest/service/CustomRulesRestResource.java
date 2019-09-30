@@ -39,11 +39,11 @@ import java.util.UUID;
 
 @Path("/customrules")
 @Stateless
-@Consumes(value = { MediaType.APPLICATION_JSON })
-@Produces(value = { MediaType.APPLICATION_JSON })
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class CustomRulesRestResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CustomRulesRestResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CustomRulesRestResource.class);
 
     @EJB
     private RulesServiceBean rulesService;

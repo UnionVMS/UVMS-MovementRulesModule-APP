@@ -357,7 +357,7 @@ public class RulesServiceBean {
         Ticket ticket = rulesDao.getLatestTicketForRule(ruleGuid);
         Instant retVal = null;
         if(ticket != null){
-            retVal = ticket.getCreatedDate();
+            retVal = ticket.getUpdated();
         }
         return retVal;
     }

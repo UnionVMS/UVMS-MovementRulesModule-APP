@@ -100,17 +100,18 @@ public class ValidationServiceBean  {
     public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails movementDetails, String actions) {
         LOG.debug("Performing actions on triggered user rules, rule: {}", ruleName);
 
+        CustomRule triggeredRule = getCustomRule(ruleGuid);
+        
         Instant auditTimestamp = Instant.now();
+        
+        if (triggeredRule != null && triggeredRule.isAggregateInvocations()) {
+            createTicketOrIncreaseCount(movementDetails, triggeredRule);
+        } else {
+            createTicket(ruleName, ruleGuid, movementDetails);
+        }
+        auditTimestamp = auditLog("Time to create/update ticket:", auditTimestamp);
 
-        // Update last update 
-        // TODO check if this is needed
-        auditTimestamp = auditLog("Time to update last triggered:", auditTimestamp);
-
-        // Always create a ticket
-        createTicket(ruleName, ruleGuid, movementDetails);
-        auditTimestamp = auditLog("Time to create ticket:", auditTimestamp);
-
-        sendMailToSubscribers(ruleGuid, ruleName, movementDetails);
+        sendMailToSubscribers(triggeredRule, movementDetails);
         auditTimestamp = auditLog("Time to send email to subscribers:", auditTimestamp);
 
         // Actions list format:
@@ -160,15 +161,30 @@ public class ValidationServiceBean  {
         }
     }
     
-    private void sendMailToSubscribers(String ruleGuid, String ruleName, MovementDetails movementDetails) {
-        CustomRule customRule = null;
+    private CustomRule getCustomRule(String ruleGuid) {
         try {
-            customRule = rulesDao.getCustomRuleByGuid(UUID.fromString(ruleGuid));
+            return rulesDao.getCustomRuleByGuid(UUID.fromString(ruleGuid));
         } catch (Exception e) {
             LOG.error("[ Failed to fetch rule when sending email to subscribers due to erro when getting CustomRule by GUID! ] {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private void createTicketOrIncreaseCount(MovementDetails movementDetails, CustomRule triggeredRule) {
+        Ticket latestTicketForRule = rulesDao.getLatestTicketForRule(triggeredRule.getGuid());
+        if (latestTicketForRule == null) {
+            createTicket(triggeredRule.getName(), triggeredRule.getGuid().toString(), movementDetails);
+        } else {
+            latestTicketForRule.setTicketCount(latestTicketForRule.getTicketCount() + 1);
+            latestTicketForRule.setUpdated(Instant.now());
+        }
+    }
+    
+    private void sendMailToSubscribers(CustomRule customRule, MovementDetails movementDetails) {
+        if (customRule == null) {
             return;
         }
-
+        
         List<RuleSubscription> subscriptions = customRule.getRuleSubscriptionList();
         if (subscriptions != null) {
             for (RuleSubscription subscription : subscriptions) {
@@ -177,7 +193,7 @@ public class ValidationServiceBean  {
                         // Find current email address
                         GetContactDetailResponse userResponse = userService.getContactDetails(subscription.getOwner());
                         String emailAddress = userResponse.getContactDetails().getEMail();
-                        sendToEmail(emailAddress, ruleName, movementDetails);
+                        sendToEmail(emailAddress, customRule.getName(), movementDetails);
                     } catch (Exception e) {
                         // If a mail attempt fails, proceed with the rest
                         LOG.error("Could not send email to user '{}'", subscription.getOwner());
