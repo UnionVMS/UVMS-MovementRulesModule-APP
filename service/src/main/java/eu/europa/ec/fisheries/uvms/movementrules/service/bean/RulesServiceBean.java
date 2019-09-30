@@ -136,8 +136,7 @@ public class RulesServiceBean {
             retVal.setLastTriggered(getLastTriggeredForRule(guid));
             return retVal;
         } catch (NoResultException e) {
-            LOG.error("[ERROR] Error when getting CustomRule by GUID ] {}", e.getMessage());
-            throw new RuntimeException(e);
+            return null;
         }
     }
     
@@ -222,6 +221,9 @@ public class RulesServiceBean {
         }
 
         CustomRule oldEntity = getCustomRuleByGuid(newEntity.getGuid());
+        if (oldEntity == null) {
+            throw new IllegalArgumentException("Could not find rule with id: " + newEntity.getGuid());
+        }
 
         CustomRule copiedNewEntity = newEntity.copy();
 
@@ -305,6 +307,9 @@ public class RulesServiceBean {
 
         UUID guid = UUID.fromString(guidString);
         CustomRule customRuleFromDb = getCustomRuleByGuid(guid);
+        if (customRuleFromDb == null) {
+            throw new IllegalArgumentException("Could not find rule with id: " + guidString);
+        }
         if (customRuleFromDb.getAvailability().equals(AvailabilityType.GLOBAL.value())) {
             UserContext userContext = userService.getFullUserContext(username, applicationName);
             if (!hasFeature(userContext, featureName)) {
@@ -312,14 +317,13 @@ public class RulesServiceBean {
             }
         }
 
-        CustomRule entity = rulesDao.getCustomRuleByGuid(guid);
-        entity.setArchived(true);
-        entity.setActive(false);
-        entity.setEndDate(Instant.now());
+        customRuleFromDb.setArchived(true);
+        customRuleFromDb.setActive(false);
+        customRuleFromDb.setEndDate(Instant.now());
 
         rulesValidator.updateCustomRules();
-        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, entity.getGuid().toString(), null, username);
-        return entity;
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.DELETE, customRuleFromDb.getGuid().toString(), null, username);
+        return customRuleFromDb;
 
     }
 

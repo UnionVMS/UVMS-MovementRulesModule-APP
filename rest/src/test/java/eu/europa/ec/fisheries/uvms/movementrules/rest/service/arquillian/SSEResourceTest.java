@@ -120,14 +120,16 @@ public class SSEResourceTest extends BuildRulesRestDeployment {
         MovementDetails movementDetails = getMovementDetails();
         movementDetails.setFlagState(flagstate);
             
+        TicketType ticket;
         try (SSETestClient client = new SSETestClient()) {
             validationService.customRuleTriggered(updatedRule.getName(), updatedRule.getGuid().toString(), movementDetails, ";");
             
-            TicketType ticket = client.getTicket(10000);
+            ticket = client.getTicket(10000);
             assertThat(ticket.getRuleName(), is(updatedRule.getName()));
             assertThat(ticket.getMovementGuid(), is(movementDetails.getMovementGuid()));
             assertThat(ticket.getAssetGuid(), is(movementDetails.getAssetGuid()));
         }
+        rulesDao.removeTicketAfterTests(TicketMapper.toTicketEntity(ticket));
         rulesDao.removeCustomRuleAfterTests(customRule);
     }
     
