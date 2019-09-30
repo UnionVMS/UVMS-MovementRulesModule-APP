@@ -4,7 +4,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -55,16 +58,22 @@ public class SSEResource {
         sseEventSink.send(sse.newEvent("User " + user + " is now registered"));
     }
 
-    public void updatedTicket(@Observes @TicketUpdateEvent Ticket ticket) {
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent Ticket ticket) {
         sendEvent(ticket, "TicketUpdate");
     }
     
-    public void createdTicket(@Observes @TicketEvent Ticket ticket) {
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void createdTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent Ticket ticket) {
         sendEvent(ticket, "Ticket");
     }
     
     private void sendEvent(Ticket ticket, String eventName) {
         CustomRule customRule = rulesService.getCustomRuleByGuid(UUID.fromString(ticket.getRuleGuid()));
+        if (customRule == null) {
+            LOG.error("Could not find rule with id: {}", ticket.getRuleGuid());
+            return;
+        }
         OutboundSseEvent sseEvent = createSseEvent(ticket, eventName);
         
         userSinks.stream().forEach(userSink -> {
