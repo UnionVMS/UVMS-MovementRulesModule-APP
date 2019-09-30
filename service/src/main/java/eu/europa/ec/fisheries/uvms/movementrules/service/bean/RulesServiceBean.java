@@ -78,6 +78,9 @@ public class RulesServiceBean {
     private AuditServiceBean auditService;
 
     @Inject
+    ValidationServiceBean validationServiceBean;
+
+    @Inject
     @TicketEvent
     private Event<NotificationMessage> ticketEvent;
 
@@ -478,6 +481,7 @@ public class RulesServiceBean {
 
         if (ticketEntity == null) {
             createAssetNotSendingTicket(ruleName, previousReport);
+            validationServiceBean.createPollInternal(previousReport.getAssetGuid(), ruleName);
         } else if (ticketEntity.getTicketCount() != null) {
             ticketEntity.setTicketCount(ticketEntity.getTicketCount() + 1);
             updateTicketCount(ticketEntity);
