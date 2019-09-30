@@ -22,9 +22,6 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollMobileTerminal;
-import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollRequestType;
-import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
@@ -139,7 +136,7 @@ public class ValidationServiceBean  {
                     auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
                     break;
                 case MANUAL_POLL:
-                    createManualPoll(movementDetails, ruleName);
+                    createPollInternal(movementDetails, ruleName);
                     auditTimestamp = auditLog("Time to send poll:", auditTimestamp);
                     break;
 
@@ -388,24 +385,27 @@ public class ValidationServiceBean  {
         return positionBuilder.toString();
     }
 
-    private String createManualPoll(MovementDetails fact, String ruleName){
-        try {
-            PollRequestType poll = new PollRequestType();
-            poll.setUserName("Triggerd by rule: " + ruleName);
-            poll.setComment("This poll was triggered by rule: " + ruleName + " on: " + Instant.now().toString() + " on Asset: " + fact.getAssetName());
-            poll.setPollType(PollType.MANUAL_POLL);
+    public String createPollInternal(String assetGuid, String ruleName){
+        MovementDetails fact = new MovementDetails();
+        fact.setAssetGuid(assetGuid);
+        fact.setAssetName(assetGuid);
 
-            PollMobileTerminal pmt = new PollMobileTerminal();
-            pmt.setComChannelId(fact.getChannelGuid());
-            pmt.setConnectId(fact.getAssetGuid());
-            pmt.setMobileTerminalId(fact.getMobileTerminalGuid());
-            poll.getMobileTerminals().add(pmt);
+        return createPollInternal(fact, ruleName);
+    }
+
+    private String createPollInternal(MovementDetails fact, String ruleName){
+        try {
+            String username = "Triggerd by rule: " + ruleName;
+            String comment = "This poll was triggered by rule: " + ruleName + " on: " + Instant.now().toString() + " on Asset: " + fact.getAssetName();
 
             Response createdPoll = getWebTarget()
-                    .path("internal/poll")
+                    .path("internal/createPollForAsset")
+                    .path(fact.getAssetGuid())
+                    .queryParam("username", username)
+                    .queryParam("comment", comment)
                     .request(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.AUTHORIZATION, tokenHandler.createAndFetchToken("user"))
-                    .post(Entity.json(poll), Response.class);
+                    .post(Entity.json(""), Response.class);
 
         if(createdPoll.getStatus() != 200){
             return "NOK";
