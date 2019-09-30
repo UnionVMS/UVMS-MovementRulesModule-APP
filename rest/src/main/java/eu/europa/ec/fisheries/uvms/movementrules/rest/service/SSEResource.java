@@ -17,6 +17,8 @@ import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
@@ -73,7 +75,8 @@ public class SSEResource {
         
         userSinks.stream().forEach(userSink -> {
             for (RuleSubscription subscription : customRule.getRuleSubscriptionList()) {
-                if (userSink.getUser().equals(subscription.getOwner())) {
+                if ((userSink.getUser().equals(subscription.getOwner()) && subscription.getType().equals(SubscriptionTypeType.TICKET.value())) 
+                        || customRule.getAvailability().equals(AvailabilityType.GLOBAL.value())) {
                     LOG.debug("Broadcasting to {}", subscription.getOwner());
                     userSink.getEventSink().send(sseEvent).whenComplete((object, error) -> {
                         if (error != null) {

@@ -11,6 +11,7 @@ import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
@@ -101,6 +102,31 @@ public class SSEResourceTest extends BuildRulesRestDeployment {
             
             TicketType ticket = client.getTicket(4000);
             assertThat(ticket, is(nullValue()));
+        }
+        rulesDao.removeCustomRuleAfterTests(customRule);
+    }
+    
+    @Test
+    @OperateOnDeployment("normal")
+    public void sseBroadcastNotSubscribingToGlobalRuleTest() throws Exception {
+        String flagstate = "SWE";
+        
+        CustomRule customRule = createCustomRule(null);
+        
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+        createdCustomRule.setAvailability(AvailabilityType.GLOBAL);
+        CustomRule updatedRule = rulesService.updateCustomRule(createdCustomRule);
+        
+        MovementDetails movementDetails = getMovementDetails();
+        movementDetails.setFlagState(flagstate);
+            
+        try (SSETestClient client = new SSETestClient()) {
+            validationService.customRuleTriggered(updatedRule.getName(), updatedRule.getGuid().toString(), movementDetails, ";");
+            
+            TicketType ticket = client.getTicket(10000);
+            assertThat(ticket.getRuleName(), is(updatedRule.getName()));
+            assertThat(ticket.getMovementGuid(), is(movementDetails.getMovementGuid()));
+            assertThat(ticket.getAssetGuid(), is(movementDetails.getAssetGuid()));
         }
         rulesDao.removeCustomRuleAfterTests(customRule);
     }
