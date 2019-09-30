@@ -78,6 +78,9 @@ public class RulesServiceBean {
     private AuditServiceBean auditService;
 
     @Inject
+    ValidationServiceBean validationServiceBean;
+
+    @Inject
     @TicketEvent
     private Event<NotificationMessage> ticketEvent;
 
@@ -469,9 +472,6 @@ public class RulesServiceBean {
     public List<PreviousReport> getPreviousMovementReports() {
         return rulesDao.getPreviousReportList();
     }
-
-    @Inject
-    ValidationServiceBean validationServiceBean;
 
     // Triggered by timer rule
     public void timerRuleTriggered(String ruleName, PreviousReport previousReport) {
