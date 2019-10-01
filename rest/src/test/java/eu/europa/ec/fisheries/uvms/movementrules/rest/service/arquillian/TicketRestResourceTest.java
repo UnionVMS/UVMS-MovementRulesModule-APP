@@ -154,7 +154,9 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     @Test
     @OperateOnDeployment("normal")
     public void updateTicketStatusTest() {
+        CustomRule customRule = createCustomRule("testUser");
         Ticket ticket = RulesTestHelper.getCompleteTicket();
+        ticket.setRuleGuid(customRule.getGuid().toString());
         ticket = rulesDao.createTicket(ticket);
         TicketType ticketType = TicketMapper.toTicketType(ticket);
 
