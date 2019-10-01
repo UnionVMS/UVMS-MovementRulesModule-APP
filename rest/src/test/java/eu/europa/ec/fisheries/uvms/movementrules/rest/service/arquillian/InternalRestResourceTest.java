@@ -114,6 +114,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         segment.setValue(flagState);
         segment.setLogicOperator("NONE");
         segment.setCustomRule(customRule);
+        segment.setOrder(0);
         segments.add(segment);
         customRule.setRuleSegmentList(segments);
         List<RuleAction> actions = new ArrayList<>();

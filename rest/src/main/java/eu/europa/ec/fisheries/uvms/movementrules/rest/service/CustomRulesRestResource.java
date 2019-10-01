@@ -85,7 +85,7 @@ public class CustomRulesRestResource {
             List<CustomRuleType> typeList = CustomRuleMapper.toCustomRuleTypeList(entityList);
             return Response.ok(typeList).build();
         } catch (Exception ex) {
-            LOG.error("[ Error when getting all custom rules. ] {} ", ex);
+            LOG.error("[ Error when getting all custom rules. ]", ex);
             return ErrorHandler.getFault(ex);
         }
     }

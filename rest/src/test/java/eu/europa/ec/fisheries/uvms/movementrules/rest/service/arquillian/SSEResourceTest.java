@@ -176,6 +176,7 @@ public class SSEResourceTest extends BuildRulesRestDeployment {
         segment.setValue("SWE");
         segment.setLogicOperator("NONE");
         segment.setCustomRule(customRule);
+        segment.setOrder(0);
         customRule.getRuleSegmentList().add(segment);
         return customRule;
     }

@@ -65,6 +65,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         segment.setValue(flagState);
         segment.setLogicOperator("NONE");
         segment.setCustomRule(customRule);
+        segment.setOrder(0);
         segments.add(segment);
         customRule.setRuleSegmentList(segments);
         rulesService.createCustomRule(customRule, "", "");
@@ -92,6 +93,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         segment.setValue("AreaA");
         segment.setLogicOperator("NONE");
         segment.setCustomRule(customRule);
+        segment.setOrder(0);
         segments.add(segment);
         customRule.setRuleSegmentList(segments);
         rulesService.createCustomRule(customRule, "", "");
@@ -119,6 +121,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         segment.setValue("AreaA");
         segment.setLogicOperator("NONE");
         segment.setCustomRule(customRule);
+        segment.setOrder(0);
         segments.add(segment);
         customRule.setRuleSegmentList(segments);
         rulesService.createCustomRule(customRule, "", "");
@@ -149,6 +152,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         segment.setValue("AreaB");
         segment.setLogicOperator("NONE");
         segment.setCustomRule(customRule);
+        segment.setOrder(0);
         segments.add(segment);
         customRule.setRuleSegmentList(segments);
         rulesService.createCustomRule(customRule, "", "");
@@ -179,6 +183,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         segment.setValue("AreaA");
         segment.setLogicOperator("NONE");
         segment.setCustomRule(customRule);
+        segment.setOrder(0);
         segments.add(segment);
         customRule.setRuleSegmentList(segments);
         rulesService.createCustomRule(customRule, "", "");
