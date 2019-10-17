@@ -1,14 +1,9 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
-import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -22,8 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
@@ -32,8 +26,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
-@Singleton
-@Startup
+@ApplicationScoped
 @Path("sse")
 @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
 public class SSEResource {
@@ -45,9 +38,6 @@ public class SSEResource {
     @Context
     private Sse sse;
     
-    @Inject
-    private RulesServiceBean rulesService;
-    
     @GET
     @Path("subscribe")
     @Produces(MediaType.SERVER_SENT_EVENTS)
@@ -58,23 +48,20 @@ public class SSEResource {
         sseEventSink.send(sse.newEvent("User " + user + " is now registered"));
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent Ticket ticket) {
+    public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent EventTicket ticket) {
         sendEvent(ticket, "TicketUpdate");
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void createdTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent Ticket ticket) {
+    public void createdTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent EventTicket ticket) {
         sendEvent(ticket, "Ticket");
     }
     
-    private void sendEvent(Ticket ticket, String eventName) {
-        CustomRule customRule = rulesService.getCustomRuleByGuid(UUID.fromString(ticket.getRuleGuid()));
-        if (customRule == null) {
-            LOG.error("Could not find rule with id: {}", ticket.getRuleGuid());
+    private void sendEvent(EventTicket eventTicket, String eventName) {
+        if (eventTicket.getCustomRule() == null) {
+            LOG.error("Rule in eventTicket {} is null", eventTicket.getTicket().getRuleName());
             return;
         }
-        OutboundSseEvent sseEvent = createSseEvent(ticket, eventName);
+        OutboundSseEvent sseEvent = createSseEvent(eventTicket.getTicket(), eventName);
         
         userSinks.stream().forEach(userSink -> {
             if (userSink.getEventSink().isClosed()) {
@@ -83,9 +70,9 @@ public class SSEResource {
         });
         
         userSinks.stream().forEach(userSink -> {
-            for (RuleSubscription subscription : customRule.getRuleSubscriptionList()) {
+            for (RuleSubscription subscription : eventTicket.getCustomRule().getRuleSubscriptionList()) {
                 if ((userSink.getUser().equals(subscription.getOwner()) && subscription.getType().equals(SubscriptionTypeType.TICKET.value())) 
-                        || customRule.getAvailability().equals(AvailabilityType.GLOBAL.value())) {
+                        || eventTicket.getCustomRule().getAvailability().equals(AvailabilityType.GLOBAL.value())) {
                     LOG.debug("Broadcasting to {}", subscription.getOwner());
                     userSink.getEventSink().send(sseEvent).whenComplete((object, error) -> {
                         if (error != null) {

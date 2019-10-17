@@ -9,24 +9,34 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.service.constants;
+package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
-public class ServiceConstants {
+public class EventTicket {
 
-    // Rule GUID for Asset not sending rule
-    public static final String ASSET_NOT_SENDING_RULE = "Asset not sending";
+    private Ticket ticket;
+    private CustomRule customRule;
     
-    public static final CustomRule ASSET_NOT_SENDING_CUSTOMRULE = new CustomRule();
-    
-    static {
-        ASSET_NOT_SENDING_CUSTOMRULE.setAvailability(AvailabilityType.GLOBAL);
-        RuleSubscription ruleSubscription = new RuleSubscription();
-        ruleSubscription.setOwner(ServiceConstants.ASSET_NOT_SENDING_RULE);
-        ASSET_NOT_SENDING_CUSTOMRULE.getRuleSubscriptionList().add(ruleSubscription);
+    public EventTicket(Ticket ticket, CustomRule customRule) {
+        this.ticket = ticket;
+        this.customRule = customRule;
+        if (customRule != null) {
+            customRule.getRuleSubscriptionList().size();
+        }
     }
-
+    
+    public Ticket getTicket() {
+        return ticket;
+    }
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
+    }
+    public CustomRule getCustomRule() {
+        return customRule;
+    }
+    public void setCustomRule(CustomRule customRule) {
+        this.customRule = customRule;
+    }
 }

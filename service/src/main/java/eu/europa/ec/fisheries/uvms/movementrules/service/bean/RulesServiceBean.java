@@ -28,6 +28,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperatio
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -81,12 +82,8 @@ public class RulesServiceBean {
     ValidationServiceBean validationServiceBean;
 
     @Inject
-    @TicketEvent
-    private Event<Ticket> ticketEvent;
-
-    @Inject
     @TicketUpdateEvent
-    private Event<Ticket> ticketUpdateEvent;
+    private Event<EventTicket> ticketUpdateEvent;
 
     @Inject
     @TicketCountEvent
@@ -186,6 +183,17 @@ public class RulesServiceBean {
         customRuleListByQuery.setCurrentPage(query.getPagination().getPage());
         customRuleListByQuery.setCustomRuleList(customRuleEntityList);
         return customRuleListByQuery;
+    }
+    
+    public CustomRule getCustomRuleOrAssetNotSendingRule(String guid) {
+        if (ServiceConstants.ASSET_NOT_SENDING_RULE.equals(guid)) {
+            return ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE;
+        }
+        try {
+            return rulesDao.getCustomRuleByGuid(UUID.fromString(guid));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, JMSException, AccessDeniedException {
@@ -421,9 +429,11 @@ public class RulesServiceBean {
         entity.setUpdatedBy(ticket.getUpdatedBy());
 
         rulesDao.updateTicket(entity);
+        
+        CustomRule customRule = getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
 
         // Notify long-polling clients of the update
-        ticketUpdateEvent.fire(entity);
+        ticketUpdateEvent.fire(new EventTicket(entity, customRule));
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
         auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid().toString(), "", ticket.getUpdatedBy());
@@ -455,9 +465,11 @@ public class RulesServiceBean {
             ticket.setUpdatedBy(loggedInUser);
 
             rulesDao.updateTicket(ticket);
+            
+            CustomRule customRule = getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
 
             // Notify long-polling clients of the update
-            ticketUpdateEvent.fire(ticket);
+            ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid().toString(), null, loggedInUser);
         }
 
@@ -518,8 +530,10 @@ public class RulesServiceBean {
         }
         ticket.setUpdated(Instant.now());
 
+        CustomRule customRule = getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
+        
         // Notify long-polling clients of the update
-        ticketUpdateEvent.fire(ticket);
+        ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
         auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
