@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+	logicalFilePath="changelog/v2.1.27/db-changelog-create-index-2.1.27.xml">
+    
+    <changeSet id="db-changelog-index-on-ticket" author="joemat">
+        <createIndex indexName="ticket_ruleguid_idx" tableName="ticket">
+            <column name="ticket_ruleguid"/>
+        </createIndex>
+
+        <createIndex indexName="ticket_createddate_idx" tableName="ticket">
+            <column name="ticket_createddate" descending="true"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="db-changelog-index-on-rule-subscription" author="joemat">
+        <createIndex indexName="rulesubscription_owner_idx" tableName="rulesubscription">
+            <column name="rulesub_owner"/>
+        </createIndex>
+
+        <createIndex indexName="rulesubscription_type_idx" tableName="rulesubscription">
+            <column name="rulesub_type" descending="true"/>
+        </createIndex>
+    </changeSet>
+    
+</databaseChangeLog>

@@ -99,6 +99,7 @@ public class ValidationServiceBean  {
         LOG.debug("Performing actions on triggered user rules, rule: {}", ruleName);
 
         CustomRule triggeredRule = getCustomRule(ruleGuid);
+        triggeredRule.setLastTriggered(Instant.now());
         
         Instant auditTimestamp = Instant.now();
         
@@ -432,7 +433,6 @@ public class ValidationServiceBean  {
             ticket.setStatus(TicketStatusType.OPEN.value());
             ticket.setUpdatedBy("UVMS");
             ticket.setMovementGuid(fact.getMovementGuid());
-            //ticket.setGuid(UUID.randomUUID().toString());
 
             for (int i = 0; i < fact.getAreaTypes().size(); i++) {
                 if ("EEZ".equals(fact.getAreaTypes().get(i))) {
@@ -443,7 +443,6 @@ public class ValidationServiceBean  {
 
             ticket.setTicketCount(1L);
             Ticket createdTicket = rulesDao.createTicket(ticket);
-
 
             ticketEvent.fire(new EventTicket(ticket, customRule));
 

@@ -96,7 +96,7 @@ public class CustomRule implements Serializable {
     @OneToMany(mappedBy = "customRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Interval> intervals;           //exists in Type as timeIntervals
 
-    @Transient
+    @Column(name = "rule_lasttriggered")
     private Instant lastTriggered;
 
 
