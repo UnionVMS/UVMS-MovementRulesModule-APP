@@ -33,6 +33,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBea
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditObjectTypeEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.AuditOperationEnum;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
@@ -84,7 +85,7 @@ public class ValidationServiceBean  {
 
     @Inject
     @TicketEvent
-    private Event<Ticket> ticketEvent;
+    private Event<EventTicket> ticketEvent;
 
     @Inject
     @TicketCountEvent
@@ -104,7 +105,7 @@ public class ValidationServiceBean  {
         if (triggeredRule != null && triggeredRule.isAggregateInvocations()) {
             createTicketOrIncreaseCount(movementDetails, triggeredRule);
         } else {
-            createTicket(ruleName, ruleGuid, movementDetails);
+            createTicket(triggeredRule, movementDetails);
         }
         auditTimestamp = auditLog("Time to create/update ticket:", auditTimestamp);
 
@@ -170,7 +171,7 @@ public class ValidationServiceBean  {
     private void createTicketOrIncreaseCount(MovementDetails movementDetails, CustomRule triggeredRule) {
         Ticket latestTicketForRule = rulesDao.getLatestTicketForRule(triggeredRule.getGuid());
         if (latestTicketForRule == null) {
-            createTicket(triggeredRule.getName(), triggeredRule.getGuid().toString(), movementDetails);
+            createTicket(triggeredRule, movementDetails);
         } else {
             latestTicketForRule.setTicketCount(latestTicketForRule.getTicketCount() + 1);
             latestTicketForRule.setUpdated(Instant.now());
@@ -417,7 +418,7 @@ public class ValidationServiceBean  {
         }
     }
 
-    private void createTicket(String ruleName, String ruleGuid, MovementDetails fact) {
+    private void createTicket(CustomRule customRule, MovementDetails fact) {
         try {
             Ticket ticket = new Ticket();
 
@@ -426,8 +427,8 @@ public class ValidationServiceBean  {
             ticket.setChannelGuid(fact.getChannelGuid());
             ticket.setCreatedDate(Instant.now());
             ticket.setUpdated(Instant.now());
-            ticket.setRuleName(ruleName);
-            ticket.setRuleGuid(ruleGuid);
+            ticket.setRuleName(customRule.getName());
+            ticket.setRuleGuid(customRule.getGuid().toString());
             ticket.setStatus(TicketStatusType.OPEN.value());
             ticket.setUpdatedBy("UVMS");
             ticket.setMovementGuid(fact.getMovementGuid());
@@ -444,7 +445,7 @@ public class ValidationServiceBean  {
             Ticket createdTicket = rulesDao.createTicket(ticket);
 
 
-            ticketEvent.fire(createdTicket);
+            ticketEvent.fire(new EventTicket(ticket, customRule));
 
             // Notify long-polling clients of the change (no value since FE will need to fetch it)
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));

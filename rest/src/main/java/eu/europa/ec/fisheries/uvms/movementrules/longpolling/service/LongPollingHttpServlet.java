@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movementrules.longpolling.constants.LongPollingConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
@@ -60,13 +61,13 @@ public class LongPollingHttpServlet extends HttpServlet {
         asyncContexts.add(ctx, req.getServletPath());
     }
     
-    public void observeTicketUpdate(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent Ticket ticket) throws IOException {
-        UUID guid = ticket.getGuid();
+    public void observeTicketUpdate(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent EventTicket eventTicket) throws IOException {
+        UUID guid = eventTicket.getTicket().getGuid();
         completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid.toString(), LongPollingConstants.ACTION_CREATED));
     }
 
-    public void observeTicketUpdateEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent Ticket ticket) throws IOException {
-        UUID guid = ticket.getGuid();
+    public void observeTicketUpdateEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent EventTicket eventTicket) throws IOException {
+        UUID guid = eventTicket.getTicket().getGuid();
         completePoll(LongPollingConstants.TICKET_UPDATE_PATH, createJsonMessage(guid.toString(), LongPollingConstants.ACTION_UPDATED));
     }
 
