@@ -129,9 +129,7 @@ public class RulesServiceBean {
 
     public CustomRule getCustomRuleByGuid(UUID guid) {
         try {
-            CustomRule retVal = rulesDao.getCustomRuleByGuid(guid);
-            retVal.setLastTriggered(getLastTriggeredForRule(guid));
-            return retVal;
+            return rulesDao.getCustomRuleByGuid(guid);
         } catch (NoResultException e) {
             return null;
         }
@@ -139,9 +137,6 @@ public class RulesServiceBean {
     
     public List<CustomRule> getCustomRulesByUser(String userName) {
         List<CustomRule> customRules = rulesDao.getCustomRulesByUser(userName);
-        for (CustomRule customRule: customRules) {         //this might not be the fastest solution but as long as the number of results are small it should be fine with an extra DB query per result
-            customRule.setLastTriggered(getLastTriggeredForRule(customRule.getGuid()));
-        }
         return customRules;
     }
     
@@ -168,11 +163,7 @@ public class RulesServiceBean {
         Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql);
         List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql);
 
-        for (CustomRule customRule: customRuleEntityList) {         //this might not be the fastest solution but as long as the number of results are small it should be fine with an extra DB query per result
-                customRule.setLastTriggered(getLastTriggeredForRule(customRule.getGuid()));
-        }
 
-        
         int numberOfPages = (int) (numberMatches / listSize);
         if (numberMatches % listSize != 0) {
             numberOfPages += 1;

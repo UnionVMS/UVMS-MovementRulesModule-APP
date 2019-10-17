@@ -108,13 +108,8 @@ public class RulesServiceBeanTest extends TransactionalTests {
 
     @Test
     @OperateOnDeployment ("normal")
-    public void getCustomRuleByDummyGuidTest() throws Exception{   //a get with proper input exists among the rest tests
-        try {
-            rulesService.getCustomRuleByGuid(UUID.randomUUID());
-            fail();
-        }catch (EJBTransactionRolledbackException e){
-            Assert.assertTrue(true);
-        }
+    public void getCustomRuleByDummyGuidTest() {   //a get with proper input exists among the rest tests
+            assertNull(rulesService.getCustomRuleByGuid(UUID.randomUUID()));
     }
     
     @Test

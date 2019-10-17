@@ -16,4 +16,8 @@
 	
 	<include file="v2.1.23\db-changelog-2.1.23.xml" relativeToChangelogFile="true"/>
 
+    <include file="v2.1.27\db-changelog-create-index-2.1.27.xml" relativeToChangelogFile="true"/>
+
+    <include file="v2.1.27\db-changelog-add-column-last-triggered-on-customrule-2.1.27.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
