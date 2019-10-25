@@ -33,7 +33,7 @@ public class TicketMapper {
         ticketType.setMobileTerminalGuid(ticketEntity.getMobileTerminalGuid());
         ticketType.setChannelGuid(ticketEntity.getChannelGuid());
         ticketType.setGuid(ticketEntity.getGuid().toString());
-        ticketType.setStatus(TicketStatusType.valueOf(ticketEntity.getStatus()));
+        ticketType.setStatus(ticketEntity.getStatus());
         ticketType.setOpenDate(MRDateUtils.dateToString(ticketEntity.getCreatedDate()));
         ticketType.setUpdated(MRDateUtils.dateToString(ticketEntity.getUpdated()));
         ticketType.setUpdatedBy(ticketEntity.getUpdatedBy());
@@ -53,7 +53,7 @@ public class TicketMapper {
         ticketEntity.setMobileTerminalGuid(ticketType.getMobileTerminalGuid());
         ticketEntity.setChannelGuid(ticketType.getChannelGuid());
         ticketEntity.setGuid(UUID.fromString(ticketType.getGuid()));
-        ticketEntity.setStatus(ticketType.getStatus().name());
+        ticketEntity.setStatus(ticketType.getStatus());
         ticketEntity.setCreatedDate(MRDateUtils.stringToDate(ticketType.getOpenDate()));
         ticketEntity.setRuleGuid(ticketType.getRuleGuid());
         ticketEntity.setUpdated(Instant.now());

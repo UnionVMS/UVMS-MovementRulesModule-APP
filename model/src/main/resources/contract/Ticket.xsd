@@ -26,9 +26,8 @@
     <xsd:simpleType name="TicketStatusType">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="OPEN"/>
-            <xsd:enumeration value="PENDING"/>
+            <xsd:enumeration value="POLL_PENDING"/>
             <xsd:enumeration value="CLOSED"/>
-            <xsd:enumeration value="NONE"/>
         </xsd:restriction>
     </xsd:simpleType>
 

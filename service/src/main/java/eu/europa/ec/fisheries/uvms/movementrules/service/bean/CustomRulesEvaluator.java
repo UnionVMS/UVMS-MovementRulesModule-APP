@@ -11,21 +11,24 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.SpatialRestClient;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import java.time.Instant;
 
 @Stateless
@@ -64,6 +67,7 @@ public class CustomRulesEvaluator {
         // We only persist our own last communications that were not from AIS.
         if (isLocalFlagState(assetFlagState) && !movementSource.equals(MovementSourceType.AIS.value())) {
             persistLastCommunication(assetGuid, positionTime);
+            checkForOpenAssetNotSendingTicketAndCloseIt(assetGuid);
         }
 
         return timeDiffInSeconds;
@@ -107,5 +111,13 @@ public class CustomRulesEvaluator {
             LOG.error("Could not get local flag state", e);
             return false;
         }
+    }
+
+    private void checkForOpenAssetNotSendingTicketAndCloseIt(String assetGuid){
+        Ticket t = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
+        if(t == null){
+            return;
+        }
+        t.setStatus(TicketStatusType.CLOSED);
     }
 }

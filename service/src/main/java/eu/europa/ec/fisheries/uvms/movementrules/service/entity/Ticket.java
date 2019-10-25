@@ -13,21 +13,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "ticket")
@@ -77,8 +69,9 @@ public class Ticket implements Serializable {
     @Column(name = "ticket_movementguid")
     private String movementGuid;    //exists in Type, same name
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ticket_status")
-    private String status;          //expects values from TicketStatusType, exists in Type, same name
+    private TicketStatusType status;          //expects values from TicketStatusType, exists in Type, same name
 
     @Column(name = "ticket_count")
     private Long ticketCount;       //exists in Type, same name
@@ -160,15 +153,13 @@ public class Ticket implements Serializable {
         this.movementGuid = movementGuid;
     }
 
-    public String getStatus() {
+    public TicketStatusType getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TicketStatusType status) {
         this.status = status;
     }
-
-    public void setStatus(TicketStatusType tss) {status = tss.value();}
 
     public Long getTicketCount() {
         return ticketCount;

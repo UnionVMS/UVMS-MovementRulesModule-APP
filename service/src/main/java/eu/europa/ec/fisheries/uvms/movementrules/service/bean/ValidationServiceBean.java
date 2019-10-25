@@ -430,7 +430,7 @@ public class ValidationServiceBean  {
             ticket.setUpdated(Instant.now());
             ticket.setRuleName(customRule.getName());
             ticket.setRuleGuid(customRule.getGuid().toString());
-            ticket.setStatus(TicketStatusType.OPEN.value());
+            ticket.setStatus(TicketStatusType.OPEN);
             ticket.setUpdatedBy("UVMS");
             ticket.setMovementGuid(fact.getMovementGuid());
 
