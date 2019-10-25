@@ -68,6 +68,6 @@ public class ConfigResourcesTest extends TransactionalTests {
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(new GenericType<List<TicketStatusType>>(){});
 
-        assertEquals(4, response.size());
+        assertEquals(3, response.size());
     }
 }
