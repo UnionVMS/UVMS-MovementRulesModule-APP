@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+	logicalFilePath="changelog/v2.1.28/db-changelog-create-assetGuid_index_on_ticket-2.1.28.xml">
+    
+    <changeSet id="db-changelog-assetguid_index-on-ticket" author="joemat">
+        <createIndex indexName="ticket_assetguid_idx" tableName="ticket">
+            <column name="ticket_assetguid"/>
+        </createIndex>
+
+    </changeSet>
+
+    
+</databaseChangeLog>
