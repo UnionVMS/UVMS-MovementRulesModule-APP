@@ -35,7 +35,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
@@ -451,7 +450,7 @@ public class RulesServiceBean {
         String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleStrings, true);
         List<Ticket> tickets = rulesDao.getTicketList(sql);
         for (Ticket ticket : tickets) {
-            ticket.setStatus(status.name());
+            ticket.setStatus(status);
             ticket.setUpdated(Instant.now());
             ticket.setUpdatedBy(loggedInUser);
 
@@ -498,7 +497,7 @@ public class RulesServiceBean {
         }
     }
 
-    private void createAssetNotSendingTicket(String ruleName, PreviousReport previousReport) {
+    public void createAssetNotSendingTicket(String ruleName, PreviousReport previousReport) {
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(previousReport.getAssetGuid());
         ticket.setCreatedDate(Instant.now());
@@ -506,7 +505,7 @@ public class RulesServiceBean {
         ticket.setRuleGuid(ruleName);
         ticket.setUpdatedBy("UVMS");
         ticket.setUpdated(Instant.now());
-        ticket.setStatus(TicketStatusType.OPEN.value());
+        ticket.setStatus(TicketStatusType.POLL_PENDING);
         ticket.setTicketCount(1L);
         rulesDao.createTicket(ticket);
 

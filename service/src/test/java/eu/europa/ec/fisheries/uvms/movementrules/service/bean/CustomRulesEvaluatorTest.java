@@ -1,27 +1,31 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import javax.inject.Inject;
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+
+import javax.inject.Inject;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
 public class CustomRulesEvaluatorTest extends TransactionalTests {
@@ -34,6 +38,9 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
     
     @Inject
     private RulesValidator rulesValidator;
+
+    @Inject
+    private RulesDao rulesDao;
     
     @Test
     @OperateOnDeployment("normal")
@@ -47,6 +54,27 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
 
         List<PreviousReport> previousReportsAfter = rulesService.getPreviousMovementReports();
         assertThat(previousReportsAfter.size(), is(previousReportsBefore.size() + 1));
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void evaluateMovementAndVerifyOpenAssetNotSendingTicketIsClosed() {
+        rulesValidator.updateCustomRules(); // reload/clear rules
+
+        MovementDetails movementDetails = getMovementDetails();
+        PreviousReport report = new PreviousReport();
+        report.setAssetGuid(movementDetails.getAssetGuid());
+        rulesService.createAssetNotSendingTicket(ServiceConstants.ASSET_NOT_SENDING_RULE, report);
+
+        Ticket ticket = rulesDao.getTicketByAssetAndRule(movementDetails.getAssetGuid(), ServiceConstants.ASSET_NOT_SENDING_RULE);
+        assertNotNull(ticket);
+        assertEquals(TicketStatusType.POLL_PENDING, ticket.getStatus());
+
+        customRulesEvaluator.evaluate(movementDetails);
+
+        Ticket closedTicket = rulesDao.getTicketByGuid(ticket.getGuid());
+        assertEquals(TicketStatusType.CLOSED, closedTicket.getStatus());
+
     }
     
     @Test

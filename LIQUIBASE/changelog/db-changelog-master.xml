@@ -20,4 +20,6 @@
 
     <include file="v2.1.27\db-changelog-add-column-last-triggered-on-customrule-2.1.27.xml" relativeToChangelogFile="true"/>
 
+    <include file="v2.1.28\db-changelog-create-assetGuid_index_on_ticket-2.1.28.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
