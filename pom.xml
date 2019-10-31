@@ -21,7 +21,7 @@
         <spatial.model.version>2.0.8-UVMS</spatial.model.version>
         <usm4uvms.version>4.0.23</usm4uvms.version>
         <uvms.config.version>4.0.5</uvms.config.version>
-        <uvms.common.version>4.0.4</uvms.common.version>
+        <uvms.common.version>4.0.9</uvms.common.version>
         <uvms.asset.version>6.0.72</uvms.asset.version>
 
         <project.scm.id>github</project.scm.id>
@@ -29,7 +29,7 @@
         
         <installAtEnd>false</installAtEnd>
       
-        <docker.dev.version>3.40.3.w18</docker.dev.version>
+        <docker.dev.version>3.40.4.w18</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>movementrules</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>movementrules</docker.liquibase.db.passwd>
