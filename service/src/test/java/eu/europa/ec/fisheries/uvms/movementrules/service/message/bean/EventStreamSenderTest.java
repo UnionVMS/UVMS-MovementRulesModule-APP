@@ -116,6 +116,7 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
         assertThat(ticket.getAssetGuid(), is(movementDetails.getAssetGuid()));
         rulesDao.removeTicketAfterTests(TicketMapper.toTicketEntity(ticket));
         rulesDao.removeCustomRuleAfterTests(customRule);
+        rulesDao.removeCustomRuleAfterTests(updatedRule);
     }
     
     @Test
