@@ -157,11 +157,9 @@ public class RulesServiceBean {
         List<CustomRuleSearchValue> searchKeyValues = CustomRuleSearchFieldMapper.mapSearchField(query.getCustomRuleSearchCriteria());
 
         String sql = CustomRuleSearchFieldMapper.createSelectSearchSql(searchKeyValues, query.isDynamic());
-        String countSql = CustomRuleSearchFieldMapper.createCountSearchSql(searchKeyValues, query.isDynamic());
 
-        Long numberMatches = rulesDao.getCustomRuleListSearchCount(countSql);
         List<CustomRule> customRuleEntityList = rulesDao.getCustomRuleListPaginated(page, listSize, sql);
-
+        Integer numberMatches = customRuleEntityList.size();
 
         int numberOfPages = (int) (numberMatches / listSize);
         if (numberMatches % listSize != 0) {
@@ -342,9 +340,8 @@ public class RulesServiceBean {
         }
 
         String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleStrings, true);
-        String countSql = TicketSearchFieldMapper.createCountSearchSql(searchKeyValues, validRuleStrings, true);
-        Long numberMatches = rulesDao.getTicketListSearchCount(countSql);
         List<Ticket> ticketEntityList = rulesDao.getTicketListPaginated(query.getPagination().getPage(), listSize, sql);
+        Integer numberMatches = ticketEntityList.size();
 
         int numberOfPages = (int) (numberMatches / listSize);
         if (numberMatches % listSize != 0) {

@@ -31,7 +31,6 @@ public class CustomRuleSearchFieldMapper {
      * @param searchFields
      * @param isDynamic
      * @return
-     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
     public static String createSelectSearchSql(List<CustomRuleSearchValue> searchFields, boolean isDynamic) {
         StringBuilder selectBuffer = new StringBuilder();
@@ -55,32 +54,6 @@ public class CustomRuleSearchFieldMapper {
         return selectBuffer.toString();
     }
 
-    /**
-     *
-     * Creates a JPQL count query based on the search fields. This is used for
-     * when paginating lists
-     *
-     * @param searchFields
-     * @param isDynamic
-     * @return
-     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
-     */
-    public static String createCountSearchSql(List<CustomRuleSearchValue> searchFields, boolean isDynamic) {
-        StringBuilder countBuffer = new StringBuilder();
-        countBuffer.append("SELECT COUNT(")
-                .append(CustomRuleSearchTables.CUSTOM_RULE.getTableAlias())
-                .append(") FROM ")
-                .append(CustomRuleSearchTables.CUSTOM_RULE.getTableName())
-                .append(" ")
-                .append(CustomRuleSearchTables.CUSTOM_RULE.getTableAlias())
-                .append(" ");
-        if (searchFields != null) {
-            countBuffer.append(createSearchSql(searchFields, isDynamic));
-        }
-
-        LOG.debug("[ COUNT SQL: {} ]", countBuffer);
-        return countBuffer.toString();
-    }
 
     /**
      *
@@ -90,7 +63,6 @@ public class CustomRuleSearchFieldMapper {
      * @param criteriaList
      * @param dynamic
      * @return
-     * @throws SearchMapperException
      */
     private static String createSearchSql(List<CustomRuleSearchValue> criteriaList, boolean dynamic) {
 
@@ -141,7 +113,6 @@ public class CustomRuleSearchFieldMapper {
      *
      * @param criteria
      * @param builder
-     * @throws SearchMapperException
      */
     private static void createCriteria(List<CustomRuleSearchValue> criteria, CustomRuleSearchField field, StringBuilder builder) {
         if (criteria.size() == 1) {
@@ -238,7 +209,6 @@ public class CustomRuleSearchFieldMapper {
      *
      * @param entry
      * @return
-     * @throws SearchMapperException
      */
     private static String addParameters(CustomRuleSearchValue entry) {
         StringBuilder builder = new StringBuilder();
@@ -311,7 +281,6 @@ public class CustomRuleSearchFieldMapper {
      *
      * @param criteriaList
      * @return
-     * @throws DaoMappingException
      */
     public static List<CustomRuleSearchValue> mapSearchField(List<CustomRuleListCriteria> criteriaList) {
 
@@ -339,7 +308,6 @@ public class CustomRuleSearchFieldMapper {
      *
      * @param key
      * @return
-     * @throws SearchMapperException
      */
     private static CustomRuleSearchField mapCriteria(CustomRuleSearchKey key) {
         switch (key) {
