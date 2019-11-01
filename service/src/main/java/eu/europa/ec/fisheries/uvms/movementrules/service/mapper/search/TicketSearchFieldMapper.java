@@ -35,7 +35,6 @@ public class TicketSearchFieldMapper {
      * @param searchFields
      * @param isDynamic
      * @return
-     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
      */
     public static String createSelectSearchSql(List<TicketSearchValue> searchFields, List<String> validRuleGuids, boolean isDynamic) {
         StringBuilder selectBuffer = new StringBuilder();
@@ -75,46 +74,6 @@ public class TicketSearchFieldMapper {
         return selectBuffer.toString();
     }
 
-    /**
-     *
-     * Creates a JPQL count query based on the search fields. This is used for
-     * when paginating lists
-     *
-     * @param searchFields
-     * @param isDynamic
-     * @return
-     * @throws eu.europa.ec.fisheries.uvms.movementrules.service.exception.SearchMapperException
-     */
-    public static String createCountSearchSql(List<TicketSearchValue> searchFields, List<String> validRuleGuids, boolean isDynamic) {
-        StringBuilder countBuffer = new StringBuilder();
-        countBuffer.append("SELECT COUNT(")
-                .append(TicketSearchTables.TICKET.getTableAlias())
-                .append(") FROM ")
-                .append(TicketSearchTables.TICKET.getTableName())
-                .append(" ")
-                .append(TicketSearchTables.TICKET.getTableAlias())
-                .append(" ");
-        if (searchFields != null && !searchFields.isEmpty()) {
-            countBuffer.append(createSearchSql(searchFields, isDynamic));
-            countBuffer.append(" AND ");
-        } else {
-            countBuffer.append(" WHERE ");
-        }
-        countBuffer.append(TicketSearchTables.TICKET.getTableAlias())
-                .append(".")
-                .append(TicketSearchField.RULE_GUID.getFieldName());
-
-        countBuffer.append(" IN ( ");
-        countBuffer.append("'").append(ServiceConstants.ASSET_NOT_SENDING_RULE).append("'");
-        for (String validRuleGuid : validRuleGuids) {
-            countBuffer.append(", ");
-            countBuffer.append("'").append(validRuleGuid).append("'");
-        }
-        countBuffer.append(" )");
-
-        LOG.debug("[ COUNT SQL: ]{}", countBuffer);
-        return countBuffer.toString();
-    }
 
     /**
      *
@@ -124,7 +83,7 @@ public class TicketSearchFieldMapper {
      * @param criteriaList
      * @param dynamic
      * @return
-     * @throws SearchMapperException
+     * @throws
      */
     private static String createSearchSql(List<TicketSearchValue> criteriaList, boolean dynamic) {
 
@@ -167,7 +126,7 @@ public class TicketSearchFieldMapper {
      *
      * @param criteria
      * @param builder
-     * @throws SearchMapperException
+     * @throws
      */
     private static void createCriteria(List<TicketSearchValue> criteria, TicketSearchField field, StringBuilder builder) {
         if (criteria.size() == 1) {
@@ -221,7 +180,7 @@ public class TicketSearchFieldMapper {
      *
      * @param entry
      * @return
-     * @throws SearchMapperException
+     * @throws
      */
     private static String addParameters(TicketSearchValue entry) {
         StringBuilder builder = new StringBuilder();
@@ -315,14 +274,7 @@ public class TicketSearchFieldMapper {
         for (TicketListCriteria criteria : criteriaList) {
             try {
                 TicketSearchField field = mapCriteria(criteria.getKey());
-                // Oracle cannot handle time zone in String
-                // we are not using Oracle
-                //if(field.equals(TicketSearchField.FROM_DATE) || field.equals(TicketSearchField.TO_DATE)){
-                    //searchFields.add(new TicketSearchValue(field, DateUtils.stringToUTC(criteria.getValue())));
-                //    searchFields.add(new TicketSearchValue(field, criteria.getValue()));
-                //}else {
                 searchFields.add(new TicketSearchValue(field, criteria.getValue()));
-                //}
             } catch (IllegalArgumentException ex) {
                 LOG.debug("[ Error with criteria {} when mapping to search field... continuing with other criteria ]", criteria);
             }

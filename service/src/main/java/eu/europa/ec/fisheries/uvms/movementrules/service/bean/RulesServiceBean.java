@@ -342,9 +342,8 @@ public class RulesServiceBean {
         }
 
         String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleStrings, true);
-        String countSql = TicketSearchFieldMapper.createCountSearchSql(searchKeyValues, validRuleStrings, true);
-        Long numberMatches = rulesDao.getTicketListSearchCount(countSql);
         List<Ticket> ticketEntityList = rulesDao.getTicketListPaginated(query.getPagination().getPage(), listSize, sql);
+        Integer numberMatches = ticketEntityList.size();
 
         int numberOfPages = (int) (numberMatches / listSize);
         if (numberMatches % listSize != 0) {
