@@ -64,7 +64,7 @@ public class EventStreamSender {
             String outgoingJson = om.writeValueAsString(TicketMapper.toTicketType(eventTicket.getTicket()));
             List<String> subscriberList = new ArrayList<>();
             String subscriberJson = null;
-            if(eventTicket.getCustomRule().getAvailability().equals(AvailabilityType.GLOBAL.value())) {
+            if(!eventTicket.getCustomRule().getAvailability().equals(AvailabilityType.GLOBAL.value())) {
                 eventTicket.getCustomRule().getRuleSubscriptionList().stream()
                         .filter(sub -> SubscriptionTypeType.TICKET.value().equals(sub.getType()))
                         .forEach(sub -> subscriberList.add(sub.getOwner()));
