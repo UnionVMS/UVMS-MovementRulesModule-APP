@@ -63,10 +63,13 @@ public class EventStreamSender {
         try {
             String outgoingJson = om.writeValueAsString(TicketMapper.toTicketType(eventTicket.getTicket()));
             List<String> subscriberList = new ArrayList<>();
-            eventTicket.getCustomRule().getRuleSubscriptionList().stream()
-                    .filter(sub -> sub.getType().equals(SubscriptionTypeType.TICKET.value()))
-                    .forEach(sub -> subscriberList.add(sub.getOwner()));
-            String subscriberJson = (eventTicket.getCustomRule().getAvailability().equals(AvailabilityType.GLOBAL.value()) ? null : om.writeValueAsString(subscriberList));
+            String subscriberJson = null;
+            if(!eventTicket.getCustomRule().getAvailability().equals(AvailabilityType.GLOBAL.value())) {
+                eventTicket.getCustomRule().getRuleSubscriptionList().stream()
+                        .filter(sub -> SubscriptionTypeType.TICKET.value().equals(sub.getType()))
+                        .forEach(sub -> subscriberList.add(sub.getOwner()));
+                subscriberJson = om.writeValueAsString(subscriberList);
+            }
 
 
             TextMessage message = this.context.createTextMessage(outgoingJson);
