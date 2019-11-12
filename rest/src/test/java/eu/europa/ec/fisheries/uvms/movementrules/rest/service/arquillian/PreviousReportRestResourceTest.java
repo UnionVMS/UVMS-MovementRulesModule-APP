@@ -3,12 +3,17 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
+import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -19,17 +24,28 @@ import static org.junit.Assert.*;
 public class PreviousReportRestResourceTest extends BuildRulesRestDeployment {
 
     @Inject
-    CustomRulesEvaluator customRulesEvaluator;
+    RulesValidator rulesValidator;
+
+    @Before
+    public void initClass(){
+        rulesValidator.updateCustomRules();
+    }
 
     @Test
     @OperateOnDeployment("normal")
     public void testGetAllPreviousReports(){
         MovementDetails movement = RulesTestHelper.createBasicMovementDetails();
-        customRulesEvaluator.evaluate(movement);
 
-        Response response = getAllPreviousReportByRest();
-        assertEquals(200, response.getStatus());
-        String previousReports = response.readEntity(String.class);
+        Response evaluate = getWebTarget()
+                .path("internal")
+                .path("evaluate")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(movement));
+        assertThat(evaluate.getStatus(), CoreMatchers.is(Response.Status.OK.getStatusCode()));
+
+        evaluate = getAllPreviousReportByRest();
+        assertEquals(200, evaluate.getStatus());
+        String previousReports = evaluate.readEntity(String.class);
         assertTrue(previousReports.contains(movement.getAssetGuid()));
 
     }
@@ -38,7 +54,12 @@ public class PreviousReportRestResourceTest extends BuildRulesRestDeployment {
     @OperateOnDeployment("normal")
     public void testDeleteAPreviousReport(){
         MovementDetails movement = RulesTestHelper.createBasicMovementDetails();
-        customRulesEvaluator.evaluate(movement);
+        Response evaluate = getWebTarget()
+                .path("internal")
+                .path("evaluate")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(movement));
+        assertThat(evaluate.getStatus(), CoreMatchers.is(Response.Status.OK.getStatusCode()));
 
         Response response = getAllPreviousReportByRest();
         assertEquals(200, response.getStatus());

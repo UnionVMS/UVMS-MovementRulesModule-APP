@@ -16,6 +16,8 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
+import javax.json.bind.config.PropertyNamingStrategy;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -51,7 +53,6 @@ import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRS;
 @Stateless
 public class SpatialModuleMock {
 
-    private Jsonb jsonb = JsonbBuilder.create();
 
     @GET
     @Path("getEnrichmentAndTransitions")
@@ -85,7 +86,7 @@ public class SpatialModuleMock {
         
         response.setEnteredAreas(enteredAreas);
         
-        return Response.ok(jsonb.toJson(response)).build();
+        return Response.ok(response).build();
     }
 
     private void populateClosestAreas(SpatialEnrichmentRS spatialEnrichmentRS) {
