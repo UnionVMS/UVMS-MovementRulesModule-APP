@@ -180,7 +180,7 @@ public class TicketRestResource {
     }
 
     @GET
-    @Path("/AssetsNotSending")
+    @Path("/assetsNotSending")
     @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
     public Response getAssetNotSEndingTicketsBetween(@QueryParam("fromDate") String fromString, @QueryParam("toDate") String toString) {
         try {

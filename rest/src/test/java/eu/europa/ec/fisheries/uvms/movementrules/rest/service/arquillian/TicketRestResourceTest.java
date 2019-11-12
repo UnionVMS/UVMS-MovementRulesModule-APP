@@ -346,7 +346,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         rulesDao.createTicket(ticket);
 
         List<TicketType> response = getWebTarget()
-                .path("/tickets/AssetsNotSending")
+                .path("/tickets/assetsNotSending")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(new GenericType<List<TicketType>>(){});
@@ -369,7 +369,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         rulesDao.flush();
 
         List<TicketType> response = getWebTarget()
-                .path("/tickets/AssetsNotSending")
+                .path("/tickets/assetsNotSending")
                 .queryParam("fromDate", fromDate)
                 .queryParam("toDate", DateUtils.dateToString(Instant.now().plusSeconds(1)))
                 .request(MediaType.APPLICATION_JSON)
@@ -394,7 +394,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         rulesDao.flush();
 
         List<TicketType> response = getWebTarget()
-                .path("/tickets/AssetsNotSending")
+                .path("/tickets/assetsNotSending")
                 .queryParam("fromDate", fromDate)
                 .queryParam("toDate", DateUtils.dateToString(Instant.now().minusSeconds(8)))
                 .request(MediaType.APPLICATION_JSON)
