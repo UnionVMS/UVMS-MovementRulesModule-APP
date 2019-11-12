@@ -11,16 +11,23 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementActivityTypeType;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.UUID;
 
 public class RulesTestHelper {
 
@@ -111,5 +118,27 @@ public class RulesTestHelper {
         ticket.setRecipient("tmp recipient");
 
         return ticket;
+    }
+
+    public static MovementDetails createBasicMovementDetails() {
+        MovementDetails movementDetails = new MovementDetails();
+        movementDetails.setLatitude(56d);
+        movementDetails.setLongitude(11d);
+        movementDetails.setPositionTime(Instant.now());
+        movementDetails.setMovementGuid(UUID.randomUUID().toString());
+        movementDetails.setAssetGuid(UUID.randomUUID().toString());
+        movementDetails.setAssetType(AssetType.VESSEL.value());
+        movementDetails.setFlagState("SWE");
+        movementDetails.setClosestCountryCode("SWE");
+        movementDetails.setClosestPortCode("GBG");
+        movementDetails.setAreaCodes(Arrays.asList("DNK"));
+        movementDetails.setActivityMessageType(MovementActivityTypeType.COE.value());
+        movementDetails.setActivityMessageId("messageId");
+        movementDetails.setSource(MovementSourceType.NAF.value());
+        movementDetails.setAreaCodes(new ArrayList<>());
+        movementDetails.setAreaTypes(new ArrayList<>());
+        movementDetails.setEntAreaCodes(new ArrayList<>());
+        movementDetails.setExtAreaCodes(new ArrayList<>());
+        return movementDetails;
     }
 }

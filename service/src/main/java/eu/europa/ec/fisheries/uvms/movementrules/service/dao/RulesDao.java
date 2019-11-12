@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.dao;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import javax.ejb.Stateless;
@@ -18,6 +19,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
@@ -216,9 +219,20 @@ public class RulesDao {
         return em.merge(report);
     }
 
-    public long getNumberOfTicketsWithAssetNotSending(String ruleGuid){
-        TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_ASSETS_NOT_SENDING, Long.class);
+    public void deletePreviousReport(PreviousReport report) {
+        em.remove(report);
+    }
+
+    public long getNumberOfTicketsForRule(String ruleGuid){
+        TypedQuery<Long> query = em.createNamedQuery(Ticket.COUNT_TICKETS_FOR_RULE, Long.class);
         query.setParameter("ruleGuid", ruleGuid);
         return query.getSingleResult();
+    }
+
+    public List<Ticket> getAssetNotSendingTicketsBetween(Instant from, Instant to) {
+        TypedQuery<Ticket> query = em.createNamedQuery(Ticket.FIND_ALL_ASSET_NOT_SENDING_TICKETS_BETWEEN, Ticket.class);
+        query.setParameter("from", from);
+        query.setParameter("to", to);
+        return query.getResultList();
     }
 }

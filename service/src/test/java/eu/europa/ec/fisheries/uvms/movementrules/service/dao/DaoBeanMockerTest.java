@@ -32,7 +32,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DaoBeanTest {
+public class DaoBeanMockerTest {
 
     @Mock
     EntityManager em;

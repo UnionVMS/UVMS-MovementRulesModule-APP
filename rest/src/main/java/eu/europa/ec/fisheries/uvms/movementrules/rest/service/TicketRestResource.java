@@ -16,9 +16,12 @@ import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetTicketListByQuer
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
@@ -29,9 +32,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +48,9 @@ import java.util.UUID;
 public class TicketRestResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(TicketRestResource.class);
+
+    @Inject
+    RulesDao rulesDao;
 
     @EJB
     private RulesServiceBean rulesService;
@@ -166,6 +175,22 @@ public class TicketRestResource {
             return Response.ok(count).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting number of assets not sending. ] {} ", e);
+            return ErrorHandler.getFault(e);
+        }
+    }
+
+    @GET
+    @Path("/assetsNotSending")
+    @RequiresFeature(UnionVMSFeature.viewAlarmsOpenTickets)
+    public Response getAssetNotSEndingTicketsBetween(@QueryParam("fromDate") String fromString, @QueryParam("toDate") String toString) {
+        try {
+            Instant from = (fromString == null || fromString.isEmpty() ? Instant.now().minus(1, ChronoUnit.DAYS) : DateUtils.stringToDate(fromString));
+            Instant to = (toString == null || toString.isEmpty() ? Instant.now() : DateUtils.stringToDate(toString));
+            List<Ticket> assetsNotSendingList = rulesDao.getAssetNotSendingTicketsBetween(from, to);
+            List<TicketType> returnList = TicketMapper.listToTicketType(assetsNotSendingList);
+            return Response.ok(returnList).build();
+        } catch (Exception e) {
+            LOG.error("[ Error when getting assets not sending between {} and {} ] {} ", fromString, toString, e.getMessage(), e);
             return ErrorHandler.getFault(e);
         }
     }

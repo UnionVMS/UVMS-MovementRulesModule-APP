@@ -9,6 +9,7 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
@@ -30,6 +31,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -332,6 +334,74 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .get(Long.class);
 
         assertEquals(numberOfTicketsBefore +1 , response.intValue());
+
+        rulesDao.removeTicketAfterTests(ticket);
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void getAssetsNotSendingTicketsTest() {
+        Ticket ticket = RulesTestHelper.getCompleteTicket();
+        ticket.setRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
+        rulesDao.createTicket(ticket);
+
+        List<TicketType> response = getWebTarget()
+                .path("/tickets/assetsNotSending")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .get(new GenericType<List<TicketType>>(){});
+
+        assertFalse(response.isEmpty());
+        assertTrue(response.stream().allMatch(t -> t.getRuleGuid().equals(ServiceConstants.ASSET_NOT_SENDING_RULE)));
+        assertTrue(response.stream().anyMatch(t -> t.getAssetGuid().equals(ticket.getAssetGuid())));
+
+        rulesDao.removeTicketAfterTests(ticket);
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void getAssetsNotSendingTicketsWithTimeParamsTest() {
+        String fromDate = DateUtils.dateToString(Instant.now().minusSeconds(1));
+        Ticket ticket = RulesTestHelper.getCompleteTicket();
+        ticket.setRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
+        rulesDao.createTicket(ticket);
+
+        rulesDao.flush();
+
+        List<TicketType> response = getWebTarget()
+                .path("/tickets/assetsNotSending")
+                .queryParam("fromDate", fromDate)
+                .queryParam("toDate", DateUtils.dateToString(Instant.now().plusSeconds(1)))
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .get(new GenericType<List<TicketType>>(){});
+
+        assertFalse(response.isEmpty());
+        assertTrue(response.stream().allMatch(t -> t.getRuleGuid().equals(ServiceConstants.ASSET_NOT_SENDING_RULE)));
+        assertTrue(response.stream().anyMatch(t -> t.getAssetGuid().equals(ticket.getAssetGuid())));
+
+        rulesDao.removeTicketAfterTests(ticket);
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void getAssetsNotSendingTicketsWithTimeParamsOutsideTheTicketTest() {
+        String fromDate = DateUtils.dateToString(Instant.now().minusSeconds(10));
+        Ticket ticket = RulesTestHelper.getCompleteTicket();
+        ticket.setRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
+        rulesDao.createTicket(ticket);
+
+        rulesDao.flush();
+
+        List<TicketType> response = getWebTarget()
+                .path("/tickets/assetsNotSending")
+                .queryParam("fromDate", fromDate)
+                .queryParam("toDate", DateUtils.dateToString(Instant.now().minusSeconds(8)))
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .get(new GenericType<List<TicketType>>(){});
+
+        assertFalse(response.stream().anyMatch(t -> t.getAssetGuid().equals(ticket.getAssetGuid())));
 
         rulesDao.removeTicketAfterTests(ticket);
     }

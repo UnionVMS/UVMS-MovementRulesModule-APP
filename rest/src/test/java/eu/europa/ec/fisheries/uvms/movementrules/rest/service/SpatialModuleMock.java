@@ -14,6 +14,10 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
+import javax.json.bind.config.PropertyNamingStrategy;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -48,6 +52,7 @@ import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRS;
 @Path("spatialSwe/spatialnonsecure/json")
 @Stateless
 public class SpatialModuleMock {
+
 
     @GET
     @Path("getEnrichmentAndTransitions")
