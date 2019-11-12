@@ -81,6 +81,7 @@ public abstract class BuildRulesRestDeployment {
                     Arrays.asList(UnionVMSFeature.viewAlarmRules.getFeatureId(), 
                             UnionVMSFeature.manageAlarmRules.getFeatureId(),
                             UnionVMSFeature.manageAlarmsOpenTickets.getFeatureId(),
+                            UnionVMSFeature.manageGlobalAlarmsRules.getFeatureId(),
                             UnionVMSFeature.viewAlarmsOpenTickets.getFeatureId()));
         }
         return token;

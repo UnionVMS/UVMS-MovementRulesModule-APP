@@ -14,6 +14,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -49,6 +51,8 @@ import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRS;
 @Stateless
 public class SpatialModuleMock {
 
+    private Jsonb jsonb = JsonbBuilder.create();
+
     @GET
     @Path("getEnrichmentAndTransitions")
     @Consumes(value = {MediaType.APPLICATION_JSON})
@@ -81,7 +85,7 @@ public class SpatialModuleMock {
         
         response.setEnteredAreas(enteredAreas);
         
-        return Response.ok(response).build();
+        return Response.ok(jsonb.toJson(response)).build();
     }
 
     private void populateClosestAreas(SpatialEnrichmentRS spatialEnrichmentRS) {

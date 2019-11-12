@@ -37,6 +37,7 @@ public class RestActivator extends Application {
         set.add(UnionVMSFeatureFilter.class);
         set.add(InternalRestResources.class);
         set.add(SSEResource.class);
+        set.add(PreviousReportRestResource.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 

@@ -11,6 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
@@ -51,9 +53,11 @@ public class PreviousReport implements Serializable {
     @Column(name = "prevrep_assetguid", unique = true)
     private String assetGuid;
 
+    @JsonSerialize(using = InstantSerializer.class)
     @Column(name = "prevrep_positiontime")
     private Instant positionTime;
 
+    @JsonSerialize(using = InstantSerializer.class)
     @Column(name = "prevrep_updattim")
     @NotNull
     private Instant updated;

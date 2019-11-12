@@ -13,6 +13,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -29,8 +30,9 @@ import java.util.UUID;
         @NamedQuery(name = Ticket.FIND_TICKETS_BY_MOVEMENTS, query = "SELECT t FROM Ticket t where t.movementGuid IN :movements"),
         @NamedQuery(name = Ticket.COUNT_OPEN_TICKETS, query = "SELECT count(t) FROM Ticket t where t.status = 'OPEN' AND t.ruleGuid IN :validRuleGuids"),
         @NamedQuery(name = Ticket.COUNT_TICKETS_BY_MOVEMENTS, query = "SELECT count(t) FROM Ticket t where t.movementGuid IN :movements"),
-        @NamedQuery(name = Ticket.COUNT_ASSETS_NOT_SENDING, query = "SELECT count(t) FROM Ticket t where t.ruleGuid = :ruleGuid"),
-        @NamedQuery(name = Ticket.FIND_LATEST_TICKET_FOR_RULE, query = "SELECT t FROM Ticket t WHERE t.ruleGuid = :ruleGuid ORDER BY t.createdDate DESC")
+        @NamedQuery(name = Ticket.COUNT_TICKETS_FOR_RULE, query = "SELECT count(t) FROM Ticket t where t.ruleGuid = :ruleGuid"),
+        @NamedQuery(name = Ticket.FIND_LATEST_TICKET_FOR_RULE, query = "SELECT t FROM Ticket t WHERE t.ruleGuid = :ruleGuid ORDER BY t.createdDate DESC"),
+        @NamedQuery(name = Ticket.FIND_ALL_ASSET_NOT_SENDING_TICKETS_BETWEEN, query = "SELECT t FROM Ticket t WHERE t.ruleGuid = '" + ServiceConstants.ASSET_NOT_SENDING_RULE + "' AND t.updated BETWEEN :from AND :to ORDER BY t.updated DESC")
 })
 public class Ticket implements Serializable {
 
@@ -40,8 +42,9 @@ public class Ticket implements Serializable {
     public static final String FIND_TICKETS_BY_MOVEMENTS = "Ticket.findByMovementGuids";
     public static final String COUNT_OPEN_TICKETS = "Ticket.countOpenTickets";
     public static final String COUNT_TICKETS_BY_MOVEMENTS = "Ticket.countByMovementGuids";
-    public static final String COUNT_ASSETS_NOT_SENDING = "Ticket.countAssetsNotSending";
+    public static final String COUNT_TICKETS_FOR_RULE = "Ticket.countAssetsNotSending";
     public static final String FIND_LATEST_TICKET_FOR_RULE = "Ticket.findLastTicketForRule";
+    public static final String FIND_ALL_ASSET_NOT_SENDING_TICKETS_BETWEEN = "Ticket.findAllAssetNotSendingTicketsBetween";
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -467,7 +467,7 @@ public class RulesServiceBean {
     }
 
     public long getNumberOfAssetsNotSending() {
-        return rulesDao.getNumberOfTicketsWithAssetNotSending(ServiceConstants.ASSET_NOT_SENDING_RULE);
+        return rulesDao.getNumberOfTicketsForRule(ServiceConstants.ASSET_NOT_SENDING_RULE);
     }
 
 
