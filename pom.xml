@@ -15,21 +15,21 @@
     <properties>
         <drools.version>7.25.0.Final</drools.version>
 		
-        <exchange.model.version>5.0.15-UVMS</exchange.model.version>
-        <user.model.version>2.0.24</user.model.version>
+        <exchange.model.version>5.0.19-UVMS</exchange.model.version>
+        <user.model.version>2.0.25</user.model.version>
         <audit.model.version>4.1.4</audit.model.version>
-        <spatial.model.version>2.0.8-UVMS</spatial.model.version>
+        <spatial.model.version>2.0.19-UVMS</spatial.model.version>
         <usm4uvms.version>4.0.23</usm4uvms.version>
         <uvms.config.version>4.0.5</uvms.config.version>
         <uvms.common.version>4.0.9</uvms.common.version>
-        <uvms.asset.version>6.0.72</uvms.asset.version>
+        <uvms.asset.version>6.3.2</uvms.asset.version>
 
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
         <installAtEnd>false</installAtEnd>
       
-        <docker.dev.version>3.40.4.w18</docker.dev.version>
+        <docker.dev.version>3.40.11.w18</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>movementrules</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>movementrules</docker.liquibase.db.passwd>
