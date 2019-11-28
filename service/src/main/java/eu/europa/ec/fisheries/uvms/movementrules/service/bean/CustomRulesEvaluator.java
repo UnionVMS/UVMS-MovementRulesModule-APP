@@ -64,7 +64,7 @@ public class CustomRulesEvaluator {
   
     private Long timeDiffAndPersistPreviousReport(String movementSource, String assetGuid, String movementId,
                                                   String mobTermId, String assetFlagState, Instant positionTime) {
-        
+
         // This needs to be done before persisting last report
         Long timeDiffInSeconds = null;
         Long timeDiff = timeDiffFromLastCommunication(assetGuid, positionTime);

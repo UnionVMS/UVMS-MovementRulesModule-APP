@@ -225,6 +225,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
     private MovementDetails getMovementDetails() {
         MovementDetails movementDetails = new MovementDetails();
         movementDetails.setMovementGuid(UUID.randomUUID().toString());
+        movementDetails.setMobileTerminalGuid(UUID.randomUUID().toString());
         movementDetails.setLatitude(11d);
         movementDetails.setLongitude(56d);
         movementDetails.setPositionTime(Instant.now());
