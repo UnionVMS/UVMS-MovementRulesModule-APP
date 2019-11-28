@@ -30,6 +30,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.time.Instant;
+import java.util.UUID;
 
 @Stateless
 public class CustomRulesEvaluator {
@@ -50,7 +51,10 @@ public class CustomRulesEvaluator {
     
     public void evaluate(MovementDetails movementDetails) {
         
-        Long timeDiffPositionReport = timeDiffAndPersistPreviousReport(movementDetails.getSource(), movementDetails.getAssetGuid(), movementDetails.getFlagState(), movementDetails.getPositionTime());
+        Long timeDiffPositionReport = timeDiffAndPersistPreviousReport(movementDetails.getSource(),
+                movementDetails.getAssetGuid(), movementDetails.getMovementGuid(), movementDetails.getMobileTerminalGuid(),
+                movementDetails.getFlagState(), movementDetails.getPositionTime());
+
         movementDetails.setTimeDiffPositionReport(timeDiffPositionReport);
         
         spatialClient.populateAreasAndAreaTransitions(movementDetails);
@@ -58,7 +62,9 @@ public class CustomRulesEvaluator {
         rulesValidator.evaluate(movementDetails);
     }
   
-    private Long timeDiffAndPersistPreviousReport(String movementSource, String assetGuid, String assetFlagState, Instant positionTime) {
+    private Long timeDiffAndPersistPreviousReport(String movementSource, String assetGuid, String movementId,
+                                                  String mobTermId, String assetFlagState, Instant positionTime) {
+
         // This needs to be done before persisting last report
         Long timeDiffInSeconds = null;
         Long timeDiff = timeDiffFromLastCommunication(assetGuid, positionTime);
@@ -66,7 +72,7 @@ public class CustomRulesEvaluator {
 
         // We only persist our own last communications that were not from AIS.
         if (isLocalFlagState(assetFlagState) && !movementSource.equals(MovementSourceType.AIS.value())) {
-            persistLastCommunication(assetGuid, positionTime);
+            persistLastCommunication(assetGuid, movementId, mobTermId, positionTime);
             checkForOpenAssetNotSendingTicketAndCloseIt(assetGuid);
         }
 
@@ -91,13 +97,15 @@ public class CustomRulesEvaluator {
         return timeDiff;
     }
     
-    private void persistLastCommunication(String assetGuid, Instant positionTime) {
+    private void persistLastCommunication(String assetGuid, String movementId, String mobTermId, Instant positionTime) {
         PreviousReport entity = rulesDao.getPreviousReportByAssetGuid(assetGuid);
         if (entity == null) {
             entity = new PreviousReport();
         }
         entity.setPositionTime(positionTime);
         entity.setAssetGuid(assetGuid);
+        entity.setMovementGuid(UUID.fromString(movementId));
+        entity.setMobTermGuid(UUID.fromString(mobTermId));
         entity.setUpdated(Instant.now());
         entity.setUpdatedBy("UVMS");
         rulesDao.updatePreviousReport(entity);

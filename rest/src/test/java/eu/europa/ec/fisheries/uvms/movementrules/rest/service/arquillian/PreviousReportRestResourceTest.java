@@ -47,6 +47,25 @@ public class PreviousReportRestResourceTest extends BuildRulesRestDeployment {
         assertEquals(200, evaluate.getStatus());
         String previousReports = evaluate.readEntity(String.class);
         assertTrue(previousReports.contains(movement.getAssetGuid()));
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void testGetAllPreviousReports_VerifyMobileTerminalIdIsPresent(){
+        MovementDetails movement = RulesTestHelper.createBasicMovementDetails();
+
+        Response evaluate = getWebTarget()
+                .path("internal")
+                .path("evaluate")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(movement));
+        assertThat(evaluate.getStatus(), CoreMatchers.is(Response.Status.OK.getStatusCode()));
+
+        evaluate = getAllPreviousReportByRest();
+        assertEquals(200, evaluate.getStatus());
+        String previousReports = evaluate.readEntity(String.class);
+        assertTrue(previousReports.contains(movement.getMovementGuid()));
+        assertTrue(previousReports.contains(movement.getMobileTerminalGuid()));
 
     }
 
