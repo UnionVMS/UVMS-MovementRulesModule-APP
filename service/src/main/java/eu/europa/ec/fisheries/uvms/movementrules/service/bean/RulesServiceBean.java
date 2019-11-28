@@ -497,6 +497,8 @@ public class RulesServiceBean {
     public void createAssetNotSendingTicket(String ruleName, PreviousReport previousReport) {
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(previousReport.getAssetGuid());
+        ticket.setMovementGuid(previousReport.getMovementGuid().toString());
+        ticket.setMobileTerminalGuid(previousReport.getMobTermGuid().toString());
         ticket.setCreatedDate(Instant.now());
         ticket.setRuleName(ruleName);
         ticket.setRuleGuid(ruleName);

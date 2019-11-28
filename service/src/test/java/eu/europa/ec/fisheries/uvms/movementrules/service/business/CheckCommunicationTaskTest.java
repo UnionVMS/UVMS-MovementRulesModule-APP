@@ -306,12 +306,12 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         assertThat(ticket.getTicketCount(), is(3L));
     }
 
-    
-    
     private PreviousReport getBasicPreviousReport() {
         PreviousReport previousReport = new PreviousReport();
         previousReport.setPositionTime(Instant.now());
         previousReport.setAssetGuid(UUID.randomUUID().toString());
+        previousReport.setMovementGuid(UUID.randomUUID());
+        previousReport.setMobTermGuid(UUID.randomUUID());
         previousReport.setUpdated(Instant.now());
         previousReport.setUpdatedBy("UVMS");
         return previousReport;
