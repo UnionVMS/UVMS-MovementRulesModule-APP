@@ -53,11 +53,11 @@ public class PreviousReport implements Serializable {
     @Column(name = "prevrep_assetguid", unique = true)
     private String assetGuid;
 
-    @Column(name = "prevrep_mobtermguid", unique = true)
-    private String mobTermGuid;
+    @Column(name = "prevrep_mobtermguid")
+    private UUID mobTermGuid;
 
-    @Column(name = "prevrep_movementguid", unique = true)
-    private String movementGuid;
+    @Column(name = "prevrep_movementguid")
+    private UUID movementGuid;
 
     @JsonSerialize(using = InstantSerializer.class)
     @Column(name = "prevrep_positiontime")
@@ -88,19 +88,19 @@ public class PreviousReport implements Serializable {
         this.assetGuid = assetGuid;
     }
 
-    public String getMobTermGuid() {
+    public UUID getMobTermGuid() {
         return mobTermGuid;
     }
 
-    public void setMobTermGuid(String mobTermGuid) {
+    public void setMobTermGuid(UUID mobTermGuid) {
         this.mobTermGuid = mobTermGuid;
     }
 
-    public String getMovementGuid() {
+    public UUID getMovementGuid() {
         return movementGuid;
     }
 
-    public void setMovementGuid(String movementGuid) {
+    public void setMovementGuid(UUID movementGuid) {
         this.movementGuid = movementGuid;
     }
 
