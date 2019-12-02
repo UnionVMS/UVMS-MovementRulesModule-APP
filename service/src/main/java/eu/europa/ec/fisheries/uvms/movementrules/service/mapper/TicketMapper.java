@@ -19,6 +19,7 @@ import java.util.UUID;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 public class TicketMapper {
@@ -73,6 +74,16 @@ public class TicketMapper {
     public static TicketType toTicketType(Ticket ticketEntity) {
         TicketType ticketType = new TicketType();
         return toTicketType(ticketType, ticketEntity);
+    }
+
+    public static TicketDto toTicketDto(Ticket entity) {
+        TicketDto dto = new TicketDto();
+        dto.setTicketId(entity.getGuid().toString());
+        dto.setAssetId(entity.getAssetGuid());
+        dto.setMobTermId(entity.getMobileTerminalGuid());
+        dto.setMovementId(entity.getMovementGuid());
+        dto.setStatus(entity.getStatus().name());
+        return dto;
     }
 
     public static List<TicketType> listToTicketType(List<Ticket> ticketList) {
