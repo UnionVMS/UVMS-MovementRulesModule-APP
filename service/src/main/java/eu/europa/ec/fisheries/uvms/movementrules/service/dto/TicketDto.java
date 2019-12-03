@@ -1,6 +1,8 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
-public class TicketDto {
+import java.io.Serializable;
+
+public class TicketDto implements Serializable {
 
     private String ticketId;
     private String assetId;
@@ -46,5 +48,16 @@ public class TicketDto {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "TicketDto{" +
+                "ticketId='" + ticketId + '\'' +
+                ", assetId='" + assetId + '\'' +
+                ", mobTermId='" + mobTermId + '\'' +
+                ", movementId='" + movementId + '\'' +
+                ", status='" + status + '\'' +
+                '}';
     }
 }

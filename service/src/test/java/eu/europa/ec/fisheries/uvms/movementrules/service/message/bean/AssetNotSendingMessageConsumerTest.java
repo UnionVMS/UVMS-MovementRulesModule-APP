@@ -1,14 +1,8 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
+import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
@@ -31,10 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(Arquillian.class)
-public class AssetNotSendingMessageConsumerTest extends TransactionalTests {
-
-    @Inject
-    private CustomRulesEvaluator customRulesEvaluator;
+public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeployment {
 
     @Inject
     private RulesServiceBean rulesService;
@@ -47,10 +38,12 @@ public class AssetNotSendingMessageConsumerTest extends TransactionalTests {
 
     private JMSHelper jmsHelper = new JMSHelper();
 
-//    @Before
-//    public void clearExchangeQueue() throws Exception {
-//        jmsHelper.clearQueue(MessageConstants.QUEUE_INCIDENT);
-//    }
+    private static final String QUEUE_NAME = "IncidentEvent";
+
+    @Before
+    public void clearExchangeQueue() throws Exception {
+        jmsHelper.clearQueue(QUEUE_NAME);
+    }
 
     @Test
     @OperateOnDeployment("normal")
@@ -68,11 +61,7 @@ public class AssetNotSendingMessageConsumerTest extends TransactionalTests {
         assertNotNull(ticket);
         assertEquals(TicketStatusType.POLL_PENDING, ticket.getStatus());
 
-//        customRulesEvaluator.evaluate(movementDetails);
-//        Ticket closedTicket = rulesDao.getTicketByGuid(ticket.getGuid());
-//        assertEquals(TicketStatusType.CLOSED, closedTicket.getStatus());
-
-        Message message = jmsHelper.listenForResponseOnQueue(null, MessageConstants.QUEUE_INCIDENT);
+        Message message = jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
         assertNotNull(message);
     }
 

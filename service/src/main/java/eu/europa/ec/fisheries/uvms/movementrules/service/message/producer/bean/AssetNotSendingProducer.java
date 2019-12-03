@@ -1,10 +1,10 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.AssetNotSendingEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.AssetNotSendingUpdateEvent;
@@ -13,26 +13,20 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.Stateless;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
-import javax.enterprise.event.TransactionPhase;
-import javax.inject.Inject;
-import javax.jms.Destination;
-import javax.jms.JMSConnectionFactory;
-import javax.jms.JMSContext;
-import javax.jms.TextMessage;
+import javax.jms.*;
 
-@Stateless
+@Dependent
 public class AssetNotSendingProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(AssetNotSendingProducer.class);
 
-    @Resource(mappedName = "java:/" + MessageConstants.QUEUE_INCIDENT)
-    private Destination destination;
+    @Resource(mappedName = "java:/ConnectionFactory")
+    private ConnectionFactory connectionFactory;
 
-    @Inject
-    @JMSConnectionFactory("java:/ConnectionFactory")
-    private JMSContext context;
+    @Resource(mappedName = "java:/" + MessageConstants.QUEUE_INCIDENT)
+    private Queue queue;
 
     private ObjectMapper om = new ObjectMapper();
 
@@ -40,30 +34,23 @@ public class AssetNotSendingProducer {
     public void init() {
         om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        LOG.warn("DESTINATION: " + destination);
     }
 
-    public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @AssetNotSendingUpdateEvent TicketDto ticket) {
-        sendEvent(ticket, "AssetNotSendingUpdate");
+    public void updatedTicket(@Observes @AssetNotSendingUpdateEvent TicketDto ticket) throws JsonProcessingException {
+        String json = om.writeValueAsString(ticket);
+        send(json);
     }
 
-    public void createdTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @AssetNotSendingEvent TicketDto ticket) {
-        LOG.warn("ASSET NOT SENDING EVENT FIRED");
-        LOG.warn("DESTINATION: " + destination);
-        sendEvent(ticket, "AssetNotSending");
+    public void createdTicket(@Observes @AssetNotSendingEvent TicketDto ticket) throws JsonProcessingException {
+        String json = om.writeValueAsString(ticket);
+        LOG.info("ASSET NOT SENDING EVENT FIRED: " + json);
+        send(json);
     }
 
-    private void sendEvent(TicketDto ticketDto, String eventName) {
-        try {
-            String outgoingJson = om.writeValueAsString(ticketDto);
-            TextMessage message = this.context.createTextMessage(outgoingJson);
-            message.setStringProperty(MessageConstants.EVENT_STREAM_EVENT, eventName);
-            MappedDiagnosticContext.addThreadMappedDiagnosticContextToMessageProperties(message);
-            context.createProducer().setDeliveryMode(1).setTimeToLive(5000L).send(destination, message);
-        } catch (Exception e) {
-            LOG.error("Error while sending ticket event to event stream topic: ", e);
-            throw new RuntimeException(e);
+    public void send(String json) {
+        try (JMSContext context = connectionFactory.createContext()) {
+            JMSProducer producer = context.createProducer();
+            producer.send(queue, json);
         }
     }
-
 }
