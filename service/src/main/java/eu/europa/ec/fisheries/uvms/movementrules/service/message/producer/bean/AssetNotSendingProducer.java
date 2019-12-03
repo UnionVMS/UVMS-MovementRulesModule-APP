@@ -38,19 +38,22 @@ public class AssetNotSendingProducer {
 
     public void updatedTicket(@Observes @AssetNotSendingUpdateEvent TicketDto ticket) throws JsonProcessingException {
         String json = om.writeValueAsString(ticket);
-        send(json);
+        send(json, "AssetNotSendingUpdate");
     }
 
     public void createdTicket(@Observes @AssetNotSendingEvent TicketDto ticket) throws JsonProcessingException {
         String json = om.writeValueAsString(ticket);
-        LOG.info("ASSET NOT SENDING EVENT FIRED: " + json);
-        send(json);
+        send(json, "AssetNotSending");
     }
 
-    public void send(String json) {
+    public void send(String json, String eventType) {
         try (JMSContext context = connectionFactory.createContext()) {
+            TextMessage message = context.createTextMessage(json);
+            message.setStringProperty("eventType", eventType);
             JMSProducer producer = context.createProducer();
-            producer.send(queue, json);
+            producer.send(queue, message);
+        } catch (JMSException e) {
+            LOG.error("Error while sending AssetNotSending event. {}", e.toString());
         }
     }
 }

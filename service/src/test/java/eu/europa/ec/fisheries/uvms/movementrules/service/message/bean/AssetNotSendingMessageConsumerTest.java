@@ -3,6 +3,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
@@ -36,6 +37,9 @@ public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeploym
     @Inject
     private RulesDao rulesDao;
 
+    @Inject
+    private CustomRulesEvaluator customRulesEvaluator;
+
     private JMSHelper jmsHelper = new JMSHelper();
 
     private static final String QUEUE_NAME = "IncidentEvent";
@@ -61,8 +65,18 @@ public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeploym
         assertNotNull(ticket);
         assertEquals(TicketStatusType.POLL_PENDING, ticket.getStatus());
 
-        Message message = jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
-        assertNotNull(message);
+        // AssetNotSending Create Event
+        Message message1 = jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
+        assertNotNull(message1);
+
+        // Update ticket
+        customRulesEvaluator.evaluate(movementDetails);
+        Ticket closedTicket = rulesDao.getTicketByGuid(ticket.getGuid());
+        assertEquals(TicketStatusType.CLOSED, closedTicket.getStatus());
+
+        // AssetNotSending Update Event
+        Message message2 = jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
+        assertNotNull(message2);
     }
 
     private MovementDetails getMovementDetails() {

@@ -21,13 +21,17 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator
 import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.AssetNotSendingUpdateEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.Instant;
 import java.util.UUID;
@@ -48,6 +52,10 @@ public class CustomRulesEvaluator {
     
     @Inject
     private RulesDao rulesDao;
+
+    @Inject
+    @AssetNotSendingUpdateEvent
+    private Event<TicketDto> assetNotSendingUpdateEvent;
     
     public void evaluate(MovementDetails movementDetails) {
         
@@ -127,5 +135,6 @@ public class CustomRulesEvaluator {
             return;
         }
         t.setStatus(TicketStatusType.CLOSED);
+        assetNotSendingUpdateEvent.fire(TicketMapper.toTicketDto(t));
     }
 }
