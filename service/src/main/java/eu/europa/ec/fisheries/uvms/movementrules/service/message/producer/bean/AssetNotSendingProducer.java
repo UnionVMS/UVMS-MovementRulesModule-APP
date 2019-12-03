@@ -51,7 +51,7 @@ public class AssetNotSendingProducer {
             TextMessage message = context.createTextMessage(json);
             message.setStringProperty("eventType", eventType);
             JMSProducer producer = context.createProducer();
-            producer.send(queue, message);
+            producer.setDeliveryMode(DeliveryMode.PERSISTENT).setTimeToLive(5000L).send(queue, message);
         } catch (JMSException e) {
             LOG.error("Error while sending AssetNotSending event. {}", e.toString());
         }
