@@ -82,7 +82,10 @@ public class TicketMapper {
         dto.setAssetId(entity.getAssetGuid());
         dto.setMobTermId(entity.getMobileTerminalGuid());
         dto.setMovementId(entity.getMovementGuid());
-        dto.setStatus(entity.getStatus().name());
+        if (entity.getStatus().equals(TicketStatusType.POLL_PENDING))
+            dto.setType(TicketDto.TicketType.ASSET_NOT_SENDING);
+        else if (entity.getStatus().equals(TicketStatusType.CLOSED))
+            dto.setType(TicketDto.TicketType.ASSET_SENDING_NORMAL);
         return dto;
     }
 
