@@ -11,16 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketDto;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 public class TicketMapper {
 
@@ -74,19 +72,6 @@ public class TicketMapper {
     public static TicketType toTicketType(Ticket ticketEntity) {
         TicketType ticketType = new TicketType();
         return toTicketType(ticketType, ticketEntity);
-    }
-
-    public static TicketDto toTicketDto(Ticket entity) {
-        TicketDto dto = new TicketDto();
-        dto.setTicketId(entity.getGuid().toString());
-        dto.setAssetId(entity.getAssetGuid());
-        dto.setMobTermId(entity.getMobileTerminalGuid());
-        dto.setMovementId(entity.getMovementGuid());
-        if (entity.getStatus().equals(TicketStatusType.POLL_PENDING))
-            dto.setType(TicketDto.TicketType.ASSET_NOT_SENDING);
-        else if (entity.getStatus().equals(TicketStatusType.CLOSED))
-            dto.setType(TicketDto.TicketType.ASSET_SENDING_NORMAL);
-        return dto;
     }
 
     public static List<TicketType> listToTicketType(List<Ticket> ticketList) {

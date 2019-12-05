@@ -5,9 +5,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketDto;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AssetNotSendingEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AssetNotSendingUpdateEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +16,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
 import javax.jms.*;
 
 @Dependent
-public class AssetNotSendingProducer {
+public class IncidentProducer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AssetNotSendingProducer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IncidentProducer.class);
 
     @Resource(mappedName = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;
@@ -36,20 +38,20 @@ public class AssetNotSendingProducer {
         om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
-    public void updatedTicket(@Observes @AssetNotSendingUpdateEvent TicketDto ticket) throws JsonProcessingException {
-        String json = om.writeValueAsString(ticket);
-        send(json, "AssetNotSendingUpdate");
+    public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent EventTicket ticket) throws JsonProcessingException {
+        String json = om.writeValueAsString(TicketMapper.toTicketType(ticket.getTicket()));
+        send(json, "IncidentUpdate");
     }
 
-    public void createdTicket(@Observes @AssetNotSendingEvent TicketDto ticket) throws JsonProcessingException {
-        String json = om.writeValueAsString(ticket);
-        send(json, "AssetNotSending");
+    public void createdTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent EventTicket ticket) throws JsonProcessingException {
+        String json = om.writeValueAsString(TicketMapper.toTicketType(ticket.getTicket()));
+        send(json, "Incident");
     }
 
-    public void send(String json, String eventType) {
+    public void send(String json, String eventName) {
         try (JMSContext context = connectionFactory.createContext()) {
             TextMessage message = context.createTextMessage(json);
-            message.setStringProperty("eventType", eventType);
+            message.setStringProperty("eventName", eventName);
             JMSProducer producer = context.createProducer();
             producer.setDeliveryMode(DeliveryMode.PERSISTENT).setTimeToLive(5000L).send(queue, message);
         } catch (JMSException e) {

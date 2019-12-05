@@ -29,15 +29,13 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConsta
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.TicketListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AssetNotSendingEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.AssetNotSendingUpdateEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
@@ -88,12 +86,8 @@ public class RulesServiceBean {
     private Event<EventTicket> ticketUpdateEvent;
 
     @Inject
-    @AssetNotSendingEvent
-    private Event<TicketDto> assetNotSendingEvent;
-
-    @Inject
-    @AssetNotSendingUpdateEvent
-    private Event<TicketDto> assetNotSendingUpdateEvent;
+    @TicketEvent
+    private Event<EventTicket> ticketEvent;
 
     @Inject
     @TicketCountEvent
@@ -180,6 +174,17 @@ public class RulesServiceBean {
         customRuleListByQuery.setCurrentPage(query.getPagination().getPage());
         customRuleListByQuery.setCustomRuleList(customRuleEntityList);
         return customRuleListByQuery;
+    }
+
+    public CustomRule getCustomRuleOrAssetNotSendingRule(String guid) {
+        if (ServiceConstants.ASSET_NOT_SENDING_RULE.equals(guid)) {
+            return ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE;
+        }
+        try {
+            return rulesDao.getCustomRuleByGuid(UUID.fromString(guid));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public CustomRule updateCustomRule(CustomRule oldCustomRule, String featureName, String applicationName) throws ModelMarshallException, JMSException, AccessDeniedException {
@@ -415,12 +420,7 @@ public class RulesServiceBean {
 
         rulesDao.updateTicket(entity);
 
-        CustomRule customRule = getAssetNotSendingRule(ticket.getRuleGuid());
-        if(customRule != null) {
-            assetNotSendingUpdateEvent.fire(TicketMapper.toTicketDto(ticket));
-        } else {
-            customRule = getCustomRuleByGuid(ticket.getRuleGuid());
-        }
+        CustomRule customRule = getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
 
         // Notify long-polling clients of the update
         ticketUpdateEvent.fire(new EventTicket(entity, customRule));
@@ -429,14 +429,6 @@ public class RulesServiceBean {
         auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.UPDATE, entity.getGuid().toString(), "", ticket.getUpdatedBy());
         return entity;
 
-    }
-
-    private CustomRule getCustomRuleByGuid(String guid) {
-        try {
-            return rulesDao.getCustomRuleByGuid(UUID.fromString(guid));
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     public List<Ticket> updateTicketStatusByQuery(String loggedInUser, TicketQuery query, TicketStatusType status) {
@@ -464,12 +456,7 @@ public class RulesServiceBean {
 
             rulesDao.updateTicket(ticket);
 
-            CustomRule customRule = getAssetNotSendingRule(ticket.getRuleGuid());
-            if(customRule != null) {
-                assetNotSendingUpdateEvent.fire(TicketMapper.toTicketDto(ticket));
-            } else {
-                customRule = getCustomRuleByGuid(UUID.fromString(ticket.getRuleGuid()));
-            }
+            CustomRule customRule = getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
 
             // Notify long-polling clients of the update
             ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
@@ -479,7 +466,6 @@ public class RulesServiceBean {
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
         return tickets;
-
     }
 
     public long getNumberOfAssetsNotSending() {
@@ -525,12 +511,10 @@ public class RulesServiceBean {
         ticket.setTicketCount(1L);
         rulesDao.createTicket(ticket);
 
+        ticketEvent.fire(new EventTicket(ticket, null));
 		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
 		// Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
-
-        TicketDto ticketDto = TicketMapper.toTicketDto(ticket);
-        assetNotSendingEvent.fire(ticketDto);
     }
 
     public Ticket updateTicketCount(Ticket ticket) {
@@ -539,13 +523,7 @@ public class RulesServiceBean {
         }
         ticket.setUpdated(Instant.now());
 
-        CustomRule customRule = getAssetNotSendingRule(ticket.getRuleGuid());
-        if(customRule != null) {
-            assetNotSendingUpdateEvent.fire(TicketMapper.toTicketDto(ticket));
-        } else {
-            customRule = getCustomRuleByGuid(UUID.fromString(ticket.getRuleGuid()));
-        }
-
+        CustomRule customRule = getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
 
         // Notify long-polling clients of the update
         ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
@@ -555,12 +533,6 @@ public class RulesServiceBean {
         return ticket;
     }
 
-    public CustomRule getAssetNotSendingRule(String guid) {
-        if (ServiceConstants.ASSET_NOT_SENDING_RULE.equals(guid)) {
-            return ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE;
-        }
-        return null;
-    }
 
     public Ticket getTicketByGuid(UUID guid){
         return rulesDao.getTicketByGuid(guid);
