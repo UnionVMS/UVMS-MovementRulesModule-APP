@@ -678,7 +678,6 @@ public class RulesServiceBeanTest extends TransactionalTests {
         Ticket createdTicket = rulesDao.createTicket(ticket);
         TicketStatusType newStatus = TicketStatusType.POLL_PENDING;
         createdTicket.setStatus(newStatus);
-        System.out.println("--------------" + createdTicket.getGuid());
         
         Ticket updatedTicket = rulesService.updateTicketStatus(createdTicket);
         assertThat(updatedTicket.getStatus(), is(newStatus));
