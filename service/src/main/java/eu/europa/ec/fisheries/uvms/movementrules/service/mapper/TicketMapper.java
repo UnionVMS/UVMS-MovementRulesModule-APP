@@ -11,15 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 public class TicketMapper {
 

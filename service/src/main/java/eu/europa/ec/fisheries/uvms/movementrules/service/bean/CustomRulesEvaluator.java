@@ -21,13 +21,17 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator
 import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.Instant;
 import java.util.UUID;
@@ -48,6 +52,13 @@ public class CustomRulesEvaluator {
     
     @Inject
     private RulesDao rulesDao;
+
+    @Inject
+    @TicketUpdateEvent
+    private Event<EventTicket> ticketUpdateEvent;
+
+    @Inject
+    RulesServiceBean rulesServiceBean;
     
     public void evaluate(MovementDetails movementDetails) {
         
@@ -122,10 +133,12 @@ public class CustomRulesEvaluator {
     }
 
     private void checkForOpenAssetNotSendingTicketAndCloseIt(String assetGuid){
-        Ticket t = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        if(t == null){
+        Ticket ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
+        if(ticket == null){
             return;
         }
-        t.setStatus(TicketStatusType.CLOSED);
+        ticket.setStatus(TicketStatusType.CLOSED);
+        CustomRule customRule = rulesServiceBean.getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
+        ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
     }
 }

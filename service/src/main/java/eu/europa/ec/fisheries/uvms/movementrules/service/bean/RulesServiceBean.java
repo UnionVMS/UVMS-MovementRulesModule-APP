@@ -35,6 +35,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
@@ -85,6 +86,10 @@ public class RulesServiceBean {
     private Event<EventTicket> ticketUpdateEvent;
 
     @Inject
+    @TicketEvent
+    private Event<EventTicket> ticketEvent;
+
+    @Inject
     @TicketCountEvent
     private Event<NotificationMessage> ticketCountEvent;
 
@@ -122,8 +127,6 @@ public class RulesServiceBean {
         rulesValidator.updateCustomRules();
         auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE, AuditOperationEnum.CREATE, customRule.getGuid().toString(), null, customRule.getUpdatedBy());
         return customRule;
-
-
     }
 
     public CustomRule getCustomRuleByGuid(UUID guid) {
@@ -172,7 +175,7 @@ public class RulesServiceBean {
         customRuleListByQuery.setCustomRuleList(customRuleEntityList);
         return customRuleListByQuery;
     }
-    
+
     public CustomRule getCustomRuleOrAssetNotSendingRule(String guid) {
         if (ServiceConstants.ASSET_NOT_SENDING_RULE.equals(guid)) {
             return ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE;
@@ -416,7 +419,7 @@ public class RulesServiceBean {
         entity.setUpdatedBy(ticket.getUpdatedBy());
 
         rulesDao.updateTicket(entity);
-        
+
         CustomRule customRule = getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
 
         // Notify long-polling clients of the update
@@ -452,7 +455,7 @@ public class RulesServiceBean {
             ticket.setUpdatedBy(loggedInUser);
 
             rulesDao.updateTicket(ticket);
-            
+
             CustomRule customRule = getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
 
             // Notify long-polling clients of the update
@@ -463,7 +466,6 @@ public class RulesServiceBean {
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
         return tickets;
-
     }
 
     public long getNumberOfAssetsNotSending() {
@@ -499,15 +501,17 @@ public class RulesServiceBean {
         ticket.setAssetGuid(previousReport.getAssetGuid());
         ticket.setMovementGuid(previousReport.getMovementGuid().toString());
         ticket.setMobileTerminalGuid(previousReport.getMobTermGuid().toString());
-        ticket.setCreatedDate(Instant.now());
+        Instant now = Instant.now();
+        ticket.setCreatedDate(now);
         ticket.setRuleName(ruleName);
         ticket.setRuleGuid(ruleName);
         ticket.setUpdatedBy("UVMS");
-        ticket.setUpdated(Instant.now());
+        ticket.setUpdated(now);
         ticket.setStatus(TicketStatusType.POLL_PENDING);
         ticket.setTicketCount(1L);
         rulesDao.createTicket(ticket);
 
+        ticketEvent.fire(new EventTicket(ticket, null));
 		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
 		// Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
@@ -520,7 +524,7 @@ public class RulesServiceBean {
         ticket.setUpdated(Instant.now());
 
         CustomRule customRule = getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
-        
+
         // Notify long-polling clients of the update
         ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
         // Notify long-polling clients of the change (no value since FE will need to fetch it)
