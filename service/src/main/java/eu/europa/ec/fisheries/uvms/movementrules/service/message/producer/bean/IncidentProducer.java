@@ -53,7 +53,7 @@ public class IncidentProducer {
             TextMessage message = context.createTextMessage(json);
             message.setStringProperty("eventName", eventName);
             JMSProducer producer = context.createProducer();
-            producer.setDeliveryMode(DeliveryMode.PERSISTENT).setTimeToLive(5000L).send(queue, message);
+            producer.setDeliveryMode(DeliveryMode.PERSISTENT).send(queue, message);
         } catch (JMSException e) {
             LOG.error("Error while sending AssetNotSending event. {}", e.toString());
         }
