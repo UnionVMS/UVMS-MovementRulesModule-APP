@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
@@ -17,6 +18,7 @@ import javax.annotation.Resource;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
+import javax.inject.Inject;
 import javax.jms.*;
 
 @Dependent
@@ -24,11 +26,12 @@ public class IncidentProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(IncidentProducer.class);
 
-    @Resource(mappedName = "java:/ConnectionFactory")
-    private ConnectionFactory connectionFactory;
+    @Inject
+    @JMSConnectionFactory("java:/ConnectionFactory")
+    private JMSContext context;
 
     @Resource(mappedName = "java:/" + MessageConstants.QUEUE_INCIDENT)
-    private Queue queue;
+    private Destination queue;
 
     private ObjectMapper om = new ObjectMapper();
 
@@ -38,23 +41,22 @@ public class IncidentProducer {
         om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
-    public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent EventTicket ticket) throws JsonProcessingException {
-        String json = om.writeValueAsString(TicketMapper.toTicketType(ticket.getTicket()));
-        send(json, "IncidentUpdate");
+    public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent EventTicket eventTicket) {
+        send(eventTicket.getTicket(), "IncidentUpdate");
     }
 
-    public void createdTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent EventTicket ticket) throws JsonProcessingException {
-        String json = om.writeValueAsString(TicketMapper.toTicketType(ticket.getTicket()));
-        send(json, "Incident");
+    public void createdTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent EventTicket eventTicket) {
+        send(eventTicket.getTicket(), "Incident");
     }
 
-    public void send(String json, String eventName) {
-        try (JMSContext context = connectionFactory.createContext()) {
+    public void send(Ticket ticket, String eventName) {
+        try {
+            String json = om.writeValueAsString(TicketMapper.toTicketType(ticket));
             TextMessage message = context.createTextMessage(json);
             message.setStringProperty("eventName", eventName);
             JMSProducer producer = context.createProducer();
             producer.setDeliveryMode(DeliveryMode.PERSISTENT).send(queue, message);
-        } catch (JMSException e) {
+        } catch (JMSException | JsonProcessingException e) {
             LOG.error("Error while sending AssetNotSending event. {}", e.toString());
         }
     }
