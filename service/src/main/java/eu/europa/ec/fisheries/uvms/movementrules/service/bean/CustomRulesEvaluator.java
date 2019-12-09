@@ -115,8 +115,10 @@ public class CustomRulesEvaluator {
         }
         entity.setPositionTime(positionTime);
         entity.setAssetGuid(assetGuid);
-        entity.setMovementGuid(UUID.fromString(movementId));
-        entity.setMobTermGuid(UUID.fromString(mobTermId));
+        if(movementId != null)
+            entity.setMovementGuid(UUID.fromString(movementId));
+        if (mobTermId != null)
+            entity.setMobTermGuid(UUID.fromString(mobTermId));
         entity.setUpdated(Instant.now());
         entity.setUpdatedBy("UVMS");
         rulesDao.updatePreviousReport(entity);
