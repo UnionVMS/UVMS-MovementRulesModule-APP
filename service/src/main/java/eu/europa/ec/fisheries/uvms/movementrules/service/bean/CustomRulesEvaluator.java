@@ -83,8 +83,12 @@ public class CustomRulesEvaluator {
 
         // We only persist our own last communications that were not from AIS.
         if (isLocalFlagState(assetFlagState) && !movementSource.equals(MovementSourceType.AIS.value())) {
-            persistLastCommunication(assetGuid, movementId, mobTermId, positionTime);
-            checkForOpenAssetNotSendingTicketAndCloseIt(assetGuid);
+            if(movementSource.equals(MovementSourceType.MANUAL.value())) {
+                checkForOpenAssetNotSendingTicketAndUpdate(assetGuid, movementId);
+            } else {
+                persistLastCommunication(assetGuid, movementId, mobTermId, positionTime);
+                checkForOpenAssetNotSendingTicketAndCloseIt(assetGuid);
+            }
         }
 
         return timeDiffInSeconds;
@@ -134,13 +138,23 @@ public class CustomRulesEvaluator {
         }
     }
 
-    private void checkForOpenAssetNotSendingTicketAndCloseIt(String assetGuid){
-        Ticket ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        if(ticket == null){
-            return;
-        }
+    private void checkForOpenAssetNotSendingTicketAndUpdate(String assetGuid, String movementId) {
+        Ticket ticket = getTicket(assetGuid);
+        if (ticket == null) return;
+        ticket.setMovementGuid(movementId);
+        CustomRule customRule = rulesServiceBean.getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
+        ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
+    }
+
+    private void checkForOpenAssetNotSendingTicketAndCloseIt(String assetGuid) {
+        Ticket ticket = getTicket(assetGuid);
+        if (ticket == null) return;
         ticket.setStatus(TicketStatusType.CLOSED);
         CustomRule customRule = rulesServiceBean.getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
         ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
+    }
+
+    private Ticket getTicket(String assetGuid) {
+        return rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
     }
 }

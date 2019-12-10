@@ -15,13 +15,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.enterprise.context.Dependent;
+import javax.ejb.Stateless;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.jms.*;
 
-@Dependent
+@Stateless
 public class IncidentProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(IncidentProducer.class);
