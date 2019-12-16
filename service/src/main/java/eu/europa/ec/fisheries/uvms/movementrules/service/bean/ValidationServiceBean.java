@@ -26,6 +26,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.commons.service.exception.ObjectMapperContextResolver;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
@@ -480,7 +481,8 @@ public class ValidationServiceBean  {
     @Resource(name = "java:global/asset_endpoint")
     private String assetEndpoint;
     protected WebTarget getWebTarget() {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
+        ObjectMapper objectMapper = resolver.getContext(null);
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

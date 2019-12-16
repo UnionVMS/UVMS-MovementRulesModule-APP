@@ -11,6 +11,10 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.9.9</version>
         </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+            <artifactId>uvms-commons-date</artifactId>
+        </dependency>
         <!-- Java 11 has removed theses from the standard package   -->
         <dependency>
             <groupId>fish.focus.uvms.maven</groupId>

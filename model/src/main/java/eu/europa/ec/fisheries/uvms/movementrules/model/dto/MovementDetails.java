@@ -14,8 +14,10 @@ package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import eu.europa.ec.fisheries.uvms.movementrules.model.MovementRulesInstantDeserializer;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBInstantAdapter;
+import eu.europa.ec.fisheries.uvms.commons.date.UVMSInstantDeserializer;
 
+import javax.json.bind.annotation.JsonbTypeAdapter;
 import java.time.Instant;
 import java.util.List;
 
@@ -59,8 +61,8 @@ public class MovementDetails {
     private Double calculatedSpeed;
     private String movementType; // MovementTypeType
 
-    @JsonSerialize(using = InstantSerializer.class)
-    @JsonDeserialize(using = MovementRulesInstantDeserializer.class)
+    @JsonDeserialize(using = UVMSInstantDeserializer.class)
+    @JsonbTypeAdapter(JsonBInstantAdapter.class)
     private Instant positionTime;
     private Double reportedCourse;
     private Double reportedSpeed;

@@ -1,27 +1,27 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import javax.inject.Inject;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+
+import javax.inject.Inject;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
 public class ValidationServiceBeanTest extends TransactionalTests {
@@ -45,10 +45,10 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
 
         CustomRule updatedCustomRule = rulesService.getCustomRuleByGuid(createdCustomRule.getGuid());
-        String lastTriggered = MRDateUtils.dateToString(updatedCustomRule.getLastTriggered());
+        String lastTriggered = DateUtils.dateToEpochMilliseconds(updatedCustomRule.getLastTriggered());
         assertThat(lastTriggered, is(notNullValue()));
 
-        Instant dateTriggered = MRDateUtils.stringToDate(lastTriggered);
+        Instant dateTriggered = DateUtils.stringToDate(lastTriggered);
         assertTrue(dateTriggered.toEpochMilli() >= timestamp.toEpochMilli());
     }
 

@@ -11,11 +11,10 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import java.util.List;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dao.MockData;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,18 +23,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleIntervalType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleSegmentType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dao.MockData;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MapperTest {
@@ -62,8 +54,8 @@ public class MapperTest {
         assertSame(entity.getDescription(), result.getDescription());
         assertEquals(entity.getGuid().toString(), result.getGuid());
         assertSame(entity.getName(), result.getName());
-        assertEquals(MRDateUtils.dateToString(entity.getLastTriggered()), result.getLastTriggered());
-        assertEquals(MRDateUtils.dateToString(entity.getUpdated()), result.getUpdated());
+        assertEquals(DateUtils.dateToEpochMilliseconds(entity.getLastTriggered()), result.getLastTriggered());
+        assertEquals(DateUtils.dateToEpochMilliseconds(entity.getUpdated()), result.getUpdated());
         assertSame(entity.getUpdatedBy(), result.getUpdatedBy());
 
         // Rule segments
@@ -110,11 +102,11 @@ public class MapperTest {
         List<CustomRuleIntervalType> intervals = result.getTimeIntervals();
         assertSame(2, intervals.size());
 
-        assertEquals(MRDateUtils.dateToString(entity.getIntervals().get(0).getStart()), intervals.get(0).getStart());
-        assertEquals(MRDateUtils.dateToString(entity.getIntervals().get(0).getEnd()), intervals.get(0).getEnd());
+        assertEquals(DateUtils.dateToEpochMilliseconds(entity.getIntervals().get(0).getStart()), intervals.get(0).getStart());
+        assertEquals(DateUtils.dateToEpochMilliseconds(entity.getIntervals().get(0).getEnd()), intervals.get(0).getEnd());
 
-        assertEquals(MRDateUtils.dateToString(entity.getIntervals().get(1).getStart()), intervals.get(1).getStart());
-        assertEquals(MRDateUtils.dateToString(entity.getIntervals().get(1).getEnd()), intervals.get(1).getEnd());
+        assertEquals(DateUtils.dateToEpochMilliseconds(entity.getIntervals().get(1).getStart()), intervals.get(1).getStart());
+        assertEquals(DateUtils.dateToEpochMilliseconds(entity.getIntervals().get(1).getEnd()), intervals.get(1).getEnd());
 
         // Actions
         List<CustomRuleActionType> actions = result.getActions();

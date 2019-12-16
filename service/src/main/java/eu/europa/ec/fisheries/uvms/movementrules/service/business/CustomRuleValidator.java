@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public class CustomRuleValidator {
                     return false;
                 }
                 try {
-                    if (MRDateUtils.stringToDate(intervalType.getStart()).isAfter(MRDateUtils.stringToDate(intervalType.getEnd()))) {
+                    if (DateUtils.stringToDate(intervalType.getStart()).isAfter(DateUtils.stringToDate(intervalType.getEnd()))) {
                         return false;
                     }
                 } catch (DateTimeParseException e) {

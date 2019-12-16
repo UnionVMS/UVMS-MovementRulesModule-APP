@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.commons.service.exception.ObjectMapperContextResolver;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
@@ -33,12 +34,12 @@ public class IncidentProducer {
     @Resource(mappedName = "java:/" + MessageConstants.QUEUE_INCIDENT)
     private Destination queue;
 
-    private ObjectMapper om = new ObjectMapper();
+    private ObjectMapper om;
 
     @PostConstruct
     public void init() {
-        om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
+        om = resolver.getContext(null);
     }
 
     public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent EventTicket eventTicket) {

@@ -4,7 +4,7 @@ expression
 action
 ruleguid
 
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import java.util.Arrays;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.VicinityInfoDTO;

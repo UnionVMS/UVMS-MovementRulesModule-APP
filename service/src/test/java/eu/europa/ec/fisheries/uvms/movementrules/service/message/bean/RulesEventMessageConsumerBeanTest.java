@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.util.UUID;
 import javax.jms.Message;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.uvms.commons.service.exception.ObjectMapperContextResolver;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
@@ -67,8 +69,9 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         movementDetails.setSource("INMARSAT_C");
         movementDetails.setAssetGuid(UUID.randomUUID().toString());
         movementDetails.setFlagState("SWE");
-        
-        ObjectMapper objectMapper = new ObjectMapper();
+
+        ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
+        ObjectMapper objectMapper = resolver.getContext(null);
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         jmsHelper.sendMessageToRules(objectMapper.writeValueAsString(movementDetails), RulesModuleMethod.EVALUATE_RULES.value(), MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
         

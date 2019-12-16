@@ -8,6 +8,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityTyp
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.commons.service.exception.ObjectMapperContextResolver;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
@@ -54,14 +55,12 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
     Topic eventBus;
     Session session;
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper;
 
     @PostConstruct
     public void init() {
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
+        ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
+        mapper = resolver.getContext(null);
     }
 
     @Test

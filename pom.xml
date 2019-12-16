@@ -21,7 +21,7 @@
         <spatial.model.version>2.0.19-UVMS</spatial.model.version>
         <usm4uvms.version>4.0.23</usm4uvms.version>
         <uvms.config.version>4.0.5</uvms.config.version>
-        <uvms.common.version>4.0.12</uvms.common.version>
+        <uvms.common.version>4.0.13</uvms.common.version>
         <uvms.asset.version>6.3.2</uvms.asset.version>
 
         <project.scm.id>github</project.scm.id>
@@ -84,6 +84,16 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+            <dependency>
+                <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+                <artifactId>uvms-commons-date</artifactId>
+                <version>${uvms.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+                <artifactId>uvms-commons-service</artifactId>
+                <version>${uvms.common.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

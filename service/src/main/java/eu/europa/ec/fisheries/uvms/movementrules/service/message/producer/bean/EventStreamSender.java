@@ -7,6 +7,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityTyp
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
+import eu.europa.ec.fisheries.uvms.commons.service.exception.ObjectMapperContextResolver;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
@@ -39,12 +40,12 @@ public class EventStreamSender {
     @JMSConnectionFactory("java:/ConnectionFactory")
     JMSContext context;
 
-    private ObjectMapper om = new ObjectMapper();
+    private ObjectMapper om;
 
     @PostConstruct
     public void init() {
-        om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
+        om = resolver.getContext(null);
     }
 
     public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent EventTicket ticket) {

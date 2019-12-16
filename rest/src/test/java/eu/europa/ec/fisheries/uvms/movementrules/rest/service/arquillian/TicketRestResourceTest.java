@@ -11,7 +11,6 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
@@ -211,7 +210,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
         Date now = new Date(System.currentTimeMillis() - 1000);
         tlc.setKey(TicketSearchKey.FROM_DATE);
-        tlc.setValue(MRDateUtils.dateToString(now.toInstant()));
+        tlc.setValue(DateUtils.dateToEpochMilliseconds(now.toInstant()));
 
         CustomRule customRule = createCustomRule("vms_admin_com");
 
@@ -361,7 +360,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     @Test
     @OperateOnDeployment("normal")
     public void getAssetsNotSendingTicketsWithTimeParamsTest() {
-        String fromDate = DateUtils.dateToString(Instant.now().minusSeconds(1));
+        String fromDate = DateUtils.dateToEpochMilliseconds(Instant.now().minusSeconds(1));
         Ticket ticket = RulesTestHelper.getCompleteTicket();
         ticket.setRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
         rulesDao.createTicket(ticket);
@@ -371,7 +370,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         List<TicketType> response = getWebTarget()
                 .path("/tickets/assetsNotSending")
                 .queryParam("fromDate", fromDate)
-                .queryParam("toDate", DateUtils.dateToString(Instant.now().plusSeconds(1)))
+                .queryParam("toDate", DateUtils.dateToEpochMilliseconds(Instant.now().plusSeconds(1)))
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(new GenericType<List<TicketType>>(){});
@@ -386,7 +385,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
     @Test
     @OperateOnDeployment("normal")
     public void getAssetsNotSendingTicketsWithTimeParamsOutsideTheTicketTest() {
-        String fromDate = DateUtils.dateToString(Instant.now().minusSeconds(10));
+        String fromDate = DateUtils.dateToEpochMilliseconds(Instant.now().minusSeconds(10));
         Ticket ticket = RulesTestHelper.getCompleteTicket();
         ticket.setRuleGuid(ServiceConstants.ASSET_NOT_SENDING_RULE);
         rulesDao.createTicket(ticket);
@@ -396,7 +395,7 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
         List<TicketType> response = getWebTarget()
                 .path("/tickets/assetsNotSending")
                 .queryParam("fromDate", fromDate)
-                .queryParam("toDate", DateUtils.dateToString(Instant.now().minusSeconds(8)))
+                .queryParam("toDate", DateUtils.dateToEpochMilliseconds(Instant.now().minusSeconds(8)))
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(new GenericType<List<TicketType>>(){});
