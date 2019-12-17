@@ -35,10 +35,9 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
 
-@MessageDriven(mappedName = MessageConstants.QUEUE_MOVEMENTRULES_EVENT, activationConfig = {
-        @ActivationConfigProperty(propertyName = MessageConstants.MESSAGING_TYPE_STR, propertyValue = MessageConstants.CONNECTION_TYPE),
+@MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_QUEUE),
-        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.QUEUE_MOVEMENTRULES_EVENT_NAME)
+        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.QUEUE_MOVEMENTRULES_EVENT)
 })
 public class RulesEventMessageConsumerBean implements MessageListener {
 
