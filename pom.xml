@@ -4,7 +4,7 @@
     <parent>
         <groupId>fish.focus.uvms.maven</groupId>
         <artifactId>uvms-pom</artifactId>
-        <version>2.4</version>
+        <version>2.5</version>
     </parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
@@ -23,6 +23,7 @@
         <uvms.config.version>4.0.5</uvms.config.version>
         <uvms.common.version>4.0.13</uvms.common.version>
         <uvms.asset.version>6.3.2</uvms.asset.version>
+        <jackson.version>2.10.0</jackson.version>
 
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
