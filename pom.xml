@@ -13,7 +13,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <drools.version>7.25.0.Final</drools.version>
+        <drools.version>7.32.0.k20191223</drools.version>
 		
         <exchange.model.version>5.0.19-UVMS</exchange.model.version>
         <user.model.version>2.0.25</user.model.version>
