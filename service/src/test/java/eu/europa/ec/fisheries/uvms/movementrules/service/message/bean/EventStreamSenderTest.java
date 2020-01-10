@@ -1,13 +1,12 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.service.exception.ObjectMapperContextResolver;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.service.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
@@ -23,6 +22,7 @@ import org.junit.runner.RunWith;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.jms.*;
+import javax.json.bind.Jsonb;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -35,7 +35,8 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
 
     private static final String user = "user";
     private MessageConsumer subscriber;
-    private static ObjectMapper mapper;
+    //private static ObjectMapper mapper;
+    private static Jsonb jsonb;
 
     @Inject
     private RulesServiceBean rulesService;
@@ -50,8 +51,11 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
     private ConnectionFactory connectionFactory;
 
     static {
-        ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
-        mapper = resolver.getContext(null);
+      /*  ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
+        mapper = resolver.getContext(null);*/
+
+        JsonBConfigurator configurator = new JsonBConfigurator();
+        jsonb = configurator.getContext(null);
     }
 
     @Test
@@ -67,7 +71,8 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
         assertEquals("Ticket", message.getStringProperty(MessageConstants.EVENT_STREAM_EVENT));
         assertTrue(message.getStringProperty(MessageConstants.EVENT_STREAM_SUBSCRIBER_LIST).contains(user));
 
-        TicketType ticket = mapper.readValue(message.getText(), TicketType.class);
+        //TicketType ticket = mapper.readValue(message.getText(), TicketType.class);
+        TicketType ticket = jsonb.fromJson(message.getText(), TicketType.class);
         assertThat(ticket.getRuleName(), is(customRule.getName()));
         assertThat(ticket.getMovementGuid(), is(movementDetails.getMovementGuid()));
         assertThat(ticket.getAssetGuid(), is(movementDetails.getAssetGuid()));
@@ -95,7 +100,8 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
         assertEquals("Ticket", message.getStringProperty(MessageConstants.EVENT_STREAM_EVENT));
         assertNull(message.getStringProperty(MessageConstants.EVENT_STREAM_SUBSCRIBER_LIST));
 
-        TicketType ticket = mapper.readValue(message.getText(), TicketType.class);
+        //TicketType ticket = mapper.readValue(message.getText(), TicketType.class);
+        TicketType ticket = jsonb.fromJson(message.getText(), TicketType.class);
         assertThat(ticket.getRuleName(), is(updatedRule.getName()));
         assertThat(ticket.getMovementGuid(), is(movementDetails.getMovementGuid()));
         assertThat(ticket.getAssetGuid(), is(movementDetails.getAssetGuid()));
@@ -119,7 +125,8 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
         validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, ";");
         TextMessage message = (TextMessage) listenOnEventStream(10000L);
 
-        TicketType ticket = mapper.readValue(message.getText(), TicketType.class);
+        //TicketType ticket = mapper.readValue(message.getText(), TicketType.class);
+        TicketType ticket = jsonb.fromJson(message.getText(), TicketType.class);
         assertThat(ticket.getRuleName(), is(customRule.getName()));
 
         registerSubscriber();
@@ -128,7 +135,8 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
         message = (TextMessage) listenOnEventStream(10000L);
         assertEquals("TicketUpdate", message.getStringProperty(MessageConstants.EVENT_STREAM_EVENT));
 
-        TicketType ticketUpdate = mapper.readValue(message.getText(), TicketType.class);
+        //TicketType ticketUpdate = mapper.readValue(message.getText(), TicketType.class);
+        TicketType ticketUpdate = jsonb.fromJson(message.getText(), TicketType.class);
         assertThat(ticketUpdate.getGuid(), is(ticket.getGuid()));
         assertThat(ticketUpdate.getStatus(), is(TicketStatusType.CLOSED));
         assertThat(ticketUpdate.getMovementGuid(), is(movementDetails.getMovementGuid()));

@@ -11,11 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import eu.europa.ec.fisheries.uvms.commons.date.JsonBInstantAdapter;
-import eu.europa.ec.fisheries.uvms.commons.date.UVMSInstantDeserializer;
-
-import javax.json.bind.annotation.JsonbTypeAdapter;
 import java.time.Instant;
 import java.util.List;
 
@@ -59,8 +54,8 @@ public class MovementDetails {
     private Double calculatedSpeed;
     private String movementType; // MovementTypeType
 
-    @JsonDeserialize(using = UVMSInstantDeserializer.class)
-    @JsonbTypeAdapter(JsonBInstantAdapter.class)
+    //@JsonDeserialize(using = UVMSInstantDeserializer.class)
+    //@JsonbTypeAdapter(JsonBInstantAdapter.class)
     private Instant positionTime;
     private Double reportedCourse;
     private Double reportedSpeed;

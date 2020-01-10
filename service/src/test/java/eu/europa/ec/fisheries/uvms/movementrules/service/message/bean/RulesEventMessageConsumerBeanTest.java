@@ -1,24 +1,5 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-
-import java.time.Instant;
-import java.util.UUID;
-import javax.jms.Message;
-import javax.jms.TextMessage;
-
-import eu.europa.ec.fisheries.uvms.commons.service.exception.ObjectMapperContextResolver;
-import org.jboss.arquillian.container.test.api.OperateOnDeployment;
-import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingRequest;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
@@ -26,7 +7,26 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.service.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.JMSHelper;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
+import org.jboss.arquillian.container.test.api.RunAsClient;
+import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import javax.jms.Message;
+import javax.jms.TextMessage;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import java.time.Instant;
+import java.util.UUID;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 @RunAsClient
 @RunWith(Arquillian.class)
@@ -70,23 +70,19 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         movementDetails.setAssetGuid(UUID.randomUUID().toString());
         movementDetails.setFlagState("SWE");
 
-        ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
+        /*ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
         ObjectMapper objectMapper = resolver.getContext(null);
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        jmsHelper.sendMessageToRules(objectMapper.writeValueAsString(movementDetails), RulesModuleMethod.EVALUATE_RULES.value(), MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
-        
+        jmsHelper.sendMessageToRules(objectMapper.writeValueAsString(movementDetails), RulesModuleMethod.EVALUATE_RULES.value(), MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);*/
+
+        JsonBConfigurator configurator = new JsonBConfigurator();
+        Jsonb jsonb = configurator.getContext(null);
+        Jsonb j = JsonbBuilder.create();
+        String t = j.toJson(movementDetails);
+        String test = jsonb.toJson(movementDetails);
+        jmsHelper.sendMessageToRules(jsonb.toJson(movementDetails), RulesModuleMethod.EVALUATE_RULES.value(), MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);
+
         // wait for message to be processed
         Thread.sleep(5000);
     }
-    
-    /*
-    @Test
-    @RunAsClient
-    public void getTicketsAndRulesByMovementsTest() throws Exception {
-        String request = RulesModuleRequestMapper.createGetTicketsAndRulesByMovementsRequest(new ArrayList<String>()); 
-        String correlationId = jmsHelper.sendMessageToRules(request);
-        Message response = jmsHelper.listenForResponse(correlationId);
-        assertThat(response, is(notNullValue()));
-    }
-    */
 }

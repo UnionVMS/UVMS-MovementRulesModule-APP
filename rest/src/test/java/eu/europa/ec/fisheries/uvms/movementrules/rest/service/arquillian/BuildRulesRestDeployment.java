@@ -8,6 +8,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.dto.AreaTransitionsDTO;
+import eu.europa.ec.fisheries.uvms.movementrules.service.JsonBConfigurator;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -52,7 +53,7 @@ public abstract class BuildRulesRestDeployment {
     }
 
     protected WebTarget getWebTarget() {
-        return ClientBuilder.newClient().target("http://localhost:8080/test/rest");
+        return ClientBuilder.newClient().register(JsonBConfigurator.class).target("http://localhost:8080/test/rest");
     }
 
 

@@ -1,13 +1,10 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
-import eu.europa.ec.fisheries.uvms.commons.service.exception.ObjectMapperContextResolver;
+import eu.europa.ec.fisheries.uvms.movementrules.service.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
@@ -25,6 +22,7 @@ import javax.jms.Destination;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.TextMessage;
+import javax.json.bind.Jsonb;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,12 +38,15 @@ public class EventStreamSender {
     @JMSConnectionFactory("java:/ConnectionFactory")
     JMSContext context;
 
-    private ObjectMapper om;
+    //private ObjectMapper om;
+    private Jsonb jsonb;
 
     @PostConstruct
     public void init() {
-        ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
-        om = resolver.getContext(null);
+        /*ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
+        om = resolver.getContext(null);*/
+        JsonBConfigurator configurator = new JsonBConfigurator();
+        jsonb = configurator.getContext(null);
     }
 
     public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent EventTicket ticket) {
@@ -62,14 +63,16 @@ public class EventStreamSender {
             return;
         }
         try {
-            String outgoingJson = om.writeValueAsString(TicketMapper.toTicketType(eventTicket.getTicket()));
+            //String outgoingJson = om.writeValueAsString(TicketMapper.toTicketType(eventTicket.getTicket()));
+            String outgoingJson = jsonb.toJson(TicketMapper.toTicketType(eventTicket.getTicket()));
             List<String> subscriberList = new ArrayList<>();
             String subscriberJson = null;
             if(!eventTicket.getCustomRule().getAvailability().equals(AvailabilityType.GLOBAL.value())) {
                 eventTicket.getCustomRule().getRuleSubscriptionList().stream()
                         .filter(sub -> SubscriptionTypeType.TICKET.value().equals(sub.getType()))
                         .forEach(sub -> subscriberList.add(sub.getOwner()));
-                subscriberJson = om.writeValueAsString(subscriberList);
+                //subscriberJson = om.writeValueAsString(subscriberList);
+                subscriberJson = jsonb.toJson(subscriberList);
             }
 
 

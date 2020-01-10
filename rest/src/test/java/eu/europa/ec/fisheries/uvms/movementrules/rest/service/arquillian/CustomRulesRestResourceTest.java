@@ -27,7 +27,7 @@ import java.util.UUID;
 import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
-public class CustomRulesRestResourceTest extends TransactionalTests {
+public class CustomRulesRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @OperateOnDeployment("normal")

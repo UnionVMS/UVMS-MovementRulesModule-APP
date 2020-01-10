@@ -17,6 +17,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.*;
+import eu.europa.ec.fisheries.uvms.movementrules.service.JsonBConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.constants.RestConstants;
@@ -38,6 +39,7 @@ public class RestActivator extends Application {
         set.add(InternalRestResources.class);
         set.add(SSEResource.class);
         set.add(PreviousReportRestResource.class);
+        set.add(JsonBConfigurator.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 
