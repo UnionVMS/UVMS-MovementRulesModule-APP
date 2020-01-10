@@ -135,10 +135,10 @@
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
-                <exclusion>
+                <!--exclusion>
                     <groupId>io.jsonwebtoken</groupId>
                     <artifactId>jjwt-jackson</artifactId>
-                </exclusion>
+                </exclusion-->
             </exclusions>
         </dependency>
         <dependency>

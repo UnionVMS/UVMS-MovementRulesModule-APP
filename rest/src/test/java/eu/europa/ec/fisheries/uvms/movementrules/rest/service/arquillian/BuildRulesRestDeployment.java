@@ -64,7 +64,8 @@ public abstract class BuildRulesRestDeployment {
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
                 .resolve("eu.europa.ec.fisheries.uvms.spatialSwe:spatial-model",
                         "eu.europa.ec.fisheries.uvms.user:user-model",
-                        "eu.europa.ec.fisheries.uvms:usm4uvms")
+                        "eu.europa.ec.fisheries.uvms:usm4uvms",
+                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-date")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 

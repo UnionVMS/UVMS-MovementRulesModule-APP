@@ -132,6 +132,8 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         customRule.setRuleActionList(actions);
         rulesService.createCustomRule(customRule, "", "");
 
+        String test = "{\"assetGuid\":\"2c1505f7-bf2b-4caf-b36e-35d5ebf58305\",\"connectId\":\"11ab2d96-fb1a-4a03-8ce7-0b8960b73168\",\"flagState\":\"SWE\",\"latitude\":11.0,\"longitude\":56.0,\"mobileTerminalGuid\":\"7fa7ea5a-005d-4b58-b89f-ef8890847890\",\"movementGuid\":\"b0ad6be5-0b0e-44d0-9bac-54a8356887ed\",\"positionTime\":\"2020-01-09T13:11:30.873867300Z\",\"source\":\"INMARSAT_C\"}";
+
         Response response = getWebTarget()
                 .path("internal")
                 .path("evaluate")
