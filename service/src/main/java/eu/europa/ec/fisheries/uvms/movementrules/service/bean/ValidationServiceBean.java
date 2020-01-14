@@ -212,40 +212,13 @@ public class ValidationServiceBean  {
 
             mapTypeOfMessage(exchangeMovement, movementDetails, organisation);
 
-            String recipient = organisationName;
-            List<RecipientInfoType> recipientInfo = new ArrayList<>();
-
-            if (organisation != null) {
-                recipient = organisation.getNation();
-                recipientInfo = getRecipientInfoType(organisation);
-                for (RecipientInfoType recipientInfoType : recipientInfo) {
-                    if (recipientInfoType.getKey().contains("FLUXVesselPositionMessage")) {
-                        recipient = recipientInfoType.getValue();
-                    }
-                }
-            }
-
-            exchangeService.sendReportToPlugin(pluginName, ruleName, recipient, exchangeMovement, recipientInfo, movementDetails);
+            exchangeService.sendReportToPlugin(pluginName, ruleName, organisationName, exchangeMovement, new ArrayList<>(), movementDetails);
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, organisationName, "UVMS");
 
         } catch (JMSException e) {
             LOG.error("[ Failed to send to endpoint! ] {}", e.getMessage());
         }
-    }
-
-    private List<RecipientInfoType> getRecipientInfoType(Organisation organisation) {
-        List<RecipientInfoType> recipientInfoList = new ArrayList<>();
-        List<EndPoint> endPoints = organisation.getEndPoints();
-        for (EndPoint endPoint : endPoints) {
-            for (Channel channel : endPoint.getChannels()) {
-                RecipientInfoType recipientInfo = new RecipientInfoType();
-                recipientInfo.setKey(channel.getDataFlow());
-                recipientInfo.setValue(endPoint.getUri());
-                recipientInfoList.add(recipientInfo);
-            }
-        }
-        return recipientInfoList;
     }
 
     private void mapTypeOfMessage(MovementType movement, MovementDetails movementDetails, Organisation organisation) {
