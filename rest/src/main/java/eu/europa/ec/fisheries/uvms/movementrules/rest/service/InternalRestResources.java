@@ -20,7 +20,6 @@ import javax.ws.rs.core.Response;
 @Stateless
 @Consumes(value = { MediaType.APPLICATION_JSON })
 @Produces(value = { MediaType.APPLICATION_JSON })
-//@NoJackson
 public class InternalRestResources {
 
     @Inject

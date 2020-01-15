@@ -4,25 +4,25 @@
     <parent>
         <groupId>fish.focus.uvms.maven</groupId>
         <artifactId>uvms-pom</artifactId>
-        <version>2.5</version>
+        <version>2.6</version>
     </parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
     <artifactId>movement-rules</artifactId>
-    <version>2.1.31-SNAPSHOT</version>
+    <version>2.1.32-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
         <drools.version>7.25.0.Final</drools.version>
 		
-        <exchange.model.version>5.0.19-UVMS</exchange.model.version>
+        <uvms.pom.version>2.6</uvms.pom.version>
+        <exchange.model.version>5.0.20-UVMS</exchange.model.version>
         <user.model.version>2.0.25</user.model.version>
         <audit.model.version>4.1.4</audit.model.version>
         <spatial.model.version>2.0.19-UVMS</spatial.model.version>
         <usm4uvms.version>4.0.23</usm4uvms.version>
         <uvms.config.version>4.0.5</uvms.config.version>
         <uvms.common.version>4.0.14-SNAPSHOT</uvms.common.version>
-        <!--jackson.version>2.10.0</jackson.version-->
         <uvms.asset.version>6.4.1</uvms.asset.version>
 
         <project.scm.id>github</project.scm.id>
@@ -41,37 +41,37 @@
         	<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-gis-deps</artifactId>
-				<version>2.5</version>
+				<version>${uvms.pom.version}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-logging-deps</artifactId>
-				<version>2.5</version>
+				<version>${uvms.pom.version}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-monitoring-deps</artifactId>
-				<version>2.5</version>
+				<version>${uvms.pom.version}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-test-deps</artifactId>
-				<version>2.5</version>
+				<version>${uvms.pom.version}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-arquillian-deps</artifactId>
-				<version>2.5</version>
+				<version>${uvms.pom.version}</version>
 				<type>pom</type>
 			</dependency>
             <dependency>
                 <groupId>fish.focus.uvms.maven</groupId>
                 <artifactId>uvms-pom-java11-deps</artifactId>
-                <version>2.5</version>
+                <version>${uvms.pom.version}</version>
                 <type>pom</type>
             </dependency>
             <dependency>

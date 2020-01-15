@@ -9,7 +9,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
         <artifactId>movement-rules</artifactId>
-        <version>2.1.31-SNAPSHOT</version>
+        <version>2.1.32-SNAPSHOT</version>
     </parent>
     
     <properties>
@@ -31,18 +31,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <!--dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson-provider</artifactId>
-            <version>3.9.3.Final</version>
-        </dependency-->
-
-        <!--dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson2-provider</artifactId>
-            <version>4.4.2.Final</version>
-        </dependency-->
 
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.user</groupId>
@@ -71,10 +59,6 @@
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
-                <!--exclusion>
-                    <groupId>io.jsonwebtoken</groupId>
-                    <artifactId>jjwt-jackson</artifactId>
-                </exclusion-->
 			</exclusions>
 		</dependency>
         <dependency>
@@ -165,7 +149,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.1.1</version>
                         <executions>
                             <execution>
                                 <id>generate-service-docs</id>
@@ -182,7 +166,8 @@
                                     <additionalparam>
                                         -apiVersion ${project.version}
                                         -docBasePath /${project.parent.artifactId}/apidocs
-                                        -apiBasePath /${project.parent.artifactId}/rest</additionalparam>
+                                        -apiBasePath /${project.parent.artifactId}/rest
+                                    </additionalparam>
                                 </configuration>
                                 <goals>
                                     <goal>javadoc</goal>
