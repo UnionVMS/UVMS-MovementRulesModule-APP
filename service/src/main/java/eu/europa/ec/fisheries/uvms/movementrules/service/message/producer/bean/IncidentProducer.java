@@ -31,14 +31,10 @@ public class IncidentProducer {
     @Resource(mappedName = "java:/" + MessageConstants.QUEUE_INCIDENT)
     private Destination queue;
 
-    //private ObjectMapper om;
     private Jsonb jsonb;
 
     @PostConstruct
     public void init() {
-      /*  ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
-        om = resolver.getContext(null);*/
-
         JsonBConfigurator configurator = new JsonBConfigurator();
         jsonb = configurator.getContext(null);
     }
@@ -53,7 +49,6 @@ public class IncidentProducer {
 
     public void send(Ticket ticket, String eventName) {
         try {
-            //String json = om.writeValueAsString(TicketMapper.toTicketType(ticket));
             String json = jsonb.toJson(TicketMapper.toTicketType(ticket));
             TextMessage message = context.createTextMessage(json);
             message.setStringProperty("eventName", eventName);

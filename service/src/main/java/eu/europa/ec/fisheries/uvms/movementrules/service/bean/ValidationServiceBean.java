@@ -450,11 +450,6 @@ public class ValidationServiceBean  {
     @Resource(name = "java:global/asset_endpoint")
     private String assetEndpoint;
     protected WebTarget getWebTarget() {
-        /*ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
-        ObjectMapper objectMapper = resolver.getContext(null);
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);*/
         Client client = ClientBuilder.newClient().register(JsonBConfigurator.class);
         return client.target(assetEndpoint);
     }

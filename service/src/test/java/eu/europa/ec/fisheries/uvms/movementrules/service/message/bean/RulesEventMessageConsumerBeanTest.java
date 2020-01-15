@@ -70,11 +70,6 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         movementDetails.setAssetGuid(UUID.randomUUID().toString());
         movementDetails.setFlagState("SWE");
 
-        /*ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
-        ObjectMapper objectMapper = resolver.getContext(null);
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        jmsHelper.sendMessageToRules(objectMapper.writeValueAsString(movementDetails), RulesModuleMethod.EVALUATE_RULES.value(), MessageConstants.QUEUE_EXCHANGE_EVENT_NAME);*/
-
         JsonBConfigurator configurator = new JsonBConfigurator();
         Jsonb jsonb = configurator.getContext(null);
         Jsonb j = JsonbBuilder.create();

@@ -90,11 +90,6 @@
                 <artifactId>uvms-commons-date</artifactId>
                 <version>${uvms.common.version}</version>
             </dependency>
-            <dependency>
-                <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
-                <artifactId>uvms-commons-service</artifactId>
-                <version>${uvms.common.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -54,8 +54,6 @@ public class MovementDetails {
     private Double calculatedSpeed;
     private String movementType; // MovementTypeType
 
-    //@JsonDeserialize(using = UVMSInstantDeserializer.class)
-    //@JsonbTypeAdapter(JsonBInstantAdapter.class)
     private Instant positionTime;
     private Double reportedCourse;
     private Double reportedSpeed;

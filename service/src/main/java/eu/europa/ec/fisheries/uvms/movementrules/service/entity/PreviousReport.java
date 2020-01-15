@@ -48,11 +48,9 @@ public class PreviousReport implements Serializable {
     @Column(name = "prevrep_movementguid")
     private UUID movementGuid;
 
-    //@JsonSerialize(using = InstantSerializer.class)
     @Column(name = "prevrep_positiontime")
     private Instant positionTime;
 
-    //@JsonSerialize(using = InstantSerializer.class)
     @Column(name = "prevrep_updattim")
     @NotNull
     private Instant updated;

@@ -38,13 +38,10 @@ public class EventStreamSender {
     @JMSConnectionFactory("java:/ConnectionFactory")
     JMSContext context;
 
-    //private ObjectMapper om;
     private Jsonb jsonb;
 
     @PostConstruct
     public void init() {
-        /*ObjectMapperContextResolver resolver = new ObjectMapperContextResolver();
-        om = resolver.getContext(null);*/
         JsonBConfigurator configurator = new JsonBConfigurator();
         jsonb = configurator.getContext(null);
     }
@@ -63,7 +60,6 @@ public class EventStreamSender {
             return;
         }
         try {
-            //String outgoingJson = om.writeValueAsString(TicketMapper.toTicketType(eventTicket.getTicket()));
             String outgoingJson = jsonb.toJson(TicketMapper.toTicketType(eventTicket.getTicket()));
             List<String> subscriberList = new ArrayList<>();
             String subscriberJson = null;
@@ -71,7 +67,6 @@ public class EventStreamSender {
                 eventTicket.getCustomRule().getRuleSubscriptionList().stream()
                         .filter(sub -> SubscriptionTypeType.TICKET.value().equals(sub.getType()))
                         .forEach(sub -> subscriberList.add(sub.getOwner()));
-                //subscriberJson = om.writeValueAsString(subscriberList);
                 subscriberJson = jsonb.toJson(subscriberList);
             }
 
