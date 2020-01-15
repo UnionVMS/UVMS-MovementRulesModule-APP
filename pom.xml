@@ -30,7 +30,7 @@
         
         <installAtEnd>false</installAtEnd>
       
-        <docker.dev.version>3.40.19.w18-SNAPSHOT</docker.dev.version>
+        <docker.dev.version>3.40.19.w18-JsonBOverJackson</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>movementrules</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>movementrules</docker.liquibase.db.passwd>

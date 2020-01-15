@@ -11,17 +11,17 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.constants.RestConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.*;
-import eu.europa.ec.fisheries.uvms.movementrules.service.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeatureFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.constants.RestConstants;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeatureFilter;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.util.HashSet;
+import java.util.Set;
 
 @ApplicationPath(RestConstants.MODULE_REST)
 public class RestActivator extends Application {

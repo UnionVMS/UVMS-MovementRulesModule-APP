@@ -1,7 +1,7 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean;
 
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.movementrules.service.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;

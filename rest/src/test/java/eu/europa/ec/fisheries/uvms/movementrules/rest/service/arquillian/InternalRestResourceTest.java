@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
-import javax.json.bind.Jsonb;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import eu.europa.ec.fisheries.uvms.movementrules.service.JsonBConfigurator;
 import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
