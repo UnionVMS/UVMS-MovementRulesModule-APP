@@ -4,7 +4,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
         <artifactId>movement-rules</artifactId>
-        <version>2.1.32-SNAPSHOT</version>
+        <version>2.2.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>liquibase</artifactId>
@@ -55,7 +55,7 @@
                 <db.outputFile>changelog/generatedChangelog.xml</db.outputFile>
                 <driver.groupId>org.postgresql</driver.groupId>
                 <driver.artifactId>postgresql</driver.artifactId>
-                <driver.version>42.2.9</driver.version>
+                <driver.version>42.2.10</driver.version>
                 <db.diffTypes />
             </properties>
             <dependencies>
@@ -137,7 +137,7 @@
 					<plugin>
 						<groupId>org.liquibase</groupId>
 						<artifactId>liquibase-maven-plugin</artifactId>
-						<version>3.8.5</version>
+						<version>3.8.6</version>
 						<configuration>
 							<url>${db.docker.url}</url>
 							<migrationSqlOutputFile>${project.build.directory}/full-update.sql</migrationSqlOutputFile>
@@ -189,7 +189,7 @@
                 <plugin>
                     <groupId>org.liquibase</groupId>
                     <artifactId>liquibase-maven-plugin</artifactId>
-                    <version>3.8.5</version>
+                    <version>3.8.6</version>
                     <configuration>
                         <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
                         <changeLogFile>${db.changeLogFile}</changeLogFile>
@@ -208,9 +208,9 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4.1</version>
+				<version>3.2.0</version>
 				<configuration>
-					<descriptor>assembly.xml</descriptor>
+					<descriptors>assembly.xml</descriptors>
 					<finalName>${project.artifactId}</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>

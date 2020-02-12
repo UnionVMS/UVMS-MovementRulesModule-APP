@@ -25,6 +25,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.dto.AreaTransitionsDTO;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Area;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreaExtendedIdentifierType;
@@ -52,15 +56,12 @@ import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRS;
 @Path("spatialSwe/spatialnonsecure/json")
 @Stateless
 public class SpatialModuleMock {
-
-
+    
     @GET
     @Path("getEnrichmentAndTransitions")
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
-    public Response getEnrichmentAndTransitions(@QueryParam(value = "firstLongitude") Double firstLongitude, @QueryParam(value = "firstLatitude") Double firstLatitude, @QueryParam(value = "secondLongitude") Double secondLongitude, @QueryParam(value = "secondLatitude") Double secondLatitude) {
-        
-        
+    public Response getEnrichmentAndTransitions(@QueryParam(value = "firstLongitude") Double firstLongitude, @QueryParam(value = "firstLatitude") Double firstLatitude, @QueryParam(value = "secondLongitude") Double secondLongitude, @QueryParam(value = "secondLatitude") Double secondLatitude) throws JsonProcessingException {
         AreaTransitionsDTO response = new AreaTransitionsDTO();
         
         SpatialEnrichmentRS spatialEnrichmentRS = new SpatialEnrichmentRS();
@@ -85,8 +86,11 @@ public class SpatialModuleMock {
         }
         
         response.setEnteredAreas(enteredAreas);
-        
-        return Response.ok(response).build();
+
+        ObjectMapper om = new ObjectMapper();
+        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        String asString = om.writeValueAsString(response);
+        return Response.ok(asString).build();
     }
 
     private void populateClosestAreas(SpatialEnrichmentRS spatialEnrichmentRS) {
