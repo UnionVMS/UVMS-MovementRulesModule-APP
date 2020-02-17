@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBDurationAdapter;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBInstantAdapter;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -56,6 +57,7 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addClass(AssetModuleMock.class);
         testWar.addClass(JsonBConfigurator.class);
         testWar.addClass(JsonBInstantAdapter.class);
+        testWar.addClass(JsonBDurationAdapter.class);
         testWar.addPackage("eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1");
 
         return testWar;

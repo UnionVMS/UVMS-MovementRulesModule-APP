@@ -67,6 +67,12 @@
             <groupId>eu.europa.ec.fisheries.uvms.spatialSwe</groupId>
             <artifactId>spatial-model</artifactId>
             <version>${spatial.model.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+                    <artifactId>uvms-commons-date</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>

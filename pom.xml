@@ -19,7 +19,7 @@
         <exchange.model.version>5.1.0-UVMS</exchange.model.version>
         <user.model.version>2.1.0</user.model.version>
         <audit.model.version>4.2.0</audit.model.version>
-        <spatial.model.version>2.0.19-UVMS</spatial.model.version>
+        <spatial.model.version>2.1.0-UVMS</spatial.model.version>
         <uvms.config.version>4.1.0</uvms.config.version>
         <usm4uvms.version>4.1.0</usm4uvms.version>
         <uvms.common.version>4.1.1</uvms.common.version>
