@@ -60,33 +60,38 @@ public class RulesValidator {
 
     @PostConstruct
     public void init() {
-        updateCustomRules();
+        try {
+            updateCustomRules();
+        }catch (Exception e){
+            LOG.error("Unable to initialize initial ruleset due to: ", e);
+            throw new RuntimeException(e);
+        }
     }
     
 
     @Lock(LockType.WRITE)
     public void updateCustomRules() {
         LOG.info("Updating custom rules");
-            // Fetch custom rules from DB
-            List<CustomRule> customRules = rulesService.getRunnableCustomRules();
-            if (customRules != null && !customRules.isEmpty()) {
-                // Add custom rules
-                List<CustomRuleDto> rules = CustomRuleParser.parseRules(customRules);
-                String drl = generateCustomRuleDrl(CUSTOM_RULE_TEMPLATE, rules);
+        // Fetch custom rules from DB
+        List<CustomRule> customRules = rulesService.getRunnableCustomRules();
+        if (customRules != null && !customRules.isEmpty()) {
+            // Add custom rules
+            List<CustomRuleDto> rules = CustomRuleParser.parseRules(customRules);
+            String drl = generateCustomRuleDrl(CUSTOM_RULE_TEMPLATE, rules);
 
-                KieServices kieServices = KieServices.Factory.get();
+            KieServices kieServices = KieServices.Factory.get();
 
-                KieFileSystem customKfs = kieServices.newKieFileSystem();
+            KieFileSystem customKfs = kieServices.newKieFileSystem();
 
-                customKfs.write(CUSTOM_RULE_DRL_FILE, drl);
+            customKfs.write(CUSTOM_RULE_DRL_FILE, drl);
 
-                LOG.trace(drl);
-                // Create session
-                kieServices.newKieBuilder(customKfs).buildAll();
-                customKcontainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
-            } else {
-                customKcontainer = null;
-            }
+            LOG.trace(drl);
+            // Create session
+            kieServices.newKieBuilder(customKfs).buildAll();
+            customKcontainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
+        } else {
+            customKcontainer = null;
+        }
     }
     
     @Lock(LockType.READ)
