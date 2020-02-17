@@ -25,6 +25,7 @@
             <version>${project.parent.version}</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.user</groupId>
             <artifactId>user-model</artifactId>
@@ -95,6 +96,12 @@
             <artifactId>spatial-model</artifactId>
             <version>${spatial.model.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+                    <artifactId>uvms-commons-date</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

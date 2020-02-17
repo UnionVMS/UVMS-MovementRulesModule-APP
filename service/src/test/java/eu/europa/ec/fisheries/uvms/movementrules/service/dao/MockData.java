@@ -11,27 +11,17 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.dao;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleIntervalType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleSegmentType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class MockData {
 
@@ -51,7 +41,7 @@ public class MockData {
         dto.setDescription(DESCRIPTION);
         dto.setActive(true);
         dto.setArchived(false);
-        dto.setLastTriggered(MRDateUtils.dateToString(A_DATE));
+        dto.setLastTriggered(DateUtils.dateToEpochMilliseconds(A_DATE));
         dto.setUpdatedBy("UVMS");
 
         // Actions
@@ -113,12 +103,12 @@ public class MockData {
 
         // Intervals
         CustomRuleIntervalType interval1 = new CustomRuleIntervalType();
-        interval1.setStart(MRDateUtils.dateToString(A_DATE));
-        interval1.setEnd(MRDateUtils.dateToString(A_DATE));
+        interval1.setStart(DateUtils.dateToEpochMilliseconds(A_DATE));
+        interval1.setEnd(DateUtils.dateToEpochMilliseconds(A_DATE));
 
         CustomRuleIntervalType interval2 = new CustomRuleIntervalType();
-        interval2.setStart(MRDateUtils.dateToString(A_DATE));
-        interval2.setEnd(MRDateUtils.dateToString(A_DATE));
+        interval2.setStart(DateUtils.dateToEpochMilliseconds(A_DATE));
+        interval2.setEnd(DateUtils.dateToEpochMilliseconds(A_DATE));
 
         dto.getTimeIntervals().add(interval1);
         dto.getTimeIntervals().add(interval2);

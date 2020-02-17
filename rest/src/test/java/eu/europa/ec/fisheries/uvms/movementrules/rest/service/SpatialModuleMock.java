@@ -11,34 +11,15 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.dto.AreaTransitionsDTO;
+import eu.europa.ec.fisheries.uvms.spatial.model.schemas.*;
+
 import javax.ejb.Stateless;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
-import javax.json.bind.config.PropertyNamingStrategy;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.dto.AreaTransitionsDTO;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Area;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreaExtendedIdentifierType;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreaType;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreasByLocationType;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.ClosestAreasType;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.ClosestLocationsType;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Location;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.LocationType;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRS;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Test areas
@@ -61,7 +42,7 @@ public class SpatialModuleMock {
     @Path("getEnrichmentAndTransitions")
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
-    public Response getEnrichmentAndTransitions(@QueryParam(value = "firstLongitude") Double firstLongitude, @QueryParam(value = "firstLatitude") Double firstLatitude, @QueryParam(value = "secondLongitude") Double secondLongitude, @QueryParam(value = "secondLatitude") Double secondLatitude) throws JsonProcessingException {
+    public Response getEnrichmentAndTransitions(@QueryParam(value = "firstLongitude") Double firstLongitude, @QueryParam(value = "firstLatitude") Double firstLatitude, @QueryParam(value = "secondLongitude") Double secondLongitude, @QueryParam(value = "secondLatitude") Double secondLatitude) {
         AreaTransitionsDTO response = new AreaTransitionsDTO();
         
         SpatialEnrichmentRS spatialEnrichmentRS = new SpatialEnrichmentRS();
@@ -87,10 +68,7 @@ public class SpatialModuleMock {
         
         response.setEnteredAreas(enteredAreas);
 
-        ObjectMapper om = new ObjectMapper();
-        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        String asString = om.writeValueAsString(response);
-        return Response.ok(asString).build();
+        return Response.ok(response).build();
     }
 
     private void populateClosestAreas(SpatialEnrichmentRS spatialEnrichmentRS) {

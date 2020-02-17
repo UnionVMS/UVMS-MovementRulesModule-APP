@@ -11,7 +11,20 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.bean;
 
-import java.util.UUID;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
+import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import javax.annotation.PostConstruct;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
@@ -20,20 +33,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.xml.bind.JAXBException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.RulesModuleMethod;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
-import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
+import java.util.UUID;
 
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_QUEUE),
@@ -49,7 +49,13 @@ public class RulesEventMessageConsumerBean implements MessageListener {
     @Inject
     private RulesMessageProducerBean rulesProducer;
 
-    private Jsonb jsonb = JsonbBuilder.create();
+    private Jsonb jsonb;
+
+    @PostConstruct
+    public void init(){
+        JsonBConfigurator configurator = new JsonBConfigurator();
+        jsonb = configurator.getContext(null);
+    }
 
     @Override
     public void onMessage(Message message) {
@@ -84,7 +90,7 @@ public class RulesEventMessageConsumerBean implements MessageListener {
         } catch (JMSException e) {
             LOG.error("[ Error when receiving message in rules: {}]", e);
             throw new IllegalStateException("Error when receiving message in rules, inbound message: " + textMessage, e);
-        } catch (JAXBException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Could not read message text", e);
         } finally {
             MDC.remove("clientName");

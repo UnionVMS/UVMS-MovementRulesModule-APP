@@ -11,19 +11,20 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.CustomRuleDto;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class CustomRuleParser {
     
@@ -179,7 +180,7 @@ public class CustomRuleParser {
                             sb.append("movementType");
                             break;
                         case POSITION_REPORT_TIME:      //some problems require really creative solutions.......
-                            sb.append("MRDateUtils.stringToDate(\"");
+                            sb.append("DateUtils.stringToDate(\"");
                             sb.append(value);
                             sb.append("\")");
                             break;
@@ -371,8 +372,8 @@ public class CustomRuleParser {
         StringBuilder sb = new StringBuilder();
         if (interval.getStart() != null) {
             // TODO find a better solution than date to string to date conversion
-            String start = MRDateUtils.dateToString(interval.getStart());
-            sb.append("MRDateUtils.stringToDate(\"");
+            String start = DateUtils.dateToEpochMilliseconds(interval.getStart());
+            sb.append("DateUtils.stringToDate(\"");
             sb.append(start);
             sb.append("\")");
             sb.append(" <= positionTime");
@@ -383,8 +384,8 @@ public class CustomRuleParser {
         }
 
         if (interval.getEnd() != null) {
-            String end = MRDateUtils.dateToString(interval.getEnd());
-            sb.append("MRDateUtils.stringToDate(\"");
+            String end = DateUtils.dateToEpochMilliseconds(interval.getEnd());
+            sb.append("DateUtils.stringToDate(\"");
             sb.append(end);
             sb.append("\")");
             sb.append(">= positionTime");

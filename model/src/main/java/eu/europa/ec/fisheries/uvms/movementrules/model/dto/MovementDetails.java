@@ -11,11 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import eu.europa.ec.fisheries.uvms.movementrules.model.MovementRulesInstantDeserializer;
-
 import java.time.Instant;
 import java.util.List;
 
@@ -59,8 +54,6 @@ public class MovementDetails {
     private Double calculatedSpeed;
     private String movementType; // MovementTypeType
 
-    @JsonSerialize(using = InstantSerializer.class)
-    @JsonDeserialize(using = MovementRulesInstantDeserializer.class)
     private Instant positionTime;
     private Double reportedCourse;
     private Double reportedSpeed;
@@ -74,12 +67,12 @@ public class MovementDetails {
     // REPORT
     private List<VicinityInfoDTO> vicinityOf;
     private Integer sumPositionReport;
-    
+
     /*
      * COLLECTED DATA
      */
     private Long timeDiffPositionReport;
-    
+
     private List<String> areaCodes;
     private List<String> areaTypes;
     private List<String> entAreaCodes;
@@ -101,7 +94,7 @@ public class MovementDetails {
     private String wkt;
     private String internalReferenceNumber;
     private String assetType;
-    
+
     public String getMovementGuid() {
         return movementGuid;
     }

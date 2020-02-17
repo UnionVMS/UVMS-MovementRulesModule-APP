@@ -1,24 +1,26 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
-import java.io.File;
-import java.util.Arrays;
-import javax.ejb.EJB;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.SpatialModuleMock;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UnionVMSRestMock;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UserRestMock;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.dto.AreaTransitionsDTO;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.SpatialModuleMock;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UnionVMSRestMock;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UserRestMock;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
+
+import javax.ejb.EJB;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.util.Arrays;
 
 @ArquillianSuiteDeployment
 public abstract class BuildRulesRestDeployment {
@@ -52,7 +54,7 @@ public abstract class BuildRulesRestDeployment {
     }
 
     protected WebTarget getWebTarget() {
-        return ClientBuilder.newClient().target("http://localhost:8080/test/rest");
+        return ClientBuilder.newClient().register(JsonBConfigurator.class).target("http://localhost:8080/test/rest");
     }
 
 
@@ -63,7 +65,8 @@ public abstract class BuildRulesRestDeployment {
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
                 .resolve("eu.europa.ec.fisheries.uvms.spatialSwe:spatial-model",
                         "eu.europa.ec.fisheries.uvms.user:user-model",
-                        "eu.europa.ec.fisheries.uvms:usm4uvms")
+                        "eu.europa.ec.fisheries.uvms:usm4uvms",
+                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-date")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 

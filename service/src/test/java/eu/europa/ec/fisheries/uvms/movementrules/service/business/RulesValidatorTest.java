@@ -1,34 +1,32 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import javax.inject.Inject;
-
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.VicinityInfoDTO;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
-import org.jboss.arquillian.container.test.api.OperateOnDeployment;
-import org.jboss.arquillian.junit.Arquillian;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.VicinityInfoDTO;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
+import org.jboss.arquillian.container.test.api.OperateOnDeployment;
+import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import javax.inject.Inject;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
 public class RulesValidatorTest extends TransactionalTests {
@@ -119,7 +117,7 @@ public class RulesValidatorTest extends TransactionalTests {
         segment.setCriteria(CriteriaType.POSITION.value());
         segment.setSubCriteria(SubCriteriaType.POSITION_REPORT_TIME.value());
         segment.setCondition(ConditionType.EQ.value());
-        segment.setValue(MRDateUtils.dateToString(positionTime));
+        segment.setValue(DateUtils.dateToEpochMilliseconds(positionTime));
         segment.setEndOperator("");
         segment.setLogicOperator(LogicOperatorType.NONE.value());
         segment.setOrder(0);
@@ -371,7 +369,7 @@ public class RulesValidatorTest extends TransactionalTests {
         timeSegment.setCriteria(CriteriaType.POSITION.value());
         timeSegment.setSubCriteria(SubCriteriaType.POSITION_REPORT_TIME.value());
         timeSegment.setCondition(ConditionType.LT.value());
-        timeSegment.setValue(MRDateUtils.dateToString(timestamp));
+        timeSegment.setValue(DateUtils.dateToEpochMilliseconds(timestamp));
         timeSegment.setEndOperator("");
         timeSegment.setLogicOperator(LogicOperatorType.NONE.value());
         timeSegment.setOrder(0);
@@ -402,7 +400,7 @@ public class RulesValidatorTest extends TransactionalTests {
         timeSegment.setCriteria(CriteriaType.POSITION.value());
         timeSegment.setSubCriteria(SubCriteriaType.POSITION_REPORT_TIME.value());
         timeSegment.setCondition(ConditionType.GT.value());
-        timeSegment.setValue(MRDateUtils.dateToString(timestamp));
+        timeSegment.setValue(DateUtils.dateToEpochMilliseconds(timestamp));
         timeSegment.setEndOperator("");
         timeSegment.setLogicOperator(LogicOperatorType.NONE.value());
         timeSegment.setOrder(0);

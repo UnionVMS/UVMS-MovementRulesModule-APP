@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 @RunWith(Arquillian.class)
-public class ConfigResourcesTest extends TransactionalTests {
+public class ConfigResourcesTest extends BuildRulesRestDeployment {
 
     @Test
     @OperateOnDeployment("normal")

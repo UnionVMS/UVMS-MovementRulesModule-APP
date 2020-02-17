@@ -11,23 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.entity;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import org.hibernate.annotations.GenericGenerator;
-
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
 
 //@formatter:off
 @Entity
@@ -59,11 +48,9 @@ public class PreviousReport implements Serializable {
     @Column(name = "prevrep_movementguid")
     private UUID movementGuid;
 
-    @JsonSerialize(using = InstantSerializer.class)
     @Column(name = "prevrep_positiontime")
     private Instant positionTime;
 
-    @JsonSerialize(using = InstantSerializer.class)
     @Column(name = "prevrep_updattim")
     @NotNull
     private Instant updated;

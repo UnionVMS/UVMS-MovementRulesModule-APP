@@ -6,8 +6,8 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCrite
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -27,7 +27,7 @@ import java.util.UUID;
 import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
-public class CustomRulesRestResourceTest extends TransactionalTests {
+public class CustomRulesRestResourceTest extends BuildRulesRestDeployment {
 
     @Test
     @OperateOnDeployment("normal")
@@ -41,8 +41,8 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
         CustomRuleIntervalType intervalType = new CustomRuleIntervalType();
-        intervalType.setStart(MRDateUtils.dateToString(Instant.now()));
-        intervalType.setEnd(MRDateUtils.dateToString(Instant.now()
+        intervalType.setStart(DateUtils.dateToEpochMilliseconds(Instant.now()));
+        intervalType.setEnd(DateUtils.dateToEpochMilliseconds(Instant.now()
                 .plus(10, ChronoUnit.MINUTES)));
         customRule.getTimeIntervals().add(intervalType);
 
@@ -268,7 +268,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
 
         CustomRuleIntervalType intervalType = new CustomRuleIntervalType();
-        intervalType.setStart(MRDateUtils.dateToString(Instant.now()));
+        intervalType.setStart(DateUtils.dateToEpochMilliseconds(Instant.now()));
         customRule.getTimeIntervals().add(intervalType);
 
         Response response = getWebTarget().path("/customrules")
@@ -279,7 +279,7 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
         intervalType = new CustomRuleIntervalType();
-        intervalType.setEnd(MRDateUtils.dateToString(Instant.now()));
+        intervalType.setEnd(DateUtils.dateToEpochMilliseconds(Instant.now()));
         customRule.getTimeIntervals().add(intervalType);
 
         response = getWebTarget().path("/customrules")
@@ -290,8 +290,8 @@ public class CustomRulesRestResourceTest extends TransactionalTests {
         assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
         intervalType = new CustomRuleIntervalType();
-        intervalType.setStart(MRDateUtils.dateToString(Instant.now()));
-        intervalType.setEnd(MRDateUtils.dateToString(Instant.now()
+        intervalType.setStart(DateUtils.dateToEpochMilliseconds(Instant.now()));
+        intervalType.setEnd(DateUtils.dateToEpochMilliseconds(Instant.now()
                 .minus(10, ChronoUnit.MINUTES)));
         customRule.getTimeIntervals().add(intervalType);
 

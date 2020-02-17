@@ -19,18 +19,18 @@
         <exchange.model.version>5.1.0-UVMS</exchange.model.version>
         <user.model.version>2.1.0</user.model.version>
         <audit.model.version>4.2.0</audit.model.version>
-        <spatial.model.version>2.0.19-UVMS</spatial.model.version>
+        <spatial.model.version>2.1.0-UVMS</spatial.model.version>
         <uvms.config.version>4.1.0</uvms.config.version>
         <usm4uvms.version>4.1.0</usm4uvms.version>
-        <uvms.common.version>4.0.13</uvms.common.version>
-        <uvms.asset.version>6.5.1</uvms.asset.version>
+        <uvms.common.version>4.1.1</uvms.common.version>
+        <uvms.asset.version>6.6.0</uvms.asset.version>
 
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
         
         <installAtEnd>false</installAtEnd>
       
-        <docker.dev.version>3.40.18.w18</docker.dev.version>
+        <docker.dev.version>3.40.19.w18-JsonBOverJackson</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>movementrules</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>movementrules</docker.liquibase.db.passwd>
@@ -85,6 +85,11 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+            <dependency>
+                <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+                <artifactId>uvms-commons-date</artifactId>
+                <version>${uvms.common.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -14,6 +14,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
 import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -104,7 +105,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         String flagState = "SWE";
         MovementDetails movementDetails = getMovementDetails();
         movementDetails.setFlagState(flagState);
-        
+
         CustomRule customRule = RulesTestHelper.createBasicCustomRule();
         List<RuleSegment> segments = new ArrayList<>();
         RuleSegment segment = new RuleSegment();
@@ -127,7 +128,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         actions.add(action);
         customRule.setRuleActionList(actions);
         rulesService.createCustomRule(customRule, "", "");
-        
+
         Response response = getWebTarget()
                 .path("internal")
                 .path("evaluate")

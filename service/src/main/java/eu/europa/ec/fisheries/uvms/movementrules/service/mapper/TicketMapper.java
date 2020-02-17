@@ -12,7 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 import java.time.Instant;
@@ -33,8 +33,8 @@ public class TicketMapper {
         ticketType.setChannelGuid(ticketEntity.getChannelGuid());
         ticketType.setGuid(ticketEntity.getGuid().toString());
         ticketType.setStatus(ticketEntity.getStatus());
-        ticketType.setOpenDate(MRDateUtils.dateToString(ticketEntity.getCreatedDate()));
-        ticketType.setUpdated(MRDateUtils.dateToString(ticketEntity.getUpdated()));
+        ticketType.setOpenDate(DateUtils.dateToEpochMilliseconds(ticketEntity.getCreatedDate()));
+        ticketType.setUpdated(DateUtils.dateToEpochMilliseconds(ticketEntity.getUpdated()));
         ticketType.setUpdatedBy(ticketEntity.getUpdatedBy());
         ticketType.setRuleGuid(ticketEntity.getRuleGuid());
         ticketType.setMovementGuid(ticketEntity.getMovementGuid());
@@ -53,7 +53,7 @@ public class TicketMapper {
         ticketEntity.setChannelGuid(ticketType.getChannelGuid());
         ticketEntity.setGuid(UUID.fromString(ticketType.getGuid()));
         ticketEntity.setStatus(ticketType.getStatus());
-        ticketEntity.setCreatedDate(MRDateUtils.stringToDate(ticketType.getOpenDate()));
+        ticketEntity.setCreatedDate(DateUtils.stringToDate(ticketType.getOpenDate()));
         ticketEntity.setRuleGuid(ticketType.getRuleGuid());
         ticketEntity.setUpdated(Instant.now());
         ticketEntity.setUpdatedBy(ticketType.getUpdatedBy());

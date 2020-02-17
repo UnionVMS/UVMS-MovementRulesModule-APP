@@ -11,31 +11,16 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.mapper;
 
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import eu.europa.ec.fisheries.uvms.movementrules.service.business.MRDateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ConditionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleActionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleIntervalType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleSegmentType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionType;
-import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Interval;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;
 
 public class CustomRuleMapper {
 
@@ -54,8 +39,8 @@ public class CustomRuleMapper {
         customRuleType.setActive(customRuleEntity.getActive());
         customRuleType.setArchived(customRuleEntity.getArchived());
         customRuleType.setAggregateInvocations(customRuleEntity.isAggregateInvocations());
-        customRuleType.setLastTriggered(MRDateUtils.dateToString(customRuleEntity.getLastTriggered()));
-        customRuleType.setUpdated(MRDateUtils.dateToString(customRuleEntity.getUpdated()));
+        customRuleType.setLastTriggered(DateUtils.dateToEpochMilliseconds(customRuleEntity.getLastTriggered()));
+        customRuleType.setUpdated(DateUtils.dateToEpochMilliseconds(customRuleEntity.getUpdated()));
         customRuleType.setUpdatedBy(customRuleEntity.getUpdatedBy());
         customRuleType.setOrganisation(customRuleEntity.getOrganisation());
 
@@ -101,8 +86,8 @@ public class CustomRuleMapper {
         List<Interval> intervals = customRuleEntity.getIntervals();
         for (Interval interval : intervals) {
             CustomRuleIntervalType customRuleIntervalType = new CustomRuleIntervalType();
-            customRuleIntervalType.setStart(MRDateUtils.dateToString(interval.getStart()));
-            customRuleIntervalType.setEnd(MRDateUtils.dateToString(interval.getEnd()));
+            customRuleIntervalType.setStart(DateUtils.dateToEpochMilliseconds(interval.getStart()));
+            customRuleIntervalType.setEnd(DateUtils.dateToEpochMilliseconds(interval.getEnd()));
 
             customRuleType.getTimeIntervals().add(customRuleIntervalType);
         }
@@ -190,8 +175,8 @@ public class CustomRuleMapper {
         for (CustomRuleIntervalType customRuleActionType : customRuleIntervalTypes) {
             Interval ruleActiveInterval = new Interval();
             if (customRuleActionType != null) {
-                ruleActiveInterval.setStart(MRDateUtils.stringToDate(customRuleActionType.getStart()));
-                ruleActiveInterval.setEnd(MRDateUtils.stringToDate(customRuleActionType.getEnd()));
+                ruleActiveInterval.setStart(DateUtils.stringToDate(customRuleActionType.getStart()));
+                ruleActiveInterval.setEnd(DateUtils.stringToDate(customRuleActionType.getEnd()));
                 ruleActiveInterval.setCustomRule(customRuleEntity);
             }
             ruleActiveIntervalEntities.add(ruleActiveInterval);

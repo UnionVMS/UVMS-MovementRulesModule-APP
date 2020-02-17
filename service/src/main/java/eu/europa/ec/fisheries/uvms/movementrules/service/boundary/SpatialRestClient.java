@@ -11,35 +11,23 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
+import eu.europa.ec.fisheries.uvms.spatial.model.schemas.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.json.bind.Jsonb;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Area;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreaExtendedIdentifierType;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreaType;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Location;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.LocationType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Stateless
 public class SpatialRestClient {
@@ -48,7 +36,7 @@ public class SpatialRestClient {
 
     private WebTarget webTarget;
 
-    private ObjectMapper objectMapper;
+    Jsonb jsonb;
 
     @Resource(name = "java:global/spatial_endpoint")
     private String spatialEndpoint;
@@ -56,13 +44,12 @@ public class SpatialRestClient {
     @PostConstruct
     public void initClient() {
         String url = spatialEndpoint + "/spatialnonsecure/json/";
-        objectMapper = new ObjectMapper();
-        objectMapper.setAnnotationIntrospector(new JacksonAnnotationIntrospector());
+        jsonb = new JsonBConfigurator().getContext(null);
         webTarget = ClientBuilder.newBuilder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .build()
-                .register(new JacksonJsonProvider(objectMapper, JacksonJsonProvider.BASIC_ANNOTATIONS))
+                .register(new JsonBConfigurator())
                 .target(url);
     }
     
@@ -119,12 +106,7 @@ public class SpatialRestClient {
                 .request(MediaType.APPLICATION_JSON)
                 .get(String.class);
         LOG.debug(json);
-        try {
-            return objectMapper.readValue(json, AreaTransitionsDTO.class);  //bit of an ugly hack but this is only in place until we have replaced jackson.
-        } catch (IOException e) {
-            LOG.error(e.toString());
-            throw new RuntimeException(e);
-        }
+        return jsonb.fromJson(json, AreaTransitionsDTO.class);  //bit of an ugly hack but this is only in place until we have replaced jackson.
     }
     
     private void enrichWithCountryData(List<Area> locations, AreaType areaType, MovementDetails movementDetails) {
