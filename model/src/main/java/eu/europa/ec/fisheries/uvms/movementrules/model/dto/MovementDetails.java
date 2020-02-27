@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.model.dto;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MovementDetails {
@@ -64,6 +65,9 @@ public class MovementDetails {
     private Double previousLatitude;
     private Double previousLongitude;
 
+    private Double previousVMSLatitude;
+    private Double previousVMSLongitude;
+
     // REPORT
     private List<VicinityInfoDTO> vicinityOf;
     private Integer sumPositionReport;
@@ -73,12 +77,16 @@ public class MovementDetails {
      */
     private Long timeDiffPositionReport;
 
-    private List<String> areaCodes;
-    private List<String> areaTypes;
-    private List<String> entAreaCodes;
-    private List<String> entAreaTypes;
-    private List<String> extAreaCodes;
-    private List<String> extAreaTypes;
+    private List<String> areaCodes = new ArrayList<>();
+    private List<String> areaTypes = new ArrayList<>();
+    private List<String> entAreaCodes = new ArrayList<>();
+    private List<String> entAreaTypes = new ArrayList<>();
+    private List<String> extAreaCodes = new ArrayList<>();
+    private List<String> extAreaTypes = new ArrayList<>();
+    private List<String> vmsEntAreaCodes = new ArrayList<>();
+    private List<String> vmsEntAreaTypes = new ArrayList<>();
+    private List<String> vmsExtAreaCodes = new ArrayList<>();
+    private List<String> vmsExtAreaTypes = new ArrayList<>();
 
     private String closestCountryCode;
     private String closestPortCode;
@@ -383,6 +391,22 @@ public class MovementDetails {
         this.previousLongitude = previousLongitude;
     }
 
+    public Double getPreviousVMSLatitude() {
+        return previousVMSLatitude;
+    }
+
+    public void setPreviousVMSLatitude(Double previousVMSLatitude) {
+        this.previousVMSLatitude = previousVMSLatitude;
+    }
+
+    public Double getPreviousVMSLongitude() {
+        return previousVMSLongitude;
+    }
+
+    public void setPreviousVMSLongitude(Double previousVMSLongitude) {
+        this.previousVMSLongitude = previousVMSLongitude;
+    }
+
     public List<VicinityInfoDTO> getVicinityOf() {
         return vicinityOf;
     }
@@ -453,6 +477,38 @@ public class MovementDetails {
 
     public void setExtAreaTypes(List<String> extAreaTypes) {
         this.extAreaTypes = extAreaTypes;
+    }
+
+    public List<String> getVmsEntAreaCodes() {
+        return vmsEntAreaCodes;
+    }
+
+    public void setVmsEntAreaCodes(List<String> vmsEntAreaCodes) {
+        this.vmsEntAreaCodes = vmsEntAreaCodes;
+    }
+
+    public List<String> getVmsEntAreaTypes() {
+        return vmsEntAreaTypes;
+    }
+
+    public void setVmsEntAreaTypes(List<String> vmsEntAreaTypes) {
+        this.vmsEntAreaTypes = vmsEntAreaTypes;
+    }
+
+    public List<String> getVmsExtAreaCodes() {
+        return vmsExtAreaCodes;
+    }
+
+    public void setVmsExtAreaCodes(List<String> vmsExtAreaCodes) {
+        this.vmsExtAreaCodes = vmsExtAreaCodes;
+    }
+
+    public List<String> getVmsExtAreaTypes() {
+        return vmsExtAreaTypes;
+    }
+
+    public void setVmsExtAreaTypes(List<String> vmsExtAreaTypes) {
+        this.vmsExtAreaTypes = vmsExtAreaTypes;
     }
 
     public String getClosestCountryCode() {

@@ -11,32 +11,24 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.service.bean.CustomRulesEvaluator;
 import eu.europa.ec.fisheries.uvms.spatial.model.schemas.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
-import javax.json.bind.Jsonb;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Stateless
 public class SpatialRestClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CustomRulesEvaluator.class);
-
     private WebTarget webTarget;
-
-    Jsonb jsonb;
 
     @Resource(name = "java:global/spatial_endpoint")
     private String spatialEndpoint;
@@ -44,12 +36,11 @@ public class SpatialRestClient {
     @PostConstruct
     public void initClient() {
         String url = spatialEndpoint + "/spatialnonsecure/json/";
-        jsonb = new JsonBConfigurator().getContext(null);
         webTarget = ClientBuilder.newBuilder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .build()
-                .register(new JsonBConfigurator())
+                .register(JsonBConfigurator.class)
                 .target(url);
     }
     
@@ -62,24 +53,32 @@ public class SpatialRestClient {
         if (enrichmentCurrentPosition.getSpatialEnrichmentRS().getClosestLocations() != null) {
             enrichWithPortData(enrichmentCurrentPosition.getSpatialEnrichmentRS().getClosestLocations().getClosestLocations(), LocationType.PORT, movementDetails);
         }
-        mapAreasAndAreaTransitions(enrichmentCurrentPosition, movementDetails);
+        mapAreas(enrichmentCurrentPosition, movementDetails);
+        mapAreaTransitions(enrichmentCurrentPosition, movementDetails);
+        
+        if (!MovementSourceType.AIS.value().equals(movementDetails.getSource())) {
+            if (movementDetails.getLongitude().equals(movementDetails.getPreviousVMSLongitude()) 
+                    && movementDetails.getPreviousLatitude().equals(movementDetails.getPreviousVMSLatitude())) {
+                mapVMSAreaTransitions(enrichmentCurrentPosition, movementDetails);
+            }
+            else {
+                AreaTransitionsDTO enrichmentCurrentVMSPosition = getEnrichmentAndTransitions(movementDetails.getLatitude(), movementDetails.getLongitude(), 
+                        movementDetails.getPreviousVMSLatitude(), movementDetails.getPreviousVMSLongitude());
+                mapVMSAreaTransitions(enrichmentCurrentVMSPosition, movementDetails);
+            }
+        }
     }
 
-    private void mapAreasAndAreaTransitions(AreaTransitionsDTO enrichmentCurrentPosition, MovementDetails movementDetails) {
-        movementDetails.setAreaCodes(new ArrayList<>());
-        movementDetails.setAreaTypes(new ArrayList<>());
+    private void mapAreas(AreaTransitionsDTO enrichmentCurrentPosition, MovementDetails movementDetails) {
         if (enrichmentCurrentPosition.getSpatialEnrichmentRS().getAreasByLocation() != null) {
             for (AreaExtendedIdentifierType area : enrichmentCurrentPosition.getSpatialEnrichmentRS().getAreasByLocation().getAreas()) {
                 movementDetails.getAreaCodes().add(area.getCode());
                 movementDetails.getAreaTypes().add(area.getAreaType().value());
             }
         }
-        
-        movementDetails.setEntAreaCodes(new ArrayList<>());
-        movementDetails.setEntAreaTypes(new ArrayList<>());
-        movementDetails.setExtAreaCodes(new ArrayList<>());
-        movementDetails.setExtAreaTypes(new ArrayList<>());
-
+    }
+    
+    private void mapAreaTransitions(AreaTransitionsDTO enrichmentCurrentPosition, MovementDetails movementDetails) {
         for (AreaExtendedIdentifierType area : enrichmentCurrentPosition.getEnteredAreas()) {
             movementDetails.getEntAreaCodes().add(area.getCode());
             if (!movementDetails.getEntAreaTypes().contains(area.getAreaType().value())) {
@@ -94,19 +93,33 @@ public class SpatialRestClient {
             }
         }
     }
+    
+    private void mapVMSAreaTransitions(AreaTransitionsDTO enrichmentCurrentVMSPosition, MovementDetails movementDetails) {
+        for (AreaExtendedIdentifierType area : enrichmentCurrentVMSPosition.getEnteredAreas()) {
+            movementDetails.getVmsEntAreaCodes().add(area.getCode());
+            if (!movementDetails.getVmsEntAreaTypes().contains(area.getAreaType().value())) {
+                movementDetails.getVmsEntAreaTypes().add(area.getAreaType().value());
+            }
+        }
+        
+        for (AreaExtendedIdentifierType area : enrichmentCurrentVMSPosition.getExitedAreas()) {
+            movementDetails.getVmsExtAreaCodes().add(area.getCode());
+            if (!movementDetails.getVmsExtAreaTypes().contains(area.getAreaType().value())) {
+                movementDetails.getVmsExtAreaTypes().add(area.getAreaType().value());
+            }
+        }
+    }
 
     private AreaTransitionsDTO getEnrichmentAndTransitions(Double latitude, Double longitude, 
                                               Double previousLatitude, Double previousLongitude) {
-        String json = webTarget
+        return webTarget
                 .path("getEnrichmentAndTransitions")
                 .queryParam("firstLongitude", previousLongitude)
                 .queryParam("firstLatitude", previousLatitude)
                 .queryParam("secondLongitude", longitude)
                 .queryParam("secondLatitude", latitude)
                 .request(MediaType.APPLICATION_JSON)
-                .get(String.class);
-        LOG.debug(json);
-        return jsonb.fromJson(json, AreaTransitionsDTO.class);  //bit of an ugly hack but this is only in place until we have replaced jackson.
+                .get(AreaTransitionsDTO.class);
     }
     
     private void enrichWithCountryData(List<Area> locations, AreaType areaType, MovementDetails movementDetails) {
