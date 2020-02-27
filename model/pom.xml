@@ -1,10 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <dependencies>
-        <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
-            <artifactId>uvms-commons-date</artifactId>
-        </dependency>
         <!-- Java 11 has removed theses from the standard package   -->
         <dependency>
             <groupId>fish.focus.uvms.maven</groupId>
@@ -54,51 +50,6 @@
         <connection>${scm.connection}</connection>
         <tag>HEAD</tag>
     </scm>
-
-    <profiles>
-        <profile>
-            <id>dg-mare</id>
-            <distributionManagement>
-                <repository>
-                    <id>digit-releases</id>
-                    <name>DG DIGIT Repository</name>
-                    <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/mare/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>digit-snapshots</id>
-                    <name>DG DIGIT Snapshot Repository</name>
-                    <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/mare-snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
-
-            <properties>
-                <scm.connection>
-                    scm:git:https://emserveje@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/UVMS-MovementRulesModule.git
-                </scm.connection>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>xmlgregoriancalendar</id>
-            <properties>
-                <binding.xml>binding.xml</binding.xml>
-                <envClassifier>xmlgregoriancalendar</envClassifier>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>belgium-local</id>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>lv-snapshots</id>
-                    <url>https://apjenp01.dg3.be/nexus/repository/maven-snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
-            <properties>
-                <focus-pom.java.version>1.8</focus-pom.java.version>
-            </properties>
-        </profile>
-    </profiles>
 
     <build>
         <finalName>${project.parent.artifactId}-model-${project.version}</finalName>
