@@ -11,19 +11,22 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.boundary;
 
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
-import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
-import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.spatial.model.schemas.*;
-
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
+import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Area;
+import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreaExtendedIdentifierType;
+import eu.europa.ec.fisheries.uvms.spatial.model.schemas.AreaType;
+import eu.europa.ec.fisheries.uvms.spatial.model.schemas.Location;
+import eu.europa.ec.fisheries.uvms.spatial.model.schemas.LocationType;
 
 @Stateless
 public class SpatialRestClient {
@@ -57,8 +60,9 @@ public class SpatialRestClient {
         mapAreaTransitions(enrichmentCurrentPosition, movementDetails);
         
         if (!MovementSourceType.AIS.value().equals(movementDetails.getSource())) {
-            if (movementDetails.getLongitude().equals(movementDetails.getPreviousVMSLongitude()) 
-                    && movementDetails.getPreviousLatitude().equals(movementDetails.getPreviousVMSLatitude())) {
+            if ((movementDetails.getPreviousVMSLatitude() == null && movementDetails.getPreviousVMSLongitude() == null) 
+                    || (movementDetails.getLongitude().equals(movementDetails.getPreviousVMSLongitude()) 
+                    && movementDetails.getLatitude().equals(movementDetails.getPreviousVMSLatitude()))) {
                 mapVMSAreaTransitions(enrichmentCurrentPosition, movementDetails);
             }
             else {
@@ -110,7 +114,7 @@ public class SpatialRestClient {
         }
     }
 
-    private AreaTransitionsDTO getEnrichmentAndTransitions(Double latitude, Double longitude, 
+    protected AreaTransitionsDTO getEnrichmentAndTransitions(Double latitude, Double longitude, 
                                               Double previousLatitude, Double previousLongitude) {
         return webTarget
                 .path("getEnrichmentAndTransitions")
