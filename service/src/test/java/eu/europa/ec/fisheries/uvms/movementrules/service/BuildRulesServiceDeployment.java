@@ -4,6 +4,7 @@ import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBDateAdapter;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBDurationAdapter;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBInstantAdapter;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBXmlGregorianCalendarAdapter;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -61,6 +62,7 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addClass(JsonBInstantAdapter.class);
         testWar.addClass(JsonBDurationAdapter.class);
         testWar.addClass(JsonBDateAdapter.class);
+        testWar.addClass(JsonBXmlGregorianCalendarAdapter.class);
         testWar.addPackage("eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1");
 
         return testWar;
