@@ -14,6 +14,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -42,11 +43,14 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
     @Inject
     private RulesDao rulesDao;
     
+    @Before
+    public void reloadCustomRules() {
+        rulesValidator.updateCustomRules(); // reload/clear rules
+    }
+    
     @Test
     @OperateOnDeployment("normal")
     public void evaluateMovementAndVerifyReportCreated() {
-        rulesValidator.updateCustomRules(); // reload/clear rules
-        
         List<PreviousReport> previousReportsBefore = rulesService.getPreviousMovementReports();
         
         MovementDetails movementDetails = getMovementDetails();
@@ -59,8 +63,6 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
     @Test
     @OperateOnDeployment("normal")
     public void evaluateMovementAndVerifyOpenAssetNotSendingTicketIsClosed() {
-        rulesValidator.updateCustomRules(); // reload/clear rules
-
         MovementDetails movementDetails = getMovementDetails();
         PreviousReport report = new PreviousReport();
         report.setAssetGuid(movementDetails.getAssetGuid());
@@ -209,6 +211,72 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         RuleSegment segment = new RuleSegment();
         segment.setCriteria("AREA");
         segment.setSubCriteria("AREA_CODE_ENT");
+        segment.setCondition("EQ");
+        segment.setValue("AreaA");
+        segment.setLogicOperator("NONE");
+        segment.setCustomRule(customRule);
+        segment.setOrder(0);
+        segments.add(segment);
+        customRule.setRuleSegmentList(segments);
+        rulesService.createCustomRule(customRule, "", "");
+        
+        customRulesEvaluator.evaluate(movementDetails);
+        
+        List<Ticket> tickets = rulesService.getTicketsByMovements(Arrays.asList(movementDetails.getMovementGuid()));
+        assertThat(tickets.size(), CoreMatchers.is(1));
+    }
+    
+    @Test
+    @OperateOnDeployment("normal")
+    public void evaluateMovementTriggerVMSAreaExitRule() throws Exception {
+        MovementDetails movementDetails = getMovementDetails();
+        // AreaA
+        movementDetails.setLongitude(1d);
+        movementDetails.setLatitude(1d);
+        // AreaB
+        movementDetails.setPreviousLatitude(-1d);
+        movementDetails.setPreviousLongitude(1d);
+        movementDetails.setPreviousVMSLatitude(-1d);
+        movementDetails.setPreviousVMSLongitude(1d);
+        
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        List<RuleSegment> segments = new ArrayList<>();
+        RuleSegment segment = new RuleSegment();
+        segment.setCriteria("AREA");
+        segment.setSubCriteria("AREA_CODE_VMS_EXT");
+        segment.setCondition("EQ");
+        segment.setValue("AreaB");
+        segment.setLogicOperator("NONE");
+        segment.setCustomRule(customRule);
+        segment.setOrder(0);
+        segments.add(segment);
+        customRule.setRuleSegmentList(segments);
+        rulesService.createCustomRule(customRule, "", "");
+        
+        customRulesEvaluator.evaluate(movementDetails);
+        
+        List<Ticket> tickets = rulesService.getTicketsByMovements(Arrays.asList(movementDetails.getMovementGuid()));
+        assertThat(tickets.size(), CoreMatchers.is(1));
+    }
+    
+    @Test
+    @OperateOnDeployment("normal")
+    public void evaluateMovementTriggerVMSAreaEntRuleWithPrevousPosition() throws Exception {
+        MovementDetails movementDetails = getMovementDetails();
+        // AreaA
+        movementDetails.setLongitude(1d);
+        movementDetails.setLatitude(1d);
+        // AreaB
+        movementDetails.setPreviousLatitude(-1d);
+        movementDetails.setPreviousLongitude(1d);
+        movementDetails.setPreviousVMSLatitude(-1d);
+        movementDetails.setPreviousVMSLongitude(1d);
+        
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        List<RuleSegment> segments = new ArrayList<>();
+        RuleSegment segment = new RuleSegment();
+        segment.setCriteria("AREA");
+        segment.setSubCriteria("AREA_CODE_VMS_ENT");
         segment.setCondition("EQ");
         segment.setValue("AreaA");
         segment.setLogicOperator("NONE");

@@ -72,6 +72,10 @@
             <xsd:enumeration value="AREA_TYPE_ENT"/>
             <xsd:enumeration value="AREA_CODE_EXT"/>
             <xsd:enumeration value="AREA_TYPE_EXT"/>
+            <xsd:enumeration value="AREA_CODE_VMS_ENT"/>
+            <xsd:enumeration value="AREA_TYPE_VMS_ENT"/>
+            <xsd:enumeration value="AREA_CODE_VMS_EXT"/>
+            <xsd:enumeration value="AREA_TYPE_VMS_EXT"/>
             <!-- ASSET -->
             <xsd:enumeration value="ASSET_ID_GEAR_TYPE"/>
             <xsd:enumeration value="EXTERNAL_MARKING"/>

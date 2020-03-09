@@ -116,6 +116,34 @@ public class CustomRuleParser {
                             }
                             sb.append("extAreaTypes");
                             break;
+                        case AREA_CODE_VMS_ENT:
+                            // If list and NE
+                            if (segment.getCondition().equals(ConditionType.NE.value())) {
+                                sb.append("!");
+                            }
+                            sb.append("vmsEntAreaCodes");
+                            break;
+                        case AREA_TYPE_VMS_ENT:
+                            // If list and NE
+                            if (segment.getCondition().equals(ConditionType.NE.value())) {
+                                sb.append("!");
+                            }
+                            sb.append("vmsEntAreaTypes");
+                            break;
+                        case AREA_CODE_VMS_EXT:
+                            // If list and NE
+                            if (segment.getCondition().equals(ConditionType.NE.value())) {
+                                sb.append("!");
+                            }
+                            sb.append("vmsExtAreaCodes");
+                            break;
+                        case AREA_TYPE_VMS_EXT:
+                            // If list and NE
+                            if (segment.getCondition().equals(ConditionType.NE.value())) {
+                                sb.append("!");
+                            }
+                            sb.append("vmsExtAreaTypes");
+                            break;
 
                         // ASSET
                         case ASSET_ID_GEAR_TYPE:
@@ -246,7 +274,7 @@ public class CustomRuleParser {
                         }
                         break;
                     case GT:
-                        if(SubCriteriaType.POSITION_REPORT_TIME.value().equals(segment.getSubCriteria())) {             //really beautiful solution......................
+                        if(SubCriteriaType.POSITION_REPORT_TIME.value().equals(segment.getSubCriteria())) {
                             sb.append(" < ");
                         }else {
                             sb.append(" > ");
@@ -363,6 +391,10 @@ public class CustomRuleParser {
                 SubCriteriaType.AREA_TYPE_ENT.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_CODE_EXT.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_TYPE_EXT.value().equals(subcriteria) ||
+                SubCriteriaType.AREA_CODE_VMS_ENT.value().equals(subcriteria) ||
+                SubCriteriaType.AREA_TYPE_VMS_ENT.value().equals(subcriteria) ||
+                SubCriteriaType.AREA_CODE_VMS_EXT.value().equals(subcriteria) ||
+                SubCriteriaType.AREA_TYPE_VMS_EXT.value().equals(subcriteria) ||
                 SubCriteriaType.ASSET_GROUP.value().equals(subcriteria) ||
                 //SubCriteriaType.VICINITY_DISTANCE_OF.value().equals(subcriteria) ||
                 SubCriteriaType.VICINITY_OF.value().equals(subcriteria);

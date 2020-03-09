@@ -769,4 +769,78 @@ public class CustomRuleParserTest {
         List<CustomRuleDto> rules = CustomRuleParser.parseRules(rawRules);
         assertEquals(expectedRule, rules.get(0).getExpression());
     }
+    
+    @Test
+    public void parseVMSEntryTest() {
+        CustomRule customRule = new CustomRule();
+        customRule.setName("Name");
+        customRule.setGuid(UUID.randomUUID());
+        customRule.setAvailability(AvailabilityType.PRIVATE.value());
+        
+        RuleSegment segmentVmsEntryType = new RuleSegment();
+        segmentVmsEntryType.setStartOperator("");
+        segmentVmsEntryType.setCriteria(CriteriaType.AREA.value());
+        segmentVmsEntryType.setSubCriteria(SubCriteriaType.AREA_TYPE_VMS_ENT.value());
+        segmentVmsEntryType.setCondition(ConditionType.EQ.value());
+        segmentVmsEntryType.setValue("EEZ");
+        segmentVmsEntryType.setEndOperator("");
+        segmentVmsEntryType.setLogicOperator(LogicOperatorType.AND.value());
+        segmentVmsEntryType.setOrder(0);
+        customRule.getRuleSegmentList().add(segmentVmsEntryType);
+        
+        RuleSegment segmentVmsEntryCode = new RuleSegment();
+        segmentVmsEntryCode.setStartOperator("");
+        segmentVmsEntryCode.setCriteria(CriteriaType.AREA.value());
+        segmentVmsEntryCode.setSubCriteria(SubCriteriaType.AREA_CODE_VMS_ENT.value());
+        segmentVmsEntryCode.setCondition(ConditionType.EQ.value());
+        segmentVmsEntryCode.setValue("SWE");
+        segmentVmsEntryCode.setEndOperator("");
+        segmentVmsEntryCode.setLogicOperator(LogicOperatorType.NONE.value());
+        segmentVmsEntryCode.setOrder(0);
+        customRule.getRuleSegmentList().add(segmentVmsEntryCode);
+        
+        List<CustomRule> rawRules = new ArrayList<CustomRule>();
+        rawRules.add(customRule);
+        String expectedRule = "vmsEntAreaTypes.contains(\"EEZ\") && vmsEntAreaCodes.contains(\"SWE\")";
+
+        List<CustomRuleDto> rules = CustomRuleParser.parseRules(rawRules);
+        assertEquals(expectedRule, rules.get(0).getExpression());
+    }
+
+    @Test
+    public void parseVMSExitTest() {
+        CustomRule customRule = new CustomRule();
+        customRule.setName("Name");
+        customRule.setGuid(UUID.randomUUID());
+        customRule.setAvailability(AvailabilityType.PRIVATE.value());
+        
+        RuleSegment segmentVmsExitType = new RuleSegment();
+        segmentVmsExitType.setStartOperator("");
+        segmentVmsExitType.setCriteria(CriteriaType.AREA.value());
+        segmentVmsExitType.setSubCriteria(SubCriteriaType.AREA_TYPE_VMS_EXT.value());
+        segmentVmsExitType.setCondition(ConditionType.EQ.value());
+        segmentVmsExitType.setValue("EEZ");
+        segmentVmsExitType.setEndOperator("");
+        segmentVmsExitType.setLogicOperator(LogicOperatorType.AND.value());
+        segmentVmsExitType.setOrder(0);
+        customRule.getRuleSegmentList().add(segmentVmsExitType);
+        
+        RuleSegment segmentVmsExitCode = new RuleSegment();
+        segmentVmsExitCode.setStartOperator("");
+        segmentVmsExitCode.setCriteria(CriteriaType.AREA.value());
+        segmentVmsExitCode.setSubCriteria(SubCriteriaType.AREA_CODE_VMS_EXT.value());
+        segmentVmsExitCode.setCondition(ConditionType.EQ.value());
+        segmentVmsExitCode.setValue("SWE");
+        segmentVmsExitCode.setEndOperator("");
+        segmentVmsExitCode.setLogicOperator(LogicOperatorType.NONE.value());
+        segmentVmsExitCode.setOrder(0);
+        customRule.getRuleSegmentList().add(segmentVmsExitCode);
+        
+        List<CustomRule> rawRules = new ArrayList<CustomRule>();
+        rawRules.add(customRule);
+        String expectedRule = "vmsExtAreaTypes.contains(\"EEZ\") && vmsExtAreaCodes.contains(\"SWE\")";
+
+        List<CustomRuleDto> rules = CustomRuleParser.parseRules(rawRules);
+        assertEquals(expectedRule, rules.get(0).getExpression());
+    }
 }
