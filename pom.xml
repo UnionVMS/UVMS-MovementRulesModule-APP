@@ -22,7 +22,7 @@
         <spatial.model.version>2.1.0-UVMS</spatial.model.version>
         <uvms.config.version>4.1.0</uvms.config.version>
         <usm4uvms.version>4.1.0</usm4uvms.version>
-        <uvms.common.version>4.1.5</uvms.common.version>
+        <uvms.common.version>4.1.6</uvms.common.version>
         <uvms.asset.version>6.6.2</uvms.asset.version>
 
         <project.scm.id>github</project.scm.id>
