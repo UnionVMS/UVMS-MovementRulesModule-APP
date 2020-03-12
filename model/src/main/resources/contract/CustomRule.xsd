@@ -183,6 +183,8 @@
     <xsd:simpleType name="ActionType">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="SEND_REPORT"/>
+            <xsd:enumeration value="SEND_ENTRY_REPORT"/>
+            <xsd:enumeration value="SEND_EXIT_REPORT"/>
             <xsd:enumeration value="EMAIL"/>
             <xsd:enumeration value="MANUAL_POLL"/>
 
