@@ -131,8 +131,14 @@ public class ValidationServiceBean  {
                     auditTimestamp = auditLog("Time to send (action) email:", auditTimestamp);
                     break;
                 case SEND_REPORT:
-                    sendToEndpoint(ruleName, movementDetails, value, target);
+                    sendToEndpoint(ruleName, movementDetails, value, target, ActionType.SEND_REPORT);
                     auditTimestamp = auditLog("Time to send to endpoint:", auditTimestamp);
+                    break;
+                case SEND_ENTRY_REPORT:
+                    sendToEndpoint(ruleName, movementDetails, value, target, ActionType.SEND_ENTRY_REPORT);
+                    break;
+                case SEND_EXIT_REPORT:
+                    sendToEndpoint(ruleName, movementDetails, value, target, ActionType.SEND_EXIT_REPORT);
                     break;
                 case MANUAL_POLL:
                     createPollInternal(movementDetails, ruleName);
@@ -199,15 +205,13 @@ public class ValidationServiceBean  {
         }
     }
 
-    private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String organisationName, String pluginName) {
+    private void sendToEndpoint(String ruleName, MovementDetails movementDetails, String organisationName, String pluginName, ActionType actionType) {
         LOG.debug("Sending to organisation '{}'", organisationName);
 
         try {
             MovementType exchangeMovement = ExchangeMovementMapper.mapToExchangeMovementType(movementDetails);
 
-            Organisation organisation = userService.getOrganisation(organisationName);
-
-            mapTypeOfMessage(exchangeMovement, movementDetails, organisation);
+            mapTypeOfMessage(exchangeMovement, actionType);
 
             exchangeService.sendReportToPlugin(pluginName, ruleName, organisationName, exchangeMovement, new ArrayList<>(), movementDetails);
 
@@ -218,13 +222,13 @@ public class ValidationServiceBean  {
         }
     }
 
-    private void mapTypeOfMessage(MovementType movement, MovementDetails movementDetails, Organisation organisation) {
-        if (organisation == null) {
+    private void mapTypeOfMessage(MovementType movement, ActionType actionType) {
+        if (actionType == null) {
             return;
         }
-        if (movementDetails.getEntAreaCodes().contains(organisation.getNation())) {
+        if (ActionType.SEND_ENTRY_REPORT.equals(actionType)) {
             movement.setMovementType(MovementTypeType.ENT);
-        } else if (movementDetails.getExtAreaCodes().contains(organisation.getNation()) ) {
+        } else if (ActionType.SEND_EXIT_REPORT.equals(actionType) ) {
             movement.setMovementType(MovementTypeType.EXI);
         }
     }
