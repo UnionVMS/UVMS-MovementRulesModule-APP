@@ -16,7 +16,7 @@
         <drools.version>7.34.0.Final</drools.version>
 		
         <uvms.pom.version>3.0</uvms.pom.version>
-        <exchange.model.version>5.2.3-UVMS</exchange.model.version>
+        <exchange.model.version>5.2.4-UVMS</exchange.model.version>
         <user.model.version>2.1.3</user.model.version>
         <audit.model.version>4.3.3</audit.model.version>
         <spatial.model.version>2.1.0-UVMS</spatial.model.version>
