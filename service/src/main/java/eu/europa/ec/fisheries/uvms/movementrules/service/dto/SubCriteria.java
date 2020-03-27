@@ -22,9 +22,11 @@ public enum SubCriteria {
     AREA_CODE(MainCriteria.AREA),
     AREA_TYPE(MainCriteria.AREA),
     AREA_CODE_ENT(MainCriteria.AREA),
+    AREA_CODE_VMS_ENT(MainCriteria.AREA),
     AREA_TYPE_ENT(MainCriteria.AREA),
     AREA_TYPE_VMS_ENT(MainCriteria.AREA),
     AREA_CODE_EXT(MainCriteria.AREA),
+    AREA_CODE_VMS_EXT(MainCriteria.AREA),
     AREA_TYPE_EXT(MainCriteria.AREA),
     AREA_TYPE_VMS_EXT(MainCriteria.AREA),
 
