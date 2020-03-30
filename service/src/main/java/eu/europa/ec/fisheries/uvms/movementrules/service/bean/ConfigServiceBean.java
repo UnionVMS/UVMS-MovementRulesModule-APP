@@ -78,9 +78,11 @@ public class ConfigServiceBean {
             case ASSET_STATUS:
             case MT_STATUS:
             case AREA_CODE_ENT:
+            case AREA_CODE_VMS_ENT:
             case AREA_TYPE_ENT:
             case AREA_TYPE_VMS_ENT:
             case AREA_CODE_EXT:
+            case AREA_CODE_VMS_EXT:
             case AREA_TYPE_EXT:
             case AREA_TYPE_VMS_EXT:
             case VICINITY_OF:
