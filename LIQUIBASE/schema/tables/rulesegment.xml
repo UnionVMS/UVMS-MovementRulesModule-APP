@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.7.xsd">
 
     <changeSet author="andtho" id="rulesegment-01">
         <createTable tableName="rulesegment" remarks="Rule segment table.">
@@ -22,22 +23,22 @@
         </createTable>
 
         <addForeignKeyConstraint
-			constraintName="ruleseg_rule_fk"
-			baseTableName="rulesegment"
-			baseColumnNames="ruleseg_rule_id"
-			referencedTableName="customrule"
-			referencedColumnNames="rule_id"
-		/>
+                constraintName="ruleseg_rule_fk"
+                baseTableName="rulesegment"
+                baseColumnNames="ruleseg_rule_id"
+                referencedTableName="customrule"
+                referencedColumnNames="rule_id"
+        />
 
         <rollback>
-            <dropTable tableName="rulesegment" cascadeConstraints="true" />
+            <dropTable tableName="rulesegment" cascadeConstraints="true"/>
         </rollback>
     </changeSet>
 
-	<changeSet id="ruleseg_rule_fk_inx-01" author="andtho">
-		<createIndex tableName="rulesegment" indexName="ruleseg_rule_fk_inx">
-			<column name="ruleseg_rule_id"></column>
-		</createIndex>
-	</changeSet>
+    <changeSet id="ruleseg_rule_fk_inx-01" author="andtho">
+        <createIndex tableName="rulesegment" indexName="ruleseg_rule_fk_inx">
+            <column name="ruleseg_rule_id"></column>
+        </createIndex>
+    </changeSet>
 
 </databaseChangeLog>

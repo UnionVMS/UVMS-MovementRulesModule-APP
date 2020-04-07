@@ -3,15 +3,12 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.7.xsd"
-                   logicalFilePath="changelog/v2.1.30/db-changelog-update-previous-report-table-2.1.30.xml">
+                   logicalFilePath="changelog/v2.3.5/db-changelog-new-index-on-ticket-ticket_movementguid.xml">
 
-    <changeSet id="Update previous_report table" author="kasim">
-        <addColumn tableName="previousreport">
-            <column name="prevrep_mobtermguid" type="UUID"/>
-            <column name="prevrep_movementguid" type="UUID"/>
-        </addColumn>
-
+    <changeSet id="Create a new index on movement guid field" author="kasgul">
+        <createIndex indexName="ticket_movementguid_idx" tableName="ticket">
+            <column name="ticket_movementguid"/>
+        </createIndex>
     </changeSet>
-
 
 </databaseChangeLog>

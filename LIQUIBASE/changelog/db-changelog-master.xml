@@ -2,8 +2,8 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-         logicalFilePath="changelog/db-changelog-master.xml">
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.7.xsd"
+                   logicalFilePath="changelog/db-changelog-master.xml">
 
     <!-- set DB specific properties, like sysdate vs now() -->
     <include file="properties.xml" relativeToChangelogFile="true"/>
@@ -12,16 +12,19 @@
 
     <include file="v0.1\insertParameter.xml" relativeToChangelogFile="true"/>
 
-	<include file="v2.1.20\db-changelog-2.1.20.xml" relativeToChangelogFile="true"/>
-	
-	<include file="v2.1.23\db-changelog-2.1.23.xml" relativeToChangelogFile="true"/>
+    <include file="v2.1.20\db-changelog-2.1.20.xml" relativeToChangelogFile="true"/>
+
+    <include file="v2.1.23\db-changelog-2.1.23.xml" relativeToChangelogFile="true"/>
 
     <include file="v2.1.27\db-changelog-create-index-2.1.27.xml" relativeToChangelogFile="true"/>
 
-    <include file="v2.1.27\db-changelog-add-column-last-triggered-on-customrule-2.1.27.xml" relativeToChangelogFile="true"/>
+    <include file="v2.1.27\db-changelog-add-column-last-triggered-on-customrule-2.1.27.xml"
+             relativeToChangelogFile="true"/>
 
     <include file="v2.1.28\db-changelog-create-assetGuid_index_on_ticket-2.1.28.xml" relativeToChangelogFile="true"/>
 
     <include file="v2.1.30\db-changelog-update-previous-report-table-2.1.30.xml" relativeToChangelogFile="true"/>
+
+    <include file="v2.3.5\db-changelog-new-index-on-ticket-ticket_movementguid.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
