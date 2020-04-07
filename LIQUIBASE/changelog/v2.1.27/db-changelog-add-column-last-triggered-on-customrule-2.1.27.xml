@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
-	logicalFilePath="changelog/v2.1.27/db-changelog-add-column-last-triggered-on-customrule-2.1.27.xml">
-    
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.7.xsd"
+                   logicalFilePath="changelog/v2.1.27/db-changelog-add-column-last-triggered-on-customrule-2.1.27.xml">
+
     <changeSet id="db-changelog-add-last-triggered-to-customrule" author="joemat">
-        <addColumn tableName="customrule" >
+        <addColumn tableName="customrule">
             <column name="rule_lasttriggered" type="TIMESTAMP(6) WITH TIME ZONE"/>
         </addColumn>
 
     </changeSet>
-    
+
 </databaseChangeLog>

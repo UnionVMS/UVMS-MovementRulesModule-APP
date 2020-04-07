@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.7.xsd">
 
     <changeSet author="andtho" id="ticket-01">
-        
+
         <createTable tableName="ticket" remarks="Ticket table.">
-            
+
             <column name="ticket_id" type="bigint" remarks="The synthetic key.">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ticket_pk"/>
             </column>
@@ -27,9 +28,9 @@
         </createTable>
 
         <rollback>
-            <dropTable tableName="ticket" cascadeConstraints="true" />
+            <dropTable tableName="ticket" cascadeConstraints="true"/>
         </rollback>
-        
+
     </changeSet>
 
     <changeSet author="andtho" id="ticket-02">
@@ -39,8 +40,8 @@
         </addColumn>
 
         <rollback>
-            <dropColumn tableName="ticket" columnName="ticket_mobileterminalguid" />
-            <dropColumn tableName="ticket" columnName="ticket_channelguid" />
+            <dropColumn tableName="ticket" columnName="ticket_mobileterminalguid"/>
+            <dropColumn tableName="ticket" columnName="ticket_channelguid"/>
         </rollback>
 
     </changeSet>
@@ -51,7 +52,7 @@
         </addColumn>
 
         <rollback>
-            <dropColumn tableName="ticket" columnName="ticket_count" />
+            <dropColumn tableName="ticket" columnName="ticket_count"/>
         </rollback>
 
     </changeSet>

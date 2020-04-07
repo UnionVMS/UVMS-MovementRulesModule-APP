@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.7.xsd">
 
     <changeSet author="andtho" id="previousreport-01">
-        
+
         <createTable tableName="previousreport" remarks="Previous report table.">
-            
+
             <column name="prevrep_id" type="bigint" remarks="The synthetic key.">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="prevrep_pk"/>
             </column>
@@ -20,19 +21,19 @@
             </column>
 
         </createTable>
-       
+
 
         <rollback>
-            <dropTable tableName="previousreport" cascadeConstraints="true" />
+            <dropTable tableName="previousreport" cascadeConstraints="true"/>
         </rollback>
-        
+
     </changeSet>
 
     <changeSet author="osdjup" id="previousreport-02">
         <addUniqueConstraint
-            columnNames="prevrep_assetguid"
-            tableName="previousreport"/>
+                columnNames="prevrep_assetguid"
+                tableName="previousreport"/>
     </changeSet>
-        
+
 
 </databaseChangeLog>
