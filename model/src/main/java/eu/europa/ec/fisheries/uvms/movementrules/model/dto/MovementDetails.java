@@ -35,6 +35,7 @@ public class MovementDetails {
     private String assetName;
     private String assetStatus;
     private String mmsi;
+    private String imo;
     private List<String> assetGroups;
 
     // MOBILE_TERMINAL
@@ -205,6 +206,14 @@ public class MovementDetails {
 
     public void setMmsi(String mmsi) {
         this.mmsi = mmsi;
+    }
+
+    public String getImo() {
+        return imo;
+    }
+
+    public void setImo(String imo) {
+        this.imo = imo;
     }
 
     public List<String> getAssetGroups() {
