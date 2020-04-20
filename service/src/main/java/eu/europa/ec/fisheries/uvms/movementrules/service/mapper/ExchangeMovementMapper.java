@@ -104,6 +104,12 @@ public class ExchangeMovementMapper {
             idList.setValue(movementDetails.getMmsi());
             assetId.getAssetIdList().add(idList);
         }
+        if (movementDetails.getImo() != null) {
+            eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList idList = new eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList();
+            idList.setIdType(AssetIdType.IMO);
+            idList.setValue(movementDetails.getImo());
+            assetId.getAssetIdList().add(idList);
+        }
         return assetId;
     }
 }
