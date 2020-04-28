@@ -217,7 +217,7 @@ public class ValidationServiceBean  {
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_TO_ENDPOINT, null, organisationName, "UVMS");
 
-        } catch (JMSException e) {
+        } catch (Exception e) {
             LOG.error("[ Failed to send to endpoint! ] {}", e.getMessage());
         }
     }

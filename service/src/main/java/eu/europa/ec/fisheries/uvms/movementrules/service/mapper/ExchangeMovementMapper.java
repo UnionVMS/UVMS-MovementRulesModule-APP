@@ -83,9 +83,6 @@ public class ExchangeMovementMapper {
 
     private static AssetId mapAssetId(MovementDetails movementDetails) {
         AssetId assetId = new AssetId();
-        if (movementDetails.getAssetType() != null) {
-            assetId.setAssetType(AssetType.valueOf(movementDetails.getAssetType()));
-        }
         if (movementDetails.getCfr() != null) {
             eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList idList = new eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList();
             idList.setIdType(AssetIdType.CFR);
