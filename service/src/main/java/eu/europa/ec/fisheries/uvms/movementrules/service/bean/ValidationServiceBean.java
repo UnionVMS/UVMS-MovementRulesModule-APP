@@ -13,7 +13,6 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementTypeType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
@@ -36,12 +35,10 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.EmailMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.InternalRestTokenHandler;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
-import eu.europa.ec.fisheries.wsdl.user.types.Channel;
-import eu.europa.ec.fisheries.wsdl.user.types.EndPoint;
-import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -238,8 +235,8 @@ public class ValidationServiceBean  {
 
         EmailType email = new EmailType();
 
-        email.setSubject(buildSubject(ruleName));
-        email.setBody(buildBody(ruleName, movementDetails));
+        email.setSubject(EmailMapper.buildSubject(movementDetails));
+        email.setBody(EmailMapper.buildBody(ruleName, movementDetails));
         email.setTo(emailAddress);
 
         try {
@@ -260,105 +257,6 @@ public class ValidationServiceBean  {
         } catch (JMSException e) {
             LOG.error("Failed to send email! {}", e.getMessage());
         }
-    }
-
-    private String buildSubject(String ruleName) {
-        StringBuilder subjectBuilder = new StringBuilder();
-        subjectBuilder.append("Rule '")
-                .append(ruleName)
-                .append("' has been triggered.");
-        return subjectBuilder.toString();
-    }
-    
-    private String buildBody(String ruleName, MovementDetails movementDetails) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html>")
-                .append(buildSubject(ruleName))
-                .append("<br><br>")
-                .append(buildAssetBodyPart(movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getCfr()))
-                .append(buildPositionBodyPart(movementDetails))
-                .append("</html>");
-
-        return sb.toString();
-    }
-
-    private String buildAssetBodyPart(String assetName, String ircs, String cfr) {
-        StringBuilder assetBuilder = new StringBuilder();
-        assetBuilder.append("<b>Asset:</b>")
-                .append("<br>&nbsp;&nbsp;")
-                .append("Name: ")
-                .append(assetName)
-                .append("<br>&nbsp;&nbsp;")
-                .append("IRCS: ")
-                .append(ircs)
-                .append("<br>&nbsp;&nbsp;")
-                .append("CFR: ")
-                .append(cfr)
-                .append("<br>");
-
-        return assetBuilder.toString();
-    }
-
-    private String buildPositionBodyPart(MovementDetails fact) {
-        StringBuilder positionBuilder = new StringBuilder();
-        positionBuilder.append("<b>Position report:</b>")
-                .append("<br>&nbsp;&nbsp;")
-                .append("Report timestamp: ")
-                .append(fact.getPositionTime())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Longitude: ")
-                .append(fact.getLongitude())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Latitude: ")
-                .append(fact.getLatitude())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Status code: ")
-                .append(fact.getStatusCode())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Reported speed: ")
-                .append(fact.getReportedSpeed())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Reported course: ")
-                .append(fact.getReportedCourse())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Calculated speed: ")
-                .append(fact.getCalculatedSpeed())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Calculated course: ")
-                .append(fact.getCalculatedCourse())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Com channel type: ")
-                .append(fact.getComChannelType())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Segment type: ")
-                .append(fact.getSegmentType())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Source: ")
-                .append(fact.getSource())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Movement type: ")
-                .append(fact.getMovementType())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Activity type: ")
-                .append(fact.getActivityMessageType())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Closest port: ")
-                .append(fact.getClosestPortCode())
-                .append("<br>&nbsp;&nbsp;")
-                .append("Closest country: ")
-                .append(fact.getClosestCountryCode())
-                .append("<br>&nbsp;&nbsp;");
-
-        positionBuilder.append("Areas:");
-        for (int i = 0; i < fact.getAreaCodes().size(); i++) {
-            positionBuilder.append("<br>&nbsp;&nbsp;&nbsp;&nbsp;")
-                    .append(fact.getAreaCodes().get(i))
-                    .append(" (")
-                    .append(fact.getAreaTypes().get(i))
-                    .append(")");
-        }
-
-        return positionBuilder.toString();
     }
 
     public String createPollInternal(String assetGuid, String ruleName){
