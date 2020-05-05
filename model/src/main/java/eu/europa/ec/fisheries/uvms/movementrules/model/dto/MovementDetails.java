@@ -47,6 +47,7 @@ public class MovementDetails {
     private String mobileTerminalMemberNumber;
     private String mobileTerminalSerialNumber;
     private String mobileTerminalStatus;
+    private String oceanRegion;
 
     // POSITION
     private Double altitude;
@@ -286,6 +287,14 @@ public class MovementDetails {
 
     public void setMobileTerminalStatus(String mobileTerminalStatus) {
         this.mobileTerminalStatus = mobileTerminalStatus;
+    }
+
+    public String getOceanRegion() {
+        return oceanRegion;
+    }
+
+    public void setOceanRegion(String oceanRegion) {
+        this.oceanRegion = oceanRegion;
     }
 
     public Double getAltitude() {
