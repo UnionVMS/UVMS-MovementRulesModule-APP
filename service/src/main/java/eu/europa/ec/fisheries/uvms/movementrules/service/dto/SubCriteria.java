@@ -13,7 +13,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
 public enum SubCriteria {
 
-    ASSET_GROUP(MainCriteria.ASSET_GROUP),
+    ASSET_FILTER(MainCriteria.ASSET_FILTER),
 
     ACTIVITY_CALLBACK(MainCriteria.ACTIVITY),
     ACTIVITY_MESSAGE_ID(MainCriteria.ACTIVITY),
@@ -37,6 +37,7 @@ public enum SubCriteria {
     ASSET_IRCS(MainCriteria.ASSET),
     ASSET_NAME(MainCriteria.ASSET),
     ASSET_STATUS(MainCriteria.ASSET),
+    ASSET_TYPE(MainCriteria.ASSET),
 
     COMCHANNEL_TYPE(MainCriteria.MOBILE_TERMINAL),
     MT_TYPE(MainCriteria.MOBILE_TERMINAL),

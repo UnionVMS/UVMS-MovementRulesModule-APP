@@ -13,7 +13,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.dto;
 
 public enum MainCriteria {
 
-    ROOT, ACTIVITY, AREA, ASSET, ASSET_GROUP, MOBILE_TERMINAL, POSITION, REPORT;
+    ROOT, ACTIVITY, AREA, ASSET, ASSET_FILTER, MOBILE_TERMINAL, POSITION, REPORT;
 
     private MainCriteria() {
     }

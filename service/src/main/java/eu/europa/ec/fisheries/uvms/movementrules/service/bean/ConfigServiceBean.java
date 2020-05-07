@@ -74,7 +74,7 @@ public class ConfigServiceBean {
             case SOURCE:
             case CLOSEST_COUNTRY_CODE:
             case CLOSEST_PORT_CODE:
-            case ASSET_GROUP:
+            case ASSET_FILTER:
             case ASSET_STATUS:
             case MT_STATUS:
             case AREA_CODE_ENT:

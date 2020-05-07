@@ -54,13 +54,7 @@ public class CustomRuleParser {
 
                 if (segment.getSubCriteria() != null) {
                     switch (SubCriteriaType.valueOf(segment.getSubCriteria())) {
-                        case ASSET_GROUP:
-                            // If list and NE
-                            if (segment.getCondition().equals(ConditionType.NE.value())) {
-                                sb.append("!");
-                            }
-                            sb.append("assetGroups");
-                            break;
+
 
                         // ACTIVITY
                         case ACTIVITY_CALLBACK:
@@ -146,6 +140,13 @@ public class CustomRuleParser {
                             break;
 
                         // ASSET
+                        case ASSET_FILTER:
+                            // If list and NE
+                            if (segment.getCondition().equals(ConditionType.NE.value())) {
+                                sb.append("!");
+                            }
+                            sb.append("assetFilters");
+                            break;
                         case ASSET_ID_GEAR_TYPE:
                             sb.append("assetIdGearType");
                             break;
@@ -166,6 +167,9 @@ public class CustomRuleParser {
                             break;
                         case ASSET_STATUS:
                             sb.append("assetStatus");
+                            break;
+                        case ASSET_TYPE:
+                            sb.append("assetType");
                             break;
 
                         // MOBILE_TERMINAL
@@ -315,7 +319,7 @@ public class CustomRuleParser {
                 }
 
                 // If list, end "contains" with parenthesis
-                if ((segment.getCriteria().equals(CriteriaType.AREA.value()) || segment.getCriteria().equals(CriteriaType.ASSET_GROUP.value()) || segment.getSubCriteria().equals(SubCriteriaType.VICINITY_OF.value()))
+                if ((segment.getCriteria().equals(CriteriaType.AREA.value()) || segment.getCriteria().equals(CriteriaType.ASSET_FILTER.value()) || segment.getSubCriteria().equals(SubCriteriaType.VICINITY_OF.value()))
                         && (segment.getCondition().equals(ConditionType.EQ.value()) || segment.getCondition().equals(ConditionType.NE.value()))) {
                     sb.append(")");
                 }
@@ -395,7 +399,7 @@ public class CustomRuleParser {
                 SubCriteriaType.AREA_TYPE_VMS_ENT.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_CODE_VMS_EXT.value().equals(subcriteria) ||
                 SubCriteriaType.AREA_TYPE_VMS_EXT.value().equals(subcriteria) ||
-                SubCriteriaType.ASSET_GROUP.value().equals(subcriteria) ||
+                SubCriteriaType.ASSET_FILTER.value().equals(subcriteria) ||
                 //SubCriteriaType.VICINITY_DISTANCE_OF.value().equals(subcriteria) ||
                 SubCriteriaType.VICINITY_OF.value().equals(subcriteria);
     }
