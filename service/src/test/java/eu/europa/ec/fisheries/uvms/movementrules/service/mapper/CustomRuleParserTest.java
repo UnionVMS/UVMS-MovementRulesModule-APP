@@ -497,10 +497,10 @@ public class CustomRuleParserTest {
         // ASSET_GROUP
         RuleSegment segment30 = new RuleSegment();
         segment30.setStartOperator("");
-        segment30.setCriteria(CriteriaType.ASSET_GROUP.value());
-        segment30.setSubCriteria(SubCriteriaType.ASSET_GROUP.value());
+        segment30.setCriteria(CriteriaType.ASSET_FILTER.value());
+        segment30.setSubCriteria(SubCriteriaType.ASSET_FILTER.value());
         segment30.setCondition(ConditionType.NE.value());
-        segment30.setValue("ASSET_GROUP");
+        segment30.setValue("ASSET_FILTER");
         segment30.setEndOperator("");
         segment30.setLogicOperator(LogicOperatorType.OR.value());
         segment30.setOrder(30);
@@ -605,18 +605,6 @@ public class CustomRuleParserTest {
 
 
 
-        // VICINITY_OF
-//        RuleSegment segment33 = new RuleSegment();
-//        segment33.setStartOperator("");
-//        segment33.setCriteria(CriteriaType.POSITION);
-//        segment33.setSubCriteria(SubCriteriaType.VICINITY_OF);
-//        segment33.setCondition(ConditionType.EQ);
-//        segment33.setValue("VICINITY_OF");
-//        segment33.setEndOperator(")");
-//        segment33.setLogicOperator(LogicOperatorType.NONE);
-//        segment33.setOrder("33");
-//        customRule.getDefinitions().add(segment33);
-
         // Action
         RuleAction action = new RuleAction();
         action.setAction(ActionType.SEND_REPORT.value());
@@ -658,7 +646,7 @@ public class CustomRuleParserTest {
         sb.append("statusCode == \"010\" || ");
         sb.append("closestCountryCode == \"DNK\" || ");
         sb.append("closestPortCode == \"CLOSEST_PORT_CODE\" || ");
-        sb.append("!assetGroups.contains(\"ASSET_GROUP\") || ");
+        sb.append("!assetFilters.contains(\"ASSET_FILTER\") || ");
         sb.append("sumPositionReport > \"10\" || ");
         sb.append("timeDiffPositionReport < \"60\" || ");
         sb.append("entAreaCodes.contains(\"DNK\") || ");
@@ -839,6 +827,33 @@ public class CustomRuleParserTest {
         List<CustomRule> rawRules = new ArrayList<CustomRule>();
         rawRules.add(customRule);
         String expectedRule = "vmsExtAreaTypes.contains(\"EEZ\") && vmsExtAreaCodes.contains(\"SWE\")";
+
+        List<CustomRuleDto> rules = CustomRuleParser.parseRules(rawRules);
+        assertEquals(expectedRule, rules.get(0).getExpression());
+    }
+
+    @Test
+    public void parseAssetTypeTest() {
+        CustomRule customRule = new CustomRule();
+        customRule.setName("Name");
+        customRule.setGuid(UUID.randomUUID());
+        customRule.setAvailability(AvailabilityType.PRIVATE.value());
+
+        RuleSegment segmentVmsExitType = new RuleSegment();
+        segmentVmsExitType.setStartOperator("");
+        segmentVmsExitType.setCriteria(CriteriaType.ASSET.value());
+        segmentVmsExitType.setSubCriteria(SubCriteriaType.ASSET_TYPE.value());
+        segmentVmsExitType.setCondition(ConditionType.EQ.value());
+        segmentVmsExitType.setValue("asset type test");
+        segmentVmsExitType.setEndOperator("");
+        segmentVmsExitType.setLogicOperator(LogicOperatorType.NONE.value());
+        segmentVmsExitType.setOrder(0);
+        customRule.getRuleSegmentList().add(segmentVmsExitType);
+
+
+        List<CustomRule> rawRules = new ArrayList<CustomRule>();
+        rawRules.add(customRule);
+        String expectedRule = "assetType == \"asset type test\"";
 
         List<CustomRuleDto> rules = CustomRuleParser.parseRules(rawRules);
         assertEquals(expectedRule, rules.get(0).getExpression());

@@ -36,7 +36,7 @@ public class MovementDetails {
     private String assetStatus;
     private String mmsi;
     private String imo;
-    private List<String> assetGroups;
+    private List<String> assetFilters;
 
     // MOBILE_TERMINAL
     private String channelGuid;
@@ -218,12 +218,12 @@ public class MovementDetails {
         this.imo = imo;
     }
 
-    public List<String> getAssetGroups() {
-        return assetGroups;
+    public List<String> getAssetFilters() {
+        return assetFilters;
     }
 
-    public void setAssetGroups(List<String> assetGroups) {
-        this.assetGroups = assetGroups;
+    public void setAssetFilters(List<String> assetFilters) {
+        this.assetFilters = assetFilters;
     }
 
     public String getChannelGuid() {
