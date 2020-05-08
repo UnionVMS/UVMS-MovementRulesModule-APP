@@ -77,6 +77,7 @@ public class ExchangeMovementMapper {
         }
         movement.setStatus(movementDetails.getStatusCode());
         movement.setTripNumber(movementDetails.getTripNumber());
+        movement.setSourceSatelliteId(movementDetails.getSourceSatelliteId());
 
         return movement;
     }

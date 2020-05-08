@@ -48,6 +48,7 @@ public class MovementDetails {
     private String mobileTerminalSerialNumber;
     private String mobileTerminalStatus;
     private String oceanRegion;
+    private Integer sourceSatelliteId;
 
     // POSITION
     private Double altitude;
@@ -295,6 +296,14 @@ public class MovementDetails {
 
     public void setOceanRegion(String oceanRegion) {
         this.oceanRegion = oceanRegion;
+    }
+
+    public Integer getSourceSatelliteId() {
+        return sourceSatelliteId;
+    }
+
+    public void setSourceSatelliteId(Integer sourceSatelliteId) {
+        this.sourceSatelliteId = sourceSatelliteId;
     }
 
     public Double getAltitude() {
