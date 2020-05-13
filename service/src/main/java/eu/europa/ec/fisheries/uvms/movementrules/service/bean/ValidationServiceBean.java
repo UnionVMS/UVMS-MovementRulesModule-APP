@@ -22,6 +22,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.mobileterminal.model.dto.CreatePollResultDto;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
@@ -272,7 +273,7 @@ public class ValidationServiceBean  {
             String username = "Triggerd by rule: " + ruleName;
             String comment = "This poll was triggered by rule: " + ruleName + " on: " + Instant.now().toString() + " on Asset: " + fact.getAssetName();
 
-            Response createdPoll = getWebTarget()
+            Response createdPollResponse = getWebTarget()
                     .path("internal/createPollForAsset")
                     .path(fact.getAssetGuid())
                     .queryParam("username", username)
@@ -281,13 +282,20 @@ public class ValidationServiceBean  {
                     .header(HttpHeaders.AUTHORIZATION, tokenHandler.createAndFetchToken("user"))
                     .post(Entity.json(""), Response.class);
 
-        if(createdPoll.getStatus() != 200){
-            return "NOK";
-        }
-        return "OK";
+            if(createdPollResponse.getStatus() != 200){
+                return "Unable to create poll";
+            }
+
+            CreatePollResultDto createPollResultDto = createdPollResponse.readEntity(CreatePollResultDto.class);
+            if(!createPollResultDto.isUnsentPoll()){
+                return createPollResultDto.getSentPolls().get(0);
+            }else {
+                return createPollResultDto.getUnsentPolls().get(0);
+            }
+
         } catch (Exception e){
             LOG.error("Error while sending rule-triggered poll: ", e);
-            return "NOK";
+            return "NOK " + e.getMessage();
         }
     }
 

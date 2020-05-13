@@ -485,8 +485,8 @@ public class RulesServiceBean {
         Ticket ticketEntity = rulesDao.getTicketByAssetAndRule(previousReport.getAssetGuid(), ruleName); // ruleName gets renamed
 
         if (ticketEntity == null) {
-            createAssetNotSendingTicket(ruleName, previousReport);
-            validationServiceBean.createPollInternal(previousReport.getAssetGuid(), ruleName);
+            String pollId = validationServiceBean.createPollInternal(previousReport.getAssetGuid(), ruleName);
+            createAssetNotSendingTicket(ruleName, previousReport, pollId);
         } else if (ticketEntity.getTicketCount() != null) {
             ticketEntity.setTicketCount(ticketEntity.getTicketCount() + 1);
             updateTicketCount(ticketEntity);
@@ -496,7 +496,7 @@ public class RulesServiceBean {
         }
     }
 
-    public void createAssetNotSendingTicket(String ruleName, PreviousReport previousReport) {
+    public void createAssetNotSendingTicket(String ruleName, PreviousReport previousReport, String pollId) {
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(previousReport.getAssetGuid());
         if (previousReport.getMovementGuid() != null)
@@ -513,7 +513,7 @@ public class RulesServiceBean {
         ticket.setTicketCount(1L);
         rulesDao.createTicket(ticket);
 
-        ticketEvent.fire(new EventTicket(ticket, null));
+        ticketEvent.fire(new EventTicket(ticket, null, pollId));
 		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
 		// Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));

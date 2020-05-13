@@ -23,7 +23,7 @@
         <uvms.config.version>4.1.2</uvms.config.version>
         <usm4uvms.version>4.1.0</usm4uvms.version>
         <uvms.common.version>4.1.7</uvms.common.version>
-        <uvms.asset.version>6.7.7</uvms.asset.version>
+        <uvms.asset.version>6.7.9-SNAPSHOT</uvms.asset.version>
 
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
