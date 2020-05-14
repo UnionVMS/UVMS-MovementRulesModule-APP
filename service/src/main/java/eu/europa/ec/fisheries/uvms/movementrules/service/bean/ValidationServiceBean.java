@@ -38,6 +38,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.EmailMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.IncidentProducer;
 import eu.europa.ec.fisheries.uvms.rest.security.InternalRestTokenHandler;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
 import org.slf4j.Logger;
@@ -79,6 +80,9 @@ public class ValidationServiceBean  {
     private AuditServiceBean auditService;
 
     @Inject
+    private IncidentProducer incidentProducer;
+
+    @Inject
     @TicketEvent
     private Event<EventTicket> ticketEvent;
 
@@ -97,12 +101,7 @@ public class ValidationServiceBean  {
         triggeredRule.setLastTriggered(Instant.now());
         
         Instant auditTimestamp = Instant.now();
-        
-        if (triggeredRule != null && triggeredRule.isAggregateInvocations()) {
-            createTicketOrIncreaseCount(movementDetails, triggeredRule);
-        } else {
-            createTicket(triggeredRule, movementDetails);
-        }
+
         auditTimestamp = auditLog("Time to create/update ticket:", auditTimestamp);
 
         sendMailToSubscribers(triggeredRule, movementDetails);
@@ -142,6 +141,13 @@ public class ValidationServiceBean  {
                     createPollInternal(movementDetails, ruleName);
                     auditTimestamp = auditLog("Time to send poll:", auditTimestamp);
                     break;
+                case CREATE_INCIDENT:
+                    Ticket ticket = upsertTicket(triggeredRule, movementDetails);
+                    incidentProducer.createdTicket(new EventTicket(ticket, triggeredRule));
+                    break;
+                case CREATE_TICKET:
+                    upsertTicket(triggeredRule, movementDetails);
+                    break;
 
                     /*
                 case ON_HOLD:
@@ -160,7 +166,16 @@ public class ValidationServiceBean  {
             }
         }
     }
-    
+
+    private Ticket upsertTicket(CustomRule triggeredRule, MovementDetails movementDetails){
+        if (triggeredRule != null && triggeredRule.isAggregateInvocations()) {
+            createTicketOrIncreaseCount(movementDetails, triggeredRule);
+        } else {
+            createTicket(triggeredRule, movementDetails);
+        }
+    }
+
+
     private CustomRule getCustomRule(String ruleGuid) {
         try {
             return rulesDao.getCustomRuleByGuid(UUID.fromString(ruleGuid));
@@ -332,7 +347,6 @@ public class ValidationServiceBean  {
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid().toString(), null, createdTicket.getUpdatedBy());
         } catch (Exception e) { //TODO: figure out if we are to have this kind of exception handling here and if we are to catch everything
             LOG.error("[ Failed to create ticket! ] {}", e);
-            LOG.error("[ERROR] Error when creating ticket {}", e);
         }
     }
 
