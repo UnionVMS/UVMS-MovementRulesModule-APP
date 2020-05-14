@@ -30,7 +30,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityTyp
 @XmlRootElement
 @NamedQueries({
         @NamedQuery(name = CustomRule.GET_RUNNABLE_CUSTOM_RULES, query = "SELECT r FROM CustomRule r WHERE r.active = true AND r.archived = false"), // for rule engine
-        @NamedQuery(name = CustomRule.LIST_CUSTOM_RULES_BY_USER, query = "SELECT r FROM CustomRule r WHERE r.archived = false AND (r.availability = 'GLOBAL' OR r.availability = 'PUBLIC' OR r.updatedBy = :updatedBy)"),
+        @NamedQuery(name = CustomRule.LIST_CUSTOM_RULES_BY_USER, query = "SELECT r FROM CustomRule r WHERE (r.availability = 'GLOBAL' OR r.availability = 'PUBLIC' OR r.updatedBy = :updatedBy)"),
         @NamedQuery(name = CustomRule.FIND_CUSTOM_RULE_GUID_FOR_TICKETS, query = "SELECT r.guid FROM CustomRule r LEFT OUTER JOIN r.ruleSubscriptionList s WHERE r.availability = 'GLOBAL' OR (s.owner = :owner AND s.type='TICKET')")
 })
 //@formatter:on
