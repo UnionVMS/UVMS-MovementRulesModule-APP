@@ -169,9 +169,9 @@ public class ValidationServiceBean  {
 
     private Ticket upsertTicket(CustomRule triggeredRule, MovementDetails movementDetails){
         if (triggeredRule != null && triggeredRule.isAggregateInvocations()) {
-            createTicketOrIncreaseCount(movementDetails, triggeredRule);
+            return createTicketOrIncreaseCount(movementDetails, triggeredRule);
         } else {
-            createTicket(triggeredRule, movementDetails);
+            return createTicket(triggeredRule, movementDetails);
         }
     }
 
@@ -314,7 +314,7 @@ public class ValidationServiceBean  {
         }
     }
 
-    private void createTicket(CustomRule customRule, MovementDetails fact) {
+    private Ticket createTicket(CustomRule customRule, MovementDetails fact) {
         try {
             Ticket ticket = new Ticket();
 
@@ -345,6 +345,8 @@ public class ValidationServiceBean  {
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid().toString(), null, createdTicket.getUpdatedBy());
+
+            return
         } catch (Exception e) { //TODO: figure out if we are to have this kind of exception handling here and if we are to catch everything
             LOG.error("[ Failed to create ticket! ] {}", e);
         }
