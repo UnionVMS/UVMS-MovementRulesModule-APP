@@ -24,6 +24,8 @@
         <usm4uvms.version>4.1.0</usm4uvms.version>
         <uvms.common.version>4.1.7</uvms.common.version>
         <uvms.asset.version>6.7.8</uvms.asset.version>
+        <uvms.incident.version>0.2.0</uvms.incident.version>
+
 
         <project.scm.id>github</project.scm.id>
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-MovementRulesModule-APP.git</scm.connection>
@@ -71,6 +73,11 @@
                 <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
                 <artifactId>uvms-commons-date</artifactId>
                 <version>${uvms.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.fisheries.uvms.incident</groupId>
+                <artifactId>incident-model</artifactId>
+                <version>${uvms.incident.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
