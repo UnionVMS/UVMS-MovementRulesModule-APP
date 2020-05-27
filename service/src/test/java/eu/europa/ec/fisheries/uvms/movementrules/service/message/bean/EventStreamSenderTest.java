@@ -61,7 +61,7 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
         MovementDetails movementDetails = getMovementDetails();
         registerSubscriber();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, ";");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, "CREATE_TICKET");
 
         TextMessage message = (TextMessage) listenOnEventStream(10000L);
         assertNotNull(message);
@@ -91,7 +91,7 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
         movementDetails.setFlagState(flagstate);
 
         registerSubscriber();
-        validationService.customRuleTriggered(updatedRule.getName(), updatedRule.getGuid().toString(), movementDetails, ";");
+        validationService.customRuleTriggered(updatedRule.getName(), updatedRule.getGuid().toString(), movementDetails, "CREATE_TICKET");
 
         TextMessage message = (TextMessage) listenOnEventStream(10000L);
         assertNotNull(message);
@@ -119,7 +119,7 @@ public class EventStreamSenderTest extends BuildRulesServiceDeployment {
         MovementDetails movementDetails = getMovementDetails();
         movementDetails.setFlagState(flagstate);
         registerSubscriber();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, ";");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, "CREATE_TICKET");
 
         TextMessage message = (TextMessage) listenOnEventStream(10000L);
         assertNotNull(message);
