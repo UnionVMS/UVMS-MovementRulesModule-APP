@@ -22,6 +22,7 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
+import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 
 import java.time.Instant;
@@ -38,7 +39,23 @@ public class RulesTestHelper {
         customRule.setUpdatedBy("Test User");
         customRule.setActive(true);
         customRule.setArchived(false);
+
+        RuleAction action = new RuleAction();
+        action.setAction(ActionType.CREATE_TICKET.value());
+        action.setOrder(0);
+        action.setCustomRule(customRule);
+        customRule.getRuleActionList().add(action);
+
         return customRule;
+    }
+
+
+    public static CustomRuleActionType createCreateTicketAction(){
+        CustomRuleActionType action = new CustomRuleActionType();
+        action.setAction(ActionType.CREATE_TICKET);
+        action.setOrder("0");
+
+        return action;
     }
     
     public static TicketQuery getBasicTicketQuery() {
@@ -98,6 +115,8 @@ public class RulesTestHelper {
         action.setValue("FLUX DNK");
         action.setOrder("0");
         customRule.getActions().add(action);
+
+        customRule.getActions().add(createCreateTicketAction());
 
         return customRule;
     }

@@ -69,6 +69,7 @@ public class CheckCommunicationTask implements Runnable {
             String thresholdSetting = parameterService.getStringValue(ParameterKey.ASSET_NOT_SENDING_THRESHOLD.getKey());
             return Long.valueOf(thresholdSetting);
         } catch (Exception e) {
+            LOG.error("Unable to get asset not sending threashold from parameter service due to {}. Returning two hours instead: ", e.getMessage(), e);
             return TWO_HOURS_IN_MILLISECONDS;
         }
     }

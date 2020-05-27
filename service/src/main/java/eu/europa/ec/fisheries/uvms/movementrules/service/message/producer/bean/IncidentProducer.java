@@ -8,7 +8,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.TicketMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +40,12 @@ public class IncidentProducer {
         jsonb = configurator.getContext(null);
     }
 
-    public void updatedTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketUpdateEvent EventTicket eventTicket) {
+    public void updatedTicket(EventTicket eventTicket) {
         IncidentTicketDto dto = mapToIncidentTicket(eventTicket, TicketType.ASSET_NOT_SENDING);
         send(dto, "IncidentUpdate");
     }
 
-    public void createdTicket(@Observes(during = TransactionPhase.AFTER_SUCCESS) @TicketEvent EventTicket eventTicket) {
+    public void createdTicket(EventTicket eventTicket) {
         IncidentTicketDto dto = mapToIncidentTicket(eventTicket, TicketType.ASSET_NOT_SENDING);
         send(dto, "Incident");
     }
@@ -72,7 +71,7 @@ public class IncidentProducer {
         dto.setId(ticket.getGuid());
         dto.setMobTermId(ticket.getMobileTerminalGuid());
         dto.setMovementId(ticket.getMovementGuid());
-        //dto.setPollId(eventTicket.getPollId());
+        dto.setPollId(eventTicket.getPollId());
         dto.setRecipient(ticket.getRecipient());
         dto.setRuleGuid(ticket.getRuleGuid());
         dto.setRuleName(ticket.getRuleName());

@@ -48,7 +48,7 @@ public class SSEResourceTest extends BuildRulesRestDeployment {
         MovementDetails movementDetails = getMovementDetails();
             
         try (SSETestClient client = new SSETestClient()) {
-            validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, ";");
+            validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, "CREATE_TICKET");
             
             TicketType ticket = client.getTicket(10000);
             assertThat(ticket.getRuleName(), is(customRule.getName()));
@@ -70,7 +70,7 @@ public class SSEResourceTest extends BuildRulesRestDeployment {
             
         try (SSETestClient client = new SSETestClient();
                 SSETestClient client2 = new SSETestClient()) {
-            validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, ";");
+            validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, "CREATE_TICKET");
             
             TicketType ticket = client.getTicket(10000);
             assertThat(ticket.getRuleName(), is(customRule.getName()));
@@ -122,7 +122,7 @@ public class SSEResourceTest extends BuildRulesRestDeployment {
             
         TicketType ticket;
         try (SSETestClient client = new SSETestClient()) {
-            validationService.customRuleTriggered(updatedRule.getName(), updatedRule.getGuid().toString(), movementDetails, ";");
+            validationService.customRuleTriggered(updatedRule.getName(), updatedRule.getGuid().toString(), movementDetails, "CREATE_TICKET");
             
             ticket = client.getTicket(10000);
             assertThat(ticket.getRuleName(), is(updatedRule.getName()));
@@ -146,7 +146,7 @@ public class SSEResourceTest extends BuildRulesRestDeployment {
         movementDetails.setFlagState(flagstate);
             
         try (SSETestClient client = new SSETestClient()) {
-            validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, ";");
+            validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementDetails, "CREATE_TICKET");
             
             TicketType ticket = client.getTicket(10000);
             assertThat(ticket.getRuleName(), is(customRule.getName()));

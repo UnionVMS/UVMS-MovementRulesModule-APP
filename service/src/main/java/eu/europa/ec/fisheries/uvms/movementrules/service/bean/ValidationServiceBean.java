@@ -22,6 +22,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.mobileterminal.model.dto.CreatePollResultDto;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
@@ -37,6 +38,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.EmailMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.IncidentProducer;
 import eu.europa.ec.fisheries.uvms.rest.security.InternalRestTokenHandler;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
 import org.slf4j.Logger;
@@ -78,6 +80,9 @@ public class ValidationServiceBean  {
     private AuditServiceBean auditService;
 
     @Inject
+    private IncidentProducer incidentProducer;
+
+    @Inject
     @TicketEvent
     private Event<EventTicket> ticketEvent;
 
@@ -96,12 +101,7 @@ public class ValidationServiceBean  {
         triggeredRule.setLastTriggered(Instant.now());
         
         Instant auditTimestamp = Instant.now();
-        
-        if (triggeredRule != null && triggeredRule.isAggregateInvocations()) {
-            createTicketOrIncreaseCount(movementDetails, triggeredRule);
-        } else {
-            createTicket(triggeredRule, movementDetails);
-        }
+
         auditTimestamp = auditLog("Time to create/update ticket:", auditTimestamp);
 
         sendMailToSubscribers(triggeredRule, movementDetails);
@@ -141,6 +141,13 @@ public class ValidationServiceBean  {
                     createPollInternal(movementDetails, ruleName);
                     auditTimestamp = auditLog("Time to send poll:", auditTimestamp);
                     break;
+                case CREATE_INCIDENT:
+                    Ticket ticket = upsertTicket(triggeredRule, movementDetails);
+                    incidentProducer.createdTicket(new EventTicket(ticket, triggeredRule));
+                    break;
+                case CREATE_TICKET:
+                    upsertTicket(triggeredRule, movementDetails);
+                    break;
 
                     /*
                 case ON_HOLD:
@@ -159,7 +166,16 @@ public class ValidationServiceBean  {
             }
         }
     }
-    
+
+    private Ticket upsertTicket(CustomRule triggeredRule, MovementDetails movementDetails){
+        if (triggeredRule != null && triggeredRule.isAggregateInvocations()) {
+            return createTicketOrIncreaseCount(movementDetails, triggeredRule);
+        } else {
+            return createTicket(triggeredRule, movementDetails);
+        }
+    }
+
+
     private CustomRule getCustomRule(String ruleGuid) {
         try {
             return rulesDao.getCustomRuleByGuid(UUID.fromString(ruleGuid));
@@ -169,13 +185,14 @@ public class ValidationServiceBean  {
         }
     }
 
-    private void createTicketOrIncreaseCount(MovementDetails movementDetails, CustomRule triggeredRule) {
+    private Ticket createTicketOrIncreaseCount(MovementDetails movementDetails, CustomRule triggeredRule) {
         Ticket latestTicketForRule = rulesDao.getLatestTicketForRule(triggeredRule.getGuid());
         if (latestTicketForRule == null) {
-            createTicket(triggeredRule, movementDetails);
+            return createTicket(triggeredRule, movementDetails);
         } else {
             latestTicketForRule.setTicketCount(latestTicketForRule.getTicketCount() + 1);
             latestTicketForRule.setUpdated(Instant.now());
+            return latestTicketForRule;
         }
     }
     
@@ -272,7 +289,7 @@ public class ValidationServiceBean  {
             String username = "Triggerd by rule: " + ruleName;
             String comment = "This poll was triggered by rule: " + ruleName + " on: " + Instant.now().toString() + " on Asset: " + fact.getAssetName();
 
-            Response createdPoll = getWebTarget()
+            Response createdPollResponse = getWebTarget()
                     .path("internal/createPollForAsset")
                     .path(fact.getAssetGuid())
                     .queryParam("username", username)
@@ -281,17 +298,24 @@ public class ValidationServiceBean  {
                     .header(HttpHeaders.AUTHORIZATION, tokenHandler.createAndFetchToken("user"))
                     .post(Entity.json(""), Response.class);
 
-        if(createdPoll.getStatus() != 200){
-            return "NOK";
-        }
-        return "OK";
+            if(createdPollResponse.getStatus() != 200){
+                return "Unable to create poll";
+            }
+
+            CreatePollResultDto createPollResultDto = createdPollResponse.readEntity(CreatePollResultDto.class);
+            if(!createPollResultDto.isUnsentPoll()){
+                return createPollResultDto.getSentPolls().get(0);
+            }else {
+                return createPollResultDto.getUnsentPolls().get(0);
+            }
+
         } catch (Exception e){
             LOG.error("Error while sending rule-triggered poll: ", e);
-            return "NOK";
+            return "NOK " + e.getMessage();
         }
     }
 
-    private void createTicket(CustomRule customRule, MovementDetails fact) {
+    private Ticket createTicket(CustomRule customRule, MovementDetails fact) {
         try {
             Ticket ticket = new Ticket();
 
@@ -322,9 +346,11 @@ public class ValidationServiceBean  {
             ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid().toString(), null, createdTicket.getUpdatedBy());
+
+            return ticket;
         } catch (Exception e) { //TODO: figure out if we are to have this kind of exception handling here and if we are to catch everything
             LOG.error("[ Failed to create ticket! ] {}", e);
-            LOG.error("[ERROR] Error when creating ticket {}", e);
+            return null;
         }
     }
 

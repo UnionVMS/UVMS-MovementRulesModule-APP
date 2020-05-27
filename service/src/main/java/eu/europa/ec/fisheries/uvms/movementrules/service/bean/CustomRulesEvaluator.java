@@ -26,6 +26,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.IncidentProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,10 @@ public class CustomRulesEvaluator {
     private Event<EventTicket> ticketUpdateEvent;
 
     @Inject
-    RulesServiceBean rulesServiceBean;
+    private RulesServiceBean rulesServiceBean;
+
+    @Inject
+    private IncidentProducer incidentProducer;
     
     public void evaluate(MovementDetails movementDetails) {
         
@@ -138,11 +142,13 @@ public class CustomRulesEvaluator {
         }
     }
 
+
     private void checkForOpenAssetNotSendingTicketAndUpdate(String assetGuid, String movementId) {
         Ticket ticket = getTicket(assetGuid);
         if (ticket == null) return;
         ticket.setMovementGuid(movementId);
         CustomRule customRule = rulesServiceBean.getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
+        incidentProducer.updatedTicket(new EventTicket(ticket, customRule));
         ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
     }
 
@@ -151,6 +157,7 @@ public class CustomRulesEvaluator {
         if (ticket == null) return;
         ticket.setStatus(TicketStatusType.CLOSED);
         CustomRule customRule = rulesServiceBean.getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
+        incidentProducer.updatedTicket(new EventTicket(ticket, customRule));
         ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
     }
 

@@ -189,6 +189,8 @@
             <xsd:enumeration value="SEND_EXIT_REPORT"/>
             <xsd:enumeration value="EMAIL"/>
             <xsd:enumeration value="MANUAL_POLL"/>
+            <xsd:enumeration value="CREATE_INCIDENT"/>
+            <xsd:enumeration value="CREATE_TICKET"/>
 
             <!-- NOT IMPLEMENTED YET
             <xsd:enumeration value="ON_HOLD"/>

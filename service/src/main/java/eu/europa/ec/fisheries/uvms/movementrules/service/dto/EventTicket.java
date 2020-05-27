@@ -18,6 +18,7 @@ public class EventTicket {
 
     private Ticket ticket;
     private CustomRule customRule;
+    private String pollId;
     
     public EventTicket(Ticket ticket, CustomRule customRule) {
         this.ticket = ticket;
@@ -25,6 +26,11 @@ public class EventTicket {
         if (customRule != null) {
             customRule.getRuleSubscriptionList().size();
         }
+    }
+
+    public EventTicket(Ticket ticket, CustomRule customRule, String pollId) {
+        this(ticket,customRule);
+        this.pollId = pollId;
     }
     
     public Ticket getTicket() {
@@ -38,5 +44,13 @@ public class EventTicket {
     }
     public void setCustomRule(CustomRule customRule) {
         this.customRule = customRule;
+    }
+
+    public String getPollId() {
+        return pollId;
+    }
+
+    public void setPollId(String pollId) {
+        this.pollId = pollId;
     }
 }
