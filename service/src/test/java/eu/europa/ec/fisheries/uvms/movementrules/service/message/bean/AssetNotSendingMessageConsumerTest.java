@@ -59,7 +59,7 @@ public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeploym
         report.setAssetGuid(movementDetails.getAssetGuid());
         report.setMovementGuid(UUID.fromString(movementDetails.getMovementGuid()));
         report.setMobTermGuid(UUID.fromString(movementDetails.getMobileTerminalGuid()));
-        rulesService.createAssetNotSendingTicket(ServiceConstants.ASSET_NOT_SENDING_RULE, report);
+        rulesService.timerRuleTriggered(ServiceConstants.ASSET_NOT_SENDING_RULE, report);
 
         Ticket ticket = rulesDao.getTicketByAssetAndRule(movementDetails.getAssetGuid(), ServiceConstants.ASSET_NOT_SENDING_RULE);
         assertNotNull(ticket);

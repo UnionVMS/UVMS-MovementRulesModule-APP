@@ -61,7 +61,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
 
         MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "CREATE_TICKET,null");
 
         long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
         assertThat(openTicketsAfter, is(openTicketsBefore + 1));
@@ -76,7 +76,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
 
         MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "SEND_REPORT,NAF,SWE");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "SEND_REPORT,NAF,SWE;CREATE_TICKET,null");
 
         long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
         assertThat(openTicketsAfter, is(openTicketsBefore + 1));
@@ -117,7 +117,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         long openTicketsBefore = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
 
         MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "CREATE_TICKET,null");
 
         long openTicketsAfter = validationService.getNumberOfOpenTickets(createdCustomRule.getUpdatedBy());
         assertThat(openTicketsAfter, is(openTicketsBefore + 1));
@@ -131,10 +131,10 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
 
         MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "CREATE_TICKET,null");
 
         MovementDetails movementFact2 = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact2, "EMAIL,test@test.com");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact2, "CREATE_TICKET,null");
         
         List<Ticket> tickets = rulesService.getTicketsByMovements(Arrays.asList(movementFact.getMovementGuid()));
         assertThat(tickets.size(), is(1));
@@ -149,7 +149,7 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
 
         MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
-        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,test@test.com");
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "CREATE_TICKET,null");
 
         Instant firstTimestamp = rulesService.getCustomRuleByGuid(createdCustomRule.getGuid())
                 .getLastTriggered();

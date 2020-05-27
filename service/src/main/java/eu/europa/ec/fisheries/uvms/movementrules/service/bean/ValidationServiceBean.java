@@ -185,13 +185,14 @@ public class ValidationServiceBean  {
         }
     }
 
-    private void createTicketOrIncreaseCount(MovementDetails movementDetails, CustomRule triggeredRule) {
+    private Ticket createTicketOrIncreaseCount(MovementDetails movementDetails, CustomRule triggeredRule) {
         Ticket latestTicketForRule = rulesDao.getLatestTicketForRule(triggeredRule.getGuid());
         if (latestTicketForRule == null) {
-            createTicket(triggeredRule, movementDetails);
+            return createTicket(triggeredRule, movementDetails);
         } else {
             latestTicketForRule.setTicketCount(latestTicketForRule.getTicketCount() + 1);
             latestTicketForRule.setUpdated(Instant.now());
+            return latestTicketForRule;
         }
     }
     
@@ -346,9 +347,10 @@ public class ValidationServiceBean  {
 
             auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, createdTicket.getGuid().toString(), null, createdTicket.getUpdatedBy());
 
-            return
+            return ticket;
         } catch (Exception e) { //TODO: figure out if we are to have this kind of exception handling here and if we are to catch everything
             LOG.error("[ Failed to create ticket! ] {}", e);
+            return null;
         }
     }
 

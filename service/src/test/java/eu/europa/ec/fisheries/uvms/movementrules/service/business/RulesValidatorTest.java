@@ -336,6 +336,7 @@ public class RulesValidatorTest extends TransactionalTests {
         ruleAction.setAction(ActionType.MANUAL_POLL.value());
         List<RuleAction> ruleActionList = new ArrayList<>();
         ruleActionList.add(ruleAction);
+        ruleActionList.add(RulesTestHelper.createCreateTicketAction(customRule));
         customRule.setRuleActionList(ruleActionList);
 
         CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");

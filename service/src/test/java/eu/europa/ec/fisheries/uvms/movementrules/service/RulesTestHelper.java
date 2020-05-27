@@ -44,6 +44,9 @@ public class RulesTestHelper {
         customRule.setUpdatedBy("vms_admin_com");
         customRule.setActive(true);
         customRule.setArchived(false);
+
+        customRule.getRuleActionList().add(createCreateTicketAction(customRule));
+
         return customRule;
     }
     
@@ -88,7 +91,18 @@ public class RulesTestHelper {
         action.setCustomRule(customRule);
         customRule.getRuleActionList().add(action);
 
+        customRule.getRuleActionList().add(createCreateTicketAction(customRule));
+
         return customRule;
+    }
+
+    public static RuleAction createCreateTicketAction(CustomRule customRule){
+        RuleAction action = new RuleAction();
+        action.setAction(ActionType.CREATE_TICKET.value());
+        action.setOrder(0);
+        action.setCustomRule(customRule);
+
+        return action;
     }
     
     public static CustomRuleQuery createBasicCustomRuleQuery() {

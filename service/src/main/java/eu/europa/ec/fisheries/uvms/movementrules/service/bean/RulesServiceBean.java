@@ -43,6 +43,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRul
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.CustomRuleSearchValue;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.search.TicketSearchValue;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.IncidentProducer;
 import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.wsdl.user.types.Feature;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
@@ -79,7 +80,10 @@ public class RulesServiceBean {
     private AuditServiceBean auditService;
 
     @Inject
-    ValidationServiceBean validationServiceBean;
+    private ValidationServiceBean validationServiceBean;
+
+    @Inject
+    private IncidentProducer incidentProducer;
 
     @Inject
     @TicketUpdateEvent
@@ -478,6 +482,7 @@ public class RulesServiceBean {
         return rulesDao.getPreviousReportList();
     }
 
+
     // Triggered by timer rule
     public void timerRuleTriggered(String ruleName, PreviousReport previousReport) {
         LOG.info("Timer rule triggered for asset: {}", previousReport.getAssetGuid());
@@ -486,17 +491,20 @@ public class RulesServiceBean {
 
         if (ticketEntity == null) {
             String pollId = validationServiceBean.createPollInternal(previousReport.getAssetGuid(), ruleName);
-            createAssetNotSendingTicket(ruleName, previousReport, pollId);
+            ticketEntity = createAssetNotSendingTicket(ruleName, previousReport, pollId);
+            incidentProducer.createdTicket(new EventTicket(ticketEntity, ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE, pollId));
         } else if (ticketEntity.getTicketCount() != null) {
             ticketEntity.setTicketCount(ticketEntity.getTicketCount() + 1);
             updateTicketCount(ticketEntity);
+            incidentProducer.updatedTicket(new EventTicket(ticketEntity, ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE));
         } else {
             ticketEntity.setTicketCount(2L);
             updateTicketCount(ticketEntity);
+            incidentProducer.updatedTicket(new EventTicket(ticketEntity, ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE));
         }
     }
 
-    public void createAssetNotSendingTicket(String ruleName, PreviousReport previousReport, String pollId) {
+    public Ticket createAssetNotSendingTicket(String ruleName, PreviousReport previousReport, String pollId) {
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(previousReport.getAssetGuid());
         if (previousReport.getMovementGuid() != null)
@@ -517,6 +525,8 @@ public class RulesServiceBean {
 		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
 		// Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
+
+        return ticket;
     }
 
     public Ticket updateTicketCount(Ticket ticket) {
