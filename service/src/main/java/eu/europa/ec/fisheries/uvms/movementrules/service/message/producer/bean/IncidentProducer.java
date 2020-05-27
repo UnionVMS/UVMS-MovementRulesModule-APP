@@ -71,7 +71,7 @@ public class IncidentProducer {
         dto.setId(ticket.getGuid());
         dto.setMobTermId(ticket.getMobileTerminalGuid());
         dto.setMovementId(ticket.getMovementGuid());
-        dto.setPollId(eventTicket.getPollId());
+        //dto.setPollId(eventTicket.getPollId());
         dto.setRecipient(ticket.getRecipient());
         dto.setRuleGuid(ticket.getRuleGuid());
         dto.setRuleName(ticket.getRuleName());
