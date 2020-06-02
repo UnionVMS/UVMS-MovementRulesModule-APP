@@ -91,7 +91,7 @@ public class CustomRulesEvaluator {
                 checkForOpenAssetNotSendingTicketAndUpdate(assetGuid, movementId);
             } else {
                 persistLastCommunication(assetGuid, movementId, mobTermId, positionTime);
-                checkForOpenAssetNotSendingTicketAndCloseIt(assetGuid);
+                checkForOpenAssetNotSendingTicketAndCloseIt(assetGuid, movementId);
             }
         }
 
@@ -152,10 +152,11 @@ public class CustomRulesEvaluator {
         ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
     }
 
-    private void checkForOpenAssetNotSendingTicketAndCloseIt(String assetGuid) {
+    private void checkForOpenAssetNotSendingTicketAndCloseIt(String assetGuid, String movementId) {
         Ticket ticket = getTicket(assetGuid);
         if (ticket == null) return;
         ticket.setStatus(TicketStatusType.CLOSED);
+        ticket.setMovementGuid(movementId);
         CustomRule customRule = rulesServiceBean.getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
         incidentProducer.updatedTicket(new EventTicket(ticket, customRule));
         ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
