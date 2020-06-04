@@ -15,18 +15,19 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.UpdateSubscriptionType;
 import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.CustomRuleListResponseDto;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.CustomRuleMapper;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.fisheries.uvms.user.model.exception.ModelMarshallException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.jms.JMSException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -54,7 +55,7 @@ public class CustomRulesRestResource {
 
     @POST
     @RequiresFeature(UnionVMSFeature.manageAlarmRules)
-    public Response createCustomRule(CustomRuleType customRule) {
+    public Response createCustomRule(CustomRuleType customRule) throws JMSException, ModelMarshallException, AccessDeniedException {
         LOG.info("Create invoked in rest layer");
         if(rulesService.isValid(customRule)) {
             try {
@@ -65,10 +66,10 @@ public class CustomRulesRestResource {
                 return Response.ok(response).build();
             } catch (AccessDeniedException e) {
                 LOG.error("[ User has no right to create global alarm rules ] {} ", e);
-                return ErrorHandler.getFault(e);
+                throw e;
             } catch (Exception e) {
                 LOG.error("[ Error when creating. ] {} ", e);
-                return ErrorHandler.getFault(e);
+                throw e;
             }
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("Custom rule data is not correct").build();
@@ -86,7 +87,7 @@ public class CustomRulesRestResource {
             return Response.ok(typeList).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting all custom rules. ]", ex);
-            return ErrorHandler.getFault(ex);
+            throw ex;
         }
     }
 
@@ -104,7 +105,7 @@ public class CustomRulesRestResource {
             return Response.ok(response).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting custom rules by query. ] {} ", ex);
-            return ErrorHandler.getFault(ex);
+            throw ex;
         }
     }
 
@@ -119,13 +120,13 @@ public class CustomRulesRestResource {
             return Response.ok(response).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting custom rule by guid. ] {} ", ex);
-            return ErrorHandler.getFault(ex);
+            throw ex;
         }
     }
 
     @PUT
     @RequiresFeature(UnionVMSFeature.manageAlarmRules)
-    public Response updateCustomRule(final CustomRuleType customRuleType) {
+    public Response updateCustomRule(final CustomRuleType customRuleType) throws AccessDeniedException, JMSException, ModelMarshallException {
         LOG.info("Update custom rule invoked in rest layer");
         if(rulesService.isValid(customRuleType)) {
             try {
@@ -136,10 +137,10 @@ public class CustomRulesRestResource {
                 return Response.ok(response).build();
             } catch (AccessDeniedException e) {
                 LOG.error("Forbidden access", e.getMessage());
-                return ErrorHandler.getFault(e);
+                throw e;
             } catch (Exception e) {
                 LOG.error("[ Error when updating. ] {} ", e);
-                return ErrorHandler.getFault(e);
+                throw e;
             }
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("Custom rule data is not correct").build();
@@ -157,14 +158,14 @@ public class CustomRulesRestResource {
             return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when updating subscription and custom rule. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            throw e;
         }
     }
 
     @DELETE
     @Path("/{guid}")
     @RequiresFeature(UnionVMSFeature.manageAlarmRules)
-    public Response deleteCustomRule(@PathParam(value = "guid") final String guid) {
+    public Response deleteCustomRule(@PathParam(value = "guid") final String guid) throws AccessDeniedException {
         LOG.info("Delete custom rule invoked in rest layer");
         try {
             CustomRule deleted = rulesService.deleteCustomRule(guid, request.getRemoteUser(),
@@ -173,10 +174,10 @@ public class CustomRulesRestResource {
             return Response.ok(response).build();
         } catch (AccessDeniedException e) {
             LOG.error("Forbidden access", e.getMessage());
-            return ErrorHandler.getFault(e);
+            throw e;
         } catch (Exception e) {
             LOG.error("[ Error when deleting custom rule. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            throw e;
         }
     }
 }

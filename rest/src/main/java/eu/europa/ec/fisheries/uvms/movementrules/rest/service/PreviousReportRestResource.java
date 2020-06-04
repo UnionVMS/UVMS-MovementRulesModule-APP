@@ -35,7 +35,7 @@ public class PreviousReportRestResource {
             return Response.ok(previousReports).build();
         }catch (Exception e){
             LOG.error("Error while getting a list of all previous reports.", e.getMessage(), e);
-            return Response.status(500).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 
@@ -49,7 +49,7 @@ public class PreviousReportRestResource {
             return Response.ok().build();
         }catch (Exception e){
             LOG.error("Error while deleting a previous report", e.getMessage(), e);
-            return Response.status(500).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 }

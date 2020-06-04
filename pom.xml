@@ -32,7 +32,7 @@
         
         <installAtEnd>false</installAtEnd>
       
-        <docker.dev.version>3.43.0</docker.dev.version>
+        <docker.dev.version>3.43.9</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>movementrules</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>movementrules</docker.liquibase.db.passwd>
