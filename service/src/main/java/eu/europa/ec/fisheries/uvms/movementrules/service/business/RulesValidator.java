@@ -99,15 +99,11 @@ public class RulesValidator {
     public void evaluate(MovementDetails fact) {
         if (customKcontainer != null) {
             LOG.debug("Verify user defined rules");
-            try {
                 StatelessKieSession ksession = customKcontainer.newStatelessKieSession();
                 // Inject beans
                 ksession.setGlobal("validationService", validationService);
                 ksession.setGlobal("logger", LOG);
                 ksession.execute(fact);
-            }catch(RuntimeException rte){
-                LOG.error(rte.toString(),rte);
-            }
         }
     }
 
