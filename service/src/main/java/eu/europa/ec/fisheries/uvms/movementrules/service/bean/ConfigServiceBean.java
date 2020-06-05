@@ -52,7 +52,11 @@ public class ConfigServiceBean {
 
 
     public Map<ActionType, Boolean> getActions() {
-        return Arrays.stream(ActionType.values()).collect(Collectors.toMap(Function.identity(), a -> !a.equals(ActionType.MANUAL_POLL)));
+        return Arrays.stream(ActionType.values())
+                .collect(Collectors.toMap(Function.identity(), 
+                        a -> !(a.equals(ActionType.MANUAL_POLL) || 
+                             a.equals(ActionType.CREATE_TICKET) ||
+                             a.equals(ActionType.CREATE_INCIDENT))));
     }
 
     private ArrayList<String> getConditionsByCriteria(SubCriteria subCriteria) {
