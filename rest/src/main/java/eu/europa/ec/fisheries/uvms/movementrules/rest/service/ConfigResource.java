@@ -12,7 +12,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ConfigServiceBean;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
@@ -56,7 +55,7 @@ public class ConfigResource {
             return Response.ok(map).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting config. ] {} ", ex.getMessage());
-            return ErrorHandler.getFault(ex);
+            throw ex;
         }
     }
 
@@ -67,7 +66,7 @@ public class ConfigResource {
             return Response.ok(TicketStatusType.values()).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting ticket statuses. ] {} ", ex.getMessage());
-            return ErrorHandler.getFault(ex);
+            throw ex;
         }
     }
 }

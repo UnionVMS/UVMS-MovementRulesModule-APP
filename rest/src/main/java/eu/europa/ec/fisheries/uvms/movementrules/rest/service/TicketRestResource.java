@@ -17,7 +17,6 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
@@ -72,7 +71,7 @@ public class TicketRestResource {
             return Response.ok(response).build();
         } catch (Exception ex) {
             LOG.error("[ERROR] Error when getting ticket list by query ] {} ", ex.getMessage());
-            return ErrorHandler.getFault(ex);
+            throw ex;
         }
     }
 
@@ -89,7 +88,7 @@ public class TicketRestResource {
             return Response.ok(response).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting ticket list by movements. ] {} ", ex);
-            return ErrorHandler.getFault(ex);
+            throw ex;
         }
     }
 
@@ -102,7 +101,7 @@ public class TicketRestResource {
             return Response.ok(count).build();
         } catch (Exception e) {
             LOG.error("[ Error when counting number of open tickets by movements. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            throw e;
         }
     }
 
@@ -118,7 +117,7 @@ public class TicketRestResource {
             return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when updating ticket. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            throw e;
         }
     }
 
@@ -134,7 +133,7 @@ public class TicketRestResource {
             return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when updating tickets. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            throw e;
         }
     }
 
@@ -148,7 +147,7 @@ public class TicketRestResource {
             return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting ticket by GUID. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            throw e;
         }
     }
 
@@ -161,7 +160,7 @@ public class TicketRestResource {
             return Response.ok(count).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting number of open tickets. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            throw e;
         }
     }
 
@@ -174,7 +173,7 @@ public class TicketRestResource {
             return Response.ok(count).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting number of assets not sending. ] {} ", e);
-            return ErrorHandler.getFault(e);
+            throw e;
         }
     }
 
@@ -190,7 +189,7 @@ public class TicketRestResource {
             return Response.ok(returnList).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting assets not sending between {} and {} ] {} ", fromString, toString, e.getMessage(), e);
-            return ErrorHandler.getFault(e);
+            throw e;
         }
     }
 }

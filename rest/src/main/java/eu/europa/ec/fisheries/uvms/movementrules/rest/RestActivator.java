@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest;
 
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.constants.RestConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.filter.MovementRulesRestExceptionMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.*;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeatureFilter;
 import org.slf4j.Logger;
@@ -39,7 +40,9 @@ public class RestActivator extends Application {
         set.add(InternalRestResources.class);
         set.add(SSEResource.class);
         set.add(PreviousReportRestResource.class);
+
         set.add(JsonBConfigurator.class);
+        set.add(MovementRulesRestExceptionMapper.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 

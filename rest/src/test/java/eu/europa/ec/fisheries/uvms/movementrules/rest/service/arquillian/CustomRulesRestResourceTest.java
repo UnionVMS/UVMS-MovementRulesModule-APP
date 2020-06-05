@@ -7,6 +7,7 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.filter.AppError;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -146,7 +147,9 @@ public class CustomRulesRestResourceTest extends BuildRulesRestDeployment {
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get();
 
-        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        AppError appError = response.readEntity(AppError.class);
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), appError.code.intValue());
     }
 
     @Test
@@ -196,7 +199,10 @@ public class CustomRulesRestResourceTest extends BuildRulesRestDeployment {
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(new UpdateSubscriptionType()));
-        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        AppError appError = response.readEntity(AppError.class);
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), appError.code.intValue());
     }
 
     @Test
@@ -383,7 +389,9 @@ public class CustomRulesRestResourceTest extends BuildRulesRestDeployment {
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(customRule));
 
-        assertEquals(Status.FORBIDDEN.getStatusCode(), response.getStatus());
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        AppError appError = response.readEntity(AppError.class);
+        assertEquals(Status.FORBIDDEN.getStatusCode(), appError.code.intValue());
     }
 
     @Test
@@ -394,7 +402,10 @@ public class CustomRulesRestResourceTest extends BuildRulesRestDeployment {
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json(customRule));
-        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        AppError appError = response.readEntity(AppError.class);
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), appError.code.intValue());
     }
 
     @Test
@@ -409,7 +420,9 @@ public class CustomRulesRestResourceTest extends BuildRulesRestDeployment {
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(customRuleQuery));
 
-        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        AppError appError = response.readEntity(AppError.class);
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), appError.code.intValue());
     }
 
     private CustomRuleType createCustomRule() {

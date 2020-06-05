@@ -10,6 +10,7 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.filter.AppError;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
@@ -93,7 +94,9 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(new TicketQuery()));
 
-        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        AppError appError = response.readEntity(AppError.class);
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), appError.code.intValue());
     }
     
     @Test
@@ -187,7 +190,10 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json(ticketType));
-        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        AppError appError = response.readEntity(AppError.class);
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), appError.code.intValue());
     }
     
     @Test
@@ -267,7 +273,10 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get();
-        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        AppError appError = response.readEntity(AppError.class);
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), appError.code.intValue());
     }
 
     @Test
