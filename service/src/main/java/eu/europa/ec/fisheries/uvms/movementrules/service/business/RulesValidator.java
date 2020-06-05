@@ -30,6 +30,7 @@ import org.kie.api.KieServices;
 import org.kie.api.builder.KieFileSystem;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.StatelessKieSession;
 import org.kie.api.runtime.rule.FactHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,18 +99,11 @@ public class RulesValidator {
     public void evaluate(MovementDetails fact) {
         if (customKcontainer != null) {
             LOG.debug("Verify user defined rules");
-
-            KieSession ksession = customKcontainer.newKieSession();
-
-            // Inject beans
-            ksession.setGlobal("validationService", validationService);
-            ksession.setGlobal("logger", LOG);
-
-            FactHandle factHandle = ksession.insert(fact);
-            ksession.fireAllRules();
-            ksession.delete(factHandle);
-
-            ksession.dispose();
+                StatelessKieSession ksession = customKcontainer.newStatelessKieSession();
+                // Inject beans
+                ksession.setGlobal("validationService", validationService);
+                ksession.setGlobal("logger", LOG);
+                ksession.execute(fact);
         }
     }
 
