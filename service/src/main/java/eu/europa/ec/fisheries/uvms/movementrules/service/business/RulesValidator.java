@@ -64,11 +64,6 @@ public class RulesValidator {
     public void init() {
         try {
             updateCustomRules();
-            if(customKcontainer != null){
-                ksession = customKcontainer.newStatelessKieSession();
-                ksession.setGlobal("validationService", validationService);
-                ksession.setGlobal("logger", LOG);
-            }
         }catch (Exception e){
             LOG.error("Unable to initialize initial ruleset due to: ", e);
             throw new RuntimeException(e);
@@ -95,6 +90,11 @@ public class RulesValidator {
             // Create session
             kieServices.newKieBuilder(customKfs).buildAll();
             customKcontainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
+            if(customKcontainer != null){
+                ksession = customKcontainer.newStatelessKieSession();
+                ksession.setGlobal("validationService", validationService);
+                ksession.setGlobal("logger", LOG);
+            }
         } else {
             customKcontainer = null;
         }
