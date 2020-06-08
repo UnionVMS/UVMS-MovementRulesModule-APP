@@ -97,6 +97,7 @@ public class RulesValidator {
             }
         } else {
             customKcontainer = null;
+            ksession = null;
         }
     }
     
