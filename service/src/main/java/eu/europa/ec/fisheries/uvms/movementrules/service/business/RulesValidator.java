@@ -58,17 +58,22 @@ public class RulesValidator {
     private RulesServiceBean rulesService;
 
     private KieContainer customKcontainer;
+   private  StatelessKieSession ksession ;
 
     @PostConstruct
     public void init() {
         try {
             updateCustomRules();
+            if(customKcontainer != null){
+                ksession = customKcontainer.newStatelessKieSession();
+                ksession.setGlobal("validationService", validationService);
+                ksession.setGlobal("logger", LOG);
+            }
         }catch (Exception e){
             LOG.error("Unable to initialize initial ruleset due to: ", e);
             throw new RuntimeException(e);
         }
     }
-    
 
     @Lock(LockType.WRITE)
     public void updateCustomRules() {
@@ -97,12 +102,8 @@ public class RulesValidator {
     
     @Lock(LockType.READ)
     public void evaluate(MovementDetails fact) {
-        if (customKcontainer != null) {
+        if (ksession != null) {
             LOG.debug("Verify user defined rules");
-                StatelessKieSession ksession = customKcontainer.newStatelessKieSession();
-                // Inject beans
-                ksession.setGlobal("validationService", validationService);
-                ksession.setGlobal("logger", LOG);
                 ksession.execute(fact);
         }
     }
