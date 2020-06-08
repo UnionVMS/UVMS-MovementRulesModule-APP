@@ -58,6 +58,7 @@ public class RulesValidator {
     private RulesServiceBean rulesService;
 
     private KieContainer customKcontainer;
+   private  StatelessKieSession ksession ;
 
     @PostConstruct
     public void init() {
@@ -68,7 +69,6 @@ public class RulesValidator {
             throw new RuntimeException(e);
         }
     }
-    
 
     @Lock(LockType.WRITE)
     public void updateCustomRules() {
@@ -90,19 +90,21 @@ public class RulesValidator {
             // Create session
             kieServices.newKieBuilder(customKfs).buildAll();
             customKcontainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
+            if(customKcontainer != null){
+                ksession = customKcontainer.newStatelessKieSession();
+                ksession.setGlobal("validationService", validationService);
+                ksession.setGlobal("logger", LOG);
+            }
         } else {
             customKcontainer = null;
+            ksession = null;
         }
     }
     
     @Lock(LockType.READ)
     public void evaluate(MovementDetails fact) {
-        if (customKcontainer != null) {
+        if (ksession != null) {
             LOG.debug("Verify user defined rules");
-                StatelessKieSession ksession = customKcontainer.newStatelessKieSession();
-                // Inject beans
-                ksession.setGlobal("validationService", validationService);
-                ksession.setGlobal("logger", LOG);
                 ksession.execute(fact);
         }
     }
