@@ -24,7 +24,7 @@
         <usm4uvms.version>4.1.0</usm4uvms.version>
         <uvms.common.version>4.1.7</uvms.common.version>
         <uvms.asset.version>6.7.12</uvms.asset.version>
-        <uvms.incident.version>0.2.1</uvms.incident.version>
+        <uvms.incident.version>0.2.4</uvms.incident.version>
 
 
         <project.scm.id>github</project.scm.id>
