@@ -55,7 +55,7 @@ public class CheckRulesChangesTaskTest extends TransactionalTests {
 
         Assert.assertEquals(customRule.getGuid(), createdCustomRule.getGuid());
         Assert.assertFalse(createdCustomRule.getActive());
-        Assert.assertTrue(createdCustomRule.getArchived());
+        Assert.assertFalse(createdCustomRule.getArchived());
 
     }
 }

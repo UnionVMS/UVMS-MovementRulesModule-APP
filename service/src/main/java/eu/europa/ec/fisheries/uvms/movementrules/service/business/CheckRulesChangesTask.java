@@ -60,7 +60,6 @@ public class CheckRulesChangesTask implements Runnable {
             if (inactivate) {
                 LOG.debug("Inactivating {}", rule.getName());
                 rule.setActive(false);
-                rule.setArchived(true);
                 rule.setUpdatedBy("UVMS Out of date checker");
                 updateNeeded = true;
             }
