@@ -299,7 +299,7 @@ public class ValidationServiceBean  {
                     .post(Entity.json(""), Response.class);
 
             if(createdPollResponse.getStatus() != 200){
-                return "Unable to create poll";
+                return createdPollResponse.readEntity(String.class);
             }
 
             CreatePollResultDto createPollResultDto = createdPollResponse.readEntity(CreatePollResultDto.class);
