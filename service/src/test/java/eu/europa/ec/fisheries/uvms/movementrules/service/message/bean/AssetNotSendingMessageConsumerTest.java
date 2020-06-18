@@ -79,6 +79,26 @@ public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeploym
         assertNotNull(message2);
     }
 
+    @Test
+    @OperateOnDeployment("normal")
+    public void createAssetSendingDespiteBeingLongTermParkedTest() throws Exception {
+        rulesValidator.updateCustomRules();
+
+        MovementDetails movementDetails = getMovementDetails();
+        movementDetails.setLongTermParked(true);
+        customRulesEvaluator.evaluate(movementDetails);
+
+        Ticket ticket = rulesDao.getTicketByAssetAndRule(movementDetails.getAssetGuid(), ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE);
+        assertNotNull(ticket);
+        assertEquals(TicketStatusType.OPEN, ticket.getStatus());
+
+        // sending despite Create Event
+        Message message1 = jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
+        assertNotNull(message1);
+
+    }
+
+
     private MovementDetails getMovementDetails() {
         MovementDetails movementDetails = new MovementDetails();
         movementDetails.setMovementGuid(UUID.randomUUID().toString());
