@@ -101,6 +101,26 @@ public class PreviousReportRestResourceTest extends BuildRulesRestDeployment {
 
     }
 
+    @Test
+    @OperateOnDeployment("normal")
+    public void testDontCreatePreviousReportOnLongTermParked(){
+        MovementDetails movement = RulesTestHelper.createBasicMovementDetails();
+        movement.setLongTermParked(true);
+
+        Response evaluate = getWebTarget()
+                .path("internal")
+                .path("evaluate")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(movement));
+        assertThat(evaluate.getStatus(), CoreMatchers.is(Response.Status.OK.getStatusCode()));
+
+        evaluate = getAllPreviousReportByRest();
+        assertEquals(200, evaluate.getStatus());
+        String previousReports = evaluate.readEntity(String.class);
+        assertFalse(previousReports.contains(movement.getAssetGuid()));
+    }
+
+
     private Response getAllPreviousReportByRest(){
         return getWebTarget()
                 .path("previousReports/list/")
