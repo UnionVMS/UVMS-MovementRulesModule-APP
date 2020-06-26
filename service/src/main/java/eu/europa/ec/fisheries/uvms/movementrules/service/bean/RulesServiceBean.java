@@ -530,13 +530,13 @@ public class RulesServiceBean {
         return ticket;
     }
 
-    public Ticket createAssetSendingDespiteLongTermParkedTicket(MovementDetails movementDetails) {
+    public Ticket createAssetSendingDespiteLongTermParkedDummyTicket(MovementDetails movementDetails) {
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(movementDetails.getAssetGuid());
         if (movementDetails.getMovementGuid() != null)
-            ticket.setMovementGuid(movementDetails.getMovementGuid().toString());
+            ticket.setMovementGuid(movementDetails.getMovementGuid());
         if (movementDetails.getMobileTerminalGuid() != null)
-            ticket.setMobileTerminalGuid(movementDetails.getMobileTerminalGuid().toString());
+            ticket.setMobileTerminalGuid(movementDetails.getMobileTerminalGuid());
         Instant now = Instant.now();
         ticket.setCreatedDate(now);
         ticket.setRuleName(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE);
@@ -545,15 +545,6 @@ public class RulesServiceBean {
         ticket.setUpdated(now);
         ticket.setStatus(TicketStatusType.OPEN);
         ticket.setTicketCount(1L);
-        rulesDao.createTicket(ticket);
-
-        ticketEvent.fire(new EventTicket(ticket, ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_CUSTOMRULE));
-        auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
-
-        incidentProducer.createdTicket(new EventTicket(ticket, ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_CUSTOMRULE));
-
-        // Notify long-polling clients of the change
-        ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
         return ticket;
     }

@@ -3,7 +3,8 @@ package eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.incident.model.dto.IncidentTicketDto;
-import eu.europa.ec.fisheries.uvms.incident.model.dto.enums.TicketType;
+import eu.europa.ec.fisheries.uvms.incident.model.dto.enums.IncidentType;
+import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import org.slf4j.Logger;
@@ -37,12 +38,14 @@ public class IncidentProducer {
     }
 
     public void updatedTicket(EventTicket eventTicket) {
-        IncidentTicketDto dto = mapToIncidentTicket(eventTicket, TicketType.ASSET_NOT_SENDING);
+        IncidentType incidentType = determineIncidentType(eventTicket);
+        IncidentTicketDto dto = mapToIncidentTicket(eventTicket, incidentType);
         send(dto, "IncidentUpdate");
     }
 
     public void createdTicket(EventTicket eventTicket) {
-        IncidentTicketDto dto = mapToIncidentTicket(eventTicket, TicketType.ASSET_NOT_SENDING);
+        IncidentType incidentType = determineIncidentType(eventTicket);
+        IncidentTicketDto dto = mapToIncidentTicket(eventTicket, incidentType);
         send(dto, "Incident");
     }
 
@@ -58,7 +61,17 @@ public class IncidentProducer {
         }
     }
 
-    private IncidentTicketDto mapToIncidentTicket(EventTicket eventTicket, TicketType ticketType){
+    private IncidentType determineIncidentType(EventTicket eventTicket){
+        if(eventTicket.getTicket().getRuleGuid().equals(ServiceConstants.ASSET_NOT_SENDING_RULE)){
+            return IncidentType.ASSET_NOT_SENDING;
+        } else if(eventTicket.getTicket().getRuleGuid().equals(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE)){
+            return IncidentType.LONG_TERM_PARKED;
+        } else {
+            return IncidentType.ASSET_SENDING_NORMAL;   //not really a lot of choice here.....
+        }
+    }
+
+    private IncidentTicketDto mapToIncidentTicket(EventTicket eventTicket, IncidentType ticketType){
         IncidentTicketDto dto = new IncidentTicketDto();
         Ticket ticket = eventTicket.getTicket();
         dto.setAssetId(ticket.getAssetGuid());

@@ -175,7 +175,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         List<RuleAction> actions = new ArrayList<>();
         RuleAction action = new RuleAction();
         action.setCustomRule(customRule);
-        action.setAction("SEND_REPORT");   
+        action.setAction("SEND_REPORT");
         action.setTarget("FLUX");
         action.setValue("DNK");
         action.setOrder(1);

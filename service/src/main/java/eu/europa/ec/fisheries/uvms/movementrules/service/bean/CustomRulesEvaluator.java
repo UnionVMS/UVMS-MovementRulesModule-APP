@@ -80,7 +80,6 @@ public class CustomRulesEvaluator {
         String movementSource = movementDetails.getSource();
         String assetGuid = movementDetails.getAssetGuid();
         String movementId = movementDetails.getMovementGuid();
-        String mobTermId = movementDetails.getMobileTerminalGuid();
         String assetFlagState = movementDetails.getFlagState();
         Instant positionTime = movementDetails.getPositionTime();
 
@@ -94,8 +93,8 @@ public class CustomRulesEvaluator {
             if(movementSource.equals(MovementSourceType.MANUAL.value())) {
                 checkForOpenAssetNotSendingTicketAndUpdate(assetGuid, movementId);
             } else {
-                createIncidentIfAssetIsLongTermParked(movementDetails);
-                persistLastCommunication(assetGuid, movementId, mobTermId, positionTime);
+
+                persistLastCommunication(movementDetails);
                 checkForOpenAssetNotSendingTicketAndCloseIt(assetGuid, movementId);
             }
         }
@@ -121,20 +120,23 @@ public class CustomRulesEvaluator {
         return timeDiff;
     }
 
-    private void createIncidentIfAssetIsLongTermParked(MovementDetails movementDetails){
-        if(movementDetails.isLongTermParked()){
-            Ticket ticket = getAssetSendingDespiteParkedTicket(movementDetails.getAssetGuid());
-            if (ticket == null){
-                rulesServiceBean.createAssetSendingDespiteLongTermParkedTicket(movementDetails);
-                return;
-            }
-            ticket.setMovementGuid(movementDetails.getMovementGuid());
-            ticket.setTicketCount(ticket.getTicketCount() + 1);
-            ticketUpdateEvent.fire(new EventTicket(ticket, ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_CUSTOMRULE));
-        }
+    private void createNewPositionDespiteLongTermParkedIncident(MovementDetails movementDetails){
+        Ticket dummyTicket = rulesServiceBean.createAssetSendingDespiteLongTermParkedDummyTicket(movementDetails);
+        incidentProducer.updatedTicket(new EventTicket(dummyTicket, ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_CUSTOMRULE));
     }
 
-    private void persistLastCommunication(String assetGuid, String movementId, String mobTermId, Instant positionTime) {
+    private void persistLastCommunication(MovementDetails movementDetails) {
+
+        if(movementDetails.isLongTermParked()) {
+            createNewPositionDespiteLongTermParkedIncident(movementDetails);
+            return;
+        }
+
+        String assetGuid = movementDetails.getAssetGuid();
+        String movementId = movementDetails.getMovementGuid();
+        String mobTermId = movementDetails.getMobileTerminalGuid();
+        Instant positionTime = movementDetails.getPositionTime();
+
         PreviousReport entity = rulesDao.getPreviousReportByAssetGuid(assetGuid);
         if (entity == null) {
             entity = new PreviousReport();
@@ -182,9 +184,5 @@ public class CustomRulesEvaluator {
 
     private Ticket getAssetNotSendingTicket(String assetGuid) {
         return rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-    }
-
-    private Ticket getAssetSendingDespiteParkedTicket(String assetGuid) {
-        return rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE);
     }
 }
