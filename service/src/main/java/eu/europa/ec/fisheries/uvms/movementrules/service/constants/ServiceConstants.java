@@ -19,14 +19,24 @@ public class ServiceConstants {
 
     // Rule GUID for Asset not sending rule
     public static final String ASSET_NOT_SENDING_RULE = "Asset not sending";
+
+    // Rule GUID for Asset sending despite beeing long term parked rule
+    public static final String ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE = "Asset sending despite long term parked";
     
     public static final CustomRule ASSET_NOT_SENDING_CUSTOMRULE = new CustomRule();
+
+    public static final CustomRule ASSET_SENDING_DESPITE_LONG_TERM_PARKED_CUSTOMRULE = new CustomRule();
     
     static {
         ASSET_NOT_SENDING_CUSTOMRULE.setAvailability(AvailabilityType.GLOBAL);
-        RuleSubscription ruleSubscription = new RuleSubscription();
-        ruleSubscription.setOwner(ServiceConstants.ASSET_NOT_SENDING_RULE);
-        ASSET_NOT_SENDING_CUSTOMRULE.getRuleSubscriptionList().add(ruleSubscription);
+        RuleSubscription notSendingSubscription = new RuleSubscription();
+        notSendingSubscription.setOwner(ServiceConstants.ASSET_NOT_SENDING_RULE);
+        ASSET_NOT_SENDING_CUSTOMRULE.getRuleSubscriptionList().add(notSendingSubscription);
+
+        ASSET_SENDING_DESPITE_LONG_TERM_PARKED_CUSTOMRULE.setAvailability(AvailabilityType.GLOBAL);
+        RuleSubscription sendingDespiteSubscription = new RuleSubscription();
+        sendingDespiteSubscription.setOwner(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE);
+        ASSET_SENDING_DESPITE_LONG_TERM_PARKED_CUSTOMRULE.getRuleSubscriptionList().add(sendingDespiteSubscription);
     }
 
 }

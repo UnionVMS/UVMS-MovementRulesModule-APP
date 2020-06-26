@@ -171,6 +171,9 @@ public class CustomRuleParser {
                         case ASSET_TYPE:
                             sb.append("assetType");
                             break;
+                        case ASSET_LONG_TERM_PARKED:
+                            sb.append("longTermParked");
+                            break;
 
                         // MOBILE_TERMINAL
                         case COMCHANNEL_TYPE:

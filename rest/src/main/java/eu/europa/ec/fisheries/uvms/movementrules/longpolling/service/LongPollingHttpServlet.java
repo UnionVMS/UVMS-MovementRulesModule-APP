@@ -11,8 +11,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.longpolling.service;
 
-import java.io.IOException;
-import java.util.UUID;
+import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.movementrules.longpolling.constants.LongPollingConstants;
+import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
+import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
+
 import javax.ejb.EJB;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
@@ -27,13 +32,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.movementrules.longpolling.constants.LongPollingConstants;
-import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketCountEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
-import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
+import java.io.IOException;
+import java.util.UUID;
 
 @WebServlet(asyncSupported = true, urlPatterns = { LongPollingConstants.TICKET_UPDATE_PATH, LongPollingConstants.TICKET_COUNT_PATH })
 public class LongPollingHttpServlet extends HttpServlet {

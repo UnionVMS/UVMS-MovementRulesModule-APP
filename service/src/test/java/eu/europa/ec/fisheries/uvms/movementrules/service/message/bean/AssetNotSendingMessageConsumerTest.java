@@ -19,11 +19,11 @@ import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
 import javax.jms.Message;
+import javax.jms.TextMessage;
 import java.time.Instant;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
 public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeployment {
@@ -78,6 +78,24 @@ public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeploym
         Message message2 = jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
         assertNotNull(message2);
     }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void createAssetSendingDespiteBeingLongTermParkedTest() throws Exception {
+        rulesValidator.updateCustomRules();
+
+        MovementDetails movementDetails = getMovementDetails();
+        movementDetails.setLongTermParked(true);
+        customRulesEvaluator.evaluate(movementDetails);
+
+        // sending despite Create Event
+        TextMessage message = (TextMessage) jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
+        assertNotNull(message);
+
+        assertTrue(message.getText().contains(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE));
+        assertTrue(message.getText().contains(movementDetails.getAssetGuid()));
+    }
+
 
     private MovementDetails getMovementDetails() {
         MovementDetails movementDetails = new MovementDetails();

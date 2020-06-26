@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
 import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -145,6 +146,59 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         
         assertThat(sendMovementRequest.getReport().getMovement().getConnectId(), CoreMatchers.is(movementDetails.getConnectId()));
         
+        rulesDao.removeCustomRuleAfterTests(customRule);
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void evaluateAndTriggerRuleWithLongTermParked() throws Exception {
+        jmsHelper.clearExchangeQueue();
+
+        String flagState = "SWE";
+        MovementDetails movementDetails = getMovementDetails();
+        movementDetails.setLongTermParked(true);
+        movementDetails.setFlagState(flagState);
+        movementDetails.setSource("AIS");
+
+        CustomRule customRule = RulesTestHelper.createBasicCustomRule();
+        List<RuleSegment> segments = new ArrayList<>();
+        RuleSegment segment = new RuleSegment();
+        segment.setCriteria("ASSET");
+        segment.setSubCriteria(SubCriteriaType.ASSET_LONG_TERM_PARKED.value());
+        segment.setCondition("EQ");
+        segment.setValue("true");
+        segment.setLogicOperator("NONE");
+        segment.setCustomRule(customRule);
+        segment.setOrder(0);
+        segments.add(segment);
+        customRule.setRuleSegmentList(segments);
+        List<RuleAction> actions = new ArrayList<>();
+        RuleAction action = new RuleAction();
+        action.setCustomRule(customRule);
+        action.setAction("SEND_REPORT");
+        action.setTarget("FLUX");
+        action.setValue("DNK");
+        action.setOrder(1);
+        actions.add(action);
+        customRule.setRuleActionList(actions);
+        rulesService.createCustomRule(customRule, "", "");
+
+        Response response = getWebTarget()
+                .path("internal")
+                .path("evaluate")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(movementDetails));
+        assertThat(response.getStatus(), CoreMatchers.is(Status.OK.getStatusCode()));
+
+        TextMessage message = (TextMessage) jmsHelper.getMessageFromExchangeQueue();
+
+        assertThat(message, CoreMatchers.is(CoreMatchers.notNullValue()));
+
+        SendMovementToPluginRequest sendMovementRequest = JAXBMarshaller.unmarshallTextMessage(message, SendMovementToPluginRequest.class);
+        assertThat(sendMovementRequest, CoreMatchers.is(CoreMatchers.notNullValue()));
+
+        assertThat(sendMovementRequest.getReport().getMovement().getConnectId(), CoreMatchers.is(movementDetails.getConnectId()));
+
         rulesDao.removeCustomRuleAfterTests(customRule);
     }
     

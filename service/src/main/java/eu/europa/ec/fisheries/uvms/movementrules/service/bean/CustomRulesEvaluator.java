@@ -66,9 +66,7 @@ public class CustomRulesEvaluator {
     
     public void evaluate(MovementDetails movementDetails) {
         
-        Long timeDiffPositionReport = timeDiffAndPersistPreviousReport(movementDetails.getSource(),
-                movementDetails.getAssetGuid(), movementDetails.getMovementGuid(), movementDetails.getMobileTerminalGuid(),
-                movementDetails.getFlagState(), movementDetails.getPositionTime());
+        Long timeDiffPositionReport = timeDiffAndPersistPreviousReport(movementDetails);
 
         movementDetails.setTimeDiffPositionReport(timeDiffPositionReport);
         
@@ -77,8 +75,13 @@ public class CustomRulesEvaluator {
         rulesValidator.evaluate(movementDetails);
     }
   
-    private Long timeDiffAndPersistPreviousReport(String movementSource, String assetGuid, String movementId,
-                                                  String mobTermId, String assetFlagState, Instant positionTime) {
+    private Long timeDiffAndPersistPreviousReport(MovementDetails movementDetails) {
+
+        String movementSource = movementDetails.getSource();
+        String assetGuid = movementDetails.getAssetGuid();
+        String movementId = movementDetails.getMovementGuid();
+        String assetFlagState = movementDetails.getFlagState();
+        Instant positionTime = movementDetails.getPositionTime();
 
         // This needs to be done before persisting last report
         Long timeDiffInSeconds = null;
@@ -90,7 +93,8 @@ public class CustomRulesEvaluator {
             if(movementSource.equals(MovementSourceType.MANUAL.value())) {
                 checkForOpenAssetNotSendingTicketAndUpdate(assetGuid, movementId);
             } else {
-                persistLastCommunication(assetGuid, movementId, mobTermId, positionTime);
+
+                persistLastCommunication(movementDetails);
                 checkForOpenAssetNotSendingTicketAndCloseIt(assetGuid, movementId);
             }
         }
@@ -115,8 +119,24 @@ public class CustomRulesEvaluator {
         }
         return timeDiff;
     }
-    
-    private void persistLastCommunication(String assetGuid, String movementId, String mobTermId, Instant positionTime) {
+
+    private void createNewPositionDespiteLongTermParkedIncident(MovementDetails movementDetails){
+        Ticket dummyTicket = rulesServiceBean.createAssetSendingDespiteLongTermParkedDummyTicket(movementDetails);
+        incidentProducer.updatedTicket(new EventTicket(dummyTicket, ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_CUSTOMRULE));
+    }
+
+    private void persistLastCommunication(MovementDetails movementDetails) {
+
+        if(movementDetails.isLongTermParked()) {
+            createNewPositionDespiteLongTermParkedIncident(movementDetails);
+            return;
+        }
+
+        String assetGuid = movementDetails.getAssetGuid();
+        String movementId = movementDetails.getMovementGuid();
+        String mobTermId = movementDetails.getMobileTerminalGuid();
+        Instant positionTime = movementDetails.getPositionTime();
+
         PreviousReport entity = rulesDao.getPreviousReportByAssetGuid(assetGuid);
         if (entity == null) {
             entity = new PreviousReport();
@@ -144,7 +164,7 @@ public class CustomRulesEvaluator {
 
 
     private void checkForOpenAssetNotSendingTicketAndUpdate(String assetGuid, String movementId) {
-        Ticket ticket = getTicket(assetGuid);
+        Ticket ticket = getAssetNotSendingTicket(assetGuid);
         if (ticket == null) return;
         ticket.setMovementGuid(movementId);
         CustomRule customRule = rulesServiceBean.getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
@@ -153,7 +173,7 @@ public class CustomRulesEvaluator {
     }
 
     private void checkForOpenAssetNotSendingTicketAndCloseIt(String assetGuid, String movementId) {
-        Ticket ticket = getTicket(assetGuid);
+        Ticket ticket = getAssetNotSendingTicket(assetGuid);
         if (ticket == null) return;
         ticket.setStatus(TicketStatusType.CLOSED);
         ticket.setMovementGuid(movementId);
@@ -162,7 +182,7 @@ public class CustomRulesEvaluator {
         ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
     }
 
-    private Ticket getTicket(String assetGuid) {
+    private Ticket getAssetNotSendingTicket(String assetGuid) {
         return rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
     }
 }

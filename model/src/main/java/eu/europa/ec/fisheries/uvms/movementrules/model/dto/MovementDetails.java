@@ -37,6 +37,7 @@ public class MovementDetails {
     private String mmsi;
     private String imo;
     private List<String> assetFilters;
+    private boolean longTermParked;
 
     // MOBILE_TERMINAL
     private String channelGuid;
@@ -608,5 +609,13 @@ public class MovementDetails {
 
     public void setAssetType(String assetType) {
         this.assetType = assetType;
+    }
+
+    public boolean isLongTermParked() {
+        return longTermParked;
+    }
+
+    public void setLongTermParked(boolean longTermParked) {
+        this.longTermParked = longTermParked;
     }
 }

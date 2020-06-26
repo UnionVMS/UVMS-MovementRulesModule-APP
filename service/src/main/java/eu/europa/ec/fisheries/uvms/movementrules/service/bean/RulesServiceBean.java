@@ -19,6 +19,7 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.schema.movementrules.ticketrule.v1.TicketAndRuleType;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.UserServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.CustomRuleValidator;
@@ -525,6 +526,25 @@ public class RulesServiceBean {
 		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
 		// Notify long-polling clients of the change
         ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
+
+        return ticket;
+    }
+
+    public Ticket createAssetSendingDespiteLongTermParkedDummyTicket(MovementDetails movementDetails) {
+        Ticket ticket = new Ticket();
+        ticket.setAssetGuid(movementDetails.getAssetGuid());
+        if (movementDetails.getMovementGuid() != null)
+            ticket.setMovementGuid(movementDetails.getMovementGuid());
+        if (movementDetails.getMobileTerminalGuid() != null)
+            ticket.setMobileTerminalGuid(movementDetails.getMobileTerminalGuid());
+        Instant now = Instant.now();
+        ticket.setCreatedDate(now);
+        ticket.setRuleName(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE);
+        ticket.setRuleGuid(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE);
+        ticket.setUpdatedBy("UVMS");
+        ticket.setUpdated(now);
+        ticket.setStatus(TicketStatusType.OPEN);
+        ticket.setTicketCount(1L);
 
         return ticket;
     }
