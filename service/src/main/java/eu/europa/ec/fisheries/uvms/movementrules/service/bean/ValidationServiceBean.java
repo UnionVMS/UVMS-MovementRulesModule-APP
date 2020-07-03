@@ -299,7 +299,7 @@ public class ValidationServiceBean  {
                     .post(Entity.json(""), Response.class);
 
             if(createdPollResponse.getStatus() != 200){
-                return createdPollResponse.readEntity(String.class);
+                return stripExceptionFromResponseString(createdPollResponse.readEntity(String.class));
             }
 
             CreatePollResultDto createPollResultDto = createdPollResponse.readEntity(CreatePollResultDto.class);
@@ -313,6 +313,15 @@ public class ValidationServiceBean  {
             LOG.error("Error while sending rule-triggered poll: ", e);
             return "NOK " + e.getMessage();
         }
+    }
+
+    private String stripExceptionFromResponseString(String errorString){
+        if(!errorString.contains("Exception")){
+            return errorString;
+        }
+        int exceptionEndIndex = errorString.indexOf("Exception:") + 10;
+        return errorString.length() > exceptionEndIndex
+                ? errorString.substring(exceptionEndIndex).trim() : "";
     }
 
     private Ticket createTicket(CustomRule customRule, MovementDetails fact) {
