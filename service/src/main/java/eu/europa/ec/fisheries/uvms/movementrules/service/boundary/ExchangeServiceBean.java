@@ -33,29 +33,14 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.E
 @Stateless
 public class ExchangeServiceBean {
 
-    @Inject
-    private RulesResponseConsumer consumer;
 
     @Inject
     private ExchangeProducerBean exchangeProducer;
 
-    public List<ServiceResponseType> getPluginList(PluginType pluginType) throws JMSException {
-        ArrayList<PluginType> types = new ArrayList<>();
-        types.add(pluginType);
-        String serviceListRequest = ExchangeModuleRequestMapper.createGetServiceListRequest(types);
-        String serviceListRequestId = exchangeProducer.sendSynchronousModuleMessage(serviceListRequest, ExchangeModuleMethod.LIST_SERVICES.value());
 
-        TextMessage serviceListResponse = consumer.getMessage(serviceListRequestId, TextMessage.class);
-        return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromModuleResponse(serviceListResponse);
-    }
-    
     public void sendReportToPlugin(String pluginName, String ruleName, String recipient, MovementType exchangeMovement, List<RecipientInfoType> recipientInfoList, MovementDetails movementDetails) throws  JMSException {
         String exchangeRequest = ExchangeModuleRequestMapper.createSendReportToPlugin(pluginName, null, Instant.now(), ruleName, recipient, exchangeMovement, recipientInfoList, movementDetails.getAssetName(), movementDetails.getIrcs(), movementDetails.getMmsi(), movementDetails.getExternalMarking(), movementDetails.getFlagState());
         exchangeProducer.sendModuleMessage(exchangeRequest, ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
     }
     
-    public void sendEmail(ServiceResponseType service, EmailType email, String ruleName) throws JMSException {
-        String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(service.getServiceClassName(), email, ruleName);
-        exchangeProducer.sendModuleMessage(request, ExchangeModuleMethod.SET_COMMAND.value());
-    }
 }

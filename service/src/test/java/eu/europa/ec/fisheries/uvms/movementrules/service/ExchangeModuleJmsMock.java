@@ -34,9 +34,9 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
         @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = MessageConstants.JMS_FUNCTION_PROPERTY + " NOT IN ( 'PROCESSED_MOVEMENT' ) AND JMSCorrelationID IS NULL")})
 
 
-public class ExchangeModuleMock implements MessageListener {
+public class ExchangeModuleJmsMock implements MessageListener {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeModuleMock.class);
+    final static Logger LOG = LoggerFactory.getLogger(ExchangeModuleJmsMock.class);
     
     @Inject
     RulesMessageProducerBean messageProducer;

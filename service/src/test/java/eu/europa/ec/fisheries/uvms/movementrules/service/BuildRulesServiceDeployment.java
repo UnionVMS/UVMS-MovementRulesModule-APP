@@ -1,5 +1,6 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBDateAdapter;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBDurationAdapter;
@@ -56,6 +57,8 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addClass(UnionVMSRestMock.class);
         testWar.addClass(SpatialModuleMock.class);
         testWar.addClass(UserRestMock.class);
+        testWar.addClass(ExchangeModuleRestMock.class);
+        testWar.addClass(EmailType.class);
         testWar.addClass(AreaTransitionsDTO.class);
         testWar.addClass(AssetModuleMock.class);
         testWar.addClass(JsonBConfigurator.class);
