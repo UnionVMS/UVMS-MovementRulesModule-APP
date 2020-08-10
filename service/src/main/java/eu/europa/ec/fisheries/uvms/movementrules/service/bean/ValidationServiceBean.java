@@ -22,6 +22,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTyp
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.exchange.client.ExchangeRestClient;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.dto.CreatePollResultDto;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
@@ -247,7 +248,10 @@ public class ValidationServiceBean  {
             movement.setMovementType(MovementTypeType.EXI);
         }
     }
-    
+
+    @Inject
+    ExchangeRestClient exchangeRestClient;
+
     private void sendToEmail(String emailAddress, String ruleName, MovementDetails movementDetails) {
         LOG.info("Sending email to '{}'", emailAddress);
 
@@ -256,25 +260,12 @@ public class ValidationServiceBean  {
         email.setSubject(EmailMapper.buildSubject(movementDetails));
         email.setBody(EmailMapper.buildBody(ruleName, movementDetails));
         email.setTo(emailAddress);
+        email.setFrom(ruleName);
 
-        try {
-            List<ServiceResponseType> pluginList = exchangeService.getPluginList(PluginType.EMAIL);
-            if (pluginList != null && !pluginList.isEmpty()) {
-                for (ServiceResponseType service : pluginList) {
-                    if (StatusType.STOPPED.equals(service.getStatus())) {
-                        LOG.info("Service {} was Stopped, trying the next one, if possible.", service.getName());
-                        continue;
-                    }
-                    exchangeService.sendEmail(service, email, ruleName);
+        exchangeRestClient.sendEmail(email);
 
-                    auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_EMAIL, null, emailAddress, "UVMS");
-                    return;
-                }
-            }
-            LOG.info("No plugin of the correct type found. Nothing was sent.");
-        } catch (JMSException e) {
-            LOG.error("Failed to send email! {}", e.getMessage());
-        }
+        auditService.sendAuditMessage(AuditObjectTypeEnum.CUSTOM_RULE_ACTION, AuditOperationEnum.SEND_EMAIL, null, emailAddress, "UVMS");
+        LOG.info("No plugin of the correct type found. Nothing was sent.");
     }
 
     public String createPollInternal(String assetGuid, String ruleName){

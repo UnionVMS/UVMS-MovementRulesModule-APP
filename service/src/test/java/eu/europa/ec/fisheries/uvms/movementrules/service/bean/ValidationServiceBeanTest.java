@@ -106,7 +106,33 @@ public class ValidationServiceBeanTest extends TransactionalTests {
         assertEquals("True", System.getProperty("AssetPollEndpointReached"));
         System.clearProperty("AssetPollEndpointReached");
     }
-    
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void customRuleTriggeredSendEmailTest() throws Exception {
+
+        System.setProperty("ExchangeEmailEndpointReached", "False");
+        Instant timestamp = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+        CustomRule customRule = RulesTestHelper.createCompleteCustomRule();
+
+        RuleAction action = new RuleAction();
+        action.setAction(ActionType.EMAIL.value());
+        action.setValue("Dont Care About This");
+        action.setOrder(5);
+        action.setCustomRule(customRule);
+        customRule.getRuleActionList().add(action);
+
+        CustomRule createdCustomRule = rulesService.createCustomRule(customRule, "", "");
+
+        MovementDetails movementFact = RulesTestHelper.createBasicMovementDetails();
+        validationService.customRuleTriggered(createdCustomRule.getName(), createdCustomRule.getGuid().toString(), movementFact, "EMAIL,ThisDoesNotMatter");
+
+        assertEquals("True", System.getProperty("ExchangeEmailEndpointReached"));
+        System.clearProperty("ExchangeEmailEndpointReached");
+    }
+
+
     @Test
     @OperateOnDeployment("normal")
     public void aggregateRuleTriggeredNewTicketShouldBeCreatedTest() throws Exception {
