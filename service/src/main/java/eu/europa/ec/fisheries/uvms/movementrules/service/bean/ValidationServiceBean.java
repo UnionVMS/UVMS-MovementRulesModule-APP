@@ -61,6 +61,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Stateless
 public class ValidationServiceBean  {
@@ -378,7 +379,10 @@ public class ValidationServiceBean  {
     @Resource(name = "java:global/asset_endpoint")
     private String assetEndpoint;
     protected WebTarget getWebTarget() {
-        Client client = ClientBuilder.newClient().register(JsonBConfigurator.class);
+        Client client = ClientBuilder.newBuilder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build().register(JsonBConfigurator.class);
         return client.target(assetEndpoint);
     }
 
