@@ -18,7 +18,14 @@ public class ExchangeModuleRestMock {
 
     @POST
     @Path(value = "unsecured/api/sendEmail")
-    public Response getPollStatus(EmailType email) {
+    public Response sendEmail(EmailType email) {
+        System.setProperty("ExchangeEmailEndpointReached", "True");
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path(value = "unsecured/api/pluginCommand")
+    public Response sendCommandToPlugin(EmailType email) {
         System.setProperty("ExchangeEmailEndpointReached", "True");
         return Response.ok().build();
     }
