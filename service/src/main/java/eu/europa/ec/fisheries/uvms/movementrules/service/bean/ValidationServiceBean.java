@@ -260,7 +260,6 @@ public class ValidationServiceBean  {
         email.setSubject(EmailMapper.buildSubject(movementDetails));
         email.setBody(EmailMapper.buildBody(ruleName, movementDetails));
         email.setTo(emailAddress);
-        email.setFrom(ruleName);
 
         exchangeRestClient.sendEmail(email);
 
