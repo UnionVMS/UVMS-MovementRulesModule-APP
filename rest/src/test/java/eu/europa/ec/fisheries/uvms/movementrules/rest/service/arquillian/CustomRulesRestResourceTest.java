@@ -1,13 +1,10 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
-import eu.europa.ec.fisheries.schema.movementrules.module.v1.GetCustomRuleListByQueryResponse;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
-import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.filter.AppError;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.BuildRulesRestDeployment;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -92,34 +89,6 @@ public class CustomRulesRestResourceTest extends BuildRulesRestDeployment {
                 .map(CustomRuleType::getGuid)
                 .anyMatch(id -> created.getGuid().equals(id));
         assertTrue(present);
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void getCustomRulesByQueryTest() {
-        CustomRuleType created = createCustomRule();
-
-        CustomRuleQuery customRuleQuery = new CustomRuleQuery();
-        ListPagination pagination = new ListPagination();
-        pagination.setListSize(10);
-        pagination.setPage(1);
-        customRuleQuery.setPagination(pagination);
-        CustomRuleListCriteria criteria = new CustomRuleListCriteria();
-        criteria.setKey(CustomRuleSearchKey.NAME);
-        criteria.setValue(created.getName());
-        customRuleQuery.getCustomRuleSearchCriteria().add(criteria);
-        customRuleQuery.setDynamic(true);
-
-        GetCustomRuleListByQueryResponse response = getWebTarget()
-                .path("/customrules/listByQuery")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(customRuleQuery), GetCustomRuleListByQueryResponse.class);
-
-        boolean found = response.getCustomRules().stream()
-                .anyMatch(cr -> created.getName().equals(cr.getName()));
-
-        assertTrue(found);
     }
 
     @Test

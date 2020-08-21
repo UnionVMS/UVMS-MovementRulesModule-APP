@@ -85,6 +85,9 @@ public class UserModuleMock implements MessageListener {
         Feature manageAlarmsFeature = new Feature();
         manageAlarmsFeature.setName(UnionVMSFeature.manageAlarmRules.name());
         context.getRole().getFeature().add(manageAlarmsFeature);
+        Feature manageGlobalAlarmsRules = new Feature();
+        manageGlobalAlarmsRules.setName(UnionVMSFeature.manageGlobalAlarmsRules.name());
+        context.getRole().getFeature().add(manageGlobalAlarmsRules);
         Feature viewAlarmsHoldingTableFeature = new Feature();
         viewAlarmsHoldingTableFeature.setName(UnionVMSFeature.viewAlarmsHoldingTable.name());
         context.getRole().getFeature().add(viewAlarmsHoldingTableFeature);

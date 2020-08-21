@@ -16,6 +16,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubCriteriaType;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.BuildRulesRestDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.JMSHelper;
 import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;

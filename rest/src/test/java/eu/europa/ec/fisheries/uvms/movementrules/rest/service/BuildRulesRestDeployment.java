@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
+package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
 
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;

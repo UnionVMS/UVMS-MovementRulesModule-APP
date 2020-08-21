@@ -11,6 +11,7 @@ import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.filter.AppError;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.BuildRulesRestDeployment;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
@@ -46,58 +47,6 @@ public class TicketRestResourceTest extends BuildRulesRestDeployment {
 
     @Inject
     private RulesDao rulesDao;
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void getTicketListByTicketQueryTest() {
-        TicketQuery query = RulesTestHelper.getBasicTicketQuery();
-        TicketListCriteria criteria = RulesTestHelper.getTicketListCriteria(TicketSearchKey.RULE_NAME, "Test Name");
-        query.getTicketSearchCriteria().add(criteria);
-
-        GetTicketListByQueryResponse ticketList = getWebTarget()
-                .path("tickets/list/" + "testUser")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(query), GetTicketListByQueryResponse.class);
-
-        assertNotNull(ticketList.getTickets());
-        int numberOfTickets = ticketList.getTickets().size();
-
-        Ticket ticket = RulesTestHelper.getCompleteTicket();
-
-        CustomRule customRule = createCustomRule("testUser");
-
-        ticket.setRuleName(customRule.getName());
-        ticket.setRuleGuid(customRule.getGuid().toString());
-        ticket.setUpdatedBy("testUser");
-
-        Ticket createdTicket = rulesDao.createTicket(ticket);
-        criteria.setValue(customRule.getName());
-        ticketList = getWebTarget()
-                .path("tickets/list/" + "testUser")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(query), GetTicketListByQueryResponse.class);
-
-        assertThat(ticketList.getTickets().size(), is(numberOfTickets + 1));
-
-        rulesDao.removeTicketAfterTests(createdTicket);
-        rulesDao.removeCustomRuleAfterTests(customRule);
-    }
-
-    @Test
-    @OperateOnDeployment("normal")
-    public void getTicketListByTicketQuery_ShouldFailInvalidTestQueryTest() {
-        Response response = getWebTarget()
-                .path("tickets/list/" + "testUser")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(new TicketQuery()));
-
-        assertEquals(Status.OK.getStatusCode(), response.getStatus());
-        AppError appError = response.readEntity(AppError.class);
-        assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), appError.code.intValue());
-    }
     
     @Test
     @OperateOnDeployment("normal")

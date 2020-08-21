@@ -7,6 +7,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.UUID;
 import javax.inject.Inject;
+
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.BuildRulesRestDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.SSETestClient;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
