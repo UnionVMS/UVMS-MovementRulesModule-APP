@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
+package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.tests;
 
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.UUID;
 import javax.inject.Inject;
 
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.BuildRulesRestDeployment;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.SSETestClient;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.BuildRulesRestDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.SSETestClient;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -18,7 +18,7 @@ import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityTyp
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.ValidationServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;

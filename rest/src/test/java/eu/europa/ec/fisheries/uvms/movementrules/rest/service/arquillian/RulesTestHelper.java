@@ -9,7 +9,7 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.movementrules.rest.service;
+package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
 import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;

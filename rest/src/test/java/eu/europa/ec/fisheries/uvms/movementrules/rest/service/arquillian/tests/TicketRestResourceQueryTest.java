@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
+package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.tests;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
@@ -7,8 +7,8 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketListCriteria;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.TicketSearchKey;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.filter.AppError;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.BuildRulesRestDeployment;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.BuildRulesRestDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSubscription;

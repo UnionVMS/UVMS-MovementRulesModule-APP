@@ -1,8 +1,8 @@
-package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
+package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.tests;
 
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.BuildRulesRestDeployment;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.BuildRulesRestDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
 import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;

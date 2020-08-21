@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
+package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.tests;
 
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
@@ -7,8 +7,8 @@ import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleListCrite
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleQuery;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.CustomRuleSearchKey;
 import eu.europa.ec.fisheries.schema.movementrules.search.v1.ListPagination;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.BuildRulesRestDeployment;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.RulesTestHelper;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.BuildRulesRestDeployment;
+import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.RulesTestHelper;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Ignore;
