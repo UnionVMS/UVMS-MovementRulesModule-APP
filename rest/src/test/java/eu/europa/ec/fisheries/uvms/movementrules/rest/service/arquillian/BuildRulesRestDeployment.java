@@ -2,9 +2,6 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.SpatialModuleMock;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UnionVMSRestMock;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.UserRestMock;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.dto.AreaTransitionsDTO;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;

@@ -62,6 +62,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Stateless
 public class RulesServiceBean {
@@ -342,10 +343,7 @@ public class RulesServiceBean {
         Integer listSize = query.getPagination().getListSize();
         List<TicketSearchValue> searchKeyValues = TicketSearchFieldMapper.mapSearchField(query.getTicketSearchCriteria());
         List<UUID> validRuleGuids = rulesDao.getCustomRulesForTicketsByUser(loggedInUser);
-        List<String> validRuleStrings = new ArrayList<>();
-        for (UUID uuid: validRuleGuids) {
-            validRuleStrings.add(uuid.toString());
-        }
+        List<String> validRuleStrings = validRuleGuids.stream().map(guid -> guid.toString()).collect(Collectors.toList());
 
         String sql = TicketSearchFieldMapper.createSelectSearchSql(searchKeyValues, validRuleStrings, true);
         List<Ticket> ticketEntityList = rulesDao.getTicketListPaginated(query.getPagination().getPage(), listSize, sql);

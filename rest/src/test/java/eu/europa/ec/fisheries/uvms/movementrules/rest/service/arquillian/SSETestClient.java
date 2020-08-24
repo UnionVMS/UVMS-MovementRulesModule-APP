@@ -20,7 +20,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.sse.SseEventSource;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketType;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.AuthorizationHeaderWebTarget;
 
 public class SSETestClient extends BuildRulesRestDeployment implements Closeable {
 
