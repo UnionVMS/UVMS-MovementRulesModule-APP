@@ -182,18 +182,18 @@ public class CustomRulesRestResourceQueryTest extends BuildRulesRestDeployment {
     @OperateOnDeployment("normal")
     public void getCustomRulesByAvailabilityOrName() {
         CustomRuleType customRule = RulesTestHelper.getCompleteNewCustomRule();
-        customRule.setAvailability(AvailabilityType.GLOBAL);
+        customRule.setAvailability(AvailabilityType.PUBLIC);
         CustomRuleType created1 = createCustomRule(customRule);
 
         customRule = RulesTestHelper.getCompleteNewCustomRule();
-        customRule.setAvailability(AvailabilityType.PUBLIC);
+        customRule.setAvailability(AvailabilityType.PRIVATE);
         CustomRuleType created2 = createCustomRule(customRule);
 
         CustomRuleQuery customRuleQuery = new CustomRuleQuery();
         setBasicPagination(customRuleQuery);
 
         customRuleQuery.getCustomRuleSearchCriteria()
-                .add(createCustomRuleCriteria(CustomRuleSearchKey.AVAILABILITY, AvailabilityType.GLOBAL.value()));
+                .add(createCustomRuleCriteria(CustomRuleSearchKey.AVAILABILITY, AvailabilityType.PUBLIC.value()));
         customRuleQuery.getCustomRuleSearchCriteria()
                 .add(createCustomRuleCriteria(CustomRuleSearchKey.NAME, created2.getName()));
         customRuleQuery.setDynamic(false);
