@@ -166,7 +166,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
         List<RuleSegment> segments = new ArrayList<>();
         RuleSegment segment = new RuleSegment();
         segment.setCriteria("ASSET");
-        segment.setSubCriteria(SubCriteriaType.ASSET_LONG_TERM_PARKED.value());
+        segment.setSubCriteria(SubCriteriaType.ASSET_PARKED.value());
         segment.setCondition("EQ");
         segment.setValue("true");
         segment.setLogicOperator("NONE");
