@@ -127,7 +127,7 @@ public class CustomRulesEvaluator {
 
     private void persistLastCommunication(MovementDetails movementDetails) {
 
-        if(movementDetails.isLongTermParked()) {
+        if(movementDetails.isParked()) {
             createNewPositionDespiteLongTermParkedIncident(movementDetails);
             return;
         }

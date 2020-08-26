@@ -85,7 +85,7 @@ public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeploym
         rulesValidator.updateCustomRules();
 
         MovementDetails movementDetails = getMovementDetails();
-        movementDetails.setLongTermParked(true);
+        movementDetails.setParked(true);
         customRulesEvaluator.evaluate(movementDetails);
 
         // sending despite Create Event

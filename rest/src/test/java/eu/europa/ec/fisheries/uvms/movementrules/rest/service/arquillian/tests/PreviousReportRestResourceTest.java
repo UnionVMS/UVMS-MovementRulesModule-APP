@@ -104,7 +104,7 @@ public class PreviousReportRestResourceTest extends BuildRulesRestDeployment {
     @OperateOnDeployment("normal")
     public void testDontCreatePreviousReportOnLongTermParked(){
         MovementDetails movement = RulesTestHelper.createBasicMovementDetails();
-        movement.setLongTermParked(true);
+        movement.setParked(true);
 
         Response evaluate = getWebTarget()
                 .path("internal")

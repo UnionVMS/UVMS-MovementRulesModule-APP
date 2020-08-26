@@ -158,7 +158,7 @@ public class InternalRestResourceTest extends BuildRulesRestDeployment {
 
         String flagState = "SWE";
         MovementDetails movementDetails = getMovementDetails();
-        movementDetails.setLongTermParked(true);
+        movementDetails.setParked(true);
         movementDetails.setFlagState(flagState);
         movementDetails.setSource("AIS");
 
