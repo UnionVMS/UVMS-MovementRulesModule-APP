@@ -21,7 +21,6 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.IncidentProducer;
 import org.slf4j.Logger;
@@ -101,14 +100,13 @@ public class CustomRulesEvaluator {
     
     private void sendPositionToIncident(MovementDetails movementDetails){
         if(shouldPositionBeSentToIncident(movementDetails)){
-            Ticket dummyTicket = rulesServiceBean.createDummyTicket(movementDetails);
-            incidentProducer.updatedTicket(new EventTicket(dummyTicket, null));
+            incidentProducer.sendPositionToIncident(movementDetails);
         }
     }
 
     private boolean shouldPositionBeSentToIncident(MovementDetails movementDetails){
         return (movementDetails.isParked()
-                || (!movementDetails.getMovementType().equals(MovementSourceType.AIS.value()) && isLocalFlagState(movementDetails.getFlagState())));
+                || (!movementDetails.getSource().equals(MovementSourceType.AIS.value()) && isLocalFlagState(movementDetails.getFlagState())));
     }
 
     private Long timeDiffFromLastCommunication(String assetGuid, Instant thisTime) {

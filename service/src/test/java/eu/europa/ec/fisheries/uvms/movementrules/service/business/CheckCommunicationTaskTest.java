@@ -1,14 +1,12 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.business;
 
-import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.bean.RulesServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
-import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
+import eu.europa.ec.fisheries.uvms.movementrules.service.message.JMSHelper;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
@@ -16,17 +14,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
+import javax.jms.TextMessage;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
 public class CheckCommunicationTaskTest extends TransactionalTests {
 
     private static final long ONE_HOUR_IN_MILLISECONDS = 3600000;
+
+    private static final String QUEUE_NAME = "IncidentEvent";
+
+    private JMSHelper jmsHelper = new JMSHelper();
     
     @Inject
     RulesServiceBean rulesService;
@@ -38,24 +40,25 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
     RulesDao rulesDao;
     
     @Before
-    public void setThreshold() throws ConfigServiceException {
+    public void setThreshold() throws Exception {
         parameterService.setStringValue(ParameterKey.ASSET_NOT_SENDING_THRESHOLD.getKey(), 
                 String.valueOf(ONE_HOUR_IN_MILLISECONDS), "");
         System.clearProperty("AssetPollEndpointReached");
+
+        jmsHelper.clearQueue(QUEUE_NAME);
     }
-    
+
+
     @Test
     @OperateOnDeployment ("normal")
     public void runTaskWithValidReport() throws Exception {
         PreviousReport previousReport = getBasicPreviousReport();
         rulesDao.updatePreviousReport(previousReport);
         
-        String assetGuid = previousReport.getAssetGuid();
-        
         new CheckCommunicationTask(rulesService, parameterService).run();
-        
-        Ticket ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(nullValue()));
+
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNull(message);
     }
     
     @Test
@@ -66,15 +69,10 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
         rulesDao.updatePreviousReport(previousReport);
         
-        String assetGuid = previousReport.getAssetGuid();
-        
         new CheckCommunicationTask(rulesService, parameterService).run();
-        
-        Ticket ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(1L));
-        assertEquals("True", System.getProperty("AssetPollEndpointReached"));
-        System.clearProperty("AssetPollEndpointReached");
+
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNotNull(message);
     }
     
     @Test
@@ -84,15 +82,15 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
         rulesDao.updatePreviousReport(previousReport);
         
-        String assetGuid = previousReport.getAssetGuid();
-        
         CheckCommunicationTask checkCommunicationTask = new CheckCommunicationTask(rulesService, parameterService);
         checkCommunicationTask.run();
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNotNull(message);
+
         checkCommunicationTask.run();
-        
-        Ticket ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(1L));
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNull(message);
+
     }
     
     @Test
@@ -102,10 +100,11 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - ONE_HOUR_IN_MILLISECONDS));
         rulesDao.updatePreviousReport(previousReport);
         
-        String assetGuid = previousReport.getAssetGuid();
-        
         CheckCommunicationTask checkCommunicationTask = new CheckCommunicationTask(rulesService, parameterService);
         checkCommunicationTask.run();
+
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNotNull(message);
         
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
         previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - 3*ONE_HOUR_IN_MILLISECONDS));
@@ -113,10 +112,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        Ticket ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(2L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNotNull(message);
     }
     
     @Test
@@ -141,13 +139,11 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         PreviousReport previousReport = getBasicPreviousReport();
         rulesDao.updatePreviousReport(previousReport);
         
-        String assetGuid = previousReport.getAssetGuid();
-        
         CheckCommunicationTask checkCommunicationTask = new CheckCommunicationTask(rulesService, parameterService);
         checkCommunicationTask.run();
 
-        Ticket ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(nullValue()));
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNull(message);
         
         // 30 mins
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -158,9 +154,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(nullValue()));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNull(message);
         
         // 1 hour
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -171,10 +167,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(1L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNotNull(message);
 
         // 1.5 hour
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -185,10 +180,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(1L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNull(message);
         
         // 2 hours
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -199,10 +193,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(2L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNotNull(message);
         
         // 2.5 hours
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -213,10 +206,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(2L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNull(message);
     }
     
     @Test
@@ -227,13 +219,11 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         previousReport.setPositionTime(Instant.ofEpochMilli(System.currentTimeMillis() - thirtyMinsInMs));
         rulesDao.updatePreviousReport(previousReport);
         
-        String assetGuid = previousReport.getAssetGuid();
-        
         CheckCommunicationTask checkCommunicationTask = new CheckCommunicationTask(rulesService, parameterService);
         checkCommunicationTask.run();
 
-        Ticket ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(nullValue()));
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNull(message);
         
         // 1 hour
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -244,10 +234,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(1L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNotNull(message);
 
         // 1.5 hour
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -258,10 +247,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(1L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNull(message);
 
         // 2 hour
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -272,10 +260,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(2L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNotNull(message);
         
         // 2.5 hours
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -286,10 +273,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(2L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNull(message);
         
         // 3 hours
         previousReport = rulesDao.getPreviousReportByAssetGuid(previousReport.getAssetGuid());
@@ -300,10 +286,9 @@ public class CheckCommunicationTaskTest extends TransactionalTests {
         rulesDao.updatePreviousReport(previousReport);
         
         checkCommunicationTask.run();
-        
-        ticket = rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertThat(ticket, is(notNullValue()));
-        assertThat(ticket.getTicketCount(), is(3L));
+
+        message = (TextMessage)jmsHelper.listenOnQueue(QUEUE_NAME);
+        assertNotNull(message);
     }
 
     private PreviousReport getBasicPreviousReport() {
