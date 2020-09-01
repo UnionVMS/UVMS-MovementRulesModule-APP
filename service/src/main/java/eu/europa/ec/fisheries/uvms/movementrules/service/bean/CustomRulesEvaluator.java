@@ -38,6 +38,8 @@ import java.util.UUID;
 public class CustomRulesEvaluator {
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomRulesEvaluator.class);
+
+    private String localFlagstate;
     
     @Inject
     private RulesValidator rulesValidator;
@@ -105,7 +107,8 @@ public class CustomRulesEvaluator {
     }
 
     private boolean shouldPositionBeSentToIncident(MovementDetails movementDetails){
-        return (movementDetails.isParked() || !movementDetails.getMovementType().equals(MovementSourceType.AIS.value()));
+        return (movementDetails.isParked()
+                || (!movementDetails.getMovementType().equals(MovementSourceType.AIS.value()) && isLocalFlagState(movementDetails.getFlagState())));
     }
 
     private Long timeDiffFromLastCommunication(String assetGuid, Instant thisTime) {
@@ -150,8 +153,10 @@ public class CustomRulesEvaluator {
     
     private boolean isLocalFlagState(String flagState) {
         try {
-            String localFlagState = parameterService.getStringValue(ParameterKey.LOCAL_FLAGSTATE.getKey());
-            return flagState.equalsIgnoreCase(localFlagState);
+            if(localFlagstate == null) {
+                localFlagstate = parameterService.getStringValue(ParameterKey.LOCAL_FLAGSTATE.getKey());
+            }
+            return flagState.equalsIgnoreCase(localFlagstate);
         } catch (ConfigServiceException e) {
             LOG.error("Could not get local flag state", e);
             return false;
