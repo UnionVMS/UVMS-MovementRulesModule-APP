@@ -1,5 +1,7 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean;
 
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementTypeType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.incident.model.dto.IncidentTicketDto;
@@ -43,6 +45,13 @@ public class IncidentProducer {
         send(dto, "IncidentUpdate");
     }
 
+    public void updatedTicket(EventTicket eventTicket, MovementSourceType movementSource) {
+        IncidentType incidentType = determineIncidentType(eventTicket);
+        IncidentTicketDto dto = mapToIncidentTicket(eventTicket, incidentType);
+        dto.setMovementSource(eu.europa.ec.fisheries.uvms.incident.model.dto.enums.MovementSourceType.fromValue(movementSource.value()));
+        send(dto, "IncidentUpdate");
+    }
+
     public void createdTicket(EventTicket eventTicket) {
         IncidentType incidentType = determineIncidentType(eventTicket);
         IncidentTicketDto dto = mapToIncidentTicket(eventTicket, incidentType);
@@ -62,12 +71,10 @@ public class IncidentProducer {
     }
 
     private IncidentType determineIncidentType(EventTicket eventTicket){
-        if(eventTicket.getTicket().getRuleGuid().equals(ServiceConstants.ASSET_NOT_SENDING_RULE)){
+        if(ServiceConstants.ASSET_NOT_SENDING_RULE.equals(eventTicket.getTicket().getRuleGuid())){
             return IncidentType.ASSET_NOT_SENDING;
-        } else if(eventTicket.getTicket().getRuleGuid().equals(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE)){
-            return IncidentType.LONG_TERM_PARKED;
         } else {
-            return IncidentType.ASSET_SENDING_NORMAL;   //not really a lot of choice here.....
+            return null;   //not really a lot of choice here.....
         }
     }
 
@@ -87,6 +94,7 @@ public class IncidentProducer {
         dto.setStatus(ticket.getStatus().value());
         dto.setTicketCount(ticket.getTicketCount());
         dto.setType(ticketType);
+
         dto.setUpdated(ticket.getUpdated());
         dto.setUpdatedBy(ticket.getUpdatedBy());
 

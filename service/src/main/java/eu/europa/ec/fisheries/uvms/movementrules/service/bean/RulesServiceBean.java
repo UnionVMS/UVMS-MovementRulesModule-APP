@@ -485,25 +485,12 @@ public class RulesServiceBean {
     // Triggered by timer rule
     public void timerRuleTriggered(String ruleName, PreviousReport previousReport) {
         LOG.info("Timer rule triggered for asset: {}", previousReport.getAssetGuid());
-        // Check if ticket already is created for this asset
-        Ticket ticketEntity = rulesDao.getTicketByAssetAndRule(previousReport.getAssetGuid(), ruleName); // ruleName gets renamed
 
-        if (ticketEntity == null) {
-            String pollId = validationServiceBean.createPollInternal(previousReport.getAssetGuid(), ruleName);
-            ticketEntity = createAssetNotSendingTicket(ruleName, previousReport, pollId);
-            incidentProducer.createdTicket(new EventTicket(ticketEntity, ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE, pollId));
-        } else if (ticketEntity.getTicketCount() != null) {
-            ticketEntity.setTicketCount(ticketEntity.getTicketCount() + 1);
-            updateTicketCount(ticketEntity);
-            incidentProducer.updatedTicket(new EventTicket(ticketEntity, ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE));
-        } else {
-            ticketEntity.setTicketCount(2L);
-            updateTicketCount(ticketEntity);
-            incidentProducer.updatedTicket(new EventTicket(ticketEntity, ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE));
-        }
+        Ticket ticketEntity = createAssetNotSendingDummyTicket(ruleName, previousReport, null);
+        incidentProducer.updatedTicket(new EventTicket(ticketEntity, ServiceConstants.ASSET_NOT_SENDING_CUSTOMRULE));
     }
 
-    public Ticket createAssetNotSendingTicket(String ruleName, PreviousReport previousReport, String pollId) {
+    public Ticket createAssetNotSendingDummyTicket(String ruleName, PreviousReport previousReport, String pollId) {
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(previousReport.getAssetGuid());
         if (previousReport.getMovementGuid() != null)
@@ -518,17 +505,11 @@ public class RulesServiceBean {
         ticket.setUpdated(now);
         ticket.setStatus(TicketStatusType.POLL_PENDING);
         ticket.setTicketCount(1L);
-        rulesDao.createTicket(ticket);
-
-        ticketEvent.fire(new EventTicket(ticket, null, pollId));
-		auditService.sendAuditMessage(AuditObjectTypeEnum.TICKET, AuditOperationEnum.CREATE, ticket.getGuid().toString(), null, ticket.getUpdatedBy());
-		// Notify long-polling clients of the change
-        ticketCountEvent.fire(new NotificationMessage("ticketCount", null));
 
         return ticket;
     }
 
-    public Ticket createAssetSendingDespiteLongTermParkedDummyTicket(MovementDetails movementDetails) {
+    public Ticket createDummyTicket(MovementDetails movementDetails) {
         Ticket ticket = new Ticket();
         ticket.setAssetGuid(movementDetails.getAssetGuid());
         if (movementDetails.getMovementGuid() != null)
@@ -537,8 +518,8 @@ public class RulesServiceBean {
             ticket.setMobileTerminalGuid(movementDetails.getMobileTerminalGuid());
         Instant now = Instant.now();
         ticket.setCreatedDate(now);
-        ticket.setRuleName(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE);
-        ticket.setRuleGuid(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE);
+        ticket.setRuleName("Dummy rule name");
+        ticket.setRuleGuid("Dummy rule guid");
         ticket.setUpdatedBy("UVMS");
         ticket.setUpdated(now);
         ticket.setStatus(TicketStatusType.OPEN);

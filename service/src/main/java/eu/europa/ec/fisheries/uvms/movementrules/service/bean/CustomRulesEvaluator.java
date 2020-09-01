@@ -12,17 +12,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
 import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.SpatialRestClient;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.config.ParameterKey;
-import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
-import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketUpdateEvent;
@@ -69,6 +66,8 @@ public class CustomRulesEvaluator {
         Long timeDiffPositionReport = timeDiffAndPersistPreviousReport(movementDetails);
 
         movementDetails.setTimeDiffPositionReport(timeDiffPositionReport);
+
+        sendPositionToIncident(movementDetails);
         
         spatialClient.populateAreasAndAreaTransitions(movementDetails);
         
@@ -90,24 +89,30 @@ public class CustomRulesEvaluator {
 
         // We only persist our own last communications that were not from AIS.
         if (isLocalFlagState(assetFlagState) && !movementSource.equals(MovementSourceType.AIS.value())) {
-            if(movementSource.equals(MovementSourceType.MANUAL.value())) {
-                checkForOpenAssetNotSendingTicketAndUpdate(assetGuid, movementId);
-            } else {
-
+            if(!movementSource.equals(MovementSourceType.MANUAL.value())) {
                 persistLastCommunication(movementDetails);
-                checkForOpenAssetNotSendingTicketAndCloseIt(assetGuid, movementId);
             }
         }
 
         return timeDiffInSeconds;
     }
     
-    
+    private void sendPositionToIncident(MovementDetails movementDetails){
+        if(shouldPositionBeSentToIncident(movementDetails)){
+            Ticket dummyTicket = rulesServiceBean.createDummyTicket(movementDetails);
+            incidentProducer.updatedTicket(new EventTicket(dummyTicket, null));
+        }
+    }
+
+    private boolean shouldPositionBeSentToIncident(MovementDetails movementDetails){
+        return (movementDetails.isParked() || !movementDetails.getMovementType().equals(MovementSourceType.AIS.value()));
+    }
+
     private Long timeDiffFromLastCommunication(String assetGuid, Instant thisTime) {
         Long timeDiff = null;
         try {
             PreviousReport entity = rulesDao.getPreviousReportByAssetGuid(assetGuid);
-            if(entity == null){         //aka not local flag state and not AIS, see line 65
+            if(entity == null){         //aka not local flag state and not AIS, see line 93
                 return null;
             }
 
@@ -120,17 +125,8 @@ public class CustomRulesEvaluator {
         return timeDiff;
     }
 
-    private void createNewPositionDespiteLongTermParkedIncident(MovementDetails movementDetails){
-        Ticket dummyTicket = rulesServiceBean.createAssetSendingDespiteLongTermParkedDummyTicket(movementDetails);
-        incidentProducer.updatedTicket(new EventTicket(dummyTicket, ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_CUSTOMRULE));
-    }
 
     private void persistLastCommunication(MovementDetails movementDetails) {
-
-        if(movementDetails.isParked()) {
-            createNewPositionDespiteLongTermParkedIncident(movementDetails);
-            return;
-        }
 
         String assetGuid = movementDetails.getAssetGuid();
         String movementId = movementDetails.getMovementGuid();
@@ -162,27 +158,4 @@ public class CustomRulesEvaluator {
         }
     }
 
-
-    private void checkForOpenAssetNotSendingTicketAndUpdate(String assetGuid, String movementId) {
-        Ticket ticket = getAssetNotSendingTicket(assetGuid);
-        if (ticket == null) return;
-        ticket.setMovementGuid(movementId);
-        CustomRule customRule = rulesServiceBean.getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
-        incidentProducer.updatedTicket(new EventTicket(ticket, customRule));
-        ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
-    }
-
-    private void checkForOpenAssetNotSendingTicketAndCloseIt(String assetGuid, String movementId) {
-        Ticket ticket = getAssetNotSendingTicket(assetGuid);
-        if (ticket == null) return;
-        ticket.setStatus(TicketStatusType.CLOSED);
-        ticket.setMovementGuid(movementId);
-        CustomRule customRule = rulesServiceBean.getCustomRuleOrAssetNotSendingRule(ticket.getRuleGuid());
-        incidentProducer.updatedTicket(new EventTicket(ticket, customRule));
-        ticketUpdateEvent.fire(new EventTicket(ticket, customRule));
-    }
-
-    private Ticket getAssetNotSendingTicket(String assetGuid) {
-        return rulesDao.getTicketByAssetAndRule(assetGuid, ServiceConstants.ASSET_NOT_SENDING_RULE);
-    }
 }
