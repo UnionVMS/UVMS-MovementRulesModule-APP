@@ -114,7 +114,7 @@ public class IncidentProducer {
         dto.setMovementSource(eu.europa.ec.fisheries.uvms.incident.model.dto.enums.MovementSourceType.fromValue(movementDetails.getSource()));
 
         dto.setPollId(null);
-        dto.setRecipient(null);
+        dto.setRecipient(movementDetails.getAssetName());
         dto.setRuleGuid("Send position to Incident rule guid");
         dto.setRuleName("Send position to Incident rule");
         dto.setStatus(TicketStatusType.OPEN.value());
