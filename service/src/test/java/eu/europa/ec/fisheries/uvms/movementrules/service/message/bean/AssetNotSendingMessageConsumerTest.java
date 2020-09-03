@@ -61,27 +61,22 @@ public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeploym
         report.setMobTermGuid(UUID.fromString(movementDetails.getMobileTerminalGuid()));
         rulesService.timerRuleTriggered(ServiceConstants.ASSET_NOT_SENDING_RULE, report);
 
-        Ticket ticket = rulesDao.getTicketByAssetAndRule(movementDetails.getAssetGuid(), ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertNotNull(ticket);
-        assertEquals(TicketStatusType.POLL_PENDING, ticket.getStatus());
 
         // AssetNotSending Create Event
-        Message message1 = jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
+        Message message1 = jmsHelper.listenOnQueue(QUEUE_NAME);
         assertNotNull(message1);
 
-        // Update ticket
+        // Run next movement
         customRulesEvaluator.evaluate(movementDetails);
-        Ticket closedTicket = rulesDao.getTicketByGuid(ticket.getGuid());
-        assertEquals(TicketStatusType.CLOSED, closedTicket.getStatus());
 
         // AssetNotSending Update Event
-        Message message2 = jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
+        Message message2 = jmsHelper.listenOnQueue(QUEUE_NAME);
         assertNotNull(message2);
     }
 
     @Test
     @OperateOnDeployment("normal")
-    public void createAssetSendingDespiteBeingLongTermParkedTest() throws Exception {
+    public void createAssetSendingDespiteBeingParkedTest() throws Exception {
         rulesValidator.updateCustomRules();
 
         MovementDetails movementDetails = getMovementDetails();
@@ -89,10 +84,9 @@ public class AssetNotSendingMessageConsumerTest extends BuildRulesServiceDeploym
         customRulesEvaluator.evaluate(movementDetails);
 
         // sending despite Create Event
-        TextMessage message = (TextMessage) jmsHelper.listenForResponseOnQueue(null, QUEUE_NAME);
+        TextMessage message = (TextMessage) jmsHelper.listenOnQueue(QUEUE_NAME);
         assertNotNull(message);
 
-        assertTrue(message.getText().contains(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE));
         assertTrue(message.getText().contains(movementDetails.getAssetGuid()));
     }
 

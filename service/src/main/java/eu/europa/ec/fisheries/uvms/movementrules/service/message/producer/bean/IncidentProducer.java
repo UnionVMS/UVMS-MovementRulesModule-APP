@@ -1,9 +1,13 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean;
 
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementTypeType;
+import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.incident.model.dto.IncidentTicketDto;
 import eu.europa.ec.fisheries.uvms.incident.model.dto.enums.IncidentType;
+import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.EventTicket;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.Ticket;
@@ -16,6 +20,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.*;
 import javax.json.bind.Jsonb;
+import java.time.Instant;
 
 @Stateless
 public class IncidentProducer {
@@ -43,6 +48,11 @@ public class IncidentProducer {
         send(dto, "IncidentUpdate");
     }
 
+    public void sendPositionToIncident(MovementDetails movementDetails) {
+        IncidentTicketDto dto = mapToIncidentTicket(movementDetails);
+        send(dto, "IncidentUpdate");
+    }
+
     public void createdTicket(EventTicket eventTicket) {
         IncidentType incidentType = determineIncidentType(eventTicket);
         IncidentTicketDto dto = mapToIncidentTicket(eventTicket, incidentType);
@@ -62,12 +72,10 @@ public class IncidentProducer {
     }
 
     private IncidentType determineIncidentType(EventTicket eventTicket){
-        if(eventTicket.getTicket().getRuleGuid().equals(ServiceConstants.ASSET_NOT_SENDING_RULE)){
+        if(ServiceConstants.ASSET_NOT_SENDING_RULE.equals(eventTicket.getTicket().getRuleGuid())){
             return IncidentType.ASSET_NOT_SENDING;
-        } else if(eventTicket.getTicket().getRuleGuid().equals(ServiceConstants.ASSET_SENDING_DESPITE_LONG_TERM_PARKED_RULE)){
-            return IncidentType.LONG_TERM_PARKED;
         } else {
-            return IncidentType.ASSET_SENDING_NORMAL;   //not really a lot of choice here.....
+            return null;   //not really a lot of choice here.....
         }
     }
 
@@ -87,9 +95,36 @@ public class IncidentProducer {
         dto.setStatus(ticket.getStatus().value());
         dto.setTicketCount(ticket.getTicketCount());
         dto.setType(ticketType);
+
         dto.setUpdated(ticket.getUpdated());
         dto.setUpdatedBy(ticket.getUpdatedBy());
 
         return dto;
     }
+
+    private IncidentTicketDto mapToIncidentTicket(MovementDetails movementDetails){
+        IncidentTicketDto dto = new IncidentTicketDto();
+        dto.setAssetId(movementDetails.getAssetGuid());
+        dto.setChannelId(movementDetails.getChannelGuid());
+        dto.setMobTermId(movementDetails.getMobileTerminalGuid());
+
+        dto.setCreatedDate(Instant.now());
+        dto.setId(null);
+        dto.setMovementId(movementDetails.getMovementGuid());
+        dto.setMovementSource(eu.europa.ec.fisheries.uvms.incident.model.dto.enums.MovementSourceType.fromValue(movementDetails.getSource()));
+
+        dto.setPollId(null);
+        dto.setRecipient(movementDetails.getAssetName());
+        dto.setRuleGuid("Send position to Incident rule guid");
+        dto.setRuleName("Send position to Incident rule");
+        dto.setStatus(TicketStatusType.OPEN.value());
+        dto.setTicketCount(1l);
+        dto.setType(null);
+
+        dto.setUpdated(Instant.now());
+        dto.setUpdatedBy("UVMS");
+
+        return dto;
+    }
+
 }

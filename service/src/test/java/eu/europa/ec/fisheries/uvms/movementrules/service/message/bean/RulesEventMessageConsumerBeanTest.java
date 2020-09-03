@@ -49,7 +49,7 @@ public class RulesEventMessageConsumerBeanTest extends BuildRulesServiceDeployme
         request.setMethod(RulesModuleMethod.PING);
         String requestString = JAXBMarshaller.marshallJaxBObjectToString(request);
         String correlationId = jmsHelper.sendMessageToRules(requestString, RulesModuleMethod.PING.value(), RESPONSE_QUEUE);
-        Message message = jmsHelper.listenForResponseOnQueue(correlationId, RESPONSE_QUEUE);
+        Message message = jmsHelper.listenOnQueue(RESPONSE_QUEUE);
         assertThat(message, is(notNullValue()));
 
         PingResponse pingResponse = JAXBMarshaller.unmarshallTextMessage((TextMessage) message, PingResponse.class);

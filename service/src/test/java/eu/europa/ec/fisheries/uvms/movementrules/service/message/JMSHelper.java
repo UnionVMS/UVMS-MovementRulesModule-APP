@@ -28,7 +28,7 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 
 public class JMSHelper {
 
-    private static final long TIMEOUT = 20000;
+    private static final long TIMEOUT = 5000;
 
     public String sendMessageToRules(String text, String requestType, String resQueue) throws Exception {
         Connection connection = getConnectionFactory().createConnection("test", "test");
@@ -50,7 +50,7 @@ public class JMSHelper {
         }
     }
 
-    public Message listenForResponseOnQueue(String correlationId, String queue) throws Exception {
+    public Message listenOnQueue(String queue) throws Exception {
         Connection connection = getConnectionFactory().createConnection("test", "test");
         try {
             connection.start();

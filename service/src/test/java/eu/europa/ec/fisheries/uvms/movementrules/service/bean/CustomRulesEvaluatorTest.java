@@ -60,27 +60,7 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
         assertThat(previousReportsAfter.size(), is(previousReportsBefore.size() + 1));
     }
 
-    @Test
-    @OperateOnDeployment("normal")
-    public void evaluateMovementAndVerifyOpenAssetNotSendingTicketIsClosed() {
-        MovementDetails movementDetails = getMovementDetails();
-        PreviousReport report = new PreviousReport();
-        report.setAssetGuid(movementDetails.getAssetGuid());
-        report.setMovementGuid(UUID.fromString(movementDetails.getMovementGuid()));
-        report.setMobTermGuid(UUID.fromString(movementDetails.getMobileTerminalGuid()));
-        rulesService.createAssetNotSendingTicket(ServiceConstants.ASSET_NOT_SENDING_RULE, report, null);
 
-        Ticket ticket = rulesDao.getTicketByAssetAndRule(movementDetails.getAssetGuid(), ServiceConstants.ASSET_NOT_SENDING_RULE);
-        assertNotNull(ticket);
-        assertEquals(TicketStatusType.POLL_PENDING, ticket.getStatus());
-
-        customRulesEvaluator.evaluate(movementDetails);
-
-        Ticket closedTicket = rulesDao.getTicketByGuid(ticket.getGuid());
-        assertEquals(TicketStatusType.CLOSED, closedTicket.getStatus());
-
-    }
-    
     @Test
     @OperateOnDeployment("normal")
     public void evaluateMovementTriggerFlagStateRule() throws Exception {
