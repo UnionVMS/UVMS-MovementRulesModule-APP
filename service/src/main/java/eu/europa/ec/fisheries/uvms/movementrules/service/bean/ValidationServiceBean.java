@@ -94,7 +94,7 @@ public class ValidationServiceBean  {
     @TicketCountEvent
     private Event<NotificationMessage> ticketCountEvent;
 
-    @EJB
+    @Inject
     private InternalRestTokenHandler tokenHandler;
 
     // Triggered by rule engine
