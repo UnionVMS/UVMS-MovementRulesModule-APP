@@ -13,6 +13,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -22,7 +23,7 @@ import java.util.Arrays;
 @ArquillianSuiteDeployment
 public abstract class BuildRulesRestDeployment {
 
-    @EJB
+    @Inject
     private JwtTokenHandler tokenHandler;
 
     private String token;
