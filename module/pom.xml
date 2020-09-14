@@ -37,6 +37,11 @@
                     </modules>
                     <skinnyWars>true</skinnyWars>
                     <defaultLibBundleDir>APP-INF/lib</defaultLibBundleDir>
+                    <archive>
+                        <manifestEntries>
+                            <Logging-Profile>movement-rules</Logging-Profile>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>
