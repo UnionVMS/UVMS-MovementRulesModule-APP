@@ -151,7 +151,7 @@ public class CustomRulesEvaluator {
     
     private boolean isLocalFlagState(String flagState) {
         try {
-            if(localFlagstate == null) {
+            if(localFlagstate == null || localFlagstate.length() > 3) {
                 localFlagstate = parameterService.getStringValue(ParameterKey.LOCAL_FLAGSTATE.getKey());
             }
             return flagState.equalsIgnoreCase(localFlagstate);
