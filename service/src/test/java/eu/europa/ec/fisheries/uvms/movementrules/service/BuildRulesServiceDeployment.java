@@ -1,7 +1,9 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
+import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
 import eu.europa.ec.fisheries.uvms.commons.date.*;
+import eu.europa.ec.fisheries.uvms.mobileterminal.model.dto.SimpleCreatePoll;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -56,8 +58,11 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addClass(ExchangeModuleRestMock.class);
         testWar.addClass(EmailType.class);
 
-        testWar.addClass(AreaTransitionsDTO.class);
         testWar.addClass(AssetModuleMock.class);
+        testWar.addClass(SimpleCreatePoll.class);
+        testWar.addClass(PollType.class);
+
+        testWar.addClass(AreaTransitionsDTO.class);
         testWar.addClass(JsonBConfigurator.class);
         testWar.addClass(JsonBInstantAdapter.class);
         testWar.addClass(JsonBDurationAdapter.class);
