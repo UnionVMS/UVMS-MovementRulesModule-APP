@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollRequestType;
+import eu.europa.ec.fisheries.uvms.mobileterminal.model.dto.SimpleCreatePoll;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.*;
@@ -22,7 +23,7 @@ public class AssetModuleMock {
 
     @POST
     @Path("/createPollForAsset/{id}")
-    public Response createPoll(@PathParam("id") String assetId, @QueryParam("username") String username, @QueryParam("comment") String comment) {
+    public Response createPoll(@PathParam("id") String assetId, @QueryParam("username") String username, SimpleCreatePoll createPoll) {
         System.setProperty("AssetPollEndpointReached", "True");
         return Response.ok().entity(Boolean.TRUE).build();
     }
