@@ -17,6 +17,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
@@ -97,6 +99,25 @@ public class PreviousReportRestResourceTest extends BuildRulesRestDeployment {
         assertEquals(200, response.getStatus());
         previousReports = response.readEntity(String.class);
         assertFalse(previousReports.contains(movement.getAssetGuid()));
+
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void testDeleteNonExistantReport(){
+
+        UUID dummy = UUID.randomUUID();
+
+        Response delete = getWebTarget()
+                .path("previousReports/byAsset/")
+                .path(dummy.toString())
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .delete(Response.class);
+
+        assertEquals(200, delete.getStatus());
+        String deleteString = delete.readEntity(String.class);
+        assertFalse(deleteString.contains("\"code\":"));
 
     }
 

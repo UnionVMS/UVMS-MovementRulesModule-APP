@@ -220,7 +220,9 @@ public class RulesDao {
     }
 
     public void deletePreviousReport(PreviousReport report) {
-        em.remove(report);
+        if(report != null) {
+            em.remove(report);
+        }
     }
 
     public long getNumberOfTicketsForRule(String ruleGuid){
