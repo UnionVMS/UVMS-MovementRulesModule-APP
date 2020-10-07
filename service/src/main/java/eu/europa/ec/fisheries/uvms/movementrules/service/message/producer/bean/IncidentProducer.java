@@ -112,6 +112,7 @@ public class IncidentProducer {
         dto.setId(null);
         dto.setMovementId(movementDetails.getMovementGuid());
         dto.setMovementSource(eu.europa.ec.fisheries.uvms.incident.model.dto.enums.MovementSourceType.fromValue(movementDetails.getSource()));
+        dto.setPositionTime(movementDetails.getPositionTime());
 
         dto.setPollId(null);
         dto.setRecipient(movementDetails.getAssetName());
