@@ -8,6 +8,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.BuildRu
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.RulesTestHelper;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

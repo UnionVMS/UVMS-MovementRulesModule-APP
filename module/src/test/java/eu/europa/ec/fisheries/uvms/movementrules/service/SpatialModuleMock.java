@@ -49,9 +49,9 @@ import eu.europa.ec.fisheries.uvms.spatial.model.schemas.SpatialEnrichmentRS;
 @Path("spatialSwe/spatialnonsecure/json")
 @Stateless
 public class SpatialModuleMock {
-    
+
     private Jsonb jsonb = JsonbBuilder.create();
-    
+
     @GET
     @Path("getEnrichmentAndTransitions")
     @Consumes(value = {MediaType.APPLICATION_JSON})

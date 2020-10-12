@@ -13,10 +13,16 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleAction;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.RuleSegment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -40,7 +46,13 @@ public class RulesValidatorTest extends TransactionalTests {
     @Inject
     RulesServiceBean rulesService;
 
-
+    @Before
+    public void reloadRules() throws NotSupportedException, SystemException, SecurityException, IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException {
+        rulesService.getRunnableCustomRules().stream().forEach(rule -> rule.setActive(false));
+        rulesValidator.updateCustomRules();
+        userTransaction.commit();
+        userTransaction.begin();
+    }
 
     /*
      * Custom Rules

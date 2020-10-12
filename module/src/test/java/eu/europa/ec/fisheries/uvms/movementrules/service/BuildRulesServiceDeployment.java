@@ -3,6 +3,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.service;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
 import eu.europa.ec.fisheries.uvms.commons.date.*;
+import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;
 import eu.europa.ec.fisheries.uvms.mobileterminal.model.dto.SimpleCreatePoll;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -32,10 +33,18 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addAsResource(new File("src/main/resources/templates/CustomRulesTemplate.drt"), "/templates/CustomRulesTemplate.drt");
 
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.movementrules.service");
+        testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.movementrules.rest");
+
+        testWar.deleteClass(UnionVMSRestMock.class);
+        testWar.deleteClass(SpatialModuleMock.class);
+        testWar.addClass(MDCFilter.class);
 
         testWar.addAsResource("persistence-integration.xml", "META-INF/persistence.xml");
 
         testWar.addAsResource("beans.xml", "META-INF/beans.xml");
+
+        testWar.delete("/WEB-INF/web.xml");
+        testWar.addAsWebInfResource("mock-web.xml", "web.xml");
 
         return testWar;
     }
@@ -47,7 +56,9 @@ public abstract class BuildRulesServiceDeployment {
 
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
                 .resolve("eu.europa.ec.fisheries.uvms.spatialSwe:spatial-model",
-                        "eu.europa.ec.fisheries.uvms.user:user-model")
+                        "eu.europa.ec.fisheries.uvms.user:user-model",
+                        "eu.europa.ec.fisheries.uvms:usm4uvms",
+                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-date")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
@@ -63,11 +74,6 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addClass(PollType.class);
 
         testWar.addClass(AreaTransitionsDTO.class);
-        testWar.addClass(JsonBConfigurator.class);
-        testWar.addClass(JsonBInstantAdapter.class);
-        testWar.addClass(JsonBDurationAdapter.class);
-        testWar.addClass(JsonBDateAdapter.class);
-        testWar.addClass(JsonBXmlGregorianCalendarAdapter.class);
         testWar.addPackage("eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1");
 
         return testWar;

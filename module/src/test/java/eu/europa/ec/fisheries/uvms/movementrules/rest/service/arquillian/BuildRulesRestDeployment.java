@@ -1,79 +1,29 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian;
 
-import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
-import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;
-import eu.europa.ec.fisheries.uvms.movementrules.rest.service.dto.AreaTransitionsDTO;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
-import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
-import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-
-import javax.ejb.EJB;
+import java.util.Arrays;
+import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import java.io.File;
-import java.util.Arrays;
+import org.junit.AfterClass;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.CustomRuleType;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.movementrules.service.BuildRulesServiceDeployment;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
 
-@ArquillianSuiteDeployment
-public abstract class BuildRulesRestDeployment {
+public abstract class BuildRulesRestDeployment extends BuildRulesServiceDeployment {
 
     @Inject
     private JwtTokenHandler tokenHandler;
 
     private String token;
-    
-    @Deployment(name = "normal", order = 2)
-    public static Archive<?> createDeployment() {
-
-        WebArchive testWar = ShrinkWrap.create(WebArchive.class, "test.war");
-        
-        File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.movement-rules:movement-rules-service",
-                        "eu.europa.ec.fisheries.uvms:usm4uvms")
-                .withTransitivity().asFile();
-        testWar.addAsLibraries(files);
-
-        testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.movementrules.rest");
-
-        testWar.deleteClass(UnionVMSRestMock.class);
-        testWar.deleteClass(SpatialModuleMock.class);
-        testWar.addClass(MDCFilter.class);
-        
-        testWar.delete("/WEB-INF/web.xml");
-        testWar.addAsWebInfResource("mock-web.xml", "web.xml");
-
-        return testWar;
-    }
-
+   
     protected WebTarget getWebTarget() {
         return ClientBuilder.newClient().register(JsonBConfigurator.class).target("http://localhost:8080/test/rest");
-    }
-
-
-    @Deployment(name = "uvms", order = 1)
-    public static Archive<?> createAssetRestMock() {
-
-        WebArchive testWar = ShrinkWrap.create(WebArchive.class, "unionvms.war");
-        File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.spatialSwe:spatial-model",
-                        "eu.europa.ec.fisheries.uvms.user:user-model",
-                        "eu.europa.ec.fisheries.uvms:usm4uvms",
-                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-date")
-                .withTransitivity().asFile();
-        testWar.addAsLibraries(files);
-
-        testWar.addClass(UnionVMSRestMock.class);
-        testWar.addClass(SpatialModuleMock.class);
-        testWar.addClass(UserRestMock.class);
-        testWar.addClass(AreaTransitionsDTO.class);
-        
-        return testWar;
     }
 
     protected String getToken() {

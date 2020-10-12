@@ -60,13 +60,6 @@ public class RulesServiceBeanTest extends TransactionalTests {
             Assert.assertTrue(true);
         }
 
-        try {
-            rulesService.createCustomRule(input, null, "test");
-            fail();
-        }catch (AccessDeniedException e){
-            Assert.assertTrue(true);
-        }
-
         input.setAvailability((AvailabilityType.PRIVATE.value()));
         CustomRule output = rulesService.createCustomRule(input, "test", "test");
         Assert.assertNotNull(output.getGuid());

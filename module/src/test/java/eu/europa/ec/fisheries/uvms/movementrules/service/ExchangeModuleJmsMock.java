@@ -31,7 +31,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"),
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "UVMSExchangeEvent"),
-        @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = MessageConstants.JMS_FUNCTION_PROPERTY + " NOT IN ( 'PROCESSED_MOVEMENT' ) AND JMSCorrelationID IS NULL")})
+        @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = MessageConstants.JMS_FUNCTION_PROPERTY + " NOT IN ( 'SEND_REPORT_TO_PLUGIN' ) AND JMSCorrelationID IS NULL")})
 
 
 public class ExchangeModuleJmsMock implements MessageListener {

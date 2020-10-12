@@ -1,11 +1,9 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.RulesTestHelper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.movementrules.service.business.RulesValidator;
-import eu.europa.ec.fisheries.uvms.movementrules.service.constants.ServiceConstants;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.CustomRule;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -19,6 +17,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,12 +43,12 @@ public class CustomRulesEvaluatorTest extends TransactionalTests {
     @Inject
     private RulesValidator rulesValidator;
 
-    @Inject
-    private RulesDao rulesDao;
-    
     @Before
-    public void reloadCustomRules() {
+    public void reloadCustomRules() throws NotSupportedException, SystemException, SecurityException, IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException {
+        rulesService.getRunnableCustomRules().stream().forEach(rule -> rule.setActive(false));
         rulesValidator.updateCustomRules(); // reload/clear rules
+        userTransaction.commit();
+        userTransaction.begin();
     }
     
     @Test

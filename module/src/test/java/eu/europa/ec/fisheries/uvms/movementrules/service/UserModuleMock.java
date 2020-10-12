@@ -20,14 +20,18 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.RulesMessageProducerBean;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleResponseMapper;
 import eu.europa.ec.fisheries.wsdl.user.module.UserBaseRequest;
 import eu.europa.ec.fisheries.wsdl.user.types.ContactDetails;
+import eu.europa.ec.fisheries.wsdl.user.types.Context;
 import eu.europa.ec.fisheries.wsdl.user.types.ContextSet;
+import eu.europa.ec.fisheries.wsdl.user.types.Feature;
 import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
+import eu.europa.ec.fisheries.wsdl.user.types.Role;
 import eu.europa.ec.fisheries.wsdl.user.types.UserContext;
 
 @MessageDriven(mappedName = "jms/queue/UVMSUserEvent", activationConfig = {
@@ -54,10 +58,10 @@ public class UserModuleMock implements MessageListener {
                     messageProducer.sendResponseMessageToSender((TextMessage) message, response);
                     break;
                 case GET_USER_CONTEXT:
-                    UserContext userContext = new UserContext();
-                    userContext.setContextSet(new ContextSet());
-                    String contextResponse =  UserModuleResponseMapper.mapToGetUserContextResponse(userContext);
-                    messageProducer.sendResponseMessageToSender((TextMessage) message, contextResponse);
+                    UserContext userContext = getRulesUserContext();
+                    String responseString;
+                    responseString = UserModuleResponseMapper.mapToGetUserContextResponse(userContext);
+                    messageProducer.sendResponseMessageToSender((TextMessage) message, responseString);
                     break;
                 case GET_ORGANISATIONS:
                     String organisationResponse = UserModuleResponseMapper.mapToGetOrganisationResponse(null);
@@ -69,5 +73,32 @@ public class UserModuleMock implements MessageListener {
         } catch (Exception e) {
             LOG.error("UserModuleMock Error", e);
         }
+    }
+
+    private UserContext getRulesUserContext() {
+        UserContext userContext = new UserContext();
+        userContext.setContextSet(new ContextSet());
+        Context context = new Context();
+        context.setRole(new Role());
+        Feature viewAlarmsFeature = new Feature();
+        viewAlarmsFeature.setName(UnionVMSFeature.viewAlarmRules.name());
+        context.getRole().getFeature().add(viewAlarmsFeature);
+        Feature manageAlarmsFeature = new Feature();
+        manageAlarmsFeature.setName(UnionVMSFeature.manageAlarmRules.name());
+        context.getRole().getFeature().add(manageAlarmsFeature);
+        Feature viewAlarmsHoldingTableFeature = new Feature();
+        viewAlarmsHoldingTableFeature.setName(UnionVMSFeature.viewAlarmsHoldingTable.name());
+        context.getRole().getFeature().add(viewAlarmsHoldingTableFeature);
+        Feature manageAlarmsHoldingTableFeature = new Feature();
+        manageAlarmsHoldingTableFeature.setName(UnionVMSFeature.manageAlarmsHoldingTable.name());
+        context.getRole().getFeature().add(manageAlarmsHoldingTableFeature);
+        Feature manageAlarmsOpenTicketsFeature = new Feature();
+        manageAlarmsOpenTicketsFeature.setName(UnionVMSFeature.manageAlarmsOpenTickets.name());
+        context.getRole().getFeature().add(manageAlarmsOpenTicketsFeature);
+        Feature viewAlarmsOpenTicketsFeature = new Feature();
+        viewAlarmsOpenTicketsFeature.setName(UnionVMSFeature.viewAlarmsOpenTickets.name());
+        context.getRole().getFeature().add(viewAlarmsOpenTicketsFeature);
+        userContext.getContextSet().getContexts().add(context);
+        return userContext;
     }
 }
