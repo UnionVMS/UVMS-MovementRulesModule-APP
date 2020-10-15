@@ -102,9 +102,7 @@ public class MovementDetails {
     private Double closestPortDistance;
     private Double closestCountryDistance;
     private String connectId;
-    private Double tripNumber;
     private String wkt;
-    private String internalReferenceNumber;
     private String assetType;
 
     public String getMovementGuid() {
@@ -579,28 +577,12 @@ public class MovementDetails {
         this.connectId = connectId;
     }
 
-    public Double getTripNumber() {
-        return tripNumber;
-    }
-
-    public void setTripNumber(Double tripNumber) {
-        this.tripNumber = tripNumber;
-    }
-
     public String getWkt() {
         return wkt;
     }
 
     public void setWkt(String wkt) {
         this.wkt = wkt;
-    }
-
-    public String getInternalReferenceNumber() {
-        return internalReferenceNumber;
-    }
-
-    public void setInternalReferenceNumber(String internalReferenceNumber) {
-        this.internalReferenceNumber = internalReferenceNumber;
     }
 
     public String getAssetType() {

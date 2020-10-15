@@ -34,7 +34,6 @@ public class ExchangeMovementMapper {
         MovementType movement = new MovementType();
         movement.setGuid(movementDetails.getMovementGuid());
         movement.setConnectId(movementDetails.getConnectId());
-        movement.setTripNumber(movementDetails.getTripNumber());
         movement.setReportedCourse(movementDetails.getReportedCourse());
         movement.setCalculatedCourse(movementDetails.getCalculatedCourse());
         movement.setReportedSpeed(movementDetails.getReportedSpeed());
@@ -62,7 +61,6 @@ public class ExchangeMovementMapper {
         if (movementDetails.getComChannelType() != null) {
             movement.setComChannelType(MovementComChannelType.valueOf(movementDetails.getComChannelType()));
         }
-        movement.setInternalReferenceNumber(movementDetails.getInternalReferenceNumber());
         if (movementDetails.getMovementType() != null) {
             movement.setMovementType(MovementTypeType.valueOf(movementDetails.getMovementType()));
         }
@@ -76,7 +74,6 @@ public class ExchangeMovementMapper {
             movement.setSource(MovementSourceType.valueOf(movementDetails.getSource()));
         }
         movement.setStatus(movementDetails.getStatusCode());
-        movement.setTripNumber(movementDetails.getTripNumber());
         movement.setSourceSatelliteId(movementDetails.getSourceSatelliteId());
 
         return movement;
