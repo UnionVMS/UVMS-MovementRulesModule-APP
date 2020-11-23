@@ -88,11 +88,11 @@ public class CustomRulesEvaluator {
         Long timeDiff = timeDiffFromLastCommunication(assetGuid, positionTime);
         timeDiffInSeconds = timeDiff != null ? timeDiff / 1000 : null;
 
-        // We only persist our own last communications that were not from AIS.
-        if (isLocalFlagState(assetFlagState) && !movementSource.equals(MovementSourceType.AIS.value())) {
-            if(!movementSource.equals(MovementSourceType.MANUAL.value())) {
-                persistLastCommunication(movementDetails);
-            }
+        // We only persist our own last communications that were from Inmarsat or Iridium.
+        if (isLocalFlagState(assetFlagState) && 
+                (movementSource.equals(MovementSourceType.INMARSAT_C.value()) 
+                        || movementSource.equals(MovementSourceType.IRIDIUM.value()))) {
+            persistLastCommunication(movementDetails);
         }
 
         return timeDiffInSeconds;
