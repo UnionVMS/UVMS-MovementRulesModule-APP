@@ -154,7 +154,7 @@ public class RulesTestHelper {
         movementDetails.setAreaCodes(Arrays.asList("DNK"));
         movementDetails.setActivityMessageType(MovementActivityTypeType.COE.value());
         movementDetails.setActivityMessageId("messageId");
-        movementDetails.setSource(MovementSourceType.NAF.value());
+        movementDetails.setSource(MovementSourceType.INMARSAT_C.value());
         movementDetails.setAreaCodes(new ArrayList<>());
         movementDetails.setAreaTypes(new ArrayList<>());
         movementDetails.setEntAreaCodes(new ArrayList<>());
