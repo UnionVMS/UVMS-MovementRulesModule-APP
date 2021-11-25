@@ -1,6 +1,5 @@
 package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.tests;
 
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalStatus;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AssetStatus;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
