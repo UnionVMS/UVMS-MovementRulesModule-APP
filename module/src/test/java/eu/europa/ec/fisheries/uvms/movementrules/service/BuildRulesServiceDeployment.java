@@ -1,10 +1,10 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
-import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
+import eu.europa.ec.fisheries.uvms.asset.client.model.PollType;
+import eu.europa.ec.fisheries.uvms.asset.client.model.SimpleCreatePoll;
 import eu.europa.ec.fisheries.uvms.commons.date.*;
 import eu.europa.ec.fisheries.uvms.commons.rest.filter.MDCFilter;
-import eu.europa.ec.fisheries.uvms.mobileterminal.model.dto.SimpleCreatePoll;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
