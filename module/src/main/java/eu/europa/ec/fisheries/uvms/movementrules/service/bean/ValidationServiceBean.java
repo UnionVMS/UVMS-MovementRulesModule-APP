@@ -11,23 +11,28 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementTypeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1.PollType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.ActionType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.SubscriptionTypeType;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
-import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
+import eu.europa.ec.fisheries.uvms.asset.client.model.PollType;
 import eu.europa.ec.fisheries.uvms.commons.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.exchange.client.ExchangeRestClient;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.mobileterminal.model.dto.CreatePollResultDto;
-import eu.europa.ec.fisheries.uvms.mobileterminal.model.dto.SimpleCreatePoll;
 import eu.europa.ec.fisheries.uvms.movementrules.model.dto.MovementDetails;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.AuditServiceBean;
 import eu.europa.ec.fisheries.uvms.movementrules.service.boundary.ExchangeServiceBean;
@@ -44,29 +49,7 @@ import eu.europa.ec.fisheries.uvms.movementrules.service.event.TicketEvent;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.EmailMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.mapper.ExchangeMovementMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.service.message.producer.bean.IncidentProducer;
-import eu.europa.ec.fisheries.uvms.rest.security.InternalRestTokenHandler;
 import eu.europa.ec.fisheries.wsdl.user.module.GetContactDetailResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Stateless
 public class ValidationServiceBean  {
@@ -97,7 +80,7 @@ public class ValidationServiceBean  {
     private Event<NotificationMessage> ticketCountEvent;
 
     @Inject
-    private InternalRestTokenHandler tokenHandler;
+    private AssetClient assetClient;
 
     // Triggered by rule engine
     public void customRuleTriggered(String ruleName, String ruleGuid, MovementDetails movementDetails, String actions) {
@@ -272,55 +255,17 @@ public class ValidationServiceBean  {
         LOG.info("No plugin of the correct type found. Nothing was sent.");
     }
 
-    public String createPollInternal(String assetGuid, String ruleName){
-        MovementDetails fact = new MovementDetails();
-        fact.setAssetGuid(assetGuid);
-        fact.setAssetName(assetGuid);
-
-        return createPollInternal(fact, ruleName);
-    }
-
     private String createPollInternal(MovementDetails fact, String ruleName){
         try {
             String username = "Triggerd by rule: " + ruleName;
             String comment = "This poll was triggered by rule: " + ruleName + " on: " + Instant.now().toString() + " on Asset: " + fact.getAssetName();
 
-            SimpleCreatePoll createPoll = new SimpleCreatePoll();
-            createPoll.setComment(comment);
-            createPoll.setPollType(PollType.AUTOMATIC_POLL);
-
-            Response createdPollResponse = getWebTarget()
-                    .path("internal/createPollForAsset")
-                    .path(fact.getAssetGuid())
-                    .queryParam("username", username)
-                    .request(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, tokenHandler.createAndFetchToken("user"))
-                    .post(Entity.json(createPoll), Response.class);
-
-            if(createdPollResponse.getStatus() != 200){
-                return stripExceptionFromResponseString(createdPollResponse.readEntity(String.class));
-            }
-
-            CreatePollResultDto createPollResultDto = createdPollResponse.readEntity(CreatePollResultDto.class);
-            if(!createPollResultDto.isUnsentPoll()){
-                return createPollResultDto.getSentPolls().get(0);
-            }else {
-                return createPollResultDto.getUnsentPolls().get(0);
-            }
+            return assetClient.createPollForAsset(UUID.fromString(fact.getAssetGuid()), username, comment, PollType.AUTOMATIC_POLL);
 
         } catch (Exception e){
             LOG.error("Error while sending rule-triggered poll: ", e);
             return "NOK " + e.getMessage();
         }
-    }
-
-    private String stripExceptionFromResponseString(String errorString){
-        if(!errorString.contains("Exception")){
-            return errorString;
-        }
-        int exceptionEndIndex = errorString.indexOf("Exception:") + 10;
-        return errorString.length() > exceptionEndIndex
-                ? errorString.substring(exceptionEndIndex).trim() : "";
     }
 
     private Ticket createTicket(CustomRule customRule, MovementDetails fact) {
@@ -382,15 +327,4 @@ public class ValidationServiceBean  {
         LOG.debug("--> AUDIT - {} {}ms", msg, duration);
         return newTimestamp;
     }
-
-    @Resource(name = "java:global/asset_endpoint")
-    private String assetEndpoint;
-    protected WebTarget getWebTarget() {
-        Client client = ClientBuilder.newBuilder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build().register(JsonBConfigurator.class);
-        return client.target(assetEndpoint);
-    }
-
 }

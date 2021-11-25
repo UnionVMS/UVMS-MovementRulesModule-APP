@@ -104,7 +104,7 @@
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
-            <artifactId>asset-model</artifactId>
+            <artifactId>asset-client</artifactId>
             <version>${uvms.asset.version}</version>
         </dependency>
 
