@@ -3,6 +3,7 @@ package eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.tests;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AssetStatus;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.AvailabilityType;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.LogicOperatorType;
+import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.MobileTerminalStatus;
 import eu.europa.ec.fisheries.schema.movementrules.ticket.v1.TicketStatusType;
 import eu.europa.ec.fisheries.uvms.movementrules.rest.service.arquillian.BuildRulesRestDeployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
