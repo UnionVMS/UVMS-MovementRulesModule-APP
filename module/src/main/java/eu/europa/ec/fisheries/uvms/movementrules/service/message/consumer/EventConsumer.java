@@ -22,7 +22,7 @@ import javax.jms.TextMessage;
 import javax.json.bind.Jsonb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.asset.remote.dto.AssetDto;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetDTO;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dao.RulesDao;
 import eu.europa.ec.fisheries.uvms.movementrules.service.entity.PreviousReport;
@@ -53,7 +53,7 @@ public class EventConsumer implements MessageListener {
     public void onMessage(Message message) {
         try {
             TextMessage textMessage = (TextMessage) message;
-            AssetDto asset = jsonb.fromJson(textMessage.getText(), AssetDto.class);
+            AssetDTO asset = jsonb.fromJson(textMessage.getText(), AssetDTO.class);
             if (Boolean.FALSE.equals(asset.getActive())) {
                 PreviousReport previousReport = rulesDao.getPreviousReportByAssetGuid(asset.getId().toString());
                 if (previousReport != null) {

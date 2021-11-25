@@ -1,6 +1,5 @@
 package eu.europa.ec.fisheries.uvms.movementrules.service.bean;
 
-import eu.europa.ec.fisheries.schema.mobileterminal.types.v1.MobileTerminalStatus;
 import eu.europa.ec.fisheries.schema.movementrules.customrule.v1.*;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.MainCriteria;
 import eu.europa.ec.fisheries.uvms.movementrules.service.dto.SubCriteria;
