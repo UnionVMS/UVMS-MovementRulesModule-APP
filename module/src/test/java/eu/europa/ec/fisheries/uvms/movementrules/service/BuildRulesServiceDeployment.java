@@ -74,7 +74,6 @@ public abstract class BuildRulesServiceDeployment {
         testWar.addClass(PollType.class);
 
         testWar.addClass(AreaTransitionsDTO.class);
-        testWar.addPackage("eu.europa.ec.fisheries.schema.mobileterminal.polltypes.v1");
 
         return testWar;
     }
