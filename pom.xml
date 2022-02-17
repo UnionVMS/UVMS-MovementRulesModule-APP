@@ -15,7 +15,7 @@
     <properties>
         <drools.version>7.65.0.Final</drools.version>
 		
-        <uvms.pom.version>3.8</uvms.pom.version>
+        <uvms.pom.version>3.10</uvms.pom.version>
         <exchange.model.version>5.3.22-UVMS</exchange.model.version>
         <user.model.version>2.2.2</user.model.version>
         <audit.model.version>4.3.10</audit.model.version>
